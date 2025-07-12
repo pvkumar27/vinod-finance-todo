@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import CreditCardTest from './CreditCardTest';
+import CreditCardManager from './CreditCardManager';
 import ExpensesTest from './ExpensesTest';
 import ToDoTest from './ToDoTest';
 
@@ -7,7 +7,7 @@ const TabNavigation = () => {
   const [activeTab, setActiveTab] = useState('cards');
 
   const tabs = [
-    { id: 'cards', label: 'Credit Cards', component: CreditCardTest },
+    { id: 'cards', label: 'Credit Cards', component: CreditCardManager },
     { id: 'expenses', label: 'Expenses', component: ExpensesTest },
     { id: 'todos', label: 'To-Dos', component: ToDoTest }
   ];
