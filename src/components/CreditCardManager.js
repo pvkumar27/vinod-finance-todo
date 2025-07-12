@@ -9,9 +9,15 @@ const CreditCardManager = () => {
   const [formData, setFormData] = useState({
     card_name: '',
     bank_name: '',
-    promo_apr: '',
-    promo_expiry: '',
-    last_activity: new Date().toISOString().split('T')[0]
+    is_active: true,
+    last_used_date: '',
+    bt_promo_available: false,
+    purchase_promo_available: false,
+    promo_end_date: '',
+    reminder_days_before: 7,
+    is_autopay_setup: false,
+    balance: '',
+    notes: ''
   });
 
   const loadCards = async () => {
@@ -31,14 +37,22 @@ const CreditCardManager = () => {
     try {
       await addCreditCard({
         ...formData,
-        promo_apr: formData.promo_apr ? parseFloat(formData.promo_apr) : null
+        balance: formData.balance ? parseFloat(formData.balance) : 0,
+        last_used_date: formData.last_used_date || null,
+        promo_end_date: formData.promo_end_date || null
       });
       setFormData({
         card_name: '',
         bank_name: '',
-        promo_apr: '',
-        promo_expiry: '',
-        last_activity: new Date().toISOString().split('T')[0]
+        is_active: true,
+        last_used_date: '',
+        bt_promo_available: false,
+        purchase_promo_available: false,
+        promo_end_date: '',
+        reminder_days_before: 7,
+        is_autopay_setup: false,
+        balance: '',
+        notes: ''
       });
       setShowForm(false);
       setMessage('✅ Credit card added successfully!');
@@ -86,7 +100,9 @@ const CreditCardManager = () => {
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-8 p-4 bg-gray-50 rounded-lg">
           <h3 className="text-lg font-semibold mb-4">Add New Credit Card</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          
+          {/* Basic Info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <input
               type="text"
               placeholder="Card name (e.g., Chase Freedom)"
@@ -106,22 +122,90 @@ const CreditCardManager = () => {
             <input
               type="number"
               step="0.01"
-              placeholder="Promo APR % (optional)"
-              value={formData.promo_apr}
-              onChange={(e) => setFormData({...formData, promo_apr: e.target.value})}
+              placeholder="Current balance"
+              value={formData.balance}
+              onChange={(e) => setFormData({...formData, balance: e.target.value})}
               className="p-2 border rounded"
             />
             <input
               type="date"
-              placeholder="Promo expiry date"
-              value={formData.promo_expiry}
-              onChange={(e) => setFormData({...formData, promo_expiry: e.target.value})}
+              placeholder="Last used date"
+              value={formData.last_used_date}
+              onChange={(e) => setFormData({...formData, last_used_date: e.target.value})}
               className="p-2 border rounded"
             />
           </div>
+
+          {/* Promo Info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <input
+              type="date"
+              placeholder="Promo end date"
+              value={formData.promo_end_date}
+              onChange={(e) => setFormData({...formData, promo_end_date: e.target.value})}
+              className="p-2 border rounded"
+            />
+            <input
+              type="number"
+              placeholder="Reminder days before (default: 7)"
+              value={formData.reminder_days_before}
+              onChange={(e) => setFormData({...formData, reminder_days_before: parseInt(e.target.value) || 7})}
+              className="p-2 border rounded"
+            />
+          </div>
+
+          {/* Checkboxes */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={formData.is_active}
+                onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
+                className="rounded"
+              />
+              <span className="text-sm">Active</span>
+            </label>
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={formData.bt_promo_available}
+                onChange={(e) => setFormData({...formData, bt_promo_available: e.target.checked})}
+                className="rounded"
+              />
+              <span className="text-sm">BT Promo</span>
+            </label>
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={formData.purchase_promo_available}
+                onChange={(e) => setFormData({...formData, purchase_promo_available: e.target.checked})}
+                className="rounded"
+              />
+              <span className="text-sm">Purchase Promo</span>
+            </label>
+            <label className="flex items-center space-x-2">
+              <input
+                type="checkbox"
+                checked={formData.is_autopay_setup}
+                onChange={(e) => setFormData({...formData, is_autopay_setup: e.target.checked})}
+                className="rounded"
+              />
+              <span className="text-sm">Autopay</span>
+            </label>
+          </div>
+
+          {/* Notes */}
+          <textarea
+            placeholder="Notes (optional)"
+            value={formData.notes}
+            onChange={(e) => setFormData({...formData, notes: e.target.value})}
+            className="w-full p-2 border rounded mb-4"
+            rows="2"
+          />
+
           <button
             type="submit"
-            className="mt-4 bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600"
+            className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600"
           >
             Add Credit Card
           </button>
@@ -138,22 +222,44 @@ const CreditCardManager = () => {
             {cards.map((card) => (
               <div key={card.id} className="border rounded-lg p-4 bg-gray-50">
                 <div className="flex justify-between items-start mb-2">
-                  <h4 className="font-bold text-lg">{card.card_name}</h4>
-                  <button
-                    onClick={() => handleDelete(card.id)}
-                    className="text-red-500 hover:text-red-700 text-sm"
-                  >
-                    Delete
-                  </button>
+                  <div>
+                    <h4 className="font-bold text-lg">{card.card_name}</h4>
+                    <p className="text-gray-600">{card.bank_name}</p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {!card.is_active && <span className="text-red-500 text-xs">Inactive</span>}
+                    <button
+                      onClick={() => handleDelete(card.id)}
+                      className="text-red-500 hover:text-red-700 text-sm"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
-                <p className="text-gray-600 mb-1">Bank: {card.bank_name}</p>
-                {card.promo_apr && (
-                  <p className="text-green-600 text-sm">Promo APR: {card.promo_apr}%</p>
+                
+                {card.balance > 0 && (
+                  <p className="text-red-600 font-semibold">Balance: ${card.balance}</p>
                 )}
-                {card.promo_expiry && (
-                  <p className="text-orange-600 text-sm">Expires: {card.promo_expiry}</p>
+                
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {card.bt_promo_available && <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">BT Promo</span>}
+                  {card.purchase_promo_available && <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Purchase Promo</span>}
+                  {card.is_autopay_setup && <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Autopay</span>}
+                </div>
+                
+                {card.promo_end_date && (
+                  <p className="text-orange-600 text-sm mt-1">Promo ends: {card.promo_end_date}</p>
                 )}
-                <p className="text-gray-500 text-xs mt-2">
+                
+                {card.last_used_date && (
+                  <p className="text-gray-500 text-sm">Last used: {card.last_used_date}</p>
+                )}
+                
+                {card.notes && (
+                  <p className="text-gray-600 text-sm mt-2 italic">{card.notes}</p>
+                )}
+                
+                <p className="text-gray-400 text-xs mt-2">
                   Added: {new Date(card.created_at).toLocaleDateString()}
                 </p>
               </div>
