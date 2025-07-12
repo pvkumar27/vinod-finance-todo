@@ -2,11 +2,13 @@ import React, { useState } from 'react';
 import CreditCardManager from './CreditCardManager';
 import ExpensesTest from './ExpensesTest';
 import ToDoTest from './ToDoTest';
+import NaturalInput from './NaturalInput';
 
 const TabNavigation = () => {
-  const [activeTab, setActiveTab] = useState('cards');
+  const [activeTab, setActiveTab] = useState('natural');
 
   const tabs = [
+    { id: 'natural', label: 'Natural Input', component: NaturalInput },
     { id: 'cards', label: 'Credit Cards', component: CreditCardManager },
     { id: 'expenses', label: 'Expenses', component: ExpensesTest },
     { id: 'todos', label: 'To-Dos', component: ToDoTest }
