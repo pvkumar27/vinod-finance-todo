@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { fetchExpenses, addExpense, deleteExpense } from '../services/expenses';
+import { fetchExpenses, addExpense, updateExpense, deleteExpense } from '../services/expenses';
 
 const ExpensesTest = () => {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
+  const [editingExpense, setEditingExpense] = useState(null);
   const [formData, setFormData] = useState({
     description: '',
     amount: '',
@@ -26,20 +27,39 @@ const ExpensesTest = () => {
     }
   };
 
+  const handleEdit = (expense) => {
+    setEditingExpense(expense);
+    setFormData({
+      description: expense.description,
+      amount: expense.amount.toString(),
+      category: expense.category,
+      date: expense.date
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await addExpense({
+      const expenseData = {
         ...formData,
         amount: parseFloat(formData.amount)
-      });
+      };
+      
+      if (editingExpense) {
+        await updateExpense(editingExpense.id, expenseData);
+        setMessage('✅ Expense updated successfully!');
+      } else {
+        await addExpense(expenseData);
+        setMessage('✅ Expense added successfully!');
+      }
+      
       setFormData({
         description: '',
         amount: '',
         category: 'Food',
         date: new Date().toISOString().split('T')[0]
       });
-      setMessage('✅ Expense added successfully!');
+      setEditingExpense(null);
       loadExpenses();
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
@@ -74,7 +94,7 @@ const ExpensesTest = () => {
 
       {/* Add Expense Form */}
       <form onSubmit={handleSubmit} className="mb-8 p-4 bg-gray-50 rounded-lg">
-        <h3 className="text-lg font-semibold mb-4">Add New Expense</h3>
+        <h3 className="text-lg font-semibold mb-4">{editingExpense ? 'Edit Expense' : 'Add New Expense'}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             type="text"
@@ -110,12 +130,31 @@ const ExpensesTest = () => {
             required
           />
         </div>
-        <button
-          type="submit"
-          className="mt-4 bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
-        >
-          Add Expense
-        </button>
+        <div className="mt-4 flex space-x-2">
+          <button
+            type="submit"
+            className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
+          >
+            {editingExpense ? 'Update Expense' : 'Add Expense'}
+          </button>
+          {editingExpense && (
+            <button
+              type="button"
+              onClick={() => {
+                setEditingExpense(null);
+                setFormData({
+                  description: '',
+                  amount: '',
+                  category: 'Food',
+                  date: new Date().toISOString().split('T')[0]
+                });
+              }}
+              className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600"
+            >
+              Cancel Edit
+            </button>
+          )}
+        </div>
       </form>
 
       {/* Expenses List */}
@@ -137,6 +176,12 @@ const ExpensesTest = () => {
                   <span className="text-lg font-bold text-green-600">
                     ${expense.amount}
                   </span>
+                  <button
+                    onClick={() => handleEdit(expense)}
+                    className="text-blue-500 hover:text-blue-700 mr-2"
+                  >
+                    Edit
+                  </button>
                   <button
                     onClick={() => handleDelete(expense.id)}
                     className="text-red-500 hover:text-red-700"

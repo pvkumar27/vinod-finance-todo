@@ -96,12 +96,46 @@ To build a **mobile-first Progressive Web App (PWA)** to:
 
 ---
 
-## 8. ✅ Dev Checklist
+## 8. 🎯 New Goals & Objectives
+
+### **Live Dashboard Integration (Phase 2)**
+Replace the current non-functional home screen buttons ("Manage Cards", "View Expenses", "Manage Tasks") with embedded, live dashboards powered by Supabase data — featuring:
+
+- **Credit Cards Dashboard:**
+  - Active cards count
+  - Cards with expiring promos
+  - Total balance across cards
+  - Recent activity chart
+
+- **Expenses Dashboard:**
+  - Monthly spending trends
+  - Category breakdown (pie/bar charts)
+  - Budget vs actual spending
+  - Top expense categories
+
+- **To-Dos Dashboard:**
+  - Pending vs completed tasks
+  - Overdue tasks alerts
+  - Task completion trends
+  - Priority task highlights
+
+**Technical Requirements:**
+- Real-time data from Supabase
+- Interactive charts (Chart.js or Recharts)
+- Mobile-responsive design
+- Auto-refresh capabilities
+
+---
+
+## 9. ✅ Dev Checklist
 
 - [x] Node & npm setup
 - [x] Tailwind & PWA initialized
 - [x] VS Code configured
-- [ ] Supabase project setup
+- [x] Supabase project setup
+- [x] Natural language input implemented
+- [x] MVP modules implemented
+- [x] PWA tested and deployed
 - [ ] Firebase push configured
-- [ ] MVP modules implemented
-- [ ] PWA tested on mobile
+- [ ] Live dashboards implementation
+- [ ] Charts and analytics integration

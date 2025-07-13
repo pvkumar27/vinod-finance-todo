@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { getCreditCards, addCreditCard, deleteCreditCard } from '../services';
+import { getCreditCards, addCreditCard, updateCreditCard, deleteCreditCard } from '../services';
 
 const CreditCardManager = () => {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [editingCard, setEditingCard] = useState(null);
   const [formData, setFormData] = useState({
     card_name: '',
     bank_name: '',
@@ -35,12 +36,21 @@ const CreditCardManager = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await addCreditCard({
+      const cardData = {
         ...formData,
         balance: formData.balance ? parseFloat(formData.balance) : 0,
         last_used_date: formData.last_used_date || null,
         promo_end_date: formData.promo_end_date || null
-      });
+      };
+      
+      if (editingCard) {
+        await updateCreditCard(editingCard.id, cardData);
+        setMessage('✅ Credit card updated successfully!');
+      } else {
+        await addCreditCard(cardData);
+        setMessage('✅ Credit card added successfully!');
+      }
+      
       setFormData({
         card_name: '',
         bank_name: '',
@@ -55,11 +65,29 @@ const CreditCardManager = () => {
         notes: ''
       });
       setShowForm(false);
-      setMessage('✅ Credit card added successfully!');
+      setEditingCard(null);
       loadCards();
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
     }
+  };
+
+  const handleEdit = (card) => {
+    setEditingCard(card);
+    setFormData({
+      card_name: card.card_name,
+      bank_name: card.bank_name,
+      is_active: card.is_active,
+      last_used_date: card.last_used_date || '',
+      bt_promo_available: card.bt_promo_available,
+      purchase_promo_available: card.purchase_promo_available,
+      promo_end_date: card.promo_end_date || '',
+      reminder_days_before: card.reminder_days_before,
+      is_autopay_setup: card.is_autopay_setup,
+      balance: card.balance || '',
+      notes: card.notes || ''
+    });
+    setShowForm(true);
   };
 
   const handleDelete = async (id) => {
@@ -99,7 +127,7 @@ const CreditCardManager = () => {
       {/* Add Card Form */}
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-8 p-4 bg-gray-50 rounded-lg">
-          <h3 className="text-lg font-semibold mb-4">Add New Credit Card</h3>
+          <h3 className="text-lg font-semibold mb-4">{editingCard ? 'Edit Credit Card' : 'Add New Credit Card'}</h3>
           
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -127,24 +155,28 @@ const CreditCardManager = () => {
               onChange={(e) => setFormData({...formData, balance: e.target.value})}
               className="p-2 border rounded"
             />
-            <input
-              type="date"
-              placeholder="Last used date"
-              value={formData.last_used_date}
-              onChange={(e) => setFormData({...formData, last_used_date: e.target.value})}
-              className="p-2 border rounded"
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">Last Used Date</label>
+              <input
+                type="date"
+                value={formData.last_used_date}
+                onChange={(e) => setFormData({...formData, last_used_date: e.target.value})}
+                className="w-full p-2 border rounded"
+              />
+            </div>
           </div>
 
           {/* Promo Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <input
-              type="date"
-              placeholder="Promo end date"
-              value={formData.promo_end_date}
-              onChange={(e) => setFormData({...formData, promo_end_date: e.target.value})}
-              className="p-2 border rounded"
-            />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">Promo End Date</label>
+              <input
+                type="date"
+                value={formData.promo_end_date}
+                onChange={(e) => setFormData({...formData, promo_end_date: e.target.value})}
+                className="w-full p-2 border rounded"
+              />
+            </div>
             <input
               type="number"
               placeholder="Reminder days before (default: 7)"
@@ -203,12 +235,39 @@ const CreditCardManager = () => {
             rows="2"
           />
 
-          <button
-            type="submit"
-            className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600"
-          >
-            Add Credit Card
-          </button>
+          <div className="flex space-x-2">
+            <button
+              type="submit"
+              className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600"
+            >
+              {editingCard ? 'Update Credit Card' : 'Add Credit Card'}
+            </button>
+            {editingCard && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingCard(null);
+                  setShowForm(false);
+                  setFormData({
+                    card_name: '',
+                    bank_name: '',
+                    is_active: true,
+                    last_used_date: '',
+                    bt_promo_available: false,
+                    purchase_promo_available: false,
+                    promo_end_date: '',
+                    reminder_days_before: 7,
+                    is_autopay_setup: false,
+                    balance: '',
+                    notes: ''
+                  });
+                }}
+                className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600"
+              >
+                Cancel Edit
+              </button>
+            )}
+          </div>
         </form>
       )}
 
@@ -228,6 +287,12 @@ const CreditCardManager = () => {
                   </div>
                   <div className="flex items-center space-x-2">
                     {!card.is_active && <span className="text-red-500 text-xs">Inactive</span>}
+                    <button
+                      onClick={() => handleEdit(card)}
+                      className="text-blue-500 hover:text-blue-700 text-sm"
+                    >
+                      Edit
+                    </button>
                     <button
                       onClick={() => handleDelete(card.id)}
                       className="text-red-500 hover:text-red-700 text-sm"

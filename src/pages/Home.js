@@ -8,7 +8,7 @@ const Home = () => {
       <div className="max-w-4xl mx-auto py-12 px-4">
         <div className="text-center">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Welcome to Vinod PWA
+            Welcome to Finance To-Dos
           </h1>
           <p className="text-xl text-gray-600 mb-8">
             Manage your cards, expenses, and todos all in one place

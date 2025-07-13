@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { fetchTodos, addTodo, updateTodo, deleteTodo } from '../services/todos';
+import { parseInput } from '../utils/parseInput';
 
 const ToDoTest = () => {
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [newTask, setNewTask] = useState('');
+  const [editingTodo, setEditingTodo] = useState(null);
 
   const loadTodos = async () => {
     try {
@@ -19,14 +21,41 @@ const ToDoTest = () => {
     }
   };
 
+  const handleEdit = (todo) => {
+    setEditingTodo(todo);
+    setNewTask(todo.task);
+  };
+
   const handleAddTodo = async (e) => {
     e.preventDefault();
     if (!newTask.trim()) return;
 
     try {
-      await addTodo({ task: newTask.trim() });
+      if (editingTodo) {
+        await updateTodo(editingTodo.id, { task: newTask.trim() });
+        setMessage('✅ Task updated successfully!');
+        setEditingTodo(null);
+      } else {
+        const parsed = parseInput(newTask);
+        let todoData;
+        
+        if (parsed.intent === 'add_todo' || parsed.intent === 'reminder') {
+          todoData = parsed.intent === 'add_todo' 
+            ? parsed.payload 
+            : {
+                task: parsed.payload.task,
+                due_date: parsed.payload.due_date,
+                notes: `Reminder for ${parsed.payload.card_name}`
+              };
+        } else {
+          todoData = { task: newTask.trim() };
+        }
+        
+        await addTodo(todoData);
+        setMessage('✅ Task added successfully!');
+      }
+      
       setNewTask('');
-      setMessage('✅ Task added successfully!');
       loadTodos();
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
@@ -74,7 +103,7 @@ const ToDoTest = () => {
         <div className="flex gap-2">
           <input
             type="text"
-            placeholder="Add a new task..."
+            placeholder={editingTodo ? "Edit task..." : "Add a new task..."}
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
             className="flex-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -83,9 +112,24 @@ const ToDoTest = () => {
             type="submit"
             className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors"
           >
-            Add
+            {editingTodo ? 'Update' : 'Add'}
           </button>
+          {editingTodo && (
+            <button
+              type="button"
+              onClick={() => {
+                setEditingTodo(null);
+                setNewTask('');
+              }}
+              className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors"
+            >
+              Cancel
+            </button>
+          )}
         </div>
+        <p className="text-xs text-gray-500 mt-1">
+          💡 Tip: You can use natural language like "Remind me to pay bills tomorrow" or "Create task: fix sink"
+        </p>
       </form>
 
       {/* Todos List */}
@@ -123,12 +167,20 @@ const ToDoTest = () => {
                   </span>
                 </div>
                 
-                <button
-                  onClick={() => handleDelete(todo.id)}
-                  className="text-red-500 hover:text-red-700 px-2 py-1 rounded transition-colors"
-                >
-                  Delete
-                </button>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleEdit(todo)}
+                    className="text-blue-500 hover:text-blue-700 px-2 py-1 rounded transition-colors"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(todo.id)}
+                    className="text-red-500 hover:text-red-700 px-2 py-1 rounded transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             ))}
           </div>

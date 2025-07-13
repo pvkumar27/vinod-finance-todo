@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { parseInput } from '../utils/parseInput';
-import { addExpense } from '../services/expenses';
 import { addTodo } from '../services/todos';
-import { addCreditCard } from '../services/creditCards';
 
 const NaturalInput = () => {
   const [input, setInput] = useState('');
@@ -10,13 +8,7 @@ const NaturalInput = () => {
   const [preview, setPreview] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  const examples = [
-    "Add $20 for groceries today",
-    "Remind me to pay Discover on July 5",
-    "Create a to-do: fix kitchen sink tomorrow",
-    "Log $25 as medicine expense",
-    "Add credit card: Citi Custom Cash, 0% until Dec 2025"
-  ];
+  // Removed examples as requested
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -50,32 +42,21 @@ const NaturalInput = () => {
     setLoading(true);
     try {
       switch (preview.intent) {
-        case 'add_expense':
-          await addExpense(preview.payload);
-          setMessage('✅ Expense added successfully!');
-          break;
-          
         case 'add_todo':
-          await addTodo(preview.payload);
+        case 'reminder':
+          const todoData = preview.intent === 'add_todo' 
+            ? preview.payload 
+            : {
+                task: preview.payload.task,
+                due_date: preview.payload.due_date,
+                notes: `Reminder for ${preview.payload.card_name}`
+              };
+          await addTodo(todoData);
           setMessage('✅ To-do added successfully!');
           break;
           
-        case 'add_credit_card':
-          await addCreditCard(preview.payload);
-          setMessage('✅ Credit card added successfully!');
-          break;
-          
-        case 'reminder':
-          await addTodo({
-            task: preview.payload.task,
-            due_date: preview.payload.due_date,
-            notes: `Reminder for ${preview.payload.card_name}`
-          });
-          setMessage('✅ Reminder added to your to-dos!');
-          break;
-          
         default:
-          setMessage('❌ Action not supported yet.');
+          setMessage('❌ Only to-do commands are supported here.');
       }
       
       setInput('');
@@ -97,7 +78,7 @@ const NaturalInput = () => {
     <div className="p-6 bg-white rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold mb-4">Natural Language Input</h2>
       <p className="text-gray-600 mb-6">
-        Type commands in plain English to add expenses, todos, or credit cards.
+        Type commands in plain English to add to-dos and reminders.
       </p>
 
       {message && (
@@ -144,7 +125,7 @@ const NaturalInput = () => {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Try typing: 'Add $20 for groceries today'"
+            placeholder="Try: 'Remind me to pay bills tomorrow' or 'Create task: fix sink'"
             className="flex-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={loading}
           />
@@ -157,22 +138,6 @@ const NaturalInput = () => {
           </button>
         </div>
       </form>
-
-      {/* Examples */}
-      <div>
-        <h3 className="font-semibold mb-3">Try these examples:</h3>
-        <div className="grid grid-cols-1 gap-2">
-          {examples.map((example, index) => (
-            <button
-              key={index}
-              onClick={() => setInput(example)}
-              className="text-left p-2 text-sm bg-gray-100 hover:bg-gray-200 rounded border"
-            >
-              "{example}"
-            </button>
-          ))}
-        </div>
-      </div>
     </div>
   );
 };
