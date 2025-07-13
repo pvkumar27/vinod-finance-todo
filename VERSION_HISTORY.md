@@ -4,6 +4,7 @@
 
 | Version | Commit Hash | Date | Description |
 |---------|-------------|------|-------------|
+| **v1.4.0** | `1562ba0` | 2024-12-19 | Package updates, rollback system, enhanced documentation |
 | **v1.3.0** | `aa6e7f2` | 2024-12-19 | Add app version display in UI footer |
 | **v1.2.0** | `9244e52` | 2024-12-19 | Add natural language input parser with preview |
 | **v1.1.0** | `9c92d83` | 2024-12-19 | Update PWA to use custom icon with maskable support |
