@@ -63,7 +63,7 @@ try {
   console.log('   ✅ Git tag created');
   console.log('   ✅ Pushed to production');
   console.log('\n🌐 Netlify will deploy automatically');
-  console.log('📱 Check https://finance-todos-pwa.netlify.app in a few minutes');
+  console.log('📱 Check your deployment URL in a few minutes');
   
 } catch (error) {
   console.error(`\n❌ Release failed: ${error.message}`);

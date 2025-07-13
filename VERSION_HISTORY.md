@@ -55,7 +55,7 @@ git log --oneline v1.1.0..v1.2.0
 - Feature dependencies
 
 ### **🔧 Post-Rollback Checklist:**
-- [ ] Verify app loads at https://vinod-pwa.netlify.app
+- [ ] Verify app loads at your deployment URL
 - [ ] Check version display in UI footer
 - [ ] Test core functionality (CRUD operations)
 - [ ] Verify PWA installation works
