@@ -70,7 +70,7 @@ try {
   
   console.log(`\n🎉 Successfully rolled back to ${targetVersion}!`);
   console.log('🌐 Netlify will auto-deploy the rollback version');
-  console.log('📱 Check https://vinod-pwa.netlify.app in a few minutes');
+  console.log('📱 Check https://finance-todos-pwa.netlify.app in a few minutes');
   
 } catch (error) {
   console.error(`❌ Rollback failed: ${error.message}`);

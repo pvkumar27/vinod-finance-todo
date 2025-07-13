@@ -11,7 +11,7 @@ const Navbar = ({ session }) => {
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex justify-between h-16">
           <div className="flex items-center space-x-3">
-            <img src="/icons/vinod-pwa-icon.png" alt="App Logo" className="w-10 h-10" />
+            <img src="/icons/finance-todos-icon.png" alt="App Logo" className="w-10 h-10" />
             <h1 className="text-xl font-bold text-gray-800">Finance To-Dos</h1>
           </div>
           <div className="flex items-center space-x-4">

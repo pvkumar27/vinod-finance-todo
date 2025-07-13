@@ -71,7 +71,7 @@ git push
 
 ### 6. **Post-Release**
 - [ ] Verify Netlify auto-deployment
-- [ ] Test production app at https://vinod-pwa.netlify.app
+- [ ] Test production app at https://finance-todos-pwa.netlify.app
 - [ ] Verify PWA installation works
 - [ ] Check all modules function correctly
 - [ ] Update project documentation if needed
@@ -113,7 +113,7 @@ Release v1.x.x: Major update with [list key features]
 ### **Next Planned:** v1.4.0 (Live Dashboards)
 ### **Release Frequency:** As features are completed
 ### **Testing Environment:** Local development server
-### **Production Environment:** Netlify (https://vinod-pwa.netlify.app)
+### **Production Environment:** Netlify (https://finance-todos-pwa.netlify.app)
 
 ## 🔄 Rollback Process
 
@@ -146,7 +146,7 @@ git push
 ```
 
 ### **Post-Rollback Verification:**
-- [ ] Check https://vinod-pwa.netlify.app loads
+- [ ] Check https://finance-todos-pwa.netlify.app loads
 - [ ] Verify version display in UI footer
 - [ ] Test core CRUD functionality
 - [ ] Confirm PWA installation works

@@ -1,5 +1,28 @@
 # 📋 Release Notes - Finance To-Dos PWA
 
+## v1.5.0 - 2024-12-19
+### 🎨 Rebranding Release
+- **Complete Rebranding**: Removed all personal name references from code and UI
+- **Professional Identity**: App now fully branded as "Finance To-Dos PWA"
+- **Clean Implementation**: No personal references in codebase while maintaining owner credit in documentation
+- **Updated Assets**: Renamed icon files and updated all references
+- **URL Updates**: Updated all script references to new domain structure
+
+### 🔄 Technical Changes
+- Package name: `vinod-pwa` → `finance-todos-pwa`
+- Icon files: `vinod-pwa-icon.png` → `finance-todos-icon.png`
+- Meta descriptions and manifest updated
+- Script URL references updated
+- Maintained owner credit in documentation
+
+### 🎯 Professional Setup
+- Clean, generic branding throughout application
+- Professional appearance for portfolio/sharing
+- Proper owner attribution in project documentation
+- No breaking changes to functionality
+
+---
+
 ## v1.4.0 - 2024-12-19
 ### 🔧 Maintenance Release
 - **Package Updates**: Updated all npm packages to latest versions
