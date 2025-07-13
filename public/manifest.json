@@ -1,6 +1,7 @@
 {
   "short_name": "Finance To-Dos",
-  "name": "Finance To-Dos",
+  "name": "Finance To-Dos PWA",
+  "description": "Personal finance companion for managing cards, expenses, and tasks",
   "icons": [
     {
       "src": "icons/finance-todos-icon.png",
@@ -17,7 +18,8 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#0f172a",
+  "theme_color": "#3b82f6",
   "background_color": "#ffffff",
-  "orientation": "portrait-primary"
+  "orientation": "portrait-primary",
+  "categories": ["finance", "productivity", "utilities"]
 }

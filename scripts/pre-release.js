@@ -23,10 +23,23 @@ try {
     }
   }
 
-  // 2. Update all packages
-  console.log('\n🔄 Updating all packages to latest versions...');
-  execSync('npm update', { stdio: 'inherit' });
-  console.log('✅ Packages updated successfully');
+  // 2. Update packages only if needed
+  console.log('\n🔄 Checking if package updates are needed...');
+  let hasOutdated = false;
+  try {
+    execSync('npm outdated', { stdio: 'pipe' });
+  } catch (error) {
+    if (error.stdout && error.stdout.trim()) {
+      hasOutdated = true;
+      console.log('📦 Updating outdated packages...');
+      execSync('npm update', { stdio: 'inherit' });
+      console.log('✅ Packages updated successfully');
+    }
+  }
+  
+  if (!hasOutdated) {
+    console.log('✅ All packages are already up-to-date, skipping update');
+  }
 
   // 3. Fix security vulnerabilities
   console.log('\n🔒 Checking and fixing security vulnerabilities...');
