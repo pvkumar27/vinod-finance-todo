@@ -19,9 +19,9 @@ const Navbar = ({ session }) => {
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
               <img 
-                src="/icons/finance-todos-icon.png" 
-                alt="Finance To-Dos" 
-                className="w-10 h-10 rounded-lg shadow-sm" 
+                src="/icons/official-logo.png" 
+                alt="Finance To-Dos Logo" 
+                className="h-8 w-auto rounded-lg shadow-sm" 
               />
             </div>
             <div className="hidden sm:block">

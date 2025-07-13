@@ -4,13 +4,13 @@
   "description": "Personal finance companion for managing cards, expenses, and tasks",
   "icons": [
     {
-      "src": "icons/finance-todos-icon.png",
+      "src": "icons/official-logo.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icons/finance-todos-icon.png",
+      "src": "icons/official-logo.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
