@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '../components';
 import TabNavigation from '../components/TabNavigation';
+import { APP_VERSION } from '../constants/version';
 
 const Home = () => {
   return (
@@ -35,6 +36,13 @@ const Home = () => {
         {/* Main Application Modules */}
         <div className="mt-12">
           <TabNavigation />
+        </div>
+        
+        {/* Version Footer */}
+        <div className="mt-8 text-center">
+          <p className="text-xs text-gray-400">
+            Finance To-Dos PWA {APP_VERSION}
+          </p>
         </div>
       </div>
     </div>

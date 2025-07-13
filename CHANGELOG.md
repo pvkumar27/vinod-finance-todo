@@ -91,3 +91,15 @@
 - **Components**: 8+
 - **Services**: 3 (creditCards, expenses, todos)
 - **Deployment**: Production ready on Netlify
+
+---
+
+## 🔧 Version Management
+
+**To update app version:**
+1. Update `src/constants/version.js`
+2. Update this CHANGELOG.md with new version
+3. Commit and push changes
+
+**Current Version Location:** Bottom of home page
+**Version Format:** v[MAJOR].[MINOR].[PATCH]
