@@ -1,5 +1,19 @@
 # 📋 Release Notes - Finance To-Dos PWA
 
+## v1.5.1 - 2024-12-19
+### 🔧 URL Fix Release
+- **Homepage URL Fix**: Added correct homepage URL to package.json
+- **Build Cleanup**: Removed old build artifacts with invalid URL references
+- **URL Correction**: Fixed all references from `finance-todos-pwa.netlify.app` to `vinod-pwa.netlify.app`
+- **Production Ready**: Ensured all builds use the correct deployment URL
+
+### 🔄 Technical Changes
+- Added `homepage` field to package.json with correct URL
+- Cleaned build directory to remove old URL references
+- Verified build process uses correct URL for all internal references
+
+---
+
 ## v1.5.0 - 2024-12-19
 ### 🎨 Rebranding Release
 - **Complete Rebranding**: Removed all personal name references from code and UI
