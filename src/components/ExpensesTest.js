@@ -5,21 +5,24 @@ const ExpensesTest = () => {
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [viewMode, setViewMode] = useState('table'); // 'cards' or 'table'
   const [editingExpense, setEditingExpense] = useState(null);
   const [formData, setFormData] = useState({
     description: '',
     amount: '',
+    type: 'expense',
     category: 'Food',
     date: new Date().toISOString().split('T')[0]
   });
 
-  const categories = ['Food', 'Transportation', 'Entertainment', 'Bills', 'Shopping', 'Healthcare', 'Other'];
+  const expenseCategories = ['Food', 'Transportation', 'Entertainment', 'Bills', 'Shopping', 'Healthcare', 'Other'];
+  const incomeCategories = ['Salary', 'Freelance', 'Investment', 'Business', 'Gift', 'Other'];
 
   const loadExpenses = async () => {
     try {
       const data = await fetchExpenses();
       setExpenses(data);
-      setMessage('');
     } catch (err) {
       setMessage(`Error: ${err.message}`);
     } finally {
@@ -29,9 +32,11 @@ const ExpensesTest = () => {
 
   const handleEdit = (expense) => {
     setEditingExpense(expense);
+    setShowForm(true);
     setFormData({
       description: expense.description,
       amount: expense.amount.toString(),
+      type: expense.is_income ? 'income' : 'expense',
       category: expense.category,
       date: expense.date
     });
@@ -42,24 +47,29 @@ const ExpensesTest = () => {
     try {
       const expenseData = {
         ...formData,
-        amount: parseFloat(formData.amount)
+        amount: parseFloat(formData.amount),
+        is_income: formData.type === 'income'
       };
       
       if (editingExpense) {
         await updateExpense(editingExpense.id, expenseData);
-        setMessage('✅ Expense updated successfully!');
+        setMessage('✅ Entry updated successfully!');
+        setTimeout(() => setMessage(''), 4000);
       } else {
         await addExpense(expenseData);
-        setMessage('✅ Expense added successfully!');
+        setMessage('✅ Entry added successfully!');
+        setTimeout(() => setMessage(''), 4000);
       }
       
       setFormData({
         description: '',
         amount: '',
+        type: 'expense',
         category: 'Food',
         date: new Date().toISOString().split('T')[0]
       });
       setEditingExpense(null);
+      setShowForm(false);
       loadExpenses();
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
@@ -69,7 +79,8 @@ const ExpensesTest = () => {
   const handleDelete = async (id) => {
     try {
       await deleteExpense(id);
-      setMessage('✅ Expense deleted!');
+      setMessage('✅ Entry deleted!');
+      setTimeout(() => setMessage(''), 4000);
       loadExpenses();
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
@@ -84,7 +95,35 @@ const ExpensesTest = () => {
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold mb-6">Expenses Manager</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">My Finances</h2>
+        <div className="flex items-center space-x-3">
+          <div className="flex bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setViewMode('cards')}
+              className={`px-3 py-1 rounded text-sm transition-colors ${
+                viewMode === 'cards' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              📋 Cards
+            </button>
+            <button
+              onClick={() => setViewMode('table')}
+              className={`px-3 py-1 rounded text-sm transition-colors ${
+                viewMode === 'table' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              📊 Table
+            </button>
+          </div>
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
+          >
+            {showForm ? 'Cancel' : 'Add Entry'}
+          </button>
+        </div>
+      </div>
       
       {message && (
         <div className={`p-3 rounded mb-4 ${message.includes('❌') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
@@ -93,12 +132,13 @@ const ExpensesTest = () => {
       )}
 
       {/* Add Expense Form */}
-      <form onSubmit={handleSubmit} className="mb-8 p-4 bg-gray-50 rounded-lg">
-        <h3 className="text-lg font-semibold mb-4">{editingExpense ? 'Edit Expense' : 'Add New Expense'}</h3>
+      {showForm && (
+        <form onSubmit={handleSubmit} className="mb-8 p-4 bg-gray-50 rounded-lg">
+        <h3 className="text-lg font-semibold mb-4">{editingExpense ? 'Edit Entry' : 'Add New Entry'}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
             type="text"
-            placeholder="Expense description"
+            placeholder="Description"
             value={formData.description}
             onChange={(e) => setFormData({...formData, description: e.target.value})}
             className="p-2 border rounded"
@@ -114,11 +154,19 @@ const ExpensesTest = () => {
             required
           />
           <select
+            value={formData.type}
+            onChange={(e) => setFormData({...formData, type: e.target.value, category: e.target.value === 'income' ? 'Salary' : 'Food'})}
+            className="p-2 border rounded"
+          >
+            <option value="expense">💸 Expense</option>
+            <option value="income">💰 Income</option>
+          </select>
+          <select
             value={formData.category}
             onChange={(e) => setFormData({...formData, category: e.target.value})}
             className="p-2 border rounded"
           >
-            {categories.map(cat => (
+            {(formData.type === 'income' ? incomeCategories : expenseCategories).map(cat => (
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
@@ -135,16 +183,18 @@ const ExpensesTest = () => {
             type="submit"
             className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
           >
-            {editingExpense ? 'Update Expense' : 'Add Expense'}
+            {editingExpense ? 'Update Entry' : `Add ${formData.type === 'income' ? 'Income' : 'Expense'}`}
           </button>
           {editingExpense && (
             <button
               type="button"
               onClick={() => {
                 setEditingExpense(null);
+                setShowForm(false);
                 setFormData({
                   description: '',
                   amount: '',
+                  type: 'expense',
                   category: 'Food',
                   date: new Date().toISOString().split('T')[0]
                 });
@@ -155,40 +205,111 @@ const ExpensesTest = () => {
             </button>
           )}
         </div>
-      </form>
+        </form>
+      )}
 
       {/* Expenses List */}
       <div>
-        <h3 className="text-lg font-semibold mb-4">Recent Expenses ({expenses.length})</h3>
+        <h3 className="text-lg font-semibold mb-4">Recent Transactions ({expenses.length})</h3>
         {expenses.length === 0 ? (
-          <p className="text-gray-600">No expenses found</p>
+          <p className="text-gray-600 text-center py-8">No transactions found</p>
+        ) : viewMode === 'table' ? (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-gray-50">
+                  <th className="border border-gray-300 px-4 py-2 text-left">Type</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left">Description</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left">Category</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left">Amount</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left">Date</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {expenses.map((expense) => (
+                  <tr key={expense.id} className="hover:bg-gray-50">
+                    <td className="border border-gray-300 px-4 py-2 text-left">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        expense.is_income ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                      }`}>
+                        {expense.is_income ? '💰 Income' : '💸 Expense'}
+                      </span>
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2 text-left font-medium">{expense.description}</td>
+                    <td className="border border-gray-300 px-4 py-2 text-left capitalize">{expense.category}</td>
+                    <td className="border border-gray-300 px-4 py-2 text-left">
+                      <span className={`font-bold ${
+                        expense.is_income ? 'text-green-600' : 'text-red-600'
+                      }`}>
+                        {expense.is_income ? '+' : '-'}${expense.amount.toLocaleString()}
+                      </span>
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2 text-left">{new Date(expense.date).toLocaleDateString()}</td>
+                    <td className="border border-gray-300 px-4 py-2 text-left">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEdit(expense)}
+                          className="text-blue-500 hover:text-blue-700 text-sm"
+                        >
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(expense.id)}
+                          className="text-red-500 hover:text-red-700 text-sm"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {expenses.map((expense) => (
-              <div key={expense.id} className="flex justify-between items-center p-4 border rounded-lg">
-                <div>
-                  <h4 className="font-semibold">{expense.description}</h4>
-                  <p className="text-sm text-gray-600">
-                    {expense.category} • {expense.date}
-                  </p>
+              <div key={expense.id} className={`border rounded-lg p-4 ${
+                expense.is_income ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+              }`}>
+                <div className="flex justify-between items-start mb-2">
+                  <div>
+                    <h4 className="font-bold text-lg text-left">{expense.description}</h4>
+                    <p className="text-gray-600 text-left capitalize">{expense.category}</p>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      expense.is_income ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {expense.is_income ? '💰 Income' : '💸 Expense'}
+                    </span>
+                    <button
+                      onClick={() => handleEdit(expense)}
+                      className="text-blue-500 hover:text-blue-700 text-sm"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => handleDelete(expense.id)}
+                      className="text-red-500 hover:text-red-700 text-sm"
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center space-x-3">
-                  <span className="text-lg font-bold text-green-600">
-                    ${expense.amount}
+                
+                <div className="text-left">
+                  <span className={`text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded ${
+                    expense.is_income ? 'text-green-700 bg-green-100' : 'text-red-700 bg-red-100'
+                  }`}>
+                    Amount: {expense.is_income ? '+' : '-'}${expense.amount.toLocaleString()}
                   </span>
-                  <button
-                    onClick={() => handleEdit(expense)}
-                    className="text-blue-500 hover:text-blue-700 mr-2"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(expense.id)}
-                    className="text-red-500 hover:text-red-700"
-                  >
-                    Delete
-                  </button>
                 </div>
+                
+                <p className="text-gray-500 text-sm text-left mt-2">
+                  Date: {new Date(expense.date).toLocaleDateString()}
+                </p>
               </div>
             ))}
           </div>

@@ -7,13 +7,14 @@ const ToDoTest = () => {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [newTask, setNewTask] = useState('');
+  const [taskDate, setTaskDate] = useState(new Date().toISOString().split('T')[0]);
   const [editingTodo, setEditingTodo] = useState(null);
+  const [showCompleted, setShowCompleted] = useState(false);
 
   const loadTodos = async () => {
     try {
       const data = await fetchTodos();
       setTodos(data);
-      setMessage('');
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
     } finally {
@@ -24,6 +25,7 @@ const ToDoTest = () => {
   const handleEdit = (todo) => {
     setEditingTodo(todo);
     setNewTask(todo.task);
+    setTaskDate(todo.due_date || new Date().toISOString().split('T')[0]);
   };
 
   const handleAddTodo = async (e) => {
@@ -32,8 +34,12 @@ const ToDoTest = () => {
 
     try {
       if (editingTodo) {
-        await updateTodo(editingTodo.id, { task: newTask.trim() });
+        await updateTodo(editingTodo.id, { 
+          task: newTask.trim(),
+          due_date: taskDate
+        });
         setMessage('✅ Task updated successfully!');
+        setTimeout(() => setMessage(''), 4000);
         setEditingTodo(null);
       } else {
         const parsed = parseInput(newTask);
@@ -48,14 +54,19 @@ const ToDoTest = () => {
                 notes: `Reminder for ${parsed.payload.card_name}`
               };
         } else {
-          todoData = { task: newTask.trim() };
+          todoData = { 
+            task: newTask.trim(),
+            due_date: taskDate
+          };
         }
         
         await addTodo(todoData);
         setMessage('✅ Task added successfully!');
+        setTimeout(() => setMessage(''), 4000);
       }
       
       setNewTask('');
+      setTaskDate(new Date().toISOString().split('T')[0]);
       loadTodos();
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
@@ -66,6 +77,7 @@ const ToDoTest = () => {
     try {
       await updateTodo(id, { completed: !completed });
       setMessage('✅ Task updated!');
+      setTimeout(() => setMessage(''), 4000);
       loadTodos();
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
@@ -76,6 +88,7 @@ const ToDoTest = () => {
     try {
       await deleteTodo(id);
       setMessage('✅ Task deleted!');
+      setTimeout(() => setMessage(''), 4000);
       loadTodos();
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
@@ -100,13 +113,20 @@ const ToDoTest = () => {
 
       {/* Add Todo Form */}
       <form onSubmit={handleAddTodo} className="mb-6">
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <input
             type="text"
             placeholder={editingTodo ? "Edit task..." : "Add a new task..."}
             value={newTask}
             onChange={(e) => setNewTask(e.target.value)}
             className="flex-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            type="date"
+            value={taskDate}
+            onChange={(e) => setTaskDate(e.target.value)}
+            className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-40"
+            required
           />
           <button
             type="submit"
@@ -120,6 +140,7 @@ const ToDoTest = () => {
               onClick={() => {
                 setEditingTodo(null);
                 setNewTask('');
+                setTaskDate(new Date().toISOString().split('T')[0]);
               }}
               className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors"
             >
@@ -132,39 +153,36 @@ const ToDoTest = () => {
         </p>
       </form>
 
-      {/* Todos List */}
-      <div>
+      {/* Pending Tasks */}
+      <div className="mb-8">
         <h3 className="text-lg font-semibold mb-4">
           Tasks ({todos.filter(t => !t.completed).length} pending, {todos.filter(t => t.completed).length} completed)
         </h3>
         
-        {todos.length === 0 ? (
-          <p className="text-gray-600 text-center py-8">No tasks yet. Add one above!</p>
+        {todos.filter(t => !t.completed).length === 0 ? (
+          <p className="text-gray-600 text-center py-8">No pending tasks. Great job! 🎉</p>
         ) : (
           <div className="space-y-2">
-            {todos.map((todo) => (
+            {todos.filter(t => !t.completed).map((todo) => (
               <div
                 key={todo.id}
-                className={`flex items-center justify-between p-4 border rounded-lg ${
-                  todo.completed ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-300'
-                }`}
+                className="flex items-center justify-between p-4 border rounded-lg bg-white border-gray-300 hover:shadow-md transition-shadow"
               >
                 <div className="flex items-center space-x-3">
                   <input
                     type="checkbox"
-                    checked={todo.completed || false}
+                    checked={false}
                     onChange={() => handleToggleComplete(todo.id, todo.completed)}
                     className="w-5 h-5 text-blue-600 rounded focus:ring-blue-500"
                   />
-                  <span
-                    className={`${
-                      todo.completed
-                        ? 'line-through text-gray-500'
-                        : 'text-gray-900'
-                    }`}
-                  >
-                    {todo.task}
-                  </span>
+                  <div className="flex-1">
+                    <span className="text-gray-900">{todo.task}</span>
+                    {todo.due_date && (
+                      <div className="text-sm text-gray-500 mt-1">
+                        Due: {new Date(todo.due_date).toLocaleDateString()}
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
                 <div className="flex space-x-2">
@@ -186,6 +204,61 @@ const ToDoTest = () => {
           </div>
         )}
       </div>
+
+      {/* Completed Tasks - Collapsible */}
+      {todos.filter(t => t.completed).length > 0 && (
+        <div>
+          <button
+            onClick={() => setShowCompleted(!showCompleted)}
+            className="flex items-center justify-between w-full p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors mb-4"
+          >
+            <h3 className="text-lg font-semibold text-gray-700">
+              Completed Tasks ({todos.filter(t => t.completed).length})
+            </h3>
+            <svg 
+              className={`w-5 h-5 text-gray-500 transition-transform ${showCompleted ? 'rotate-180' : ''}`}
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          
+          {showCompleted && (
+            <div className="space-y-1">
+              {todos.filter(t => t.completed).map((todo) => (
+                <div
+                  key={todo.id}
+                  className="flex items-center justify-between p-2 bg-green-50 rounded"
+                >
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={true}
+                      onChange={() => handleToggleComplete(todo.id, todo.completed)}
+                      className="w-4 h-4 text-green-600 rounded"
+                    />
+                    <div className="text-sm">
+                      <span className="line-through text-gray-600">{todo.task}</span>
+                      <span className="text-gray-500 ml-2">
+                        Added: {new Date(todo.created_at).toLocaleDateString()}
+                        {todo.updated_at && ` • Completed: ${new Date(todo.updated_at).toLocaleDateString()}`}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleDelete(todo.id)}
+                    className="text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1 rounded text-xs transition-colors"
+                  >
+                    Delete
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };

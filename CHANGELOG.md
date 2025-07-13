@@ -1,5 +1,60 @@
 # 📋 Release Notes - Finance To-Dos PWA
 
+## v1.7.0 - 2024-12-19
+### 💰 Enhanced Finance Management & UX Improvements
+- **Income Tracking**: Added comprehensive income management alongside expenses
+- **My Finances Module**: Renamed and enhanced expenses to full financial tracking
+- **Dual View Toggle**: Added Cards/Table view toggle for both Credit Cards and My Finances
+- **Enhanced Dashboards**: Updated financial dashboard with income/expense analytics
+- **Improved UX**: Better form handling, toast messages, and visual consistency
+
+### 💸 My Finances Enhancements
+- **Income & Expense Types**: Toggle between 💰 Income and 💸 Expense entries
+- **Dynamic Categories**: Separate categories for income (Salary, Freelance, Investment) and expenses
+- **Enhanced Dashboard**: Net worth calculation, monthly surplus/deficit tracking
+- **Visual Analytics**: Income sources vs expense categories with color coding
+- **Smart Form**: Type-aware category selection and validation
+
+### 🎛️ View Management
+- **Credit Cards Toggle**: Switch between detailed cards and compact table view
+- **My Finances Toggle**: Choose optimal view for transaction management
+- **Consistent Design**: Unified toggle interface across modules
+- **Default Settings**: Table view for better data scanning
+
+### ✅ To-Do Enhancements
+- **Date Tracking**: Added required due dates for all tasks
+- **Completion Management**: Separate pending and completed task sections
+- **Collapsible Completed**: Hide/show completed tasks with progress tracking
+- **Enhanced Display**: Show task creation and completion dates
+- **Compact Completed View**: Streamlined completed task presentation
+
+### 🎨 UI/UX Improvements
+- **Form Toggle**: Hidden forms by default with "Add Entry" buttons
+- **Toast Messages**: 4-second visibility duration following industry standards
+- **Left Alignment**: Consistent text alignment across all table views
+- **Visual Feedback**: Better success/error message handling
+- **Responsive Design**: Improved mobile and desktop layouts
+
+### 🔧 Technical Enhancements
+- **Database Schema**: Added `is_income` and `completed` columns
+- **Component Architecture**: Modular dashboard components
+- **State Management**: Improved form and view state handling
+- **Performance**: Optimized data loading and rendering
+
+### 🎯 Dashboard Analytics
+- **Financial Overview**: Monthly income, expenses, and net calculations
+- **Category Breakdown**: Top spending categories and income sources
+- **Net Worth Tracking**: Real-time financial position monitoring
+- **Color-coded Metrics**: Green for positive, red for negative values
+
+### 📱 Mobile Optimizations
+- **Touch-friendly**: Improved button sizes and tap targets
+- **Responsive Tables**: Horizontal scroll for mobile table views
+- **Adaptive Layouts**: Better card stacking on small screens
+- **Form Usability**: Enhanced mobile form interactions
+
+---
+
 ## v1.6.0 - 2024-12-19
 ### 🎨 Major UI/UX Modernization Release
 - **Complete UI Overhaul**: Modern, clean design inspired by leading apps (Notion, Mint, Trello)

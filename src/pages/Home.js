@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import TabNavigation from '../components/TabNavigation';
 import CreditCardDashboard from '../components/CreditCardDashboard';
-import ExpensesDashboard from '../components/ExpensesDashboard';
+import MyFinancesDashboard from '../components/MyFinancesDashboard';
 import TodosDashboard from '../components/TodosDashboard';
 import { APP_VERSION } from '../constants/version';
 
@@ -19,11 +19,11 @@ const Home = () => {
     },
     {
       id: 'expenses',
-      title: 'Expenses',
-      description: 'Monitor your monthly spending patterns',
+      title: 'My Finances',
+      description: 'Track income and expenses overview',
       icon: '💰',
       gradient: 'from-green-500 to-teal-600',
-      component: ExpensesDashboard
+      component: MyFinancesDashboard
     },
     {
       id: 'todos',
@@ -42,14 +42,9 @@ const Home = () => {
       <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl mb-6">
-            <span className="text-3xl">📊</span>
-          </div>
-          <h1 className="text-4xl sm:text-5xl font-bold text-gray-900 mb-4">
-            Finance To-Dos
-          </h1>
+
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Your personal finance companion for managing cards, expenses, and tasks all in one place
+            Manage your cards, expenses, and tasks in one place
           </p>
         </div>
 

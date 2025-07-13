@@ -26,7 +26,6 @@ const CreditCardManager = () => {
     try {
       const data = await getCreditCards();
       setCards(data);
-      setMessage('');
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
     } finally {
@@ -47,9 +46,11 @@ const CreditCardManager = () => {
       if (editingCard) {
         await updateCreditCard(editingCard.id, cardData);
         setMessage('✅ Credit card updated successfully!');
+        setTimeout(() => setMessage(''), 4000);
       } else {
         await addCreditCard(cardData);
         setMessage('✅ Credit card added successfully!');
+        setTimeout(() => setMessage(''), 4000);
       }
       
       setFormData({
@@ -95,6 +96,7 @@ const CreditCardManager = () => {
     try {
       await deleteCreditCard(id);
       setMessage('✅ Credit card deleted!');
+      setTimeout(() => setMessage(''), 4000);
       loadCards();
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
@@ -375,8 +377,8 @@ const CreditCardManager = () => {
               <tbody>
                 {cards.map((card) => (
                   <tr key={card.id} className="hover:bg-gray-50">
-                    <td className="border border-gray-300 px-4 py-2 font-medium">{card.card_name}</td>
-                    <td className="border border-gray-300 px-4 py-2">{card.bank_name}</td>
+                    <td className="border border-gray-300 px-4 py-2 text-left font-medium">{card.card_name}</td>
+                    <td className="border border-gray-300 px-4 py-2 text-left">{card.bank_name}</td>
                     <td className="border border-gray-300 px-4 py-2">
                       <span className={`px-2 py-1 rounded-full text-xs ${
                         card.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
@@ -386,22 +388,22 @@ const CreditCardManager = () => {
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-left">
                       {card.balance > 0 ? (
-                        <span className="text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">${card.balance.toLocaleString()}</span>
+                        <span className="text-slate-700 bg-slate-100 px-2 py-1 rounded">${card.balance.toLocaleString()}</span>
                       ) : (
                         <span className="text-gray-400">$0</span>
                       )}
                     </td>
-                    <td className="border border-gray-300 px-4 py-2">
+                    <td className="border border-gray-300 px-4 py-2 text-left">
                       <div className="flex flex-wrap gap-1">
                         {card.bt_promo_available && <span className="bg-blue-100 text-blue-800 text-xs px-1 py-0.5 rounded">BT</span>}
                         {card.purchase_promo_available && <span className="bg-green-100 text-green-800 text-xs px-1 py-0.5 rounded">Purchase</span>}
                         {card.is_autopay_setup && <span className="bg-purple-100 text-purple-800 text-xs px-1 py-0.5 rounded">Autopay</span>}
                       </div>
                     </td>
-                    <td className="border border-gray-300 px-4 py-2 text-sm">
+                    <td className="border border-gray-300 px-4 py-2 text-left text-sm">
                       {card.last_used_date ? new Date(card.last_used_date).toLocaleDateString() : '-'}
                     </td>
-                    <td className="border border-gray-300 px-4 py-2">
+                    <td className="border border-gray-300 px-4 py-2 text-left">
                       <div className="flex space-x-2">
                         <button
                           onClick={() => handleEdit(card)}
