@@ -96,46 +96,74 @@ To build a **mobile-first Progressive Web App (PWA)** to:
 
 ---
 
-## 8. 🎯 New Goals & Objectives
+## 8. 🔄 Version Control & Rollback System
 
-### **Live Dashboard Integration (Phase 2)**
-Replace the current non-functional home screen buttons ("Manage Cards", "View Expenses", "Manage Tasks") with embedded, live dashboards powered by Supabase data — featuring:
+### **Version-Based Rollback (Implemented)**
+Professional rollback system allowing version-specific deployments:
 
-- **Credit Cards Dashboard:**
-  - Active cards count
-  - Cards with expiring promos
-  - Total balance across cards
-  - Recent activity chart
+**Features:**
+- ✅ Git tags for all releases (v1.0.0, v1.1.0, v1.2.0, v1.3.0)
+- ✅ Automated rollback script: `npm run rollback v1.2.0`
+- ✅ Version display in UI footer
+- ✅ Complete version history documentation
+- ✅ Safe rollback (preserves git history)
 
-- **Expenses Dashboard:**
-  - Monthly spending trends
-  - Category breakdown (pie/bar charts)
-  - Budget vs actual spending
-  - Top expense categories
+**Usage:**
+```bash
+# Rollback to any version
+npm run rollback v1.2.0
 
-- **To-Dos Dashboard:**
-  - Pending vs completed tasks
-  - Overdue tasks alerts
-  - Task completion trends
-  - Priority task highlights
+# Check available versions
+git tag -l
+
+# View version history
+cat VERSION_HISTORY.md
+```
+
+**Files:**
+- `scripts/rollback.js` - Automated rollback script
+- `VERSION_HISTORY.md` - Version-commit mapping
+- `src/constants/version.js` - Current version constant
+- Git tags for all releases
+
+---
+
+## 9. 🎯 Future Goals & Objectives
+
+### **Live Dashboard Integration (Next Phase)**
+Replace the current non-functional home screen buttons with embedded, live dashboards:
+
+- **Credit Cards Dashboard:** Active cards, expiring promos, balance trends
+- **Expenses Dashboard:** Monthly trends, category breakdown, budget tracking
+- **To-Dos Dashboard:** Pending tasks, completion trends, priority highlights
 
 **Technical Requirements:**
 - Real-time data from Supabase
 - Interactive charts (Chart.js or Recharts)
 - Mobile-responsive design
-- Auto-refresh capabilities
 
 ---
 
-## 9. ✅ Dev Checklist
+## 10. ✅ Dev Checklist
 
+### **Core Development:**
 - [x] Node & npm setup
 - [x] Tailwind & PWA initialized
 - [x] VS Code configured
 - [x] Supabase project setup
-- [x] Natural language input implemented
-- [x] MVP modules implemented
+- [x] MVP modules implemented (CRUD for all)
 - [x] PWA tested and deployed
-- [ ] Firebase push configured
+
+### **Advanced Features:**
+- [x] Natural language input implemented
+- [x] Working edit functionality for all modules
+- [x] Custom PWA icon and branding
+- [x] Version-based rollback system
+- [x] Professional release documentation
+
+### **Pending Features:**
+- [ ] Firebase push notifications
 - [ ] Live dashboards implementation
 - [ ] Charts and analytics integration
+- [ ] Data export functionality
+- [ ] Income tracking module

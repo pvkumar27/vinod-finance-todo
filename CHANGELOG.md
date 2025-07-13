@@ -1,5 +1,27 @@
 # 📋 Release Notes - Finance To-Dos PWA
 
+## v1.4.0 - 2024-12-19
+### 🔧 Maintenance Release
+- **Package Updates**: Updated all npm packages to latest versions
+- **Security Fixes**: Applied available security patches
+- **Build Optimization**: Improved build performance and bundle size
+- **Version-Based Rollback**: Complete rollback system implementation
+- **Documentation**: Enhanced project documentation with rollback procedures
+
+### 📦 Updated Packages
+- Updated testing libraries to latest versions
+- Updated Workbox packages for better PWA performance
+- Updated web-vitals for improved performance monitoring
+- Applied security patches where available
+
+### 🔧 Technical Improvements
+- Enhanced rollback system with automated scripts
+- Professional version management workflow
+- Complete git tagging for all releases
+- Comprehensive release documentation
+
+---
+
 ## v1.3.0 - 2024-12-19
 ### ✨ New Features
 - **Working Edit Functionality**: Full CRUD operations for all modules with form pre-population
@@ -85,12 +107,13 @@
 ---
 
 ## 📊 Project Stats
-- **Total Commits**: 10+
-- **Features Implemented**: 15+
+- **Total Commits**: 15+
+- **Features Implemented**: 20+
 - **Database Tables**: 3 (credit_cards, expenses, todos)
 - **Components**: 8+
 - **Services**: 3 (creditCards, expenses, todos)
-- **Deployment**: Production ready on Netlify
+- **Git Tags**: 4 versions (v1.0.0 to v1.3.0)
+- **Deployment**: Production ready on Netlify with rollback capability
 
 ---
 
@@ -99,7 +122,14 @@
 **To update app version:**
 1. Update `src/constants/version.js`
 2. Update this CHANGELOG.md with new version
-3. Commit and push changes
+3. Create git tag: `git tag v1.x.x && git push --tags`
+4. Commit and push changes
+
+**To rollback:**
+```bash
+npm run rollback v1.2.0
+```
 
 **Current Version Location:** Bottom of home page
 **Version Format:** v[MAJOR].[MINOR].[PATCH]
+**Rollback System:** Automated via scripts/rollback.js

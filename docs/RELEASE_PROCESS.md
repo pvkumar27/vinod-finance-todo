@@ -36,6 +36,16 @@ npm run build
 git add .
 git commit -m "Release v1.x.x: [Brief description]"
 git push
+
+# Tag the release
+git tag v1.x.x
+git push --tags
+
+# Update version constant
+# Edit src/constants/version.js with new version
+git add src/constants/version.js
+git commit -m "Update version display to v1.x.x"
+git push
 ```
 
 ### 6. **Post-Release**
@@ -78,7 +88,7 @@ Release v1.x.x: Major update with [list key features]
 
 ## 📊 Release Tracking
 
-### **Current Version:** v1.3.0
+### **Current Version:** v1.4.0
 ### **Next Planned:** v1.4.0 (Live Dashboards)
 ### **Release Frequency:** As features are completed
 ### **Testing Environment:** Local development server
@@ -93,10 +103,29 @@ Release v1.x.x: Major update with [list key features]
 4. Deploy hotfix as patch version
 5. Update CHANGELOG.md with hotfix details
 
-### **Emergency Rollback:**
+### **Version-Based Rollback (Recommended):**
 ```bash
-# Revert to previous working commit
-git revert [commit-hash]
-git push
-# Netlify will auto-deploy the reverted version
+# Rollback to specific version
+npm run rollback v1.2.0
+
+# Verify available versions
+git tag -l
+
+# Check rollback status
+git log --oneline -5
 ```
+
+### **Emergency Rollback (Manual):**
+```bash
+# If automated script fails
+git checkout v1.2.0 -- .
+# Edit src/constants/version.js manually
+git add . && git commit -m "Emergency rollback to v1.2.0"
+git push
+```
+
+### **Post-Rollback Verification:**
+- [ ] Check https://vinod-pwa.netlify.app loads
+- [ ] Verify version display in UI footer
+- [ ] Test core CRUD functionality
+- [ ] Confirm PWA installation works
