@@ -2,6 +2,22 @@
 
 ## 📋 Release Workflow
 
+### **Option 1: Automated Release (Recommended)**
+```bash
+# Single command release with automatic package updates
+npm run release v1.5.0
+
+# This automatically:
+# - Updates all packages
+# - Fixes security issues
+# - Tests build
+# - Updates version
+# - Creates commit and tag
+# - Pushes to production
+```
+
+### **Option 2: Manual Release Process**
+
 ### 1. **Development Phase**
 ```bash
 # Local development and testing
@@ -10,25 +26,30 @@ npm start
 # Fix any issues
 ```
 
-### 2. **Pre-Release Checklist**
+### 2. **Automated Pre-Release Checks**
+```bash
+# Run automated pre-release script
+npm run pre-release
+
+# This automatically:
+# - Updates all packages to latest versions
+# - Fixes security vulnerabilities
+# - Tests production build
+# - Validates code quality
+```
+
+### 3. **Manual Pre-Release Checklist**
 - [ ] All features working locally
-- [ ] No ESLint warnings/errors
 - [ ] Forms validate properly
 - [ ] Database operations successful
 - [ ] Mobile responsive design verified
 - [ ] PWA functionality tested
 
-### 3. **Version Update**
+### 4. **Version Update**
 ```bash
 # Update CHANGELOG.md with new version
+# Update src/constants/version.js
 # Document new features, bug fixes, improvements
-```
-
-### 4. **Production Build**
-```bash
-npm run build
-# Verify build completes successfully
-# Check for any build warnings
 ```
 
 ### 5. **Git Release**

@@ -37,7 +37,9 @@
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "rollback": "node scripts/rollback.js"
+    "rollback": "node scripts/rollback.js",
+    "pre-release": "node scripts/pre-release.js",
+    "release": "node scripts/release.js"
   },
   "eslintConfig": {
     "extends": [
