@@ -4,6 +4,7 @@
 
 | Version | Commit Hash | Date | Description |
 |---------|-------------|------|-------------|
+| **v1.5.0** | `566a83d` | 2024-12-19 | Complete rebranding to Finance To-Dos PWA |
 | **v1.4.0** | `1562ba0` | 2024-12-19 | Package updates, rollback system, enhanced documentation |
 | **v1.3.0** | `aa6e7f2` | 2024-12-19 | Add app version display in UI footer |
 | **v1.2.0** | `9244e52` | 2024-12-19 | Add natural language input parser with preview |
