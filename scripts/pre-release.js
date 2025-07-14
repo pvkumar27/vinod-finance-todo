@@ -64,11 +64,17 @@ try {
   }
 }
 
-// 3. Run tests (skip for this release due to Firebase test setup)
-console.log('🧪 Skipping tests for this release...');
-console.log('✅ Tests skipped (Firebase mock setup needed)\n');
+// 3. Run tests
+console.log('🧪 Running tests...');
+try {
+  execSync('npm test -- --watchAll=false', { stdio: 'inherit' });
+  console.log('✅ All tests passed\n');
+} catch (error) {
+  console.log('❌ Tests failed - please fix before release');
+  process.exit(1);
+}
 
-// 3. Build check
+// 4. Build check
 console.log('🏗️  Testing build...');
 try {
   execSync('npm run build', { stdio: 'inherit' });

@@ -51,11 +51,7 @@
       "react-app/jest"
     ]
   },
-  "jest": {
-    "moduleNameMapping": {
-      "^../firebase-config$": "<rootDir>/src/__mocks__/firebase-config.js"
-    }
-  },
+
   "browserslist": {
     "production": [
       ">0.2%",
