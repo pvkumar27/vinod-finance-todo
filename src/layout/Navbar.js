@@ -24,7 +24,7 @@ const Navbar = ({ session }) => {
                 className="h-8 w-auto rounded-lg shadow-md bg-gray-300" 
               />
             </div>
-            <div className="hidden sm:block">
+            <div>
               <h1 className="text-xl font-bold text-blue-600 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
                 Finance To-Dos
               </h1>
