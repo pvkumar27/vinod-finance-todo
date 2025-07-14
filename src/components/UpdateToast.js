@@ -1,7 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 const UpdateToast = ({ show, onUpdate, onDismiss }) => {
   const [visible, setVisible] = useState(false);
+
+  const handleUpdate = () => {
+    setVisible(false);
+    onUpdate();
+  };
+
+  const handleDismiss = useCallback(() => {
+    setVisible(false);
+    if (onDismiss) onDismiss();
+  }, [onDismiss]);
 
   useEffect(() => {
     if (show) {
@@ -13,17 +23,7 @@ const UpdateToast = ({ show, onUpdate, onDismiss }) => {
       
       return () => clearTimeout(timer);
     }
-  }, [show]);
-
-  const handleUpdate = () => {
-    setVisible(false);
-    onUpdate();
-  };
-
-  const handleDismiss = () => {
-    setVisible(false);
-    if (onDismiss) onDismiss();
-  };
+  }, [show, handleDismiss]);
 
   if (!visible) return null;
 

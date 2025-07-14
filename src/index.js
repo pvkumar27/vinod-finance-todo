@@ -15,7 +15,6 @@ root.render(
 
 // Service worker registration with update handling
 let updateToastContainer = null;
-let showUpdateToast = null;
 
 const createUpdateToastContainer = () => {
   if (!updateToastContainer) {

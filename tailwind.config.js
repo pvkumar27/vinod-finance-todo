@@ -3,7 +3,7 @@ module.exports = {
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",
   ],
-  darkMode: false, // Disable dark mode
+  darkMode: 'media', // Use media query for dark mode
   theme: {
     extend: {
       colors: {

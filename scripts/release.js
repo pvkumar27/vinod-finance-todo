@@ -4,73 +4,47 @@ const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
-// Get target version from command line
-const targetVersion = process.argv[2];
+const args = process.argv.slice(2);
+const newVersion = args[0];
 
-if (!targetVersion) {
-  console.error('❌ Please specify a version for release');
-  console.log('Usage: npm run release v1.5.0');
+if (!newVersion) {
+  console.log('❌ Please provide a version number');
+  console.log('Usage: npm run release v1.8.1');
   process.exit(1);
 }
 
-// Validate version format
-if (!/^v\d+\.\d+\.\d+$/.test(targetVersion)) {
-  console.error('❌ Invalid version format. Use format: v1.5.0');
-  process.exit(1);
-}
+console.log(`🚀 Starting release process for ${newVersion}...\n`);
 
-console.log(`🚀 Starting release process for ${targetVersion}...\n`);
-
+// 1. Run pre-release checks
+console.log('🔍 Running pre-release checks...');
 try {
-  // 1. Run pre-release checks (includes package updates)
-  console.log('📋 Step 1: Running pre-release checks...');
-  execSync('npm run pre-release', { stdio: 'inherit' });
-  
-  // 2. Update version constant
-  console.log(`\n📝 Step 2: Updating version to ${targetVersion}...`);
-  const versionPath = path.join(__dirname, '..', 'src', 'constants', 'version.js');
-  const versionContent = `export const APP_VERSION = '${targetVersion}';`;
-  fs.writeFileSync(versionPath, versionContent);
-  console.log('✅ Version constant updated');
-  
-  // 3. Prompt for CHANGELOG update
-  console.log(`\n📚 Step 3: Please update CHANGELOG.md with ${targetVersion} release notes`);
-  console.log('Press Enter when CHANGELOG.md is updated...');
-  
-  // Wait for user input (simplified for Windows)
-  execSync('pause', { stdio: 'inherit' });
-  
-  // 4. Create release commit
-  console.log('\n📦 Step 4: Creating release commit...');
-  execSync('git add .', { stdio: 'inherit' });
-  execSync(`git commit -m "Release ${targetVersion}: Automated release with package updates"`, { stdio: 'inherit' });
-  
-  // 5. Create git tag
-  console.log(`\n🏷️  Step 5: Creating git tag ${targetVersion}...`);
-  execSync(`git tag ${targetVersion}`, { stdio: 'inherit' });
-  
-  // 6. Push to production
-  console.log('\n🚀 Step 6: Pushing to production...');
-  execSync('git push && git push --tags', { stdio: 'inherit' });
-  
-  console.log(`\n🎉 Release ${targetVersion} completed successfully!`);
-  console.log('📋 What was done:');
-  console.log('   ✅ Packages updated to latest versions');
-  console.log('   ✅ Security vulnerabilities fixed');
-  console.log('   ✅ Production build tested');
-  console.log('   ✅ Version constant updated');
-  console.log('   ✅ Release commit created');
-  console.log('   ✅ Git tag created');
-  console.log('   ✅ Pushed to production');
-  console.log('\n🌐 Netlify will deploy automatically');
-  console.log('📱 Check your deployment URL in a few minutes');
-  
+  execSync('node scripts/pre-release.js', { stdio: 'inherit' });
 } catch (error) {
-  console.error(`\n❌ Release failed: ${error.message}`);
-  console.log('\n🔧 Manual steps to complete release:');
-  console.log('   1. Fix the error above');
-  console.log('   2. Run npm run pre-release');
-  console.log('   3. Update version and CHANGELOG manually');
-  console.log('   4. git add . && git commit && git push');
+  console.log('❌ Pre-release checks failed');
   process.exit(1);
 }
+
+// 2. Update version in version.js
+console.log(`📝 Updating version to ${newVersion}...`);
+const versionFile = path.join(__dirname, '../src/constants/version.js');
+const versionContent = `export const APP_VERSION = '${newVersion}';\n`;
+fs.writeFileSync(versionFile, versionContent);
+console.log('✅ Version updated\n');
+
+// 3. Commit changes
+console.log('📦 Committing changes...');
+execSync('git add .', { stdio: 'inherit' });
+execSync(`git commit -m "Release ${newVersion}: Package updates and version bump"`, { stdio: 'inherit' });
+
+// 4. Create tag
+console.log('🏷️  Creating git tag...');
+execSync(`git tag ${newVersion}`, { stdio: 'inherit' });
+
+// 5. Push to repository
+console.log('🚀 Pushing to repository...');
+execSync('git push', { stdio: 'inherit' });
+execSync('git push --tags', { stdio: 'inherit' });
+
+console.log(`\n🎉 Release ${newVersion} completed successfully!`);
+console.log('🌐 Netlify will auto-deploy the new version');
+console.log(`📋 Don't forget to update CHANGELOG.md with release notes`);

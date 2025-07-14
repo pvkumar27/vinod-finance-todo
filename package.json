@@ -41,13 +41,20 @@
     "eject": "react-scripts eject",
     "rollback": "node scripts/rollback.js",
     "pre-release": "node scripts/pre-release.js",
-    "release": "node scripts/release.js"
+    "release": "node scripts/release.js",
+    "check-updates": "npm outdated",
+    "update-packages": "npm outdated && npm update && npm audit fix || echo 'All packages up to date'"
   },
   "eslintConfig": {
     "extends": [
       "react-app",
       "react-app/jest"
     ]
+  },
+  "jest": {
+    "moduleNameMapping": {
+      "^../firebase-config$": "<rootDir>/src/__mocks__/firebase-config.js"
+    }
   },
   "browserslist": {
     "production": [
