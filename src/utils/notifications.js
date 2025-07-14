@@ -2,6 +2,11 @@ import { getToken, onMessage } from 'firebase/messaging';
 import { messaging } from '../firebase-config';
 
 export const requestNotificationPermission = async () => {
+  if (!messaging) {
+    console.warn('Firebase messaging not initialized');
+    return null;
+  }
+  
   try {
     const permission = await Notification.requestPermission();
     
@@ -30,6 +35,11 @@ export const requestNotificationPermission = async () => {
 };
 
 export const setupForegroundMessageListener = () => {
+  if (!messaging) {
+    console.warn('Firebase messaging not initialized');
+    return;
+  }
+  
   onMessage(messaging, (payload) => {
     console.log('Message received in foreground:', payload);
     
