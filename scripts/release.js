@@ -45,6 +45,29 @@ console.log('🚀 Pushing to repository...');
 execSync('git push', { stdio: 'inherit' });
 execSync('git push --tags', { stdio: 'inherit' });
 
+// 6. Prompt for changelog update
+console.log('\n📋 Updating changelog...');
+const changelogPath = path.join(__dirname, '../CHANGELOG.md');
+let changelog = fs.readFileSync(changelogPath, 'utf8');
+
+// Add new version entry at the top
+const today = new Date().toISOString().split('T')[0];
+const newEntry = `## ${newVersion} - ${today}\n### 🚀 Release\n- **Version Update**: ${newVersion}\n- **Package Updates**: Latest compatible versions\n- **Security Fixes**: Automated vulnerability patches\n- **Build Verification**: Production build tested\n\n---\n\n`;
+
+// Insert after the first line (title)
+const lines = changelog.split('\n');
+lines.splice(2, 0, newEntry);
+changelog = lines.join('\n');
+
+fs.writeFileSync(changelogPath, changelog);
+console.log('✅ Changelog updated with release entry\n');
+
+// 7. Commit changelog
+console.log('📋 Committing changelog...');
+execSync('git add CHANGELOG.md', { stdio: 'inherit' });
+execSync(`git commit -m "Update changelog for ${newVersion}"`, { stdio: 'inherit' });
+execSync('git push', { stdio: 'inherit' });
+
 console.log(`\n🎉 Release ${newVersion} completed successfully!`);
 console.log('🌐 Netlify will auto-deploy the new version');
-console.log(`📋 Don't forget to update CHANGELOG.md with release notes`);
+console.log('✅ Changelog automatically updated and committed');

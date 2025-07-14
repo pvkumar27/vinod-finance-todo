@@ -10,30 +10,32 @@ console.log('📦 Checking for outdated packages...');
 let hasOutdatedPackages = false;
 
 try {
+  // npm outdated with no output means all packages are up to date
   const outdated = execSync('npm outdated --json', { encoding: 'utf8' });
-  const packages = JSON.parse(outdated || '{}');
-  
-  if (Object.keys(packages).length > 0) {
-    hasOutdatedPackages = true;
-    console.log('⚠️  Outdated packages found:');
-    Object.entries(packages).forEach(([name, info]) => {
-      console.log(`   ${name}: ${info.current} → ${info.latest}`);
-    });
-  }
+  // If we get here without error, no packages are outdated
+  console.log('✅ All packages are up to date\n');
 } catch (error) {
   // npm outdated returns exit code 1 when packages are outdated
   if (error.stdout && error.stdout.trim()) {
     hasOutdatedPackages = true;
-    console.log('⚠️  Outdated packages detected');
+    console.log('⚠️  Outdated packages found');
+    
+    // Parse and display outdated packages
+    try {
+      const packages = JSON.parse(error.stdout);
+      Object.entries(packages).forEach(([name, info]) => {
+        console.log(`   ${name}: ${info.current} → ${info.latest}`);
+      });
+    } catch (parseError) {
+      console.log('   (Package details parsing failed)');
+    }
+    
+    console.log('\n🔄 Updating packages...');
+    execSync('npm update', { stdio: 'inherit' });
+    console.log('✅ Packages updated successfully\n');
+  } else {
+    console.log('✅ All packages are up to date\n');
   }
-}
-
-if (hasOutdatedPackages) {
-  console.log('\n🔄 Updating packages...');
-  execSync('npm update', { stdio: 'inherit' });
-  console.log('✅ Packages updated successfully\n');
-} else {
-  console.log('✅ All packages are up to date\n');
 }
 
 // 2. Run security audit (only if needed)
