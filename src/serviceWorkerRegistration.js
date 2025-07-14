@@ -19,7 +19,7 @@ export function register(config) {
     }
 
     window.addEventListener('load', () => {
-      const swUrl = `${process.env.PUBLIC_URL}/service-worker.js`;
+      const swUrl = `${process.env.PUBLIC_URL}/sw.js`;
 
       if (isLocalhost) {
         // This is running on localhost. Let's check if a service worker still exists or not.
@@ -47,10 +47,23 @@ function registerValidSW(swUrl, config) {
     .then((registration) => {
       console.log('SW registered: ', registration);
       
-      // Check for updates less frequently (every 24 hours)
-      setInterval(() => {
-        registration.update();
-      }, 24 * 60 * 60 * 1000);
+      // Listen for controlling service worker change
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        window.location.reload();
+      });
+      
+      // Check for updates on focus and visibility change
+      const checkForUpdates = () => {
+        if (!document.hidden) {
+          registration.update();
+        }
+      };
+      
+      window.addEventListener('focus', checkForUpdates);
+      document.addEventListener('visibilitychange', checkForUpdates);
+      
+      // Also check periodically (every hour)
+      setInterval(checkForUpdates, 60 * 60 * 1000);
       
       registration.onupdatefound = () => {
         const installingWorker = registration.installing;
@@ -72,6 +85,13 @@ function registerValidSW(swUrl, config) {
               if (config && config.onUpdate) {
                 config.onUpdate(registration);
               }
+              
+              // Listen for skip waiting message
+              navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data && event.data.type === 'SW_UPDATED') {
+                  window.location.reload();
+                }
+              });
             } else {
               // At this point, everything has been precached.
               // It's the perfect time to display a

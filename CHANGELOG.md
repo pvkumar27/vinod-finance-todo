@@ -1,5 +1,82 @@
 # 📋 Release Notes - Finance To-Dos PWA
 
+## v1.8.0 - 2024-12-19
+### 🚀 Smart Features & Push Notifications Release
+- **Firebase Cloud Messaging**: Real-time push notifications for tasks and financial alerts
+- **Smart Task Reminders**: Intelligent notifications for overdue and upcoming tasks
+- **Financial Insights**: AI-powered spending analysis and savings recommendations
+- **Smart Quick Actions**: Context-aware floating action button with personalized shortcuts
+- **Pattern Learning**: Analyzes user behavior to provide intelligent suggestions
+- **Offline Support**: Queue actions when offline, sync when connection returns
+- **Auto Update Prompt**: User-friendly notifications when new app versions are available
+- **Smart Theme System**: Auto dark mode and accessibility enhancements
+
+### 🔔 Push Notification Features
+- **Real-time Alerts**: Instant notifications for important financial events
+- **Task Reminders**: Smart scheduling based on due dates and priorities
+- **Budget Alerts**: Notifications when approaching spending limits
+- **Payment Reminders**: Alerts for credit card payment due dates
+- **Background Support**: Notifications work even when app is closed
+- **Cross-platform**: Works on mobile and desktop browsers
+
+### 🧠 Smart Intelligence Features
+- **Spending Pattern Analysis**: Identifies unusual expenses and trends
+- **Savings Rate Monitoring**: Tracks and alerts on financial health
+- **Task Completion Insights**: Analyzes productivity patterns
+- **Personalized Suggestions**: AI-driven recommendations for improvement
+- **Habit Recognition**: Learns frequent tasks and expense categories
+- **Anomaly Detection**: Flags unusual spending for review
+
+### 🎯 Smart Quick Actions
+- **Floating Action Button**: Easy access to common actions
+- **Context-aware Shortcuts**: Personalized based on usage patterns
+- **Quick Task Creation**: One-tap task addition with smart defaults
+- **Expense Shortcuts**: Fast income/expense entry
+- **Pattern-based Suggestions**: Recommends frequent actions
+
+### 📱 Enhanced PWA Features
+- **Auto Update Detection**: Seamless app updates with user prompts
+- **Offline Queue System**: Actions saved and synced when online
+- **Smart Caching**: Improved offline experience
+- **Network Status Awareness**: Handles connectivity changes gracefully
+- **Background Sync**: Data synchronization in background
+
+### 🎨 Smart Theme & Accessibility
+- **Auto Dark Mode**: Switches based on time of day (7PM-7AM)
+- **High Contrast Mode**: Enhanced visibility for accessibility
+- **Large Text Support**: Improved readability options
+- **Reduced Motion**: Respects user motion preferences
+- **Smart Theme Persistence**: Remembers user preferences
+
+### 🔧 Technical Enhancements
+- **Firebase Integration**: Complete FCM setup with analytics
+- **Service Worker Optimization**: Enhanced caching and update handling
+- **Pattern Analysis Engine**: Machine learning-inspired user behavior analysis
+- **Offline-first Architecture**: Robust offline functionality
+- **Performance Improvements**: Faster load times and smoother interactions
+
+### 📊 Analytics & Insights
+- **Financial Health Score**: Real-time assessment of spending habits
+- **Weekly Spending Reports**: Automated expense summaries
+- **Category Analysis**: Detailed breakdown of spending patterns
+- **Productivity Metrics**: Task completion and efficiency tracking
+- **Trend Visualization**: Visual representation of financial progress
+
+### 🛡️ Security & Privacy
+- **Secure Token Management**: Safe FCM token handling
+- **Local Data Encryption**: Enhanced security for offline data
+- **Privacy-first Design**: No sensitive data in notifications
+- **Secure Sync**: Encrypted data transmission
+
+### 🌟 User Experience Improvements
+- **Intelligent Notifications**: Non-intrusive, contextually relevant alerts
+- **Smooth Animations**: Enhanced visual feedback and transitions
+- **Responsive Design**: Optimized for all screen sizes
+- **Touch-friendly Interface**: Improved mobile interaction
+- **Voice Command Integration**: Natural language task creation
+
+---
+
 ## v1.7.0 - 2024-12-19
 ### 💰 Enhanced Finance Management & UX Improvements
 - **Income Tracking**: Added comprehensive income management alongside expenses

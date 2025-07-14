@@ -21,11 +21,11 @@ const Navbar = ({ session }) => {
               <img 
                 src="/icons/official-logo.png" 
                 alt="Finance To-Dos Logo" 
-                className="h-8 w-auto rounded-lg shadow-sm" 
+                className="h-8 w-auto rounded-lg shadow-md bg-gray-300" 
               />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              <h1 className="text-xl font-bold text-blue-600 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
                 Finance To-Dos
               </h1>
             </div>

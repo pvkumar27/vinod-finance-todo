@@ -3,6 +3,7 @@ import { AuthForm } from './components';
 import { Navbar } from './layout';
 import { Home } from './pages';
 import { supabase } from './supabaseClient';
+import { requestNotificationPermission, setupForegroundMessageListener } from './utils/notifications';
 import './App.css';
 
 function App() {
@@ -22,10 +23,32 @@ function App() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setLoading(false);
+      
+      // Setup push notifications when user logs in
+      if (session) {
+        initializePushNotifications();
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const initializePushNotifications = async () => {
+    try {
+      // Request notification permission and get FCM token
+      const token = await requestNotificationPermission();
+      
+      if (token) {
+        console.log('Push notification token obtained:', token);
+        // TODO: Send token to your backend to store for the user
+      }
+      
+      // Setup foreground message listener
+      setupForegroundMessageListener();
+    } catch (error) {
+      console.error('Error initializing push notifications:', error);
+    }
+  };
 
   if (loading) {
     return (

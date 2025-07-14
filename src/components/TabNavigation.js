@@ -15,7 +15,7 @@ const TabNavigation = () => {
     },
     { 
       id: 'expenses', 
-      label: 'Expenses', 
+      label: 'My Finances', 
       icon: '💰',
       component: ExpensesTest 
     },

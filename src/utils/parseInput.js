@@ -18,7 +18,12 @@ export const parseInput = (text) => {
   // Todo patterns
   const todoPatterns = [
     /(?:create\s+(?:a\s+)?to-?do|add\s+task|remind\s+me\s+to):\s*(.+?)(?:\s+(?:on|by|tomorrow|today|next)|\s*$)/i,
-    /(?:remind\s+me\s+to|need\s+to|todo)\s+(.+?)(?:\s+(?:on|by|tomorrow|today|next)|\s*$)/i
+    /(?:remind\s+me\s+to|need\s+to|todo)\s+(.+?)(?:\s+(?:on|by|tomorrow|today|next)|\s*$)/i,
+    /(.+?)\s+due\s+date\s+is\s+(.+)/i,
+    /(.+?)\s+(?:is\s+)?due\s+(.+)/i,
+    /(.+?)\s+by\s+(.+)/i,
+    /add\s+(?:a\s+)?reminder\s+to\s+(.+?)\s+(?:for|on|by)\s+(.+)/i,
+    /(?:create\s+)?reminder\s+(?:to\s+)?(.+?)\s+(?:for|on|by)\s+(.+)/i
   ];
 
   // Credit card patterns
@@ -53,15 +58,27 @@ export const parseInput = (text) => {
   }
 
   // Check for todo intent
-  for (const pattern of todoPatterns) {
+  for (let i = 0; i < todoPatterns.length; i++) {
+    const pattern = todoPatterns[i];
     const match = input.match(pattern);
     if (match) {
+      let taskText = match[1].trim();
+      let dueDate = extractedDate;
+      
+      // For patterns with explicit date extraction (patterns 2, 3, 4, 5, 6)
+      if (i >= 2 && match[2]) {
+        const dateText = match[2].trim();
+        const parsedDate = chrono.parse(dateText);
+        if (parsedDate.length > 0) {
+          dueDate = parsedDate[0].start.date().toISOString().split('T')[0];
+        }
+      }
+      
       return {
         intent: 'add_todo',
         payload: {
-          task: match[1].trim(),
-          due_date: extractedDate,
-          notes: ''
+          task: taskText,
+          due_date: dueDate
         }
       };
     }
@@ -91,9 +108,8 @@ export const parseInput = (text) => {
       return {
         intent: 'reminder',
         payload: {
-          card_name: match[1].trim(),
-          due_date: extractedDate,
-          task: `Pay ${match[1].trim()}`
+          task: `Pay ${match[1].trim()}`,
+          due_date: extractedDate
         }
       };
     }
