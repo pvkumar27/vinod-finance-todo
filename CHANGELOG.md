@@ -1,5 +1,45 @@
 # 📋 Release Notes - Finance To-Dos PWA
 
+## v1.8.1 - 2024-12-19
+### 🔧 Maintenance & Automation Release
+- **Automated Release Process**: Complete automation with package updates, security fixes, and build verification
+- **Smart Package Updates**: Only updates packages when newer versions are available
+- **ESLint Fixes**: Resolved React hooks warnings in UpdateToast component
+- **Tailwind Configuration**: Fixed darkMode deprecation warning
+- **Release Automation**: Never miss package updates again with automated scripts
+- **Firebase Test Mocks**: Added testing infrastructure for Firebase components
+- **Security Audit**: Automated vulnerability detection and fixes
+- **Build Verification**: Ensures production build works before release
+
+### 🤖 Automation Features
+- **Pre-release Checks**: Automated package updates, security audit, and build testing
+- **Smart Detection**: Only runs updates when packages are actually outdated
+- **Release Scripts**: One-command release process with full automation
+- **Package.json Scripts**: Easy access to update and release commands
+- **Release Checklist**: Documentation to prevent missing critical steps
+
+### 🔒 Security & Maintenance
+- **Package Updates**: Latest compatible versions of all dependencies
+- **Security Fixes**: Automated vulnerability patching where possible
+- **Code Quality**: Fixed ESLint warnings and React best practices
+- **Configuration Updates**: Modern Tailwind and build configurations
+
+### 📝 Process Improvements
+- **Never Miss Updates**: Automated detection prevents outdated packages in releases
+- **One-Command Release**: `npm run release v1.x.x` handles everything
+- **Smart Workflows**: Only runs necessary operations based on current state
+- **Clear Documentation**: Release checklist and automation guide
+
+### 🚀 Usage
+```bash
+npm run check-updates     # Check for outdated packages
+npm run update-packages   # Smart update only if needed
+npm run pre-release      # Full automated checks
+npm run release v1.8.1   # Complete automated release
+```
+
+---
+
 ## v1.8.0 - 2024-12-19
 ### 🚀 Smart Features & Push Notifications Release
 - **Firebase Cloud Messaging**: Real-time push notifications for tasks and financial alerts
