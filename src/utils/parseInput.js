@@ -23,7 +23,11 @@ export const parseInput = (text) => {
     /(.+?)\s+(?:is\s+)?due\s+(.+)/i,
     /(.+?)\s+by\s+(.+)/i,
     /add\s+(?:a\s+)?reminder\s+to\s+(.+?)\s+(?:for|on|by)\s+(.+)/i,
-    /(?:create\s+)?reminder\s+(?:to\s+)?(.+?)\s+(?:for|on|by)\s+(.+)/i
+    /(?:create\s+)?reminder\s+(?:to\s+)?(.+?)\s+(?:for|on|by)\s+(.+)/i,
+    // Simple task patterns (action verbs + object)
+    /^(clean|wash|fix|buy|call|email|visit|check|update|review|finish|complete|start|organize|prepare|schedule)\s+(.+)/i,
+    // Generic simple task (any text 5+ chars)
+    /^([a-zA-Z][a-zA-Z\s]{4,})$/i
   ];
 
   // Credit card patterns
@@ -66,12 +70,22 @@ export const parseInput = (text) => {
       let dueDate = extractedDate;
       
       // For patterns with explicit date extraction (patterns 2, 3, 4, 5, 6)
-      if (i >= 2 && match[2]) {
+      if (i >= 2 && i <= 6 && match[2]) {
         const dateText = match[2].trim();
         const parsedDate = chrono.parse(dateText);
         if (parsedDate.length > 0) {
           dueDate = parsedDate[0].start.date().toISOString().split('T')[0];
         }
+      }
+      
+      // For simple action verb patterns (pattern 7)
+      if (i === 7 && match[2]) {
+        taskText = `${match[1]} ${match[2]}`.trim();
+      }
+      
+      // For generic simple task (pattern 8)
+      if (i === 8) {
+        taskText = match[1].trim();
       }
       
       return {
