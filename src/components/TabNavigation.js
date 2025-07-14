@@ -4,9 +4,15 @@ import ExpensesTest from './ExpensesTest';
 import ToDoTest from './ToDoTest';
 
 const TabNavigation = () => {
-  const [activeTab, setActiveTab] = useState('cards');
+  const [activeTab, setActiveTab] = useState('todos');
 
   const tabs = [
+    { 
+      id: 'todos', 
+      label: 'To-Dos', 
+      icon: '✅',
+      component: ToDoTest 
+    },
     { 
       id: 'cards', 
       label: 'Credit Cards', 
@@ -18,12 +24,6 @@ const TabNavigation = () => {
       label: 'My Finances', 
       icon: '💰',
       component: ExpensesTest 
-    },
-    { 
-      id: 'todos', 
-      label: 'To-Dos', 
-      icon: '✅',
-      component: ToDoTest 
     }
   ];
 
