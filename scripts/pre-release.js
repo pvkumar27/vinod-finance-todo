@@ -30,9 +30,31 @@ try {
       console.log('   (Package details parsing failed)');
     }
     
-    console.log('\n🔄 Updating packages...');
+    console.log('\n🔄 Updating compatible packages...');
     execSync('npm update', { stdio: 'inherit' });
-    console.log('✅ Packages updated successfully\n');
+    
+    // Check if major version upgrades are available
+    const majorUpgrades = [];
+    try {
+      const packages = JSON.parse(error.stdout);
+      Object.entries(packages).forEach(([name, info]) => {
+        const currentMajor = parseInt(info.current.split('.')[0]);
+        const latestMajor = parseInt(info.latest.split('.')[0]);
+        if (latestMajor > currentMajor) {
+          majorUpgrades.push(`${name}: ${info.current} → ${info.latest}`);
+        }
+      });
+    } catch (parseError) {
+      // Ignore parsing errors
+    }
+    
+    if (majorUpgrades.length > 0) {
+      console.log('\n⚠️  Major version upgrades available (require manual review):');
+      majorUpgrades.forEach(upgrade => console.log(`   ${upgrade}`));
+      console.log('   These are skipped to prevent breaking changes.\n');
+    }
+    
+    console.log('✅ Compatible packages updated successfully\n');
   } else {
     console.log('✅ All packages are up to date\n');
   }
