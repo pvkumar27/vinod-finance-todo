@@ -1,5 +1,15 @@
 # 📋 Release Notes - Finance To-Dos PWA
 
+## v2.1.2 - 2025-07-16
+### 🚀 Release
+- **Version Update**: v2.1.2
+- **Package Updates**: Latest compatible versions
+- **Security Fixes**: Automated vulnerability patches
+- **Build Verification**: Production build tested
+
+---
+
+
 ## v2.1.2 - 2025-01-16
 ### 🆓 Development Environment Integration
 - **Real Bank Connections**: Switched from sandbox to development environment for real financial data
