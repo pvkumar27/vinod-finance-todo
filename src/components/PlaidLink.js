@@ -12,22 +12,17 @@ const PlaidLink = ({ onSuccess, onError }) => {
     try {
       let accessToken;
       
-      if (plaidConfig.env === 'development') {
-        // In development, exchange public token for access token via backend
-        const response = await fetch('/api/plaid/exchange-token', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-          },
-          body: JSON.stringify({ public_token: publicToken })
-        });
-        const data = await response.json();
-        accessToken = data.access_token;
-      } else {
-        // Mock access token for sandbox only
-        accessToken = `access-sandbox-${publicToken.slice(-10)}`;
-      }
+      // Exchange public token for access token via backend
+      const response = await fetch('/api/plaid/exchange-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        },
+        body: JSON.stringify({ public_token: publicToken })
+      });
+      const data = await response.json();
+      accessToken = data.access_token;
       
       // Store token securely
       await storePlaidToken(
