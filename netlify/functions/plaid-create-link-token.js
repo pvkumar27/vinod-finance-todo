@@ -1,23 +1,23 @@
-const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
-
-const configuration = new Configuration({
-  basePath: PlaidEnvironments.development,
-  baseOptions: {
-    headers: {
-      'PLAID-CLIENT-ID': process.env.REACT_APP_PLAID_CLIENT_ID,
-      'PLAID-SECRET': process.env.REACT_APP_PLAID_SECRET,
-    },
-  },
-});
-
-const client = new PlaidApi(configuration);
-
 exports.handler = async (event, context) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
   try {
+    const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
+    
+    const configuration = new Configuration({
+      basePath: PlaidEnvironments.development,
+      baseOptions: {
+        headers: {
+          'PLAID-CLIENT-ID': process.env.REACT_APP_PLAID_CLIENT_ID,
+          'PLAID-SECRET': process.env.REACT_APP_PLAID_SECRET,
+        },
+      },
+    });
+
+    const client = new PlaidApi(configuration);
+
     const response = await client.linkTokenCreate({
       user: { client_user_id: 'user-id' },
       client_name: 'Finance To-Dos PWA',
@@ -31,6 +31,7 @@ exports.handler = async (event, context) => {
       body: JSON.stringify({ link_token: response.data.link_token }),
     };
   } catch (error) {
+    console.error('Plaid error:', error);
     return {
       statusCode: 500,
       body: JSON.stringify({ error: error.message }),
