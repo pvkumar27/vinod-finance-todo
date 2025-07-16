@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { usePlaidLink } from 'react-plaid-link';
-import { plaidConfig, createLinkToken, storePlaidToken, fetchPlaidAccounts, convertPlaidAccountToCreditCard } from '../services/plaid';
+import { createLinkToken, storePlaidToken, fetchPlaidAccounts, convertPlaidAccountToCreditCard } from '../services/plaid';
 import { supabase } from '../supabaseClient';
 import { addCreditCard } from '../services/creditCards';
 
