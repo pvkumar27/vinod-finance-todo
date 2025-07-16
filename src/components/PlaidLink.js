@@ -13,7 +13,7 @@ const PlaidLink = ({ onSuccess, onError }) => {
       let accessToken;
       
       // Exchange public token for access token via backend
-      const response = await fetch('/api/plaid/exchange-token', {
+      const response = await fetch('/.netlify/functions/plaid-exchange-token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

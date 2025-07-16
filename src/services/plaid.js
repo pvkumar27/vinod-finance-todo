@@ -13,7 +13,7 @@ export const plaidConfig = {
 // Create link token - calls backend for real bank connections
 export const createLinkToken = async () => {
   try {
-    const response = await fetch('/api/plaid/create-link-token', {
+    const response = await fetch('/.netlify/functions/plaid-create-link-token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -66,7 +66,7 @@ export const getPlaidTokens = async () => {
 // Fetch Plaid accounts - calls backend for real account data
 export const fetchPlaidAccounts = async (accessToken) => {
   try {
-    const response = await fetch('/api/plaid/accounts', {
+    const response = await fetch('/.netlify/functions/plaid-accounts', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
