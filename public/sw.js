@@ -7,7 +7,13 @@ self.addEventListener('message', (event) => {
 
 self.addEventListener('activate', (event) => {
   // Take control of all clients immediately
-  event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    Promise.all([
+      self.clients.claim(),
+      // Clear icon cache to force refresh
+      caches.delete('icons-cache-v1.8.7')
+    ])
+  );
   
   // Notify clients that SW has been updated
   self.clients.matchAll().then((clients) => {
