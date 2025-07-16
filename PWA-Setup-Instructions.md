@@ -22,12 +22,13 @@
 
 ## Next Steps:
 
-### Add Icons (Required)
-1. Create two PNG icons:
-   - `public/icons/icon-192.png` (192x192 pixels)
-   - `public/icons/icon-512.png` (512x512 pixels)
+### Icons (Complete ✅)
+1. Official logo configured:
+   - `public/icons/official-logo.png` (used for all sizes)
+   - Manifest configured for 192x192 and 512x512
+   - Dark green background applied in navbar
 
-2. Use your app's branding/logo for these icons
+2. All unused icons cleaned up
 
 ### Test PWA Installation:
 1. Build the app: `npm run build`
