@@ -21,7 +21,7 @@ const Navbar = ({ session }) => {
               <img 
                 src="/icons/official-logo.png" 
                 alt="Finance To-Dos Logo" 
-                className="h-8 w-auto rounded-lg shadow-md bg-gray-300" 
+                className="h-8 w-auto rounded-lg shadow-md bg-green-800" 
               />
             </div>
             <div>
