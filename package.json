@@ -1,7 +1,7 @@
 {
   "name": "finance-todos-pwa",
   "version": "0.1.0",
-  "homepage": "https://vinod-pwa.netlify.app",
+  "homepage": "https://finance-todos.netlify.app",
   "private": true,
   "dependencies": {
     "@supabase/auth-ui-react": "^0.4.7",

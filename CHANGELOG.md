@@ -322,7 +322,7 @@ npm run release v1.8.1   # Complete automated release
 ### 🔧 URL Fix Release
 - **Homepage URL Fix**: Added correct homepage URL to package.json
 - **Build Cleanup**: Removed old build artifacts with invalid URL references
-- **URL Correction**: Fixed all references from `finance-todos-pwa.netlify.app` to `vinod-pwa.netlify.app`
+- **URL Correction**: Fixed all references from `finance-todos-pwa.netlify.app` to `finance-todos.netlify.app`
 - **Production Ready**: Ensured all builds use the correct deployment URL
 
 ### 🔄 Technical Changes
