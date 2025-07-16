@@ -38,7 +38,7 @@ exports.handler = async (event, context) => {
     const response = await client.linkTokenCreate({
       user: { client_user_id: 'user-id' },
       client_name: 'Finance To-Dos PWA',
-      products: ['accounts'],
+      products: ['auth'],
       country_codes: ['US'],
       language: 'en',
     });
