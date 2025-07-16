@@ -1,5 +1,52 @@
 # 📋 Release Notes - Finance To-Dos PWA
 
+## v2.1.0 - 2025-01-16
+### 🏦 Plaid Integration Release
+- **Credit Card Sync**: Connect bank accounts and auto-import credit card metadata
+- **Plaid Link Integration**: Secure bank account connection via Plaid Link
+- **Visual Indicators**: 🏦 Plaid Synced badges for connected cards
+- **Sandbox Environment**: Development-ready Plaid integration
+- **Secure Token Storage**: Plaid access tokens stored securely in Supabase
+- **Auto-Population**: Credit cards automatically added with proper metadata
+
+### 🔧 Technical Features
+- **React Plaid Link**: Official Plaid SDK integration
+- **Database Schema**: New plaid_tokens table with RLS policies
+- **Mock API**: Development-friendly mock responses for testing
+- **Error Handling**: Comprehensive error handling for connection issues
+- **Environment Config**: Secure credential management via environment variables
+
+### 🎨 UI Enhancements
+- **Connect Bank Button**: Easy-to-use Plaid Link integration in Credit Cards
+- **Plaid Badges**: Visual indicators for synced cards in both card and table views
+- **Loading States**: Smooth loading experience during sync process
+- **Success Messages**: Clear feedback when cards are successfully synced
+- **Form Labels**: Added proper labels to Owner and Source dropdowns in My Finances
+
+### 🔒 Security & Privacy
+- **Secure Storage**: Plaid tokens stored with user isolation via RLS
+- **No Transaction Data**: Only credit card metadata synced (transactions planned for future)
+- **Environment Variables**: Sensitive credentials managed securely
+- **User Authentication**: All Plaid operations require user authentication
+
+### 📊 Data Structure
+- **Plaid Account Linking**: Credit cards linked to Plaid account IDs
+- **Sync Source Tracking**: Clear indication of data source (Manual vs Plaid)
+- **Owner Assignment**: All Plaid cards assigned to 'self' by default
+- **Metadata Preservation**: Institution name, card name, last 4 digits stored
+
+### 🚀 Foundation for Future
+- **Transaction Sync Ready**: Database structure prepared for transaction import
+- **Multi-Institution Support**: Can connect multiple banks and credit unions
+- **Scalable Architecture**: Ready for additional financial data sources
+
+### ⚠️ Development Notes
+- **Sandbox Mode**: Currently uses Plaid sandbox environment
+- **Mock Responses**: Development-friendly mock data for testing
+- **Production Ready**: Architecture ready for production Plaid API integration
+
+---
+
 ## v2.0.0 - 2025-07-16
 ### 🚀 Release
 - **Version Update**: v2.0.0

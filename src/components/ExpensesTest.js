@@ -176,23 +176,29 @@ const ExpensesTest = () => {
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
-          <select
-            value={formData.owner}
-            onChange={(e) => setFormData({...formData, owner: e.target.value})}
-            className="p-2 border rounded"
-          >
-            <option value="self">Self</option>
-            <option value="spouse">Spouse</option>
-          </select>
-          <select
-            value={formData.sync_source}
-            onChange={(e) => setFormData({...formData, sync_source: e.target.value})}
-            className="p-2 border rounded"
-          >
-            <option value="Manual">Manual</option>
-            <option value="Plaid">Plaid</option>
-            <option value="Apple">Apple</option>
-          </select>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1 text-left">Owner</label>
+            <select
+              value={formData.owner}
+              onChange={(e) => setFormData({...formData, owner: e.target.value})}
+              className="w-full p-2 border rounded"
+            >
+              <option value="self">Self</option>
+              <option value="spouse">Spouse</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1 text-left">Source</label>
+            <select
+              value={formData.sync_source}
+              onChange={(e) => setFormData({...formData, sync_source: e.target.value})}
+              className="w-full p-2 border rounded"
+            >
+              <option value="Manual">Manual</option>
+              <option value="Plaid">Plaid</option>
+              <option value="Apple">Apple</option>
+            </select>
+          </div>
           <input
             type="date"
             value={formData.date}

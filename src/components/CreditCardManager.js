@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getCreditCards, addCreditCard, updateCreditCard, deleteCreditCard } from '../services';
+import PlaidLink from './PlaidLink';
 
 const CreditCardManager = () => {
   const [cards, setCards] = useState([]);
@@ -138,6 +139,17 @@ const CreditCardManager = () => {
               📊 Table
             </button>
           </div>
+          <PlaidLink
+            onSuccess={(cards) => {
+              setMessage(`✅ Successfully synced ${cards.length} credit card(s) from Plaid!`);
+              setTimeout(() => setMessage(''), 4000);
+              loadCards();
+            }}
+            onError={(error) => {
+              setMessage(`❌ Plaid sync error: ${error.message}`);
+              setTimeout(() => setMessage(''), 6000);
+            }}
+          />
           <button
             onClick={() => setShowForm(!showForm)}
             className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
@@ -356,6 +368,7 @@ const CreditCardManager = () => {
                 )}
                 
                 <div className="flex flex-wrap gap-2 mt-2">
+                  {card.sync_source === 'Plaid' && <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded font-medium">🏦 Plaid Synced</span>}
                   {card.bt_promo_available && <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">BT Promo</span>}
                   {card.purchase_promo_available && <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Purchase Promo</span>}
                   {card.is_autopay_setup && <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Autopay</span>}
@@ -414,6 +427,7 @@ const CreditCardManager = () => {
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-left">
                       <div className="flex flex-wrap gap-1">
+                        {card.sync_source === 'Plaid' && <span className="bg-indigo-100 text-indigo-800 text-xs px-1 py-0.5 rounded font-medium">🏦</span>}
                         {card.bt_promo_available && <span className="bg-blue-100 text-blue-800 text-xs px-1 py-0.5 rounded">BT</span>}
                         {card.purchase_promo_available && <span className="bg-green-100 text-green-800 text-xs px-1 py-0.5 rounded">Purchase</span>}
                         {card.is_autopay_setup && <span className="bg-purple-100 text-purple-800 text-xs px-1 py-0.5 rounded">Autopay</span>}
