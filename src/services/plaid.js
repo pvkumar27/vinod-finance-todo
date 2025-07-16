@@ -3,10 +3,16 @@ import { supabase } from '../supabaseClient';
 // Plaid configuration
 export const plaidConfig = {
   clientId: process.env.REACT_APP_PLAID_CLIENT_ID,
-  publicKey: process.env.REACT_APP_PLAID_PUBLIC_KEY,
+  secret: process.env.REACT_APP_PLAID_SECRET,
   env: process.env.REACT_APP_PLAID_ENV || 'sandbox',
   products: ['accounts'],
   countryCodes: ['US'],
+};
+
+// Create link token (in production, this should be done on backend)
+export const createLinkToken = async () => {
+  // Mock link token for development
+  return 'link-sandbox-' + Math.random().toString(36).substr(2, 9);
 };
 
 // Store Plaid access token securely in Supabase

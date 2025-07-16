@@ -1,5 +1,32 @@
 # 📋 Release Notes - Finance To-Dos PWA
 
+## v2.1.1 - 2025-01-16
+### 🏭 Production Ready Plaid Integration
+- **Production Environment Support**: Automatic detection of sandbox vs production
+- **Backend API Integration**: Production-ready token exchange via secure backend
+- **Updated Credentials**: Modern Plaid API without deprecated public key
+- **Environment Variables**: Updated to use Client ID + Secret (no public key)
+- **Error Handling**: Enhanced error messages for production failures
+- **Security**: All sensitive operations routed through backend in production
+
+### 🔧 Technical Updates
+- **Token Exchange**: Production calls `/api/plaid/exchange-token` endpoint
+- **Link Token**: Production calls `/api/plaid/create-link-token` endpoint  
+- **Account Fetching**: Production calls `/api/plaid/accounts` endpoint
+- **Sandbox Compatibility**: Maintains mock responses for development
+- **Authentication**: All API calls include user session tokens
+
+### 📚 Documentation
+- **Production Setup Guide**: Complete backend API requirements
+- **Environment Configuration**: Updated credential setup instructions
+- **Deployment Guide**: Netlify environment variable configuration
+
+### ⚠️ Breaking Changes
+- **Environment Variables**: `REACT_APP_PLAID_PUBLIC_KEY` removed, replaced with `REACT_APP_PLAID_SECRET`
+- **Production Requirement**: Backend API endpoints required for production use
+
+---
+
 ## v2.1.0 - 2025-07-16
 ### 🚀 Release
 - **Version Update**: v2.1.0

@@ -1,6 +1,7 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { usePlaidLink } from 'react-plaid-link';
-import { plaidConfig, storePlaidToken, fetchPlaidAccounts, convertPlaidAccountToCreditCard } from '../services/plaid';
+import { plaidConfig, createLinkToken, storePlaidToken, fetchPlaidAccounts, convertPlaidAccountToCreditCard } from '../services/plaid';
+import { supabase } from '../supabaseClient';
 import { addCreditCard } from '../services/creditCards';
 
 const PlaidLink = ({ onSuccess, onError }) => {
@@ -9,19 +10,34 @@ const PlaidLink = ({ onSuccess, onError }) => {
   const onPlaidSuccess = useCallback(async (publicToken, metadata) => {
     setLoading(true);
     try {
-      // In production, exchange public token for access token via your backend
-      // For now, we'll simulate this process
-      const mockAccessToken = `access-sandbox-${publicToken.slice(-10)}`;
+      let accessToken;
       
-      // Store token (in production, this would be done securely on backend)
+      if (plaidConfig.env === 'production') {
+        // In production, exchange public token for access token via backend
+        const response = await fetch('/api/plaid/exchange-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+          },
+          body: JSON.stringify({ public_token: publicToken })
+        });
+        const data = await response.json();
+        accessToken = data.access_token;
+      } else {
+        // Mock access token for sandbox/development
+        accessToken = `access-sandbox-${publicToken.slice(-10)}`;
+      }
+      
+      // Store token securely
       await storePlaidToken(
-        mockAccessToken,
+        accessToken,
         metadata.link_session_id,
         metadata.institution?.institution_id
       );
 
       // Fetch accounts from Plaid
-      const accountsResponse = await fetchPlaidAccounts(mockAccessToken);
+      const accountsResponse = await fetchPlaidAccounts(accessToken);
       
       // Filter for credit card accounts and add to our database
       const creditCards = accountsResponse.accounts
@@ -42,12 +58,24 @@ const PlaidLink = ({ onSuccess, onError }) => {
     }
   }, [onSuccess, onError]);
 
+  const [linkToken, setLinkToken] = useState(null);
+
+  // Create link token on component mount
+  useEffect(() => {
+    const initializePlaid = async () => {
+      try {
+        const token = await createLinkToken();
+        setLinkToken(token);
+      } catch (error) {
+        console.error('Failed to create link token:', error);
+        onError && onError(error);
+      }
+    };
+    initializePlaid();
+  }, [onError]);
+
   const { open, ready } = usePlaidLink({
-    token: null, // We'll use public_key mode for simplicity
-    publicKey: plaidConfig.publicKey,
-    env: plaidConfig.env,
-    product: plaidConfig.products,
-    countryCodes: plaidConfig.countryCodes,
+    token: linkToken,
     onSuccess: onPlaidSuccess,
     onExit: (err, metadata) => {
       if (err) {
