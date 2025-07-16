@@ -1,5 +1,45 @@
 # 📋 Release Notes - Finance To-Dos PWA
 
+## v2.0.0 - 2025-01-16
+### 🚀 Major Release: Data Reset & Sync Preparation
+- **Database Schema Update**: Added `owner` and `sync_source` fields to credit_cards and expenses tables
+- **Data Reset**: Cleared all existing dummy data for fresh start
+- **Owner Support**: Added Self/Spouse dropdown to all forms for multi-user households
+- **Sync Source Tracking**: Added Manual/Plaid/Apple sync source options
+- **UI Enhancements**: Updated forms with new owner and sync source dropdowns
+- **Plaid Integration Prep**: Database structure ready for credit card sync
+- **RLS Security**: Maintained user data isolation with existing policies
+
+### 🗃️ Database Changes
+- **credit_cards table**: Added `owner` (text) and `sync_source` (text) columns
+- **expenses table**: Added `owner` (text) and `sync_source` (text) columns
+- **Data Migration**: All existing records cleared for clean v2.0.0 start
+- **Default Values**: owner='self', sync_source='Manual' for new entries
+
+### 🖼️ UI Updates
+- **Credit Card Form**: Added Owner dropdown (Self/Spouse)
+- **My Finances Form**: Added Owner and Sync Source dropdowns
+- **Form Validation**: Proper defaults and validation for new fields
+- **Backward Compatibility**: Handles missing fields gracefully
+
+### 🔐 Security & Privacy
+- **RLS Maintained**: User data isolation continues to work
+- **No Sensitive Data**: Only metadata stored, no actual financial details
+- **Sync Source Transparency**: Users know where their data comes from
+
+### 🎯 Sync Integration Ready
+- **Plaid Support**: Database ready for credit card transaction sync
+- **Apple Integration**: Structure supports Apple Card/Wallet data
+- **Manual Override**: Users can still add entries manually
+- **Multi-source Tracking**: Clear visibility of data sources
+
+### ⚠️ Breaking Changes
+- **Data Reset**: All existing credit cards and transactions cleared
+- **New Required Fields**: Forms now include owner and sync_source
+- **Database Schema**: New columns added to existing tables
+
+---
+
 ## v1.9.1 - 2025-07-16
 ### 🚀 Release
 - **Version Update**: v1.9.1

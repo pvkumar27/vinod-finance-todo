@@ -13,9 +13,15 @@ export const fetchExpenses = async () => {
 
 // Add a new expense
 export const addExpense = async (expenseData) => {
+  const expenseWithDefaults = {
+    ...expenseData,
+    owner: expenseData.owner || 'self',
+    sync_source: expenseData.sync_source || 'Manual'
+  };
+  
   const { data, error } = await supabase
     .from('expenses')
-    .insert([expenseData])
+    .insert([expenseWithDefaults])
     .select();
   
   if (error) throw error;

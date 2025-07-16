@@ -13,7 +13,9 @@ const ExpensesTest = () => {
     amount: '',
     type: 'expense',
     category: 'Food',
-    date: new Date().toISOString().split('T')[0]
+    date: new Date().toISOString().split('T')[0],
+    owner: 'self',
+    sync_source: 'Manual'
   });
 
   const expenseCategories = ['Food', 'Transportation', 'Entertainment', 'Bills', 'Shopping', 'Healthcare', 'Other'];
@@ -38,7 +40,9 @@ const ExpensesTest = () => {
       amount: expense.amount.toString(),
       type: expense.is_income ? 'income' : 'expense',
       category: expense.category,
-      date: expense.date
+      date: expense.date,
+      owner: expense.owner || 'self',
+      sync_source: expense.sync_source || 'Manual'
     });
   };
 
@@ -66,7 +70,9 @@ const ExpensesTest = () => {
         amount: '',
         type: 'expense',
         category: 'Food',
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split('T')[0],
+        owner: 'self',
+        sync_source: 'Manual'
       });
       setEditingExpense(null);
       setShowForm(false);
@@ -170,6 +176,23 @@ const ExpensesTest = () => {
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
+          <select
+            value={formData.owner}
+            onChange={(e) => setFormData({...formData, owner: e.target.value})}
+            className="p-2 border rounded"
+          >
+            <option value="self">Self</option>
+            <option value="spouse">Spouse</option>
+          </select>
+          <select
+            value={formData.sync_source}
+            onChange={(e) => setFormData({...formData, sync_source: e.target.value})}
+            className="p-2 border rounded"
+          >
+            <option value="Manual">Manual</option>
+            <option value="Plaid">Plaid</option>
+            <option value="Apple">Apple</option>
+          </select>
           <input
             type="date"
             value={formData.date}
@@ -196,7 +219,9 @@ const ExpensesTest = () => {
                   amount: '',
                   type: 'expense',
                   category: 'Food',
-                  date: new Date().toISOString().split('T')[0]
+                  date: new Date().toISOString().split('T')[0],
+                  owner: 'self',
+                  sync_source: 'Manual'
                 });
               }}
               className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600"

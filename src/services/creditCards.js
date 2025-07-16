@@ -13,9 +13,15 @@ export const getCreditCards = async () => {
 
 // Add a new credit card
 export const addCreditCard = async (cardData) => {
+  const cardWithDefaults = {
+    ...cardData,
+    owner: cardData.owner || 'self',
+    sync_source: cardData.sync_source || 'Manual'
+  };
+  
   const { data, error } = await supabase
     .from('credit_cards')
-    .insert([cardData])
+    .insert([cardWithDefaults])
     .select();
   
   if (error) throw error;

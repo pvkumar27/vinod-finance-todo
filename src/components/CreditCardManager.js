@@ -19,7 +19,9 @@ const CreditCardManager = () => {
     reminder_days_before: 7,
     is_autopay_setup: false,
     balance: '',
-    notes: ''
+    notes: '',
+    owner: 'self',
+    sync_source: 'Manual'
   });
 
   const loadCards = async () => {
@@ -64,7 +66,9 @@ const CreditCardManager = () => {
         reminder_days_before: 7,
         is_autopay_setup: false,
         balance: '',
-        notes: ''
+        notes: '',
+        owner: 'self',
+        sync_source: 'Manual'
       });
       setShowForm(false);
       setEditingCard(null);
@@ -87,7 +91,9 @@ const CreditCardManager = () => {
       reminder_days_before: card.reminder_days_before,
       is_autopay_setup: card.is_autopay_setup,
       balance: card.balance || '',
-      notes: card.notes || ''
+      notes: card.notes || '',
+      owner: card.owner || 'self',
+      sync_source: card.sync_source || 'Manual'
     });
     setShowForm(true);
   };
@@ -178,6 +184,17 @@ const CreditCardManager = () => {
               onChange={(e) => setFormData({...formData, balance: e.target.value})}
               className="p-2 border rounded"
             />
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">Owner</label>
+              <select
+                value={formData.owner}
+                onChange={(e) => setFormData({...formData, owner: e.target.value})}
+                className="w-full p-2 border rounded"
+              >
+                <option value="self">Self</option>
+                <option value="spouse">Spouse</option>
+              </select>
+            </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 text-left">Last Used Date</label>
               <input
@@ -285,7 +302,9 @@ const CreditCardManager = () => {
                     reminder_days_before: 7,
                     is_autopay_setup: false,
                     balance: '',
-                    notes: ''
+                    notes: '',
+                    owner: 'self',
+                    sync_source: 'Manual'
                   });
                 }}
                 className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600"
