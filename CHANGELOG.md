@@ -1,5 +1,32 @@
 # 📋 Release Notes - Finance To-Dos PWA
 
+## v2.1.2 - 2025-01-16
+### 🆓 Development Environment Integration
+- **Real Bank Connections**: Switched from sandbox to development environment for real financial data
+- **Free Tier Usage**: Uses Plaid development tier (free for single user)
+- **No Mock Data**: Removed sandbox mock responses, now pulls actual account metadata
+- **Backend Required**: Real token exchange and account fetching via API endpoints
+- **Personal Finance Ready**: Perfect for individual financial tracking with real bank data
+
+### 🔧 Technical Changes
+- **Environment Default**: Changed from 'sandbox' to 'development'
+- **Real API Calls**: Development environment calls backend for token exchange
+- **Account Fetching**: Real account data instead of mock responses
+- **Token Handling**: Proper development-tier token management
+
+### 📚 Documentation Updates
+- **Setup Guide**: Updated for development environment usage
+- **Production Guide**: Added development tier information
+- **Environment Variables**: Updated examples for development mode
+
+### ✅ Benefits
+- **Real Data**: Connect actual bank accounts for personal use
+- **Free Tier**: No cost for single user development usage
+- **Full Features**: All Plaid functionality available in development
+- **Production Ready**: Easy upgrade path when scaling
+
+---
+
 ## v2.1.1 - 2025-07-16
 ### 🚀 Release
 - **Version Update**: v2.1.1

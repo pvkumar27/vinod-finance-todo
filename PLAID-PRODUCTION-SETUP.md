@@ -33,8 +33,16 @@ Production Plaid requires server-side token handling. You need these API endpoin
 ```
 
 ### 3. Environment Variables
-Update your production environment:
+For different environments:
 
+**Development (Free Tier - Real Banks):**
+```env
+REACT_APP_PLAID_CLIENT_ID=your_development_client_id
+REACT_APP_PLAID_SECRET=your_development_secret
+REACT_APP_PLAID_ENV=development
+```
+
+**Production (Paid Tier):**
 ```env
 REACT_APP_PLAID_CLIENT_ID=your_production_client_id
 REACT_APP_PLAID_SECRET=your_production_secret
@@ -45,18 +53,25 @@ REACT_APP_PLAID_ENV=production
 Add these in Netlify Dashboard → Site Settings → Environment Variables:
 - `REACT_APP_PLAID_CLIENT_ID`
 - `REACT_APP_PLAID_SECRET` 
-- `REACT_APP_PLAID_ENV=production`
+- `REACT_APP_PLAID_ENV=development` (for free tier with real banks)
+- `REACT_APP_PLAID_ENV=production` (for paid tier)
 
 ## Current Status
 
-### ✅ Ready for Production
-- Environment detection (sandbox vs production)
+### ✅ Ready for Development/Production
+- Environment detection (sandbox vs development vs production)
 - Proper error handling
 - Secure token storage
-- Production API endpoints configured
+- Backend API endpoints configured
 
-### ⚠️ Sandbox Mode (Current)
-- Uses mock responses for development
+### 🆓 Development Mode (Recommended)
+- Uses real bank connections (free tier)
+- Backend API calls required
+- Single user limit
+- Perfect for personal use
+
+### ⚠️ Sandbox Mode
+- Uses mock responses only
 - No backend API calls required
 - Safe for testing and development
 

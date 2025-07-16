@@ -12,8 +12,8 @@ const PlaidLink = ({ onSuccess, onError }) => {
     try {
       let accessToken;
       
-      if (plaidConfig.env === 'production') {
-        // In production, exchange public token for access token via backend
+      if (plaidConfig.env === 'development') {
+        // In development, exchange public token for access token via backend
         const response = await fetch('/api/plaid/exchange-token', {
           method: 'POST',
           headers: {
@@ -25,7 +25,7 @@ const PlaidLink = ({ onSuccess, onError }) => {
         const data = await response.json();
         accessToken = data.access_token;
       } else {
-        // Mock access token for sandbox/development
+        // Mock access token for sandbox only
         accessToken = `access-sandbox-${publicToken.slice(-10)}`;
       }
       

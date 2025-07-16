@@ -4,15 +4,33 @@ import { supabase } from '../supabaseClient';
 export const plaidConfig = {
   clientId: process.env.REACT_APP_PLAID_CLIENT_ID,
   secret: process.env.REACT_APP_PLAID_SECRET,
-  env: process.env.REACT_APP_PLAID_ENV || 'sandbox',
+  env: process.env.REACT_APP_PLAID_ENV || 'development',
   products: ['accounts'],
   countryCodes: ['US'],
 };
 
-// Create link token (in production, this should be done on backend)
+// Create link token - calls backend for real connections in development
 export const createLinkToken = async () => {
-  // Mock link token for development
-  return 'link-sandbox-' + Math.random().toString(36).substr(2, 9);
+  if (plaidConfig.env === 'development') {
+    // In development, call backend API for real bank connections (free tier)
+    try {
+      const response = await fetch('/api/plaid/create-link-token', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        }
+      });
+      const data = await response.json();
+      return data.link_token;
+    } catch (error) {
+      console.error('Failed to create development link token:', error);
+      throw new Error('Unable to connect to bank services. Please try again.');
+    }
+  } else {
+    // Mock link token for sandbox only
+    return 'link-sandbox-' + Math.random().toString(36).substr(2, 9);
+  }
 };
 
 // Store Plaid access token securely in Supabase
@@ -50,47 +68,64 @@ export const getPlaidTokens = async () => {
   return data;
 };
 
-// Mock function to simulate Plaid accounts API call
-// In production, this would be handled by a secure backend
+// Fetch Plaid accounts - calls backend for real data in development
 export const fetchPlaidAccounts = async (accessToken) => {
-  // This is a mock response for development
-  // In production, you'd call your backend which calls Plaid API
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        accounts: [
-          {
-            account_id: 'mock_credit_1',
-            name: 'Chase Freedom Unlimited',
-            official_name: 'Chase Freedom Unlimited Credit Card',
-            type: 'credit',
-            subtype: 'credit card',
-            mask: '1234',
-            institution_name: 'Chase',
-            balances: {
-              available: 8500,
-              current: 1500,
-              limit: 10000
-            }
-          },
-          {
-            account_id: 'mock_credit_2',
-            name: 'Capital One Venture',
-            official_name: 'Capital One Venture Rewards Credit Card',
-            type: 'credit',
-            subtype: 'credit card',
-            mask: '5678',
-            institution_name: 'Capital One',
-            balances: {
-              available: 4200,
-              current: 800,
-              limit: 5000
-            }
-          }
-        ]
+  if (plaidConfig.env === 'development') {
+    // In development, call backend API to fetch real accounts
+    try {
+      const response = await fetch('/api/plaid/accounts', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        },
+        body: JSON.stringify({ access_token: accessToken })
       });
-    }, 1000);
-  });
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error('Failed to fetch development accounts:', error);
+      throw new Error('Unable to fetch account information. Please try again.');
+    }
+  } else {
+    // Mock response for sandbox only
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve({
+          accounts: [
+            {
+              account_id: 'mock_credit_1',
+              name: 'Chase Freedom Unlimited',
+              official_name: 'Chase Freedom Unlimited Credit Card',
+              type: 'credit',
+              subtype: 'credit card',
+              mask: '1234',
+              institution_name: 'Chase',
+              balances: {
+                available: 8500,
+                current: 1500,
+                limit: 10000
+              }
+            },
+            {
+              account_id: 'mock_credit_2',
+              name: 'Capital One Venture',
+              official_name: 'Capital One Venture Rewards Credit Card',
+              type: 'credit',
+              subtype: 'credit card',
+              mask: '5678',
+              institution_name: 'Capital One',
+              balances: {
+                available: 4200,
+                current: 800,
+                limit: 5000
+              }
+            }
+          ]
+        });
+      }, 1000);
+    });
+  }
 };
 
 // Convert Plaid account to our credit card format
