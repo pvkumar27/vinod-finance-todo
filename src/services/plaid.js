@@ -5,7 +5,7 @@ import { supabase } from '../supabaseClient';
 export const plaidConfig = {
   clientId: process.env.REACT_APP_PLAID_CLIENT_ID,
   secret: process.env.REACT_APP_PLAID_SECRET,
-  env: 'development', // Fixed to development environment only
+  env: 'sandbox', // Fixed to sandbox environment only
   products: ['accounts'],
   countryCodes: ['US'],
 };

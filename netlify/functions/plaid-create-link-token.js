@@ -22,7 +22,7 @@ exports.handler = async (event, context) => {
     
     console.log('Creating Plaid configuration...');
     const configuration = new Configuration({
-      basePath: PlaidEnvironments.development,
+      basePath: PlaidEnvironments.sandbox,
       baseOptions: {
         headers: {
           'PLAID-CLIENT-ID': process.env.REACT_APP_PLAID_CLIENT_ID,

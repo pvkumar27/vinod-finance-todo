@@ -7,7 +7,7 @@ exports.handler = async (event, context) => {
     const { Configuration, PlaidApi, PlaidEnvironments } = require('plaid');
     
     const configuration = new Configuration({
-      basePath: PlaidEnvironments.development,
+      basePath: PlaidEnvironments.sandbox,
       baseOptions: {
         headers: {
           'PLAID-CLIENT-ID': process.env.REACT_APP_PLAID_CLIENT_ID,
