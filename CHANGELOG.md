@@ -6,6 +6,8 @@
 - **Package Updates**: Latest compatible versions
 - **Security Fixes**: Automated vulnerability patches
 - **Build Verification**: Production build tested
+- **Recovery**: Restored lost drag and drop implementation with proper styling for pinned tasks
+- **Testing**: Added E2E tests for drag and drop functionality
 
 ---
 
