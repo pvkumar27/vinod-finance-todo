@@ -86,7 +86,7 @@ const Home = () => {
         {/* Version Footer */}
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-500">
-            Finance To-Dos PWA {APP_VERSION} • Built with React & Supabase
+            FinTask {APP_VERSION} • Built with React & Supabase
           </p>
         </div>
       </div>

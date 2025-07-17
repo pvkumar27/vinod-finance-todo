@@ -1,7 +1,7 @@
 {
-  "name": "finance-todos-pwa",
-  "version": "2.2.0",
-  "homepage": "https://finance-todos.netlify.app",
+  "name": "fintask",
+  "version": "2.2.3",
+  "homepage": "https://fintask.netlify.app",
   "private": true,
   "dependencies": {
     "@supabase/auth-ui-react": "^0.4.7",
