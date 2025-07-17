@@ -1,7 +1,12 @@
+/**
+ * Plaid Integration tests
+ * 
+ * Tests the Plaid integration for connecting bank accounts.
+ */
 const { test, expect } = require('@playwright/test');
-const { login } = require('./test-helpers');
+const { login } = require('../../helpers/test-helpers');
 
-test.describe('Plaid Integration Tests', () => {
+test.describe('Plaid Integration', () => {
   test.beforeEach(async ({ page }) => {
     // Login before each test
     await login(page);

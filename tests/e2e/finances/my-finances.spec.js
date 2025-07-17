@@ -1,7 +1,16 @@
+/**
+ * My Finances tests
+ * 
+ * Tests the My Finances form functionality:
+ * - Dropdown options
+ * - Default values
+ * - Form submission
+ * - Data persistence
+ */
 const { test, expect } = require('@playwright/test');
-const { login, generateTestData, cleanupTestData } = require('./test-helpers');
+const { login, generateTestData, cleanupTestData } = require('../../helpers/test-helpers');
 
-test.describe('My Finances Tests', () => {
+test.describe('My Finances', () => {
   test.beforeEach(async ({ page }) => {
     // Login before each test
     await login(page);

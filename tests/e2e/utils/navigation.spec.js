@@ -1,7 +1,12 @@
+/**
+ * Navigation tests
+ * 
+ * Tests the application's navigation and UI elements.
+ */
 const { test, expect } = require('@playwright/test');
-const { login } = require('./test-helpers');
+const { login } = require('../../helpers/test-helpers');
 
-test.describe('Navigation Tests', () => {
+test.describe('Navigation', () => {
   test.beforeEach(async ({ page }) => {
     // Login before each test
     await login(page);
@@ -19,9 +24,6 @@ test.describe('Navigation Tests', () => {
       
       await button.click();
       await page.waitForTimeout(1000);
-      
-      // Take screenshot of each tab
-      await page.screenshot({ path: `tab-${i}-${buttonText.trim().toLowerCase().replace(' ', '-')}.png` });
       
       // Verify active tab indicator
       const isActive = await button.evaluate(el => 

@@ -1,6 +1,6 @@
 {
   "name": "finance-todos-pwa",
-  "version": "0.1.0",
+  "version": "2.2.0",
   "homepage": "https://finance-todos.netlify.app",
   "private": true,
   "dependencies": {
@@ -11,6 +11,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "chrono-node": "^2.8.3",
+    "dotenv": "^16.4.1",
     "firebase": "^11.10.0",
     "plaid": "^36.0.0",
     "react": "^18.2.0",
@@ -32,6 +33,7 @@
     "workbox-streams": "^6.6.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.54.1",
     "autoprefixer": "^10.4.16",
     "postcss": "^8.4.32",
     "tailwindcss": "^3.3.6"
@@ -40,12 +42,18 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "test:e2e": "playwright test",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:cleanup": "playwright test tests/e2e/utils/cleanup.spec.js",
     "eject": "react-scripts eject",
     "rollback": "node scripts/rollback.js",
     "pre-release": "node scripts/pre-release.js",
     "release": "node scripts/release.js",
     "check-updates": "npm outdated",
-    "update-packages": "npm outdated && npm update && npm audit fix || echo 'All packages up to date'"
+    "update-packages": "npm outdated && npm update && npm audit fix || echo 'All packages up to date'",
+    "backup": "node scripts/backup-supabase.js",
+    "restore": "node scripts/restore-backup.js"
   },
   "eslintConfig": {
     "extends": [

@@ -1,7 +1,12 @@
+/**
+ * Responsive Design tests
+ * 
+ * Tests the application's responsive behavior across different viewports.
+ */
 const { test, expect } = require('@playwright/test');
-const { login } = require('./test-helpers');
+const { login } = require('../../helpers/test-helpers');
 
-test.describe('Responsive Design Tests', () => {
+test.describe('Responsive Design', () => {
   test('verify responsive design - mobile', async ({ page }) => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
@@ -9,14 +14,8 @@ test.describe('Responsive Design Tests', () => {
     // Go to login page
     await page.goto('/');
     
-    // Take screenshot of login page
-    await page.screenshot({ path: 'mobile-login.png' });
-    
     // Login
     await login(page);
-    
-    // Take screenshot of app
-    await page.screenshot({ path: 'mobile-app.png' });
     
     // Check for mobile navigation
     const mobileNav = page.locator('nav');
@@ -30,7 +29,6 @@ test.describe('Responsive Design Tests', () => {
       if (await tabButton.isVisible()) {
         await tabButton.click();
         await page.waitForTimeout(1000);
-        await page.screenshot({ path: `mobile-${tab.toLowerCase().replace(' ', '-')}.png` });
       }
     }
   });
@@ -42,14 +40,8 @@ test.describe('Responsive Design Tests', () => {
     // Go to login page
     await page.goto('/');
     
-    // Take screenshot of login page
-    await page.screenshot({ path: 'tablet-login.png' });
-    
     // Login
     await login(page);
-    
-    // Take screenshot of app
-    await page.screenshot({ path: 'tablet-app.png' });
     
     // Navigate through tabs
     const tabs = ['To-Dos', 'Credit Cards', 'My Finances'];
@@ -59,7 +51,6 @@ test.describe('Responsive Design Tests', () => {
       if (await tabButton.isVisible()) {
         await tabButton.click();
         await page.waitForTimeout(1000);
-        await page.screenshot({ path: `tablet-${tab.toLowerCase().replace(' ', '-')}.png` });
       }
     }
   });
@@ -71,14 +62,8 @@ test.describe('Responsive Design Tests', () => {
     // Go to login page
     await page.goto('/');
     
-    // Take screenshot of login page
-    await page.screenshot({ path: 'desktop-login.png' });
-    
     // Login
     await login(page);
-    
-    // Take screenshot of app
-    await page.screenshot({ path: 'desktop-app.png' });
     
     // Navigate through tabs
     const tabs = ['To-Dos', 'Credit Cards', 'My Finances'];
@@ -88,7 +73,6 @@ test.describe('Responsive Design Tests', () => {
       if (await tabButton.isVisible()) {
         await tabButton.click();
         await page.waitForTimeout(1000);
-        await page.screenshot({ path: `desktop-${tab.toLowerCase().replace(' ', '-')}.png` });
       }
     }
   });
