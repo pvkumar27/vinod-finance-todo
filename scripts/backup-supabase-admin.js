@@ -66,7 +66,7 @@ try {
     try {
       // Test connection with a simple query
       console.log('Testing connection...');
-      const { data: testData, error: testError } = await supabase.from('credit_cards').select('count(*)');
+      const { data: testData, error: testError } = await supabase.from('credit_cards').select('id').limit(1);
       
       if (testError) {
         console.error('❌ Connection test failed:', testError.message);
