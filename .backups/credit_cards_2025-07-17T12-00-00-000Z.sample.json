@@ -1,0 +1,13 @@
+[
+  {
+    "id": 1,
+    "created_at": "2025-07-17T12:00:00.000Z",
+    "name": "Sample Credit Card",
+    "number": "XXXX-XXXX-XXXX-1234",
+    "expiry": "12/25",
+    "cvv": "XXX",
+    "user_id": "sample-user-id",
+    "owner": "Self",
+    "sync_source": "Manual"
+  }
+]
