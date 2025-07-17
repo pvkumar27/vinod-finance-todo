@@ -22,15 +22,29 @@ async function login(page) {
   // Go to login page
   await page.goto('/');
   
+  // Get credentials from environment variables or fallback to file
+  const email = process.env.TEST_USER_EMAIL || credentials.email;
+  const password = process.env.TEST_USER_PASSWORD || credentials.password;
+  
+  console.log(`Logging in with email: ${email.substring(0, 3)}...`);
+  
   // Fill login form
-  await page.fill('input[type="email"]', credentials.email);
-  await page.fill('input[type="password"]', credentials.password);
+  await page.fill('input[type="email"]', email);
+  await page.fill('input[type="password"]', password);
   
   // Submit form
   await page.click('button[type="submit"]');
   
-  // Wait for navigation
-  await page.waitForTimeout(3000);
+  // Wait for navigation with better approach
+  try {
+    // Wait for navigation or dashboard element
+    await Promise.race([
+      page.waitForNavigation({ timeout: 5000 }),
+      page.waitForSelector('nav, .dashboard', { timeout: 5000 })
+    ]);
+  } catch (e) {
+    // Timeout is okay, we'll check if still on login page
+  }
   
   // Check if login was successful
   const loginForm = page.locator('form input[type="email"]');
