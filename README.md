@@ -26,6 +26,9 @@ npx playwright test tests/e2e/finances/my-finances.spec.js
 # Run ui in codespaces
 npx playwright test --ui-host=0.0.0.0 --ui-port=8080
 
+# Run Playwright UI with automatic port selection
+npm run playwright
+
 
 # Run only cleanup
 npm run test:e2e:cleanup
