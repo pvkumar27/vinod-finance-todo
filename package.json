@@ -50,7 +50,6 @@
     "test:e2e": "playwright test",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:ui:codespaces": "playwright test --ui-host=0.0.0.0 --ui-port=8080",
     "test:e2e:cleanup": "playwright test tests/e2e/utils/cleanup.spec.js",
     "eject": "react-scripts eject",
     "rollback": "node scripts/rollback.js",
