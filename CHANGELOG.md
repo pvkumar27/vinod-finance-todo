@@ -1,4 +1,4 @@
-# 📋 Release Notes - Finance To-Dos PWA
+# 📋 Release Notes - FinTask
 
 ## v2.2.3 - 2025-07-17
 ### 🚀 Release
@@ -6,6 +6,8 @@
 - **Package Updates**: Latest compatible versions
 - **Security Fixes**: Automated vulnerability patches
 - **Build Verification**: Production build tested
+- **UI Improvements**: Fixed background color for pinned tasks during drag operations
+- **Branding**: Completed app name standardization to "FinTask" throughout the codebase
 
 ---
 
