@@ -1,21 +1,26 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 
-// Mock the supabaseClient module before importing App
+// Mock the supabaseClient module
 jest.mock('./supabaseClient', () => ({
   supabase: {
     auth: {
-      onAuthStateChange: jest.fn(() => ({ data: { subscription: { unsubscribe: jest.fn() } } })),
-      getSession: jest.fn(() => ({ data: { session: null } }))
+      getSession: () => Promise.resolve({ data: { session: null } }),
+      onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } })
     }
   }
 }));
 
-// Now import App after the mock is set up
+// Mock notifications
+jest.mock('./utils/notifications', () => ({
+  requestNotificationPermission: () => Promise.resolve('mock-token'),
+  setupForegroundMessageListener: () => {}
+}));
+
+// Import App after mocks
 import App from './App';
 
-test('renders app without crashing', () => {
-  render(<App />);
-  // Just verify it renders without crashing
-  expect(document.body).toBeDefined();
+test('renders loading screen initially', () => {
+  const { getByText } = render(<App />);
+  expect(getByText(/loading/i)).toBeInTheDocument();
 });
