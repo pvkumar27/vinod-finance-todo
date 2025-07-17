@@ -9,7 +9,8 @@ const { login, generateTestData, cleanupTestData } = require('../../helpers/test
 test.describe('Credit Cards CRUD', () => {
   test.beforeEach(async ({ page }) => {
     // Login before each test
-    await login(page);
+    await page.goto('/');
+    await login(page, true);
     
     // Navigate to Credit Cards tab
     await page.click('button:has-text("Credit Cards"), button:has-text("Cards")');
@@ -30,14 +31,12 @@ test.describe('Credit Cards CRUD', () => {
       await addBtn.click();
       await page.waitForTimeout(500);
       
-      // Fill form
-      await page.locator('input[placeholder*="name"], input[name*="name"]').fill(testData.name);
-      await page.locator('input[placeholder*="number"], input[name*="number"]').fill(testData.number);
-      await page.locator('input[placeholder*="expiry"], input[name*="expiry"]').fill(testData.expiry);
-      await page.locator('input[placeholder*="cvv"], input[name*="cvv"]').fill(testData.cvv);
+      // Fill form with only available fields
+      await page.getByPlaceholder('Card name').fill(testData.name);
+      await page.getByPlaceholder('Bank name').fill('Test Bank');
       
       // Submit
-      await page.locator('button[type="submit"], button:has-text("Save")').click();
+      await page.locator('button:has-text("Add Credit Card")').click();
       await page.waitForTimeout(1000);
       
       // Verify card appears
@@ -50,12 +49,12 @@ test.describe('Credit Cards CRUD', () => {
         await editBtn.click();
         await page.waitForTimeout(500);
         
-        // Update name
+        // Update name - use more specific selector
         const updatedName = `${testData.name}_Updated`;
-        await page.locator('input[placeholder*="name"], input[name*="name"]').fill(updatedName);
+        await page.getByPlaceholder('Card name').fill(updatedName);
         
         // Save
-        await page.locator('button[type="submit"], button:has-text("Save")').click();
+        await page.locator('button:has-text("Save")').click();
         await page.waitForTimeout(1000);
         
         // Verify update

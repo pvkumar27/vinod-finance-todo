@@ -17,10 +17,13 @@ const TEST_DATA_PREFIX = 'Test_E2E_';
 /**
  * Login to the application
  * @param {Page} page - Playwright page object
+ * @param {boolean} skipNavigation - Skip navigation to login page if already there
  */
-async function login(page) {
-  // Go to login page
-  await page.goto('/');
+async function login(page, skipNavigation = false) {
+  // Go to login page only if not skipping navigation
+  if (!skipNavigation) {
+    await page.goto('/');
+  }
   
   // Get credentials from environment variables or fallback to file
   const email = process.env.TEST_USER_EMAIL || credentials.email;
