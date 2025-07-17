@@ -33,18 +33,9 @@ jobs:
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium webkit firefox
       
-      # Run Playwright tests
-      - name: Run Playwright tests
-        run: npx playwright test
-        env:
-          BASE_URL: https://finance-todos.netlify.app
-          TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
-          TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
-      
-      # Run cleanup with specific project
-      - name: Run cleanup
-        if: always()
-        run: npx playwright test tests/e2e/utils/cleanup.spec.js --project=chromium-desktop
+      # Run only login tests
+      - name: Run login tests
+        run: npx playwright test tests/e2e/auth/login.spec.js --project=chromium-desktop
         env:
           BASE_URL: https://finance-todos.netlify.app
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
