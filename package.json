@@ -55,7 +55,8 @@
     "backup": "node scripts/backup-supabase.js",
     "restore": "node scripts/restore-backup.js",
     "test:backup": "node scripts/create-test-backup.js",
-    "test:restore": "node scripts/test-restore.js"
+    "test:restore": "node scripts/test-restore.js",
+    "backup:admin": "node scripts/backup-supabase-admin.js"
   },
   "eslintConfig": {
     "extends": [
