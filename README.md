@@ -18,13 +18,13 @@ npm run test:e2e:headed
 npm run test:e2e:ui
 
 # Run specific test file
-npx playwright test tests/my-finances.spec.js
+npx playwright test playwright/tests/my-finances.spec.js
 
 # Run tests with cleanup
-./tests/run-tests.sh
+./playwright/run-tests.sh
 
 # Run UI test runner in Codespaces
-./tests/run-ui.sh
+./playwright/run-ui.sh
 ```
 
 ### Test Coverage
@@ -41,7 +41,7 @@ npx playwright test tests/my-finances.spec.js
 - **🔒 SAFE**: Deletion only targets items with strict test prefixes
 - **🔒 SAFE**: Real data pattern detection prevents accidental modifications
 - Automatic cleanup after each test run
-- Manual cleanup: `npx playwright test tests/cleanup.spec.js`
+- Manual cleanup: `npx playwright test playwright/tests/cleanup.spec.js`
 - All test actions are logged for transparency
 
 ### Configuration
@@ -52,6 +52,6 @@ npx playwright test tests/my-finances.spec.js
 
 ### Authentication
 For tests requiring authentication:
-1. Update credentials in `tests/test-credentials.js` with valid login details
-2. All tests use the login helper function from `test-helpers.js`
+1. Update credentials in `playwright/fixtures/test-credentials.js` with valid login details
+2. All tests use the login helper function from `playwright/helpers/test-helpers.js`
 3. No need for complex authentication state management
