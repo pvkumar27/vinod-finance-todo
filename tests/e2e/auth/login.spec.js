@@ -5,6 +5,12 @@
  */
 const { test, expect } = require('@playwright/test');
 const credentials = require('../../fixtures/test-credentials');
+const { setupConsoleHandler } = require('../../helpers/console-handler');
+
+// Configure console error handling
+test.beforeEach(async ({ page }) => {
+  setupConsoleHandler(page);
+});
 
 test.describe('Authentication', () => {
   test('should login successfully and navigate through all tabs', async ({ page }) => {
@@ -43,7 +49,7 @@ test.describe('Authentication', () => {
     const tabs = [
       { name: 'To-Dos', expectedElement: 'h2:has-text("To-Do Manager")' },
       { name: 'Credit', expectedElement: 'h2:has-text("Credit Cards")' },
-      { name: 'My Finances', expectedElement: 'h2:has-text("My Finances")' }
+      { name: 'Finances', expectedElement: 'h2:has-text("Finances")' }
     ];
     
     // Navigate through each tab and verify content

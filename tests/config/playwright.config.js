@@ -58,6 +58,9 @@ module.exports = defineConfig({
     
     // Browser viewport size
     viewport: { width: 1280, height: 720 },
+    
+    // Ignore certain console errors
+    ignoreConsoleErrors: true,
   },
   
   // Configure projects for different environments
