@@ -1,6 +1,6 @@
 {
-  "short_name": "Finance To-Dos",
-  "name": "Finance To-Dos PWA",
+  "short_name": "FinTask",
+  "name": "FinTask",
   "description": "Personal finance companion for managing cards, expenses, and tasks",
   "icons": [
     {

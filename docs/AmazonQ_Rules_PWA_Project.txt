@@ -1,5 +1,5 @@
 
-📜 Amazon Q Development Rules for Personal Finance + To-Do PWA
+📜 Amazon Q Development Rules for FinTask
 
 1. Always follow the project strategy defined in docs/PWA_Project_Guidelines.md.
 2. Use only React functional components — no class components.

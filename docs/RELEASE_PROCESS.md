@@ -1,4 +1,4 @@
-# 🚀 Release Process - Finance To-Dos PWA
+# 🚀 Release Process - FinTask
 
 ## 📋 Release Workflow
 
@@ -71,7 +71,7 @@ git push
 
 ### 6. **Post-Release**
 - [ ] Verify Netlify auto-deployment
-- [ ] Test production app at https://finance-todos.netlify.app
+- [ ] Test production app at https://fintask.netlify.app
 - [ ] Verify PWA installation works
 - [ ] Check all modules function correctly
 - [ ] Update project documentation if needed
@@ -113,7 +113,7 @@ Release v1.x.x: Major update with [list key features]
 ### **Next Planned:** v1.4.0 (Live Dashboards)
 ### **Release Frequency:** As features are completed
 ### **Testing Environment:** Local development server
-### **Production Environment:** Netlify (https://finance-todos.netlify.app)
+### **Production Environment:** Netlify (https://fintask.netlify.app)
 
 ## 🔄 Rollback Process
 
@@ -146,7 +146,7 @@ git push
 ```
 
 ### **Post-Rollback Verification:**
-- [ ] Check https://finance-todos.netlify.app loads
+- [ ] Check https://fintask.netlify.app loads
 - [ ] Verify version display in UI footer
 - [ ] Test core CRUD functionality
 - [ ] Confirm PWA installation works

@@ -1,5 +1,5 @@
 // Utility functions for sending push notifications (for testing)
-export const sendTestNotification = async (token, title = 'Finance To-Dos', body = 'Test notification') => {
+export const sendTestNotification = async (token, title = 'FinTask', body = 'Test notification') => {
   // This would typically be called from your backend
   // For testing purposes, you can use Firebase Console or a testing tool
   console.log('Send notification to token:', token);
@@ -17,7 +17,7 @@ export const sendTestNotification = async (token, title = 'Finance To-Dos', body
       click_action: '/'
     },
     data: {
-      type: 'finance-todos',
+      type: 'fintask',
       timestamp: Date.now()
     }
   };

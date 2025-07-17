@@ -1,6 +1,6 @@
 {
   "name": "fintask",
-  "version": "2.2.3",
+  "version": "2.2.0",
   "homepage": "https://fintask.netlify.app",
   "private": true,
   "dependencies": {
@@ -19,6 +19,7 @@
     "firebase": "^11.10.0",
     "plaid": "^36.0.0",
     "react": "^18.2.0",
+    "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
     "react-plaid-link": "^4.0.1",
     "react-scripts": "5.0.1",

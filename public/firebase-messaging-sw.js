@@ -17,12 +17,12 @@ const messaging = firebase.messaging();
 messaging.onBackgroundMessage((payload) => {
   console.log('Received background message ', payload);
   
-  const notificationTitle = payload.notification?.title || 'Finance To-Dos';
+  const notificationTitle = payload.notification?.title || 'FinTask';
   const notificationOptions = {
     body: payload.notification?.body || 'You have a new notification',
     icon: '/icons/official-logo.png',
     badge: '/icons/official-logo.png',
-    tag: 'finance-todos-notification',
+    tag: 'fintask-notification',
     requireInteraction: true,
     actions: [
       {

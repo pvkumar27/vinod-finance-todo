@@ -42,7 +42,7 @@ module.exports = defineConfig({
   // Shared settings for all the projects below
   use: {
     // Base URL for all tests - PRODUCTION environment
-    baseURL: process.env.BASE_URL || 'https://finance-todos.netlify.app',
+    baseURL: process.env.BASE_URL || 'https://fintask.netlify.app',
     
     // Run in headless mode by default
     headless: true,

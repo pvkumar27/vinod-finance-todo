@@ -12,12 +12,12 @@ const AuthForm = () => {
           <div className="flex justify-center mb-6">
             <img 
               src="/icons/official-logo.png" 
-              alt="Finance To-Dos Logo" 
+              alt="FinTask Logo" 
               className="h-16 w-auto" 
             />
           </div>
           <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-            Finance To-Dos
+            FinTask
           </h2>
           <p className="text-base sm:text-lg text-gray-600">
             Your personal finance companion

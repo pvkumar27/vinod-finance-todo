@@ -1,8 +1,8 @@
 
-# Personal Finance + To-Do PWA – Strategy & Guidelines
+# FinTask – Strategy & Guidelines
 
 ## 🔖 Project Name
-**Personal Finance + To-Do PWA**
+**FinTask**
 
 ---
 

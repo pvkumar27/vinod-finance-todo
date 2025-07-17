@@ -1,6 +1,6 @@
 # Backup Strategy Guide
 
-This document explains how to set up and use the backup strategy for the Finance To-Dos PWA.
+This document explains how to set up and use the backup strategy for the FinTask app.
 
 ## Setup Instructions
 

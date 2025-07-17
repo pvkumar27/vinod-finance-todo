@@ -1,6 +1,6 @@
 # QA Automation, CI/CD, and Backup Implementation Summary
 
-This document summarizes the implementation of QA automation, CI/CD, and backup strategies for the Finance To-Dos PWA.
+This document summarizes the implementation of QA automation, CI/CD, and backup strategies for the FinTask app.
 
 ## 1. QA Automation (Playwright)
 
@@ -23,7 +23,7 @@ This document summarizes the implementation of QA automation, CI/CD, and backup 
 - **Safety Checks**: Multiple validation layers to prevent touching real user data
 
 ### Configuration
-- **Production URL**: All tests target `https://finance-todos.netlify.app/`
+- **Production URL**: All tests target `https://fintask.netlify.app/`
 - **Multi-viewport**: Tests run on mobile (375x667), tablet (768x1024), and desktop (1280x800)
 - **Fixtures**: Test credentials stored in `fixtures/test-credentials.js`
 - **Helpers**: Common functions in `helpers/test-helpers.js`

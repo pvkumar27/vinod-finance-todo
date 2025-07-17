@@ -7,7 +7,7 @@ const { test, expect } = require('@playwright/test');
 const credentials = require('../../fixtures/test-credentials');
 
 test.describe('Authentication', () => {
-  test('should login successfully with valid credentials', async ({ page }) => {
+  test('should login successfully and navigate through all tabs', async ({ page }) => {
     // Go to login page
     await page.goto('/');
     
@@ -16,7 +16,7 @@ test.describe('Authentication', () => {
     await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(page.locator('input[type="password"]')).toBeVisible();
     
-    // Login directly without using the helper (which would navigate again)
+    // Login directly without using the helper
     await page.fill('input[type="email"]', credentials.email);
     await page.fill('input[type="password"]', credentials.password);
     await page.click('button[type="submit"]');
@@ -38,32 +38,6 @@ test.describe('Authentication', () => {
     // Verify we're on the main app page
     const mainNav = page.locator('nav').first();
     await expect(mainNav).toBeVisible();
-  });
-
-  test('should navigate through all tabs after login', async ({ page }) => {
-    // Login first
-    await page.goto('/');
-    
-    // Wait for form to be fully loaded
-    await page.waitForSelector('input[type="email"]');
-    
-    // Type with delay to ensure input is captured
-    await page.fill('input[type="email"]', credentials.email);
-    await page.waitForTimeout(100);
-    await page.fill('input[type="password"]', credentials.password);
-    await page.waitForTimeout(100);
-    
-    await page.click('button[type="submit"]');
-    
-    // Wait for login to complete with better error handling
-    try {
-      await page.waitForSelector('nav', { timeout: 10000 });
-    } catch (e) {
-      // Check if still on login page
-      if (await page.locator('form input[type="email"]').isVisible()) {
-        throw new Error('Login failed - still on login page');
-      }
-    }
     
     // Define tabs to check
     const tabs = [

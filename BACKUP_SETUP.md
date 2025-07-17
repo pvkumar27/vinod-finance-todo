@@ -1,6 +1,6 @@
 # Backup Strategy Setup
 
-This document explains how to set up the backup strategy for the Finance To-Dos PWA.
+This document explains how to set up the backup strategy for the FinTask app.
 
 ## 1. Environment Variables
 

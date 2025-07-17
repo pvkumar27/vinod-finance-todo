@@ -37,7 +37,7 @@ exports.handler = async (event, context) => {
     console.log('Calling Plaid API...');
     const response = await client.linkTokenCreate({
       user: { client_user_id: 'user-id' },
-      client_name: 'Finance To-Dos PWA',
+      client_name: 'FinTask',
       products: ['auth'],
       country_codes: ['US'],
       language: 'en',

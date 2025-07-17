@@ -1,4 +1,4 @@
-# Finance To-Dos PWA
+# FinTask
 
 A Progressive Web App for managing finances and to-dos.
 
@@ -49,7 +49,7 @@ npm run test:e2e:cleanup
 - Manual cleanup: `npm run test:e2e:cleanup`
 
 ### Configuration
-- **Base URL**: `https://finance-todos.netlify.app/` (configurable via BASE_URL env var)
+- **Base URL**: `https://fintask.netlify.app/` (configurable via BASE_URL env var)
 - **Browsers**: Chromium (mobile/tablet/desktop viewports)
 - **Screenshots**: On failure only
 - **Traces**: On first retry

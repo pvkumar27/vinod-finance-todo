@@ -84,7 +84,7 @@ const PlaidLink = ({ onSuccess, onError }) => {
     <button
       onClick={() => open()}
       disabled={!ready || loading}
-      className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+      className={`flex items-center space-x-1 px-3 py-2 rounded-lg font-medium transition-colors ${ 
         loading
           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
           : 'bg-blue-600 text-white hover:bg-blue-700'
@@ -93,12 +93,14 @@ const PlaidLink = ({ onSuccess, onError }) => {
       {loading ? (
         <>
           <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-          <span>Syncing Cards...</span>
+          <span className="hidden sm:inline">Syncing Cards...</span>
+          <span className="sm:hidden">Syncing...</span>
         </>
       ) : (
         <>
           <span>🏦</span>
-          <span>Connect Bank Account</span>
+          <span className="hidden sm:inline">Connect Bank Account</span>
+          <span className="sm:hidden">Connect Bank</span>
         </>
       )}
     </button>

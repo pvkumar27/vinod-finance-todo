@@ -118,13 +118,13 @@ const CreditCardManager = () => {
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-lg">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h2 className="text-2xl font-bold">Credit Cards</h2>
-        <div className="flex items-center space-x-3">
-          <div className="flex bg-gray-100 rounded-lg p-1">
+        <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+          <div className="flex bg-gray-100 rounded-lg p-1 w-full sm:w-auto">
             <button
               onClick={() => setViewMode('cards')}
-              className={`px-3 py-1 rounded text-sm transition-colors ${
+              className={`px-3 py-1 rounded text-sm transition-colors flex-1 sm:flex-auto ${
                 viewMode === 'cards' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
@@ -132,30 +132,32 @@ const CreditCardManager = () => {
             </button>
             <button
               onClick={() => setViewMode('table')}
-              className={`px-3 py-1 rounded text-sm transition-colors ${
+              className={`px-3 py-1 rounded text-sm transition-colors flex-1 sm:flex-auto ${
                 viewMode === 'table' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               📊 Table
             </button>
           </div>
-          <PlaidLink
-            onSuccess={(cards) => {
-              setMessage(`✅ Successfully synced ${cards.length} credit card(s) from Plaid!`);
-              setTimeout(() => setMessage(''), 4000);
-              loadCards();
-            }}
-            onError={(error) => {
-              setMessage(`❌ Plaid sync error: ${error.message}`);
-              setTimeout(() => setMessage(''), 6000);
-            }}
-          />
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-          >
-            {showForm ? 'Cancel' : 'Add Card'}
-          </button>
+          <div className="flex gap-2 w-full sm:w-auto">
+            <PlaidLink
+              onSuccess={(cards) => {
+                setMessage(`✅ Successfully synced ${cards.length} credit card(s) from Plaid!`);
+                setTimeout(() => setMessage(''), 4000);
+                loadCards();
+              }}
+              onError={(error) => {
+                setMessage(`❌ Plaid sync error: ${error.message}`);
+                setTimeout(() => setMessage(''), 6000);
+              }}
+            />
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex-1 sm:flex-auto"
+            >
+              {showForm ? 'Cancel' : 'Add Card'}
+            </button>
+          </div>
         </div>
       </div>
       

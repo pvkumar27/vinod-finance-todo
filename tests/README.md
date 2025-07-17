@@ -1,6 +1,6 @@
-# E2E Testing for Finance To-Dos PWA
+# E2E Testing for FinTask
 
-This directory contains end-to-end tests for the Finance To-Dos PWA using Playwright.
+This directory contains end-to-end tests for the FinTask app using Playwright.
 
 ## 📁 Directory Structure
 

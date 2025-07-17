@@ -20,13 +20,13 @@ const Navbar = ({ session }) => {
             <div className="flex-shrink-0">
               <img 
                 src="/icons/official-logo.png" 
-                alt="Finance To-Dos Logo" 
+                alt="FinTask Logo" 
                 className="h-8 w-auto rounded-lg shadow-md bg-green-800" 
               />
             </div>
             <div>
               <h1 className="text-xl font-bold text-blue-600 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text">
-                Finance To-Dos
+                FinTask
               </h1>
             </div>
           </div>

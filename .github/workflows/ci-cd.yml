@@ -29,15 +29,26 @@ jobs:
           REACT_APP_SUPABASE_ANON_KEY: test-key
           REACT_APP_SITE_URL: http://localhost:3000
       
-      # Install all browsers needed by Playwright
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium webkit firefox
+      # Cache Playwright browsers
+      - name: Cache Playwright browsers
+        uses: actions/cache@v3
+        id: playwright-cache
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
       
-      # Run only login tests
+      # Install browsers only if cache miss
+      - name: Install Playwright browsers
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      
+      # Run only login tests with just chromium
       - name: Run login tests
         run: npx playwright test tests/e2e/auth/login.spec.js --project=chromium-desktop
         env:
-          BASE_URL: https://finance-todos.netlify.app
+          BASE_URL: https://fintask.netlify.app
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
           TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
       

@@ -29,13 +29,13 @@ jobs:
     - name: Run Playwright tests
       run: npx playwright test
       env:
-        BASE_URL: https://finance-todos.netlify.app
+        BASE_URL: https://fintask.netlify.app
     
     - name: Run cleanup
       if: always()
       run: npx playwright test tests/e2e/utils/cleanup.spec.js
       env:
-        BASE_URL: https://finance-todos.netlify.app
+        BASE_URL: https://fintask.netlify.app
     
     - uses: actions/upload-artifact@v4
       if: always()

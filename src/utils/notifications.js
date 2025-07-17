@@ -43,7 +43,7 @@ export const setupForegroundMessageListener = () => {
   onMessage(messaging, (payload) => {
     console.log('Message received in foreground:', payload);
     
-    const title = payload.notification?.title || 'Finance To-Dos';
+    const title = payload.notification?.title || 'FinTask';
     const body = payload.notification?.body || 'You have a new notification';
     
     // Show custom toast or alert
@@ -52,7 +52,7 @@ export const setupForegroundMessageListener = () => {
         body: body,
         icon: '/icons/official-logo.png',
         badge: '/icons/official-logo.png',
-        tag: 'finance-todos-foreground'
+        tag: 'fintask-foreground'
       });
     } else {
       // Fallback to alert
