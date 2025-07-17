@@ -44,6 +44,9 @@ module.exports = defineConfig({
     // Base URL for all tests - PRODUCTION environment
     baseURL: process.env.BASE_URL || 'https://finance-todos.netlify.app',
     
+    // Run in headless mode by default
+    headless: true,
+    
     // Collect trace when retrying the failed test
     trace: 'on-first-retry',
     
