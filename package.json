@@ -11,7 +11,7 @@
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "chrono-node": "^2.8.3",
-    "dotenv": "^16.4.1",
+    "dotenv": "^16.6.1",
     "firebase": "^11.10.0",
     "plaid": "^36.0.0",
     "react": "^18.2.0",
@@ -53,7 +53,9 @@
     "check-updates": "npm outdated",
     "update-packages": "npm outdated && npm update && npm audit fix || echo 'All packages up to date'",
     "backup": "node scripts/backup-supabase.js",
-    "restore": "node scripts/restore-backup.js"
+    "restore": "node scripts/restore-backup.js",
+    "test:backup": "node scripts/create-test-backup.js",
+    "test:restore": "node scripts/test-restore.js"
   },
   "eslintConfig": {
     "extends": [
