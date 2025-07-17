@@ -1,0 +1,42 @@
+name: Supabase Admin Backup
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Weekly on Sunday at midnight
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Run admin backup script
+        run: node scripts/backup-supabase-admin.js
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          
+      - name: Create backup branch if it doesn't exist
+        run: |
+          git fetch
+          git checkout -B backup || git checkout backup
+          git pull origin backup || true
+          
+      - name: Commit and push backups
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .backups/
+          git commit -m "Automated backup $(date +'%Y-%m-%d')" || echo "No changes to commit"
+          git push origin backup
