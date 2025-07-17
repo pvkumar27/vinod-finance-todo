@@ -2,8 +2,15 @@ import { getToken, onMessage } from 'firebase/messaging';
 import { messaging } from '../firebase-config';
 
 export const requestNotificationPermission = async () => {
-  if (!messaging) {
-    console.warn('Firebase messaging not initialized');
+  // Check if we're in a test environment or if the browser supports notifications
+  if (
+    !messaging || 
+    typeof window === 'undefined' || 
+    !('Notification' in window) || 
+    !navigator.serviceWorker ||
+    window.navigator.userAgent.includes('Playwright')
+  ) {
+    console.log('Messaging not supported in this environment');
     return null;
   }
   
@@ -35,8 +42,15 @@ export const requestNotificationPermission = async () => {
 };
 
 export const setupForegroundMessageListener = () => {
-  if (!messaging) {
-    console.warn('Firebase messaging not initialized');
+  // Check if we're in a test environment or if the browser supports notifications
+  if (
+    !messaging || 
+    typeof window === 'undefined' || 
+    !('Notification' in window) || 
+    !navigator.serviceWorker ||
+    window.navigator.userAgent.includes('Playwright')
+  ) {
+    console.log('Messaging not supported in this environment');
     return;
   }
   

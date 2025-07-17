@@ -18,10 +18,19 @@ const app = initializeApp(firebaseConfig);
 let messaging = null;
 let analytics = null;
 
-if (typeof window !== 'undefined') {
+// Check if we're in a browser environment and not in a test environment
+if (
+  typeof window !== 'undefined' && 
+  !window.navigator.userAgent.includes('Playwright')
+) {
   try {
-    messaging = getMessaging(app);
+    // Initialize analytics in all browser environments
     analytics = getAnalytics(app);
+    
+    // Only initialize messaging if notifications are supported
+    if ('Notification' in window && navigator.serviceWorker) {
+      messaging = getMessaging(app);
+    }
   } catch (error) {
     console.warn('Firebase services initialization failed:', error);
   }
