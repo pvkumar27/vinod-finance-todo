@@ -5,6 +5,6 @@
  * Never use real user credentials in automated tests.
  */
 module.exports = {
-  email: 'test-account@example.com',
-  password: 'Test@1234'
+  email: 'pvkumar27@yahoo.com',
+  password: 'Test1234'
 };

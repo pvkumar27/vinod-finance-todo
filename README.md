@@ -23,6 +23,10 @@ npx playwright test tests/e2e/finances/my-finances.spec.js
 # Run tests with cleanup
 ./tests/run-tests.sh
 
+# Run ui in codespaces
+npx playwright test --ui-host=0.0.0.0 --ui-port=8080
+
+
 # Run only cleanup
 npm run test:e2e:cleanup
 ```
