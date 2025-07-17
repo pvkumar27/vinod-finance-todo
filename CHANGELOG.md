@@ -6,6 +6,8 @@
 - **Package Updates**: Latest compatible versions
 - **Security Fixes**: Automated vulnerability patches
 - **Build Verification**: Production build tested
+- **Domain Change**: Updated app URL from finance-todos.netlify.app to fintask.netlify.app
+- **Branding Fix**: Corrected app name in package.json and footer
 
 ---
 
