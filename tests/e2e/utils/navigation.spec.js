@@ -9,7 +9,8 @@ const { login } = require('../../helpers/test-helpers');
 test.describe('Navigation', () => {
   test.beforeEach(async ({ page }) => {
     // Login before each test
-    await login(page);
+    await page.goto('/');
+    await login(page, true); // Skip navigation since we already navigated
   });
 
   test('navigate between all tabs', async ({ page }) => {

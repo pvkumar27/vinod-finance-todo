@@ -14,7 +14,8 @@ test.describe('Test Data Cleanup', () => {
     console.log(`Starting cleanup of all test data with prefix: ${TEST_DATA_PREFIX}`);
     
     // Login
-    await login(page);
+    await page.goto('/');
+    await login(page, true); // Skip navigation since we already navigated
     
     // Navigate to each tab and clean up test data
     const tabs = ['To-Dos', 'Credit Cards', 'My Finances'];
