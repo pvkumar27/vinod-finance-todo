@@ -31,14 +31,16 @@ jobs:
           
       - name: Create backup branch if it doesn't exist
         run: |
-          git fetch
-          git checkout -B backup || git checkout backup
-          git pull --ff-only origin backup || true
+          git fetch origin
+          git checkout backup || git checkout -b backup
+          git pull origin backup --rebase || true
           
       - name: Force add backups
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
+          mkdir -p .backups
+          echo "{\"timestamp\": \"$(date -u +"%Y-%m-%dT%H:%M:%SZ")\", \"status\": \"completed\"}" > .backups/backup_info.json
           git add -f .backups/
           git commit -m "Automated backup $(date +'%Y-%m-%d')" || echo "No changes to commit"
-          git push origin backup
+          git push -f origin backup
