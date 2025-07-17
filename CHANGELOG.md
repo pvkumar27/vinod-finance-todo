@@ -6,6 +6,8 @@
 - **Package Updates**: Latest compatible versions
 - **Security Fixes**: Automated vulnerability patches
 - **Build Verification**: Production build tested
+- **Drag and Drop**: Implemented drag and drop for tasks with proper styling for pinned tasks
+- **UI Enhancement**: Yellow background for pinned tasks during drag operations
 
 ---
 
