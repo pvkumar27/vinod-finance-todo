@@ -8,6 +8,8 @@ on:
 jobs:
   backup:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -31,12 +33,12 @@ jobs:
         run: |
           git fetch
           git checkout -B backup || git checkout backup
-          git pull origin backup || true
+          git pull --ff-only origin backup || true
           
-      - name: Commit and push backups
+      - name: Force add backups
         run: |
           git config --local user.email "action@github.com"
           git config --local user.name "GitHub Action"
-          git add .backups/
+          git add -f .backups/
           git commit -m "Automated backup $(date +'%Y-%m-%d')" || echo "No changes to commit"
           git push origin backup
