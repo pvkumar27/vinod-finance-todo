@@ -5,6 +5,7 @@ export const fetchTodos = async () => {
   const { data, error } = await supabase
     .from('todos')
     .select('*')
+    .order('pinned', { ascending: false })
     .order('created_at', { ascending: false });
   
   if (error) throw error;
@@ -42,4 +43,14 @@ export const deleteTodo = async (id) => {
     .eq('id', id);
   
   if (error) throw error;
+};
+
+// Update the order of todos
+export const updateTodoOrder = async (todos) => {
+  // For now, we're just updating the pinned status
+  // In a real implementation, you might want to add a 'position' field
+  // and update that for each todo
+  
+  // This is a placeholder implementation
+  return todos;
 };
