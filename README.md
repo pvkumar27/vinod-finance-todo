@@ -61,6 +61,8 @@ For tests requiring authentication:
 
 ## 🚀 CI/CD & Release Process
 
+> For detailed Git workflow instructions, see [Git Workflow Documentation](docs/GIT_WORKFLOW.md)
+
 ### Automated CI/CD
 The project uses GitHub Actions for continuous integration and deployment:
 
