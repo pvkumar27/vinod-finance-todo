@@ -1,6 +1,5 @@
 import React from 'react';
-import { render } from '@testing-library/react';
-import { act } from 'react';
+import { render, act } from '@testing-library/react';
 
 // Import App after mocks
 import App from './App';

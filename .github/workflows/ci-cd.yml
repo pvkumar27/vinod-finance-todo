@@ -113,10 +113,19 @@ jobs:
           echo "New version: $NEW_VERSION"
           echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
       
-      - name: Run release script
-        run: npm run release ${{ steps.version.outputs.version }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Pull Request for Release
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "Release ${{ steps.version.outputs.version }}"
+          title: "Release ${{ steps.version.outputs.version }}"
+          body: |
+            Automated release PR for version ${{ steps.version.outputs.version }}
+            
+            This PR was automatically created by the CI/CD pipeline.
+          branch: release-${{ steps.version.outputs.version }}
+          base: main
+          delete-branch: true
       
       - name: Notify on success
         if: success()
