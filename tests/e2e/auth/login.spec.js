@@ -13,6 +13,11 @@ test.beforeEach(async ({ page }) => {
 });
 
 test.describe('Authentication', () => {
+  test.beforeEach(() => {
+    // Validate credentials are available
+    credentials.validate();
+  });
+
   test('should login successfully and navigate through all tabs', async ({ page }) => {
     // Go to login page with longer timeout
     await page.goto('/', { timeout: 30000 });
@@ -28,9 +33,15 @@ test.describe('Authentication', () => {
     await expect(page.locator('input[type="password"]')).toBeVisible({ timeout: 10000 });
 
     // Login directly without using the helper
+    console.log(`Logging in with email: ${credentials.email.substring(0, 3)}...`);
     await page.fill('input[type="email"]', credentials.email);
     await page.fill('input[type="password"]', credentials.password);
+
+    // Take screenshot before submitting
+    await page.screenshot({ path: 'tests/reports/before-login.png' });
+
     await page.click('button[type="submit"]');
+    console.log('Login form submitted');
 
     // Wait for navigation to complete
     try {
@@ -42,9 +53,13 @@ test.describe('Authentication', () => {
       // Timeout is okay, we'll check if still on login page
     }
 
+    // Take screenshot after login attempt
+    await page.screenshot({ path: 'tests/reports/after-login.png' });
+
     // Verify successful login (check for absence of login form)
     const loginForm = page.locator('form input[type="email"]');
-    await expect(loginForm).not.toBeVisible();
+    await expect(loginForm).not.toBeVisible({ timeout: 10000 });
+    console.log('Login successful - login form no longer visible');
 
     // Verify we're on the main app page
     const mainNav = page.locator('nav').first();
