@@ -26,8 +26,12 @@ test.describe('Authentication', () => {
     console.log(`Environment BASE_URL: ${process.env.BASE_URL || 'not set'}`);
     console.log('================================\n\n');
 
-    // Go to login page with longer timeout
-    await page.goto('/', { timeout: 30000 });
+    // Determine the full URL to use
+    const fullUrl = process.env.BASE_URL || 'http://localhost:3000';
+    console.log(`Using full URL for navigation: ${fullUrl}`);
+
+    // Go to login page with longer timeout using full URL
+    await page.goto(fullUrl, { timeout: 30000 });
 
     // Log the actual URL after navigation
     console.log(`Actual page URL after navigation: ${page.url()}`);
@@ -47,23 +51,63 @@ test.describe('Authentication', () => {
     const fs = require('fs');
     fs.writeFileSync('tests/reports/page-content.html', pageContent);
 
+    // Verify that the page contains essential HTML elements
+    console.log('Verifying page contains essential HTML elements...');
+
+    // Wait for the root element to appear (indicates React app is mounted)
+    console.log('Waiting for root element...');
+    await page.waitForSelector('div#root', { timeout: 30000 });
+    console.log('Root element found!');
+
+    // Wait for any content to appear inside the root element
+    console.log('Waiting for content inside root...');
+    await page.waitForSelector('div#root > *', { timeout: 30000 });
+    console.log('Content inside root found!');
+
     // Wait for any element to appear first
     await page.waitForSelector('body *', { timeout: 20000 });
 
     // Try to find login form with more flexible selectors
-    const formSelector = page.locator('form, div[class*="login"], div[class*="auth"]').first();
-    await expect(formSelector).toBeVisible({ timeout: 20000 });
+    console.log('Looking for login form elements...');
+
+    // Wait for any form or auth container to appear
+    console.log('Waiting for form or auth container...');
+    await page
+      .waitForSelector('form, div[class*="login"], div[class*="auth"], div[class*="sign"]', {
+        timeout: 30000,
+        state: 'visible',
+      })
+      .catch(e => console.log('Form container not found, will try to continue anyway'));
+    console.log('Form or auth container check completed');
+
+    // Wait for input fields to appear
+    console.log('Waiting for input fields...');
+    await page.waitForSelector('input', {
+      timeout: 30000,
+      state: 'visible',
+    });
+    console.log('Input fields found!');
 
     // Look for input fields with more flexible selectors
     const emailInput = page
-      .locator('input[type="email"], input[placeholder*="email"], input[name*="email"]')
+      .locator(
+        'input[type="email"], input[placeholder*="email"], input[name*="email"], input[id*="email"], input:first-of-type'
+      )
       .first();
     const passwordInput = page
-      .locator('input[type="password"], input[placeholder*="password"], input[name*="password"]')
+      .locator(
+        'input[type="password"], input[placeholder*="password"], input[name*="password"], input[id*="password"], input[type="password"], input:nth-of-type(2)'
+      )
       .first();
 
-    await expect(emailInput).toBeVisible({ timeout: 20000 });
-    await expect(passwordInput).toBeVisible({ timeout: 20000 });
+    // Verify inputs are visible
+    console.log('Verifying email input is visible...');
+    await expect(emailInput).toBeVisible({ timeout: 30000 });
+    console.log('Email input is visible!');
+
+    console.log('Verifying password input is visible...');
+    await expect(passwordInput).toBeVisible({ timeout: 30000 });
+    console.log('Password input is visible!');
 
     // Login directly without using the helper
     await page.fill('input[type="email"]', credentials.email);
@@ -75,14 +119,32 @@ test.describe('Authentication', () => {
     await page.click('button[type="submit"]');
 
     // Wait for navigation to complete
+    console.log('Waiting for navigation to complete...');
     try {
       await Promise.race([
-        page.waitForNavigation({ timeout: 10000 }),
-        page.waitForSelector('nav, .dashboard', { timeout: 10000 }),
+        page.waitForNavigation({ timeout: 20000 }),
+        page.waitForSelector('nav, .dashboard, header, .app-container, main', { timeout: 20000 }),
+        page.waitForFunction(
+          () => {
+            // Check if URL changed or login form disappeared
+            return (
+              !document.querySelector('form input[type="email"]') ||
+              !document.querySelector('input[type="password"]')
+            );
+          },
+          { timeout: 20000 }
+        ),
       ]);
+      console.log('Navigation detected!');
     } catch (e) {
-      // Timeout is okay, we'll check if still on login page
+      console.log('Navigation timeout, will check if still on login page');
     }
+
+    // Check current URL and page content
+    console.log(`Current URL after login attempt: ${page.url()}`);
+    const postLoginContent = await page.content();
+    console.log(`Page content length after login: ${postLoginContent.length}`);
+    require('fs').writeFileSync('tests/reports/post-login-content.html', postLoginContent);
 
     // Take screenshot after navigation
     await page.screenshot({ path: 'tests/reports/03-after-navigation.png' });

@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: 'npm'
       
       - name: Install dependencies
@@ -62,11 +62,12 @@ jobs:
           # Use a simple http server instead of serve
           cd build
           python3 -m http.server 3000 > ../server.log 2>&1 &
-          echo $! > ../server.pid
+          cd ..
+          echo $! > server.pid
           sleep 10
-          echo "Server process ID: $(cat ../server.pid)"
+          echo "Server process ID: $(cat server.pid)"
           echo "Server log:"
-          cat ../server.log
+          cat server.log
       
       # Wait for server to start and verify content
       - name: Wait for server and verify content
@@ -106,12 +107,18 @@ jobs:
       - name: Run login tests
         run: |
           # Verify server is still running
-          if ! ps -p $(cat ../server.pid) > /dev/null; then
-            echo "ERROR: Server process is not running!"
-            echo "Restarting server..."
+          if [ -f "server.pid" ] && ps -p $(cat server.pid) > /dev/null; then
+            echo "Server is still running with PID $(cat server.pid)"
+          else
+            echo "Server needs to be (re)started"
+            # Kill any process that might be using port 3000
+            lsof -ti:3000 | xargs kill -9 2>/dev/null || true
+            # Start a new server
             cd build
             python3 -m http.server 3000 > ../server_restart.log 2>&1 &
-            echo $! > ../server.pid
+            cd ..
+            echo $! > server.pid
+            echo "Started new server with PID $(cat server.pid)"
             sleep 10
           fi
           
@@ -132,12 +139,17 @@ jobs:
           export BASE_URL="http://localhost:3000"
           echo "Setting BASE_URL=$BASE_URL for tests"
           
-          # Run tests in headless mode with debug
-          DEBUG=pw:api npx playwright test tests/e2e/auth/login.spec.js --project=chromium-desktop
+          # Run tests in headless mode (default)
+          DEBUG=pw:api npx playwright test tests/e2e/auth/login.spec.js
         env:
           BASE_URL: "http://localhost:3000"
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
           TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+      
+      # Ensure reports directory exists
+      - name: Ensure reports directory exists
+        if: always()
+        run: mkdir -p tests/reports/
       
       - name: Upload test reports
         if: always()
@@ -162,7 +174,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: 20
           cache: 'npm'
       
       - name: Install dependencies
