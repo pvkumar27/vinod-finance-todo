@@ -4,7 +4,6 @@ import CreditCardDashboard from '../components/CreditCardDashboard';
 import MyFinancesDashboard from '../components/MyFinancesDashboard';
 import TodosDashboard from '../components/TodosDashboard';
 import { APP_VERSION } from '../constants/version';
-import { useEffect } from 'react';
 
 const Home = () => {
   const [activeDashboard, setActiveDashboard] = useState(null);
