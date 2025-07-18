@@ -66,8 +66,6 @@ test.describe('Authentication', () => {
       console.log('Root element found!');
     } catch (e) {
       console.error('Root element not found! App may not be properly built.');
-      const html = await page.content();
-      require('fs').writeFileSync('tests/reports/root-element-missing.html', html);
       throw new Error('Root element not found - app may not be properly built');
     }
 
@@ -78,8 +76,6 @@ test.describe('Authentication', () => {
       console.log('Content inside root found!');
     } catch (e) {
       console.error('No content inside root! App may be empty.');
-      const html = await page.content();
-      require('fs').writeFileSync('tests/reports/empty-root-element.html', html);
       throw new Error('No content inside root - app may be empty');
     }
 
@@ -126,8 +122,6 @@ test.describe('Authentication', () => {
       console.log('Email input is visible!');
     } catch (e) {
       console.error('Email input not found! Login form may not be rendered correctly.');
-      const html = await page.content();
-      require('fs').writeFileSync('tests/reports/login-form-missing.html', html);
       throw new Error('Email input not found - login form may not be rendered correctly');
     }
 
@@ -137,8 +131,6 @@ test.describe('Authentication', () => {
       console.log('Password input is visible!');
     } catch (e) {
       console.error('Password input not found! Login form may not be rendered correctly.');
-      const html = await page.content();
-      require('fs').writeFileSync('tests/reports/login-form-incomplete.html', html);
       throw new Error('Password input not found - login form may not be rendered correctly');
     }
 
