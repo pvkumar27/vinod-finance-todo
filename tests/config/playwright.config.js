@@ -41,6 +41,12 @@ module.exports = defineConfig({
     // Base URL for all tests - Default to localhost for all environments
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
 
+    // Navigation timeout - increase for CI environments
+    navigationTimeout: 30000,
+
+    // Wait for page load state
+    waitForNavigation: 'networkidle',
+
     // Run in headless mode by default
     headless: true,
 
@@ -67,6 +73,7 @@ module.exports = defineConfig({
       use: {
         ...devices['iPhone 12'],
         viewport: { width: 375, height: 667 },
+        headless: true,
       },
     },
     {
@@ -74,6 +81,7 @@ module.exports = defineConfig({
       use: {
         ...devices['iPad'],
         viewport: { width: 768, height: 1024 },
+        headless: true,
       },
     },
     {
@@ -81,6 +89,7 @@ module.exports = defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 800 },
+        headless: true,
       },
     },
   ],

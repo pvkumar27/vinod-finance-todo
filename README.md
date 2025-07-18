@@ -1,5 +1,8 @@
 # FinTask
 
+[![CI/CD Pipeline](https://github.com/username/vinod-finance-todo/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/username/vinod-finance-todo/actions/workflows/ci-cd.yml)
+[![E2E Tests](https://github.com/username/vinod-finance-todo/actions/workflows/e2e-tests.yml/badge.svg)](https://github.com/username/vinod-finance-todo/actions/workflows/e2e-tests.yml)
+
 A Progressive Web App for managing finances and to-dos.
 
 ## 🧪 End-to-End Testing
@@ -52,10 +55,17 @@ npm run test:e2e:cleanup
 - Manual cleanup: `npm run test:e2e:cleanup`
 
 ### Configuration
-- **Base URL**: `https://fintask.netlify.app/` (configurable via BASE_URL env var)
+- **Base URL**: `http://localhost:3000` by default, configurable via BASE_URL env var
 - **Browsers**: Chromium (mobile/tablet/desktop viewports)
 - **Screenshots**: On failure only
 - **Traces**: On first retry
+
+### Local Testing in CI
+The CI pipeline automatically:
+1. Builds the app
+2. Starts a local server
+3. Waits for the server to be ready
+4. Runs tests against the local server
 
 ### Authentication
 For tests requiring authentication:
@@ -64,14 +74,25 @@ For tests requiring authentication:
 
 ## 🚀 CI/CD & Release Process
 
-> For detailed Git workflow instructions, see [Git Workflow Documentation](docs/GIT_WORKFLOW.md)
+> For detailed CI/CD process and branch strategy, see [CI/CD Process Documentation](docs/CI_CD_PROCESS.md)
 
 ### Automated CI/CD
 The project uses GitHub Actions for continuous integration and deployment:
 
-- **E2E Tests**: Run on every push to `main` and `develop` branches
+- **E2E Tests**: Run on every push to `main`, `feature/*`, and `hotfix/*` branches
+- **Branch Protection**: Prevents merging to main if tests fail
+- **Local Testing**: All tests run against a local server in CI
 - **Release Process**: Automated version bumping, changelog updates, and tagging
 - **Netlify Deployment**: Auto-deploys from the `main` branch
+
+### Branch Protection Rules
+The repository has the following branch protection rules for the `main` branch:
+
+- **Require status checks to pass**: All CI/CD checks must pass
+- **Require branches to be up to date**: Branches must be up-to-date with the base branch
+- **Include administrators**: Rules apply to administrators too
+
+For detailed setup instructions, see [Branch Protection Documentation](docs/BRANCH_PROTECTION.md)
 
 ### Manual Release
 ```bash
