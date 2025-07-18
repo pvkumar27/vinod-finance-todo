@@ -55,6 +55,20 @@ jobs:
           REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
           REACT_APP_SITE_URL: ${{ secrets.REACT_APP_SITE_URL || 'http://localhost:3000' }}
       
+      # Check build output
+      - name: Check build output
+        run: |
+          if [ ! -f build/index.html ]; then
+            echo "Build failed: index.html missing"
+            exit 1
+          fi
+          echo "Build output contents:"
+          ls -la build
+          echo "Static files:"
+          ls -la build/static || echo "No static directory found!"
+          echo "Checking index.html content:"
+          grep -q "<div id=\"root\"" build/index.html && echo "Root div found in index.html" || echo "WARNING: Root div not found in index.html"
+      
       - name: Start local server
         run: |
           echo "Starting server on port 3000"
@@ -138,6 +152,13 @@ jobs:
           export BASE_URL="http://localhost:3000"
           echo "Setting BASE_URL=$BASE_URL for tests"
           
+          # Verify environment variables
+          if [ -z "$TEST_USER_EMAIL" ] || [ -z "$TEST_USER_PASSWORD" ]; then
+            echo "ERROR: Test credentials are not set. Please configure TEST_USER_EMAIL and TEST_USER_PASSWORD secrets."
+            exit 1
+          fi
+          echo "Environment variables check passed"
+          
           # Run tests in headless mode (default)
           DEBUG=pw:api npx playwright test tests/e2e/auth/login.spec.js
         env:
@@ -149,6 +170,19 @@ jobs:
       - name: Ensure reports directory exists
         if: always()
         run: mkdir -p tests/reports/
+      
+      # Upload server logs for debugging
+      - name: Upload server logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-logs
+          path: |
+            server.log
+            server_restart.log
+            server_response.html
+            final_page.html
+          retention-days: 5
       
       - name: Upload test reports
         if: always()

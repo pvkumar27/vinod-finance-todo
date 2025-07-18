@@ -19,15 +19,22 @@ test.describe('Authentication', () => {
   });
 
   test('should login successfully and navigate through all tabs', async ({ page }) => {
+    // Fail fast if BASE_URL is not set
+    if (!process.env.BASE_URL) {
+      throw new Error('BASE_URL is not set. Check workflow and secrets!');
+    }
+
     // Log the base URL being used
     const baseUrl = page.context().browser().options.baseURL || 'No baseURL set';
     console.log('\n\n==== TEST ENVIRONMENT INFO ====');
     console.log(`Using baseURL: ${baseUrl}`);
-    console.log(`Environment BASE_URL: ${process.env.BASE_URL || 'not set'}`);
+    console.log(`Environment BASE_URL: ${process.env.BASE_URL}`);
+    console.log(`TEST_USER_EMAIL defined: ${!!process.env.TEST_USER_EMAIL}`);
+    console.log(`TEST_USER_PASSWORD defined: ${!!process.env.TEST_USER_PASSWORD}`);
     console.log('================================\n\n');
 
-    // Determine the full URL to use
-    const fullUrl = process.env.BASE_URL || 'http://localhost:3000';
+    // Use the BASE_URL environment variable
+    const fullUrl = process.env.BASE_URL;
     console.log(`Using full URL for navigation: ${fullUrl}`);
 
     // Go to login page with longer timeout using full URL
@@ -56,13 +63,27 @@ test.describe('Authentication', () => {
 
     // Wait for the root element to appear (indicates React app is mounted)
     console.log('Waiting for root element...');
-    await page.waitForSelector('div#root', { timeout: 30000 });
-    console.log('Root element found!');
+    try {
+      await page.waitForSelector('div#root', { timeout: 30000 });
+      console.log('Root element found!');
+    } catch (e) {
+      console.error('Root element not found! App may not be properly built.');
+      const html = await page.content();
+      require('fs').writeFileSync('tests/reports/root-element-missing.html', html);
+      throw new Error('Root element not found - app may not be properly built');
+    }
 
     // Wait for any content to appear inside the root element
     console.log('Waiting for content inside root...');
-    await page.waitForSelector('div#root > *', { timeout: 30000 });
-    console.log('Content inside root found!');
+    try {
+      await page.waitForSelector('div#root > *', { timeout: 30000 });
+      console.log('Content inside root found!');
+    } catch (e) {
+      console.error('No content inside root! App may be empty.');
+      const html = await page.content();
+      require('fs').writeFileSync('tests/reports/empty-root-element.html', html);
+      throw new Error('No content inside root - app may be empty');
+    }
 
     // Wait for any element to appear first
     await page.waitForSelector('body *', { timeout: 20000 });
@@ -102,12 +123,26 @@ test.describe('Authentication', () => {
 
     // Verify inputs are visible
     console.log('Verifying email input is visible...');
-    await expect(emailInput).toBeVisible({ timeout: 30000 });
-    console.log('Email input is visible!');
+    try {
+      await expect(emailInput).toBeVisible({ timeout: 30000 });
+      console.log('Email input is visible!');
+    } catch (e) {
+      console.error('Email input not found! Login form may not be rendered correctly.');
+      const html = await page.content();
+      require('fs').writeFileSync('tests/reports/login-form-missing.html', html);
+      throw new Error('Email input not found - login form may not be rendered correctly');
+    }
 
     console.log('Verifying password input is visible...');
-    await expect(passwordInput).toBeVisible({ timeout: 30000 });
-    console.log('Password input is visible!');
+    try {
+      await expect(passwordInput).toBeVisible({ timeout: 30000 });
+      console.log('Password input is visible!');
+    } catch (e) {
+      console.error('Password input not found! Login form may not be rendered correctly.');
+      const html = await page.content();
+      require('fs').writeFileSync('tests/reports/login-form-incomplete.html', html);
+      throw new Error('Password input not found - login form may not be rendered correctly');
+    }
 
     // Login directly without using the helper
     await page.fill('input[type="email"]', credentials.email);
