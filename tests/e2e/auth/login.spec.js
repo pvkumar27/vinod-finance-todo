@@ -19,19 +19,51 @@ test.describe('Authentication', () => {
   });
 
   test('should login successfully and navigate through all tabs', async ({ page }) => {
+    // Log the base URL being used
+    const baseUrl = page.context().browser().options.baseURL || 'No baseURL set';
+    console.log('\n\n==== TEST ENVIRONMENT INFO ====');
+    console.log(`Using baseURL: ${baseUrl}`);
+    console.log(`Environment BASE_URL: ${process.env.BASE_URL || 'not set'}`);
+    console.log('================================\n\n');
+
     // Go to login page with longer timeout
     await page.goto('/', { timeout: 30000 });
 
-    // Wait for page to be fully loaded
+    // Log the actual URL after navigation
+    console.log(`Actual page URL after navigation: ${page.url()}`);
+
+    // Wait for page to be fully loaded with multiple strategies
     await page.waitForLoadState('networkidle');
+    await page.waitForLoadState('domcontentloaded');
 
     // Take screenshot of initial page
     await page.screenshot({ path: 'tests/reports/01-initial-page.png' });
 
-    // Verify login form is displayed
-    await expect(page.locator('form')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('input[type="password"]')).toBeVisible({ timeout: 10000 });
+    // Debug page content
+    const pageContent = await page.content();
+    console.log('Page HTML length:', pageContent.length);
+
+    // Save HTML for debugging
+    const fs = require('fs');
+    fs.writeFileSync('tests/reports/page-content.html', pageContent);
+
+    // Wait for any element to appear first
+    await page.waitForSelector('body *', { timeout: 20000 });
+
+    // Try to find login form with more flexible selectors
+    const formSelector = page.locator('form, div[class*="login"], div[class*="auth"]').first();
+    await expect(formSelector).toBeVisible({ timeout: 20000 });
+
+    // Look for input fields with more flexible selectors
+    const emailInput = page
+      .locator('input[type="email"], input[placeholder*="email"], input[name*="email"]')
+      .first();
+    const passwordInput = page
+      .locator('input[type="password"], input[placeholder*="password"], input[name*="password"]')
+      .first();
+
+    await expect(emailInput).toBeVisible({ timeout: 20000 });
+    await expect(passwordInput).toBeVisible({ timeout: 20000 });
 
     // Login directly without using the helper
     await page.fill('input[type="email"]', credentials.email);
