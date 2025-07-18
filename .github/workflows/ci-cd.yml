@@ -101,8 +101,8 @@ jobs:
           echo "Testing server accessibility:"
           curl -I http://localhost:$SERVER_PORT
           
-          # Run the tests with debug logging
-          PWDEBUG=console npx playwright test tests/e2e/auth/login.spec.js --project=chromium-desktop --debug
+          # Run the tests with debug logging but ensure headless mode
+          PWDEBUG=console npx playwright test tests/e2e/auth/login.spec.js --project=chromium-desktop
         env:
           BASE_URL: http://localhost:${{ env.SERVER_PORT }}
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}

@@ -41,8 +41,8 @@ module.exports = defineConfig({
     // Base URL for all tests - Default to localhost for all environments
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
 
-    // Run in headless mode by default
-    headless: true,
+    // Run in headless mode by default, always in CI
+    headless: process.env.CI ? true : process.env.HEADLESS !== 'false',
 
     // Collect trace when retrying the failed test
     trace: 'on-first-retry',
