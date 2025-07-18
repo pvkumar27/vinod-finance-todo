@@ -74,7 +74,7 @@ For tests requiring authentication:
 
 ## 🚀 CI/CD & Release Process
 
-> For detailed Git workflow instructions, see [Git Workflow Documentation](docs/GIT_WORKFLOW.md)
+> For detailed CI/CD process and branch strategy, see [CI/CD Process Documentation](docs/CI_CD_PROCESS.md)
 
 ### Automated CI/CD
 The project uses GitHub Actions for continuous integration and deployment:
@@ -88,11 +88,9 @@ The project uses GitHub Actions for continuous integration and deployment:
 ### Branch Protection Rules
 The repository has the following branch protection rules for the `main` branch:
 
-- **Require pull request reviews**: At least 1 review is required
 - **Require status checks to pass**: All CI/CD checks must pass
 - **Require branches to be up to date**: Branches must be up-to-date with the base branch
 - **Include administrators**: Rules apply to administrators too
-- **Restrict who can push**: Only specific users can push directly to protected branches
 
 For detailed setup instructions, see [Branch Protection Documentation](docs/BRANCH_PROTECTION.md)
 
