@@ -39,7 +39,7 @@ const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete }) => 
       ref={setNodeRef}
       style={style}
       className={`
-        group flex items-center p-3 mb-2 rounded-lg transition-all duration-200 h-11
+        group flex items-center p-3 mb-2 rounded-lg transition-all duration-200 min-h-[3rem]
         cursor-grab active:cursor-grabbing w-full
         ${isDragging ? `shadow-lg scale-[1.03] opacity-90 ${isPinned ? 'bg-yellow-100 border border-yellow-300' : 'bg-blue-100 border border-blue-300'} z-50` : 'shadow-sm hover:shadow'}
         ${isPinned ? 'bg-yellow-50 border-l-4 border-yellow-400' : 'bg-blue-50'}
@@ -58,19 +58,20 @@ const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete }) => 
       </div>
 
       {/* Task Content - Apply drag listeners only to this part */}
-      <div className="flex-1 min-w-0 flex flex-wrap sm:flex-nowrap items-center" {...listeners}>
+      <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center" {...listeners}>
         <span className="text-sm text-gray-900 font-medium truncate">
           {task.task}
         </span>
         {formattedDate && (
-          <span className="text-xs text-gray-500 ml-2 whitespace-nowrap">
+          <span className="text-xs text-gray-500 sm:ml-2 whitespace-nowrap mt-0.5 sm:mt-0 flex items-center">
+            <span className="w-2 h-2 rounded-full bg-blue-400 mr-1 inline-block sm:hidden"></span>
             Due: {formattedDate}
           </span>
         )}
       </div>
 
       {/* Actions */}
-      <div className="flex items-center space-x-1 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+      <div className="flex items-center space-x-1 opacity-100 transition-opacity">
         <button
           type="button"
           onClick={() => onTogglePin(task.id, task.pinned)}

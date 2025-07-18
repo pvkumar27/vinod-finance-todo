@@ -303,22 +303,29 @@ const TaskManager = () => {
   if (loading) return <div className="p-4">Loading tasks...</div>;
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-lg">
+    <div className="p-4 md:p-6 bg-white rounded-lg shadow-lg max-w-4xl mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h2 className="text-xl font-bold">To-Do Manager</h2>
-        <div className="flex bg-gray-100 rounded-lg p-1 w-full sm:w-auto">
+        <h2 className="text-2xl font-bold text-blue-700 flex items-center">
+          <span className="mr-2">📝</span>
+          To-Do Manager
+        </h2>
+        <div className="flex bg-gray-100 rounded-full p-1 w-full sm:w-auto shadow-inner">
           <button
             onClick={() => setViewMode('cards')}
-            className={`px-3 py-1 rounded text-sm transition-colors flex-1 sm:flex-auto ${
-              viewMode === 'cards' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600 hover:text-gray-900'
+            className={`px-4 py-2 rounded-full text-sm transition-all flex-1 sm:flex-auto ${
+              viewMode === 'cards' 
+                ? 'bg-white shadow-md text-blue-600 font-medium' 
+                : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             📋 Cards
           </button>
           <button
             onClick={() => setViewMode('table')}
-            className={`px-3 py-1 rounded text-sm transition-colors flex-1 sm:flex-auto ${
-              viewMode === 'table' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600 hover:text-gray-900'
+            className={`px-4 py-2 rounded-full text-sm transition-all flex-1 sm:flex-auto ${
+              viewMode === 'table' 
+                ? 'bg-white shadow-md text-blue-600 font-medium' 
+                : 'text-gray-600 hover:text-gray-900'
             }`}
           >
             📊 Table
@@ -333,53 +340,64 @@ const TaskManager = () => {
       )}
 
       {/* Add Todo Form */}
-      <form onSubmit={handleAddTodo} className="mb-6">
-        <div className="flex flex-col sm:flex-row gap-2">
+      <form onSubmit={handleAddTodo} className="mb-8">
+        <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 relative">
-            <input
-              type="text"
-              placeholder={editingTodo ? "Edit task..." : "Add a new task..."}
-              value={newTask}
-              onChange={(e) => setNewTask(e.target.value)}
-              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12 text-sm"
-            />
-            <button
-              type="button"
-              onClick={handleVoiceInput}
-              className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full transition-colors ${
-                isListening ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600'
-              }`}
-              title="Voice input"
-            >
-              {isListening ? '🔴' : '🎤'}
-            </button>
+            <label htmlFor="task-input" className="text-xs font-medium text-gray-700 mb-1 ml-1 block">Task</label>
+            <div className="relative">
+              <input
+                id="task-input"
+                type="text"
+                placeholder={editingTodo ? "Edit task..." : "Add a new task..."}
+                value={newTask}
+                onChange={(e) => setNewTask(e.target.value)}
+                className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12 text-sm shadow-sm"
+              />
+              <button
+                type="button"
+                onClick={handleVoiceInput}
+                className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full transition-colors shadow-sm ${
+                  isListening ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600'
+                }`}
+                title="Voice input"
+              >
+                {isListening ? '🔴' : '🎤'}
+              </button>
+            </div>
           </div>
-          <input
-            type="date"
-            value={taskDate}
-            onChange={(e) => setTaskDate(e.target.value)}
-            className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-40 text-sm"
-            required
-          />
-          <button
-            type="submit"
-            className="bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition-colors w-full sm:w-auto text-sm"
-          >
-            {editingTodo ? 'Update' : 'Add'}
-          </button>
-          {editingTodo && (
+          <div className="flex flex-col w-full sm:w-auto">
+            <label htmlFor="task-due-date" className="text-xs font-medium text-gray-700 mb-1 ml-1">Due Date</label>
+            <input
+              id="task-due-date"
+              type="date"
+              value={taskDate}
+              onChange={(e) => setTaskDate(e.target.value)}
+              className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-40 text-sm"
+              required
+            />
+          </div>
+          <div className="flex flex-col w-full sm:w-auto justify-end mt-4 sm:mt-0">
             <button
-              type="button"
-              onClick={() => {
-                setEditingTodo(null);
-                setNewTask('');
-                setTaskDate(new Date().toISOString().split('T')[0]);
-              }}
-              className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors w-full sm:w-auto text-sm"
+              type="submit"
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto text-sm font-medium shadow-md flex items-center justify-center"
             >
-              Cancel
+              <span className="mr-1">{editingTodo ? '✏️' : '➕'}</span>
+              {editingTodo ? 'Update' : 'Add Task'}
             </button>
-          )}
+            {editingTodo && (
+              <button
+                type="button"
+                onClick={() => {
+                  setEditingTodo(null);
+                  setNewTask('');
+                  setTaskDate(new Date().toISOString().split('T')[0]);
+                }}
+                className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors w-full sm:w-auto text-sm mt-2 sm:mt-2 font-medium shadow-md"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
         </div>
         <p className="text-xs text-gray-500 mt-1">
           💡 Tip: You can use natural language like "Remind me to pay bills tomorrow" or "Create task: fix sink"
