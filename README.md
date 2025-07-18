@@ -52,10 +52,17 @@ npm run test:e2e:cleanup
 - Manual cleanup: `npm run test:e2e:cleanup`
 
 ### Configuration
-- **Base URL**: `https://fintask.netlify.app/` (configurable via BASE_URL env var)
+- **Base URL**: `http://localhost:3000` by default, configurable via BASE_URL env var
 - **Browsers**: Chromium (mobile/tablet/desktop viewports)
 - **Screenshots**: On failure only
 - **Traces**: On first retry
+
+### Local Testing in CI
+The CI pipeline automatically:
+1. Builds the app
+2. Starts a local server
+3. Waits for the server to be ready
+4. Runs tests against the local server
 
 ### Authentication
 For tests requiring authentication:
@@ -69,7 +76,9 @@ For tests requiring authentication:
 ### Automated CI/CD
 The project uses GitHub Actions for continuous integration and deployment:
 
-- **E2E Tests**: Run on every push to `main` and `develop` branches
+- **E2E Tests**: Run on every push to `main`, `feature/*`, and `hotfix/*` branches
+- **Branch Protection**: Prevents merging to main if tests fail
+- **Local Testing**: All tests run against a local server in CI
 - **Release Process**: Automated version bumping, changelog updates, and tagging
 - **Netlify Deployment**: Auto-deploys from the `main` branch
 
