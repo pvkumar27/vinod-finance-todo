@@ -15,6 +15,11 @@ const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete }) => 
     transition: {
       duration: 150,
       easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+    },
+    // Reduce activation delay to make dragging more responsive
+    activationConstraint: {
+      delay: 100,
+      tolerance: 5
     }
   });
 
@@ -39,7 +44,7 @@ const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete }) => 
       ref={setNodeRef}
       style={style}
       className={`
-        group flex items-center p-3 mb-2 rounded-lg transition-all duration-200 min-h-[3rem]
+        group flex items-center p-2 mb-1 rounded-lg transition-all duration-200 min-h-[2.75rem]
         cursor-grab active:cursor-grabbing w-full
         ${isDragging ? `shadow-lg scale-[1.03] opacity-90 ${isPinned ? 'bg-yellow-100 border border-yellow-300' : 'bg-blue-100 border border-blue-300'} z-50` : 'shadow-sm hover:shadow'}
         ${isPinned ? 'bg-yellow-50 border-l-4 border-yellow-400' : 'bg-blue-50'}

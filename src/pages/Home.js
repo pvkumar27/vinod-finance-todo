@@ -4,6 +4,7 @@ import CreditCardDashboard from '../components/CreditCardDashboard';
 import MyFinancesDashboard from '../components/MyFinancesDashboard';
 import TodosDashboard from '../components/TodosDashboard';
 import { APP_VERSION } from '../constants/version';
+import { useEffect } from 'react';
 
 const Home = () => {
   const [activeDashboard, setActiveDashboard] = useState(null);
@@ -41,46 +42,43 @@ const Home = () => {
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
       <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         {/* Hero Section */}
-        <div className="text-center mb-12">
-
+        <div className="text-center mb-8">
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
             Manage your cards, expenses, and tasks in one place
           </p>
         </div>
-
-        {/* Dashboard Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          {dashboardCards.map((card) => (
-            <div
-              key={card.id}
-              onClick={() => setActiveDashboard(card.id)}
-              className="group cursor-pointer transform transition-all duration-300 hover:scale-105"
-            >
-              <div className={`bg-gradient-to-r ${card.gradient} rounded-2xl p-6 text-white shadow-lg hover:shadow-xl`}>
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-4xl">{card.icon}</div>
-                  <div className="text-white/80 group-hover:text-white transition-colors">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                    </svg>
+        
+        {/* Main Application Modules - Now more prominent */}
+        <div className="bg-white rounded-2xl shadow-xl p-6 mb-12 border border-blue-100">
+          <TabNavigation />
+        </div>
+        
+        {/* Dashboard Cards - Now less prominent */}
+        <div className="mb-8">
+          <h2 className="text-xl font-medium text-gray-700 mb-4">Quick Access Dashboards</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {dashboardCards.map((card) => (
+              <div
+                key={card.id}
+                onClick={() => setActiveDashboard(card.id)}
+                className="group cursor-pointer border border-gray-200 hover:border-gray-300 bg-white rounded-lg p-4 shadow-sm hover:shadow transition-all duration-200"
+              >
+                <div className="flex items-center space-x-3">
+                  <div className={`text-2xl p-2 rounded-full bg-gradient-to-r ${card.gradient} text-white`}>{card.icon}</div>
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-800">{card.title}</h3>
+                    <p className="text-gray-500 text-sm">{card.description}</p>
                   </div>
                 </div>
-                <h3 className="text-xl font-bold mb-2">{card.title}</h3>
-                <p className="text-white/90 text-sm leading-relaxed">{card.description}</p>
-                <div className="mt-4 flex items-center text-sm text-white/80">
+                <div className="mt-3 flex items-center text-sm text-blue-600 group-hover:text-blue-700">
                   <span>View Dashboard</span>
                   <svg className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                   </svg>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-        
-        {/* Main Application Modules */}
-        <div className="bg-white rounded-2xl shadow-lg p-6">
-          <TabNavigation />
+            ))}
+          </div>
         </div>
         
         {/* Version Footer */}

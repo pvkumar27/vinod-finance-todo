@@ -303,7 +303,7 @@ const TaskManager = () => {
   if (loading) return <div className="p-4">Loading tasks...</div>;
 
   return (
-    <div className="p-4 md:p-6 bg-white rounded-lg shadow-lg max-w-4xl mx-auto">
+    <div className="p-4 md:p-6 bg-white rounded-lg shadow-lg max-w-3xl mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h2 className="text-2xl font-bold text-blue-700 flex items-center">
           <span className="mr-2">📝</span>
@@ -635,7 +635,7 @@ const TaskManager = () => {
               {todos.filter(t => t.completed).map((todo) => (
                 <div
                   key={todo.id}
-                  className="flex items-center justify-between p-3 bg-green-50 rounded-lg mb-2"
+                  className="flex items-center justify-between p-2 bg-green-50 rounded-lg mb-1"
                 >
                   <div className="flex items-center space-x-3">
                     <input
