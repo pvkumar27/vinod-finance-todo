@@ -44,11 +44,37 @@ jobs:
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
       
-      # Run only login tests with just chromium
+      # Start the app in background
+      - name: Build app
+        run: npm run build
+        env:
+          REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
+          REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
+      
+      - name: Start local server
+        run: npx serve -s build &
+        env:
+          PORT: 3000
+      
+      # Wait for server to start
+      - name: Wait for server
+        run: |
+          timeout=30
+          while ! curl -s http://localhost:3000 > /dev/null; do
+            if [ $timeout -le 0 ]; then
+              echo "Server failed to start"
+              exit 1
+            fi
+            echo "Waiting for server to start... ($timeout seconds left)"
+            sleep 1
+            timeout=$((timeout - 1))
+          done
+      
+      # Run login tests with just chromium against local server
       - name: Run login tests
         run: npx playwright test tests/e2e/auth/login.spec.js --project=chromium-desktop
         env:
-          BASE_URL: https://fintask.netlify.app
+          BASE_URL: http://localhost:3000
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
           TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
       

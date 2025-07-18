@@ -38,10 +38,8 @@ module.exports = defineConfig({
 
   // Shared settings for all the projects below
   use: {
-    // Base URL for all tests - Support both local and production environments
-    baseURL:
-      process.env.BASE_URL ||
-      (process.env.CI ? 'https://fintask.netlify.app' : 'http://localhost:3000'),
+    // Base URL for all tests - Default to localhost for all environments
+    baseURL: process.env.BASE_URL || 'http://localhost:3000',
 
     // Run in headless mode by default
     headless: true,
