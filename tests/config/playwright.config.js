@@ -73,6 +73,7 @@ module.exports = defineConfig({
       use: {
         ...devices['iPhone 12'],
         viewport: { width: 375, height: 667 },
+        headless: true,
       },
     },
     {
@@ -80,6 +81,7 @@ module.exports = defineConfig({
       use: {
         ...devices['iPad'],
         viewport: { width: 768, height: 1024 },
+        headless: true,
       },
     },
     {
@@ -87,6 +89,7 @@ module.exports = defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 800 },
+        headless: true,
       },
     },
   ],

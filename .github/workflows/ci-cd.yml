@@ -112,8 +112,8 @@ jobs:
           echo "Checking server before running tests:"
           curl -I http://localhost:3000
           
-          # Run tests with debug logging
-          PWDEBUG=console npx playwright test tests/e2e/auth/login.spec.js --project=chromium-desktop
+          # Run tests in headless mode
+          npx playwright test tests/e2e/auth/login.spec.js --project=chromium-desktop
         env:
           BASE_URL: http://localhost:3000
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
