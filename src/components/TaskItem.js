@@ -15,6 +15,11 @@ const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete }) => 
     transition: {
       duration: 150,
       easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+    },
+    // Reduce activation delay to make dragging more responsive
+    activationConstraint: {
+      delay: 100,
+      tolerance: 5
     }
   });
 

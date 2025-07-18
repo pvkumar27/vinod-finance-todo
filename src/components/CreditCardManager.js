@@ -119,21 +119,28 @@ const CreditCardManager = () => {
   return (
     <div className="p-6 bg-white rounded-lg shadow-lg">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h2 className="text-2xl font-bold">Credit Cards</h2>
+        <h2 className="text-2xl font-bold text-blue-700 flex items-center">
+          <span className="mr-2">💳</span>
+          Credit Cards
+        </h2>
         <div className="flex flex-wrap items-center gap-3 w-full sm:w-auto">
-          <div className="flex bg-gray-100 rounded-lg p-1 w-full sm:w-auto">
+          <div className="flex bg-gray-100 rounded-full p-1 w-full sm:w-auto shadow-inner">
             <button
               onClick={() => setViewMode('cards')}
-              className={`px-3 py-1 rounded text-sm transition-colors flex-1 sm:flex-auto ${
-                viewMode === 'cards' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600 hover:text-gray-900'
+              className={`px-4 py-2 rounded-full text-sm transition-all flex-1 sm:flex-auto ${
+                viewMode === 'cards' 
+                  ? 'bg-white shadow-md text-blue-600 font-medium' 
+                  : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               📋 Cards
             </button>
             <button
               onClick={() => setViewMode('table')}
-              className={`px-3 py-1 rounded text-sm transition-colors flex-1 sm:flex-auto ${
-                viewMode === 'table' ? 'bg-white shadow-sm text-blue-600' : 'text-gray-600 hover:text-gray-900'
+              className={`px-4 py-2 rounded-full text-sm transition-all flex-1 sm:flex-auto ${
+                viewMode === 'table' 
+                  ? 'bg-white shadow-md text-blue-600 font-medium' 
+                  : 'text-gray-600 hover:text-gray-900'
               }`}
             >
               📊 Table
@@ -153,8 +160,9 @@ const CreditCardManager = () => {
             />
             <button
               onClick={() => setShowForm(!showForm)}
-              className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 flex-1 sm:flex-auto"
+              className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors flex-1 sm:flex-auto text-sm font-medium shadow-md flex items-center justify-center"
             >
+              <span className="mr-1">{showForm ? '✖️' : '➕'}</span>
               {showForm ? 'Cancel' : 'Add Card'}
             </button>
           </div>
