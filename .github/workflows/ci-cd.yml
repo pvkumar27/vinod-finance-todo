@@ -39,10 +39,9 @@ jobs:
           restore-keys: |
             playwright-${{ runner.os }}-
       
-      # Install browsers only if cache miss
+      # Install all Playwright browsers
       - name: Install Playwright browsers
-        if: steps.playwright-cache.outputs.cache-hit != 'true'
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install --with-deps
       
       # Start the app in background
       - name: Build app
