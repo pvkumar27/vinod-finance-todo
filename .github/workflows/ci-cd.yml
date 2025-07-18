@@ -117,9 +117,9 @@ jobs:
           done
           echo "Server is responding at http://localhost:3000"
           
-          # Create a simple test page with a form
+          # Create a JavaScript-enabled test page with a form
           mkdir -p public_test
-          cp tests/e2e/mock-app/simple-form.html public_test/index.html
+          cp tests/e2e/mock-app/js-form.html public_test/index.html
           
           # Wait a bit more to ensure the server is fully ready
           echo "Waiting 5 more seconds to ensure server is fully ready"

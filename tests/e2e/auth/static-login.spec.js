@@ -5,12 +5,18 @@
  */
 const { test, expect } = require('@playwright/test');
 
-test('should find login form in static HTML', async ({ page }) => {
+test('should find login form with JavaScript enabled', async ({ page }) => {
   // Go to login page
   await page.goto(process.env.BASE_URL || 'http://localhost:3000', { timeout: 30000 });
 
+  // Wait for JavaScript to execute
+  await page.waitForTimeout(1000);
+
   // Take screenshot
   await page.screenshot({ path: 'tests/reports/static-login.png' });
+
+  // Wait for form to be created by JavaScript
+  await page.waitForSelector('form', { timeout: 5000 });
 
   // Verify login form is displayed
   await expect(page.locator('form')).toBeVisible();
