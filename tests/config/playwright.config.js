@@ -41,7 +41,7 @@ module.exports = defineConfig({
     // Base URL for all tests - Default to localhost for all environments
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
 
-    // Always run in headless mode
+    // Run in headless mode by default
     headless: true,
 
     // Collect trace when retrying the failed test
@@ -81,7 +81,6 @@ module.exports = defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         viewport: { width: 1280, height: 800 },
-        headless: true,
       },
     },
   ],
