@@ -79,8 +79,8 @@ test.describe('Authentication', () => {
       throw new Error('No content inside root - app may be empty');
     }
 
-    // Wait for any element to appear first
-    await page.waitForSelector('body *', { timeout: 20000 });
+    // Skip waiting for body elements since we already verified root content
+    console.log('Skipping body element check since root content is verified');
 
     // Try to find login form with more flexible selectors
     console.log('Looking for login form elements...');
