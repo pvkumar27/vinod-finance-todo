@@ -46,14 +46,7 @@ jobs:
       # Start the app in background
       - name: Build app
         run: |
-          echo "Checking required environment variables:"
-          
-          # Use dummy values for CI/CD if real ones aren't available
-          if [ -z "$REACT_APP_SUPABASE_URL" ] || [ -z "$REACT_APP_SUPABASE_ANON_KEY" ]; then
-            echo "WARNING: Using dummy Supabase values for CI/CD"
-            export REACT_APP_SUPABASE_URL="https://dummy-project.supabase.co"
-            export REACT_APP_SUPABASE_ANON_KEY="dummy-key-for-ci-cd-testing-only"
-          fi
+          echo "Using Supabase credentials from repository secrets"
           
           echo "Building app with environment variables:"
           echo "REACT_APP_SUPABASE_URL=$REACT_APP_SUPABASE_URL"
@@ -91,9 +84,9 @@ jobs:
         run: |
           echo "Starting server on port 3000"
           
-          # Use simple HTML form for testing
-          echo "Using simple HTML form for testing"
-          npx serve public_test -l 3000 > server.log 2>&1 &
+          # Use real React app
+          echo "Using real React app"
+          npx serve -s build -l 3000 > server.log 2>&1 &
           
           echo $! > server.pid
           sleep 5
@@ -117,9 +110,7 @@ jobs:
           done
           echo "Server is responding at http://localhost:3000"
           
-          # Create a JavaScript-enabled test page with a form
-          mkdir -p public_test
-          cp tests/e2e/mock-app/js-form.html public_test/index.html
+          # No need for test page, using real React app
           
           # Wait a bit more to ensure the server is fully ready
           echo "Waiting 5 more seconds to ensure server is fully ready"
@@ -150,9 +141,9 @@ jobs:
             echo "Server needs to be (re)started"
             # Kill any process that might be using port 3000
             lsof -ti:3000 | xargs kill -9 2>/dev/null || true
-            # Use simple HTML form for testing
-            echo "Using simple HTML form for testing"
-            npx serve public_test -l 3000 > server_restart.log 2>&1 &
+            # Use real React app
+            echo "Using real React app"
+            npx serve -s build -l 3000 > server_restart.log 2>&1 &
             echo $! > server.pid
             echo "Started new server with PID $(cat server.pid)"
             sleep 10
@@ -182,9 +173,18 @@ jobs:
           fi
           echo "Environment variables check passed"
           
-          # Run static login test
-          echo "Running static login test..."
-          DEBUG=pw:api npx playwright test tests/e2e/auth/static-login.spec.js
+          # Run real app tests
+          echo "Running app initialization check..."
+          DEBUG=pw:api npx playwright test tests/e2e/utils/app-init-check.spec.js
+          
+          # Only run login test if app initialization check passes
+          if [ $? -eq 0 ]; then
+            echo "App initialization check passed, running login test..."
+            DEBUG=pw:api npx playwright test tests/e2e/auth/login.spec.js
+          else
+            echo "App initialization check failed, skipping login test"
+            exit 1
+          fi
         env:
           BASE_URL: "http://localhost:3000"
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
