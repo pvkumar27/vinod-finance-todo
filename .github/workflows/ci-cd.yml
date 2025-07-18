@@ -25,13 +25,13 @@ jobs:
       - name: Run unit tests
         run: npm test -- --watchAll=false
         env:
-          REACT_APP_SUPABASE_URL: https://test.supabase.co
-          REACT_APP_SUPABASE_ANON_KEY: test-key
-          REACT_APP_SITE_URL: http://localhost:3000
+          REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
+          REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
+          REACT_APP_SITE_URL: ${{ secrets.REACT_APP_SITE_URL || 'http://localhost:3000' }}
       
       # Cache Playwright browsers
       - name: Cache Playwright browsers
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
@@ -50,6 +50,7 @@ jobs:
         env:
           REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
           REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
+          REACT_APP_SITE_URL: ${{ secrets.REACT_APP_SITE_URL || 'http://localhost:3000' }}
       
       - name: Start local server and detect port
         run: |
