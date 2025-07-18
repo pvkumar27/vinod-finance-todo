@@ -1,5 +1,17 @@
 # 📋 Release Notes - FinTask
 
+## v2.2.12 - 2025-07-19
+### 🎨 UI Improvements
+- **Homepage Redesign**: Made tab navigation the primary visual focus
+- **Dashboard Cards**: Reduced prominence of dashboard cards for cleaner UI
+- **Consistent Styling**: Applied uniform styling across all tabs (To-Dos, Credit Cards, Finances)
+- **Task Management**: Made task cards more compact with reduced width and padding
+- **Drag and Drop**: Fixed delay issue in task drag and drop functionality
+- **Visual Hierarchy**: Improved overall visual hierarchy and user experience
+- **Mobile Optimization**: Enhanced responsive behavior on smaller screens
+
+---
+
 ## v2.2.11 - 2025-07-18
 ### 🚀 Release
 - **Version Update**: v2.2.11
