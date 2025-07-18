@@ -51,19 +51,29 @@ jobs:
           REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
           REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
       
-      - name: Start local server
-        run: npx serve -s build &
-        env:
-          PORT: 3000
+      - name: Start local server and detect port
+        run: |
+          # Start server and capture output to get the port
+          npx serve -s build > server_output.log 2>&1 &
+          SERVER_PID=$!
+          sleep 3
+          
+          # Extract the port from the server output
+          SERVER_PORT=$(grep -o 'http://localhost:[0-9]\+' server_output.log | head -1 | cut -d':' -f3)
+          if [ -z "$SERVER_PORT" ]; then
+            SERVER_PORT=3000  # Fallback to default port
+          fi
+          echo "Server running on port: $SERVER_PORT"
+          echo "SERVER_PORT=$SERVER_PORT" >> $GITHUB_ENV
       
       # Wait for server to start and login form to be ready
       - name: Wait for server and login form
         run: |
           timeout=60
-          while ! curl -s http://localhost:3000 | grep -q 'form'; do
+          while ! curl -s http://localhost:$SERVER_PORT | grep -q 'Auth\|FinTask\|supabase\|input'; do
             if [ $timeout -le 0 ]; then
               echo "Server started but login form not found"
-              curl -s http://localhost:3000 > page_content.html
+              curl -s http://localhost:$SERVER_PORT > page_content.html
               echo "Page content saved to page_content.html"
               exit 1
             fi
@@ -77,7 +87,7 @@ jobs:
       - name: Run login tests
         run: npx playwright test tests/e2e/auth/login.spec.js --project=chromium-desktop
         env:
-          BASE_URL: http://localhost:3000
+          BASE_URL: http://localhost:${{ env.SERVER_PORT }}
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
           TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
       
