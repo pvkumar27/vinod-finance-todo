@@ -38,7 +38,7 @@ This document outlines the complete CI/CD process and branch strategy for the Fi
 
 ### Workflows
 
-The project uses three GitHub Actions workflows:
+The project uses the following GitHub Actions workflows:
 
 1. **CI/CD Pipeline** (`ci-cd.yml`)
    - Runs unit tests
