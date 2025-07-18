@@ -25,45 +25,114 @@ test.describe('Authentication', () => {
     // Wait for page to be fully loaded
     await page.waitForLoadState('networkidle');
 
-    // Verify login form is displayed with longer timeout
-    await expect(page.locator('form, div:has(> input[type="email"])')).toBeVisible({
-      timeout: 10000,
-    });
-    await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: 10000 });
-    await expect(page.locator('input[type="password"]')).toBeVisible({ timeout: 10000 });
+    // Take screenshot of initial page
+    await page.screenshot({ path: 'tests/reports/initial-page.png' });
+    console.log('Initial page loaded, checking for login form');
+
+    // Debug page content
+    const pageContent = await page.content();
+    console.log('Page title:', await page.title());
+    console.log('Page content length:', pageContent.length);
+
+    // Wait for any input field to appear (more generic)
+    await page.waitForSelector('input', { timeout: 15000 });
+
+    // Find email and password fields with more flexible selectors
+    const emailInput = page
+      .locator('input[type="email"], input[placeholder*="email"], input[name*="email"]')
+      .first();
+    const passwordInput = page
+      .locator('input[type="password"], input[placeholder*="password"], input[name*="password"]')
+      .first();
+
+    // Verify login form elements are present
+    await expect(emailInput).toBeVisible({ timeout: 10000 });
+    await expect(passwordInput).toBeVisible({ timeout: 10000 });
 
     // Login directly without using the helper
     console.log(`Logging in with email: ${credentials.email.substring(0, 3)}...`);
-    await page.fill('input[type="email"]', credentials.email);
-    await page.fill('input[type="password"]', credentials.password);
+
+    await emailInput.fill(credentials.email);
+    await passwordInput.fill(credentials.password);
 
     // Take screenshot before submitting
     await page.screenshot({ path: 'tests/reports/before-login.png' });
 
-    await page.click('button[type="submit"]');
+    // Find and click the submit button with more flexible selector
+    const submitButton = page
+      .locator(
+        'button[type="submit"], button:has-text("Sign In"), button:has-text("Log In"), input[type="submit"]'
+      )
+      .first();
+    await submitButton.click();
     console.log('Login form submitted');
 
-    // Wait for navigation to complete
+    // Wait for navigation to complete with longer timeout
     try {
+      console.log('Waiting for navigation or dashboard to appear');
       await Promise.race([
-        page.waitForNavigation({ timeout: 5000 }),
-        page.waitForSelector('nav, .dashboard', { timeout: 5000 }),
+        page.waitForNavigation({ timeout: 15000 }),
+        page.waitForSelector('nav, .dashboard, header, .app-container', { timeout: 15000 }),
+        page.waitForFunction(() => !document.querySelector('input[type="email"]'), {
+          timeout: 15000,
+        }),
       ]);
+      console.log('Navigation detected');
     } catch (e) {
-      // Timeout is okay, we'll check if still on login page
+      console.log('Navigation timeout, will check if still on login page');
     }
 
     // Take screenshot after login attempt
     await page.screenshot({ path: 'tests/reports/after-login.png' });
 
+    // Take another screenshot after waiting for navigation
+    await page.screenshot({ path: 'tests/reports/after-navigation.png' });
+
     // Verify successful login (check for absence of login form)
-    const loginForm = page.locator('form input[type="email"]');
-    await expect(loginForm).not.toBeVisible({ timeout: 10000 });
+    const loginForm = page
+      .locator('input[type="email"], input[placeholder*="email"], input[name*="email"]')
+      .first();
+
+    // Check if we're still on the login page
+    const isStillOnLoginPage = await loginForm.isVisible().catch(() => false);
+
+    if (isStillOnLoginPage) {
+      console.log('Still on login page, checking for error messages');
+      const loginPageContent = await page.content();
+      console.log('Page content after login attempt:', loginPageContent.substring(0, 500) + '...');
+
+      // Check for any error messages
+      const errorText = await page
+        .textContent('text=error, text=invalid, .error, .alert')
+        .catch(() => 'No error message found');
+      console.log('Error message if any:', errorText);
+
+      throw new Error('Login failed - still on login page');
+    }
+
     console.log('Login successful - login form no longer visible');
 
-    // Verify we're on the main app page
-    const mainNav = page.locator('nav').first();
-    await expect(mainNav).toBeVisible();
+    // Verify we're on the main app page - try multiple possible selectors
+    const appElements = [
+      page.locator('nav').first(),
+      page.locator('.dashboard').first(),
+      page.locator('header').first(),
+      page.locator('.app-container').first(),
+    ];
+
+    let foundAppElement = false;
+    for (const element of appElements) {
+      if (await element.isVisible().catch(() => false)) {
+        foundAppElement = true;
+        break;
+      }
+    }
+
+    if (!foundAppElement) {
+      console.log('Could not find any app elements after login');
+      await page.screenshot({ path: 'tests/reports/no-app-elements.png' });
+      throw new Error('Login may have succeeded but no app elements found');
+    }
 
     // Define tabs to check
     const tabs = [

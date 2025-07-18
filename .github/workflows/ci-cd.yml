@@ -57,15 +57,24 @@ jobs:
           # Start server and capture output to get the port
           npx serve -s build > server_output.log 2>&1 &
           SERVER_PID=$!
-          sleep 3
+          sleep 5
+          
+          # Debug server output
+          echo "Server output:"
+          cat server_output.log
           
           # Extract the port from the server output
           SERVER_PORT=$(grep -o 'http://localhost:[0-9]\+' server_output.log | head -1 | cut -d':' -f3)
           if [ -z "$SERVER_PORT" ]; then
+            echo "Could not detect port from server output, using default port 3000"
             SERVER_PORT=3000  # Fallback to default port
           fi
           echo "Server running on port: $SERVER_PORT"
           echo "SERVER_PORT=$SERVER_PORT" >> $GITHUB_ENV
+          
+          # Verify server is accessible
+          echo "Checking if server is accessible:"
+          curl -v http://localhost:$SERVER_PORT
       
       # Wait for server to start and login form to be ready
       - name: Wait for server and login form
@@ -86,7 +95,14 @@ jobs:
       
       # Run login tests with just chromium against local server
       - name: Run login tests
-        run: npx playwright test tests/e2e/auth/login.spec.js --project=chromium-desktop
+        run: |
+          # Debug environment
+          echo "Running tests with BASE_URL=http://localhost:$SERVER_PORT"
+          echo "Testing server accessibility:"
+          curl -I http://localhost:$SERVER_PORT
+          
+          # Run the tests with debug logging
+          PWDEBUG=console npx playwright test tests/e2e/auth/login.spec.js --project=chromium-desktop --debug
         env:
           BASE_URL: http://localhost:${{ env.SERVER_PORT }}
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
