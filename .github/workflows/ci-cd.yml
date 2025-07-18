@@ -49,11 +49,20 @@ jobs:
           echo "Building app with environment variables:"
           echo "REACT_APP_SUPABASE_URL=${{ secrets.REACT_APP_SUPABASE_URL }}"
           echo "REACT_APP_SITE_URL=${{ secrets.REACT_APP_SITE_URL || 'http://localhost:3000' }}"
+          
+          # Create .env file for build
+          echo "REACT_APP_SUPABASE_URL=${{ secrets.REACT_APP_SUPABASE_URL }}" > .env
+          echo "REACT_APP_SUPABASE_ANON_KEY=${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}" >> .env
+          echo "REACT_APP_SITE_URL=http://localhost:3000" >> .env
+          echo "REACT_APP_FIREBASE_API_KEY=${{ secrets.REACT_APP_FIREBASE_API_KEY || 'dummy-key' }}" >> .env
+          
+          # Build with explicit environment variables
           npm run build
         env:
           REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
           REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
-          REACT_APP_SITE_URL: ${{ secrets.REACT_APP_SITE_URL || 'http://localhost:3000' }}
+          REACT_APP_SITE_URL: "http://localhost:3000"
+          REACT_APP_FIREBASE_API_KEY: ${{ secrets.REACT_APP_FIREBASE_API_KEY || 'dummy-key' }}
       
       # Check build output
       - name: Check build output
@@ -72,10 +81,8 @@ jobs:
       - name: Start local server
         run: |
           echo "Starting server on port 3000"
-          # Use a simple http server instead of serve
-          cd build
-          python3 -m http.server 3000 > ../server.log 2>&1 &
-          cd ..
+          # Use serve with SPA mode (-s flag)
+          npx serve -s build -l 3000 > server.log 2>&1 &
           echo $! > server.pid
           sleep 10
           echo "Server process ID: $(cat server.pid)"
@@ -126,10 +133,8 @@ jobs:
             echo "Server needs to be (re)started"
             # Kill any process that might be using port 3000
             lsof -ti:3000 | xargs kill -9 2>/dev/null || true
-            # Start a new server
-            cd build
-            python3 -m http.server 3000 > ../server_restart.log 2>&1 &
-            cd ..
+            # Start a new server with serve (SPA mode)
+            npx serve -s build -l 3000 > server_restart.log 2>&1 &
             echo $! > server.pid
             echo "Started new server with PID $(cat server.pid)"
             sleep 10
@@ -159,12 +164,25 @@ jobs:
           fi
           echo "Environment variables check passed"
           
-          # Run tests in headless mode (default)
-          DEBUG=pw:api npx playwright test tests/e2e/auth/login.spec.js
+          # Run app initialization check first
+          echo "Running app initialization check..."
+          DEBUG=pw:api npx playwright test tests/e2e/utils/app-init-check.spec.js
+          
+          # Only run further tests if app initialization check passes
+          if [ $? -eq 0 ]; then
+            echo "App initialization check passed, running login test..."
+            DEBUG=pw:api npx playwright test tests/e2e/auth/login.spec.js
+          else
+            echo "App initialization check failed, skipping login test"
+            exit 1
+          fi
         env:
           BASE_URL: "http://localhost:3000"
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
           TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+          REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
+          REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
+          REACT_APP_FIREBASE_API_KEY: ${{ secrets.REACT_APP_FIREBASE_API_KEY || 'dummy-key' }}
       
       # Ensure reports directory exists
       - name: Ensure reports directory exists
