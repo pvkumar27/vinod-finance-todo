@@ -13,7 +13,6 @@ The `main` branch is protected with the following rules:
    - Required status checks:
      - CI/CD Pipeline
      - E2E Tests
-     - Local E2E Tests
      - Branch Protection Check
 
 2. **Include administrators**
@@ -34,7 +33,6 @@ To set up branch protection:
    - Search for and select the status checks:
      - CI/CD Pipeline
      - E2E Tests
-     - Local E2E Tests
      - Branch Protection Check
    - Check "Include administrators"
 7. Click "Create" or "Save changes"
@@ -45,7 +43,6 @@ The branch protection is enforced by GitHub Actions workflows:
 
 - `ci-cd.yml`: Runs unit tests and builds the app
 - `e2e-tests.yml`: Runs full login test against a local server
-- `local-e2e-tests.yml`: Runs full login test against a local server (alternative configuration)
 - `branch-protection.yml`: Checks if branches are up to date with main
 
 Note: Currently, only the login test is run as part of CI/CD. Other tests are not yet ready for automated execution.
