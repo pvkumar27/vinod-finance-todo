@@ -1,0 +1,89 @@
+name: E2E Tests
+
+on:
+  push:
+    branches: [ main, 'feature/*', 'hotfix/*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    timeout-minutes: 30
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Install Playwright Browsers
+      run: npx playwright install --with-deps chromium
+    
+    # Build the app
+    - name: Build app
+      run: |
+        # Create .env file for build
+        echo "REACT_APP_SUPABASE_URL=$REACT_APP_SUPABASE_URL" > .env
+        echo "REACT_APP_SUPABASE_ANON_KEY=$REACT_APP_SUPABASE_ANON_KEY" >> .env
+        echo "REACT_APP_SITE_URL=http://localhost:3000" >> .env
+        echo "REACT_APP_FIREBASE_API_KEY=${REACT_APP_FIREBASE_API_KEY:-dummy-key}" >> .env
+        
+        # Build the app
+        npm run build
+      env:
+        REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
+        REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
+        REACT_APP_SITE_URL: "http://localhost:3000"
+        REACT_APP_FIREBASE_API_KEY: ${{ secrets.REACT_APP_FIREBASE_API_KEY || 'dummy-key' }}
+    
+    # Start local server
+    - name: Start local server
+      run: |
+        echo "Starting server on port 3000"
+        npx serve -s build -l 3000 > server.log 2>&1 &
+        echo $! > server.pid
+        
+        # Wait for server to start
+        timeout=30
+        while ! curl -s http://localhost:3000 > /dev/null; do
+          if [ $timeout -le 0 ]; then
+            echo "Server failed to start"
+            exit 1
+          fi
+          echo "Waiting for server to start... ($timeout seconds left)"
+          sleep 1
+          timeout=$((timeout - 1))
+        done
+        echo "Server is responding at http://localhost:3000"
+        sleep 5
+    
+    # Run app initialization test
+    - name: Run app initialization test
+      run: npx playwright test tests/e2e/auth/login.spec.js --project=chromium-desktop
+      env:
+        BASE_URL: "http://localhost:3000"
+        REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
+        REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
+    
+    # Upload test reports
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: playwright-report
+        path: tests/reports/
+        retention-days: 30
+    
+    # Upload server logs
+    - name: Upload server logs
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: server-logs
+        path: server.log
+        retention-days: 5

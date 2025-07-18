@@ -1,0 +1,29 @@
+name: Branch Protection Check
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Branch Protection Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Check if branch is up to date
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          MERGE_BASE=$(git merge-base origin/${{ github.base_ref }} HEAD)
+          BASE_HEAD=$(git rev-parse origin/${{ github.base_ref }})
+          
+          if [ "$MERGE_BASE" != "$BASE_HEAD" ]; then
+            echo "::error::Branch is not up to date with ${{ github.base_ref }}. Please merge or rebase."
+            exit 1
+          else
+            echo "Branch is up to date with ${{ github.base_ref }}."
+          fi

@@ -1,36 +1,67 @@
 # Branch Protection Setup
 
-To enforce CI/CD checks before merging to main, follow these steps to set up branch protection rules in GitHub:
+This document outlines how branch protection is set up for the FinTask repository.
 
-1. Go to your repository on GitHub
-2. Click on "Settings" tab
-3. In the left sidebar, click on "Branches"
+## Branch Protection Rules
+
+### Main Branch Protection
+
+The `main` branch is protected with the following rules:
+
+1. **Require status checks to pass before merging**
+   - Require branches to be up to date before merging
+   - Required status checks:
+     - CI/CD Pipeline
+     - E2E Tests
+     - Local E2E Tests
+     - Branch Protection Check
+
+2. **Include administrators**
+   - Apply these rules to repository administrators as well
+
+## Setting Up Branch Protection
+
+To set up branch protection:
+
+1. Go to the repository on GitHub
+2. Click on "Settings"
+3. Select "Branches" from the left sidebar
 4. Under "Branch protection rules", click "Add rule"
-5. In "Branch name pattern", enter `main`
-6. Enable the following options:
-   - ✅ Require a pull request before merging
-   - ✅ Require status checks to pass before merging
-   - ✅ Require branches to be up to date before merging
-7. In the "Status checks that are required" search box, search for and select:
-   - `test` (from CI/CD Pipeline)
-   - `test-local` (from Test Local Environment)
-8. Enable these additional options:
-   - ✅ Include administrators
-   - ✅ Restrict who can push to matching branches
-9. Click "Create" or "Save changes"
+5. Enter "main" as the branch name pattern
+6. Configure the protection settings:
+   - Check "Require status checks to pass before merging"
+   - Check "Require branches to be up to date before merging"
+   - Search for and select the status checks:
+     - CI/CD Pipeline
+     - E2E Tests
+     - Local E2E Tests
+     - Branch Protection Check
+   - Check "Include administrators"
+7. Click "Create" or "Save changes"
 
-This configuration ensures:
-- All changes to main must go through a pull request
-- CI/CD checks must pass before merging
-- Even repository administrators must follow these rules
-- Branches must be up to date with main before merging
+## Workflow Enforcement
 
-## Workflow for Feature Development
+The branch protection is enforced by GitHub Actions workflows:
 
-1. Create a feature branch: `git checkout -b feature/your-feature-name`
-2. Make changes and commit them
-3. Push to GitHub: `git push -u origin feature/your-feature-name`
-4. Create a Pull Request to main
-5. Wait for CI/CD checks to pass
-6. Merge the PR
-7. CI/CD will automatically run on main after merge
+- `ci-cd.yml`: Runs unit tests and builds the app
+- `e2e-tests.yml`: Runs app initialization test against a local server
+- `local-e2e-tests.yml`: Runs app initialization test against a local server (alternative configuration)
+- `branch-protection.yml`: Checks if branches are up to date with main
+
+Note: Currently, only the app initialization test is run as part of CI/CD. Other tests are not yet ready for automated execution.
+
+## Pull Request Process
+
+1. Create a feature branch from `main`
+2. Make your changes
+3. Push your branch and create a pull request
+4. Wait for all status checks to pass
+5. Merge the pull request
+
+## Troubleshooting
+
+If you encounter issues with branch protection:
+
+1. Check that your branch is up to date with `main`
+2. Verify that all required status checks are passing
+3. Check for any merge conflicts

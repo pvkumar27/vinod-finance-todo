@@ -1,5 +1,9 @@
 # FinTask
 
+[![CI/CD Pipeline](https://github.com/username/vinod-finance-todo/actions/workflows/ci-cd.yml/badge.svg)](https://github.com/username/vinod-finance-todo/actions/workflows/ci-cd.yml)
+[![E2E Tests](https://github.com/username/vinod-finance-todo/actions/workflows/e2e-tests.yml/badge.svg)](https://github.com/username/vinod-finance-todo/actions/workflows/e2e-tests.yml)
+[![Local E2E Tests](https://github.com/username/vinod-finance-todo/actions/workflows/local-e2e-tests.yml/badge.svg)](https://github.com/username/vinod-finance-todo/actions/workflows/local-e2e-tests.yml)
+
 A Progressive Web App for managing finances and to-dos.
 
 ## 🧪 End-to-End Testing
@@ -81,6 +85,17 @@ The project uses GitHub Actions for continuous integration and deployment:
 - **Local Testing**: All tests run against a local server in CI
 - **Release Process**: Automated version bumping, changelog updates, and tagging
 - **Netlify Deployment**: Auto-deploys from the `main` branch
+
+### Branch Protection Rules
+The repository has the following branch protection rules for the `main` branch:
+
+- **Require pull request reviews**: At least 1 review is required
+- **Require status checks to pass**: All CI/CD checks must pass
+- **Require branches to be up to date**: Branches must be up-to-date with the base branch
+- **Include administrators**: Rules apply to administrators too
+- **Restrict who can push**: Only specific users can push directly to protected branches
+
+For detailed setup instructions, see [Branch Protection Documentation](docs/BRANCH_PROTECTION.md)
 
 ### Manual Release
 ```bash
