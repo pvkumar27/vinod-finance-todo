@@ -34,22 +34,22 @@ const TabNavigation = () => {
 
   return (
     <div className="w-full">
-      {/* Tab Headers */}
-      <div className="border-b border-gray-100 overflow-x-auto">
-        <nav className="flex flex-nowrap min-w-full">
+      {/* Tab Headers - Now more prominent */}
+      <div className="overflow-x-auto mb-2">
+        <nav className="flex flex-nowrap min-w-full bg-gray-50 rounded-lg p-2">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center space-x-2 py-4 px-4 sm:px-6 border-b-3 font-medium text-sm transition-all duration-200 whitespace-nowrap ${
+              className={`flex items-center justify-center space-x-2 py-4 px-4 sm:px-8 font-medium text-sm transition-all duration-200 whitespace-nowrap rounded-lg flex-1 ${
                 activeTab === tab.id
-                  ? 'border-primary-500 text-primary-600 bg-primary-50'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 hover:bg-gray-50'
+                  ? 'bg-white text-blue-600 shadow-md border-b-2 border-blue-500'
+                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
               }`}
             >
-              <span className="text-lg">{tab.icon}</span>
-              <span className="hidden sm:inline">{tab.label}</span>
-              <span className="sm:hidden text-xs">{tab.shortLabel}</span>
+              <span className="text-xl">{tab.icon}</span>
+              <span className="hidden sm:inline font-medium">{tab.label}</span>
+              <span className="sm:hidden text-xs font-medium">{tab.shortLabel}</span>
             </button>
           ))}
         </nav>
