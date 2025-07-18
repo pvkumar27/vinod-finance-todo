@@ -44,11 +44,11 @@ To set up branch protection:
 The branch protection is enforced by GitHub Actions workflows:
 
 - `ci-cd.yml`: Runs unit tests and builds the app
-- `e2e-tests.yml`: Runs app initialization test against a local server
-- `local-e2e-tests.yml`: Runs app initialization test against a local server (alternative configuration)
+- `e2e-tests.yml`: Runs full login test against a local server
+- `local-e2e-tests.yml`: Runs full login test against a local server (alternative configuration)
 - `branch-protection.yml`: Checks if branches are up to date with main
 
-Note: Currently, only the app initialization test is run as part of CI/CD. Other tests are not yet ready for automated execution.
+Note: Currently, only the login test is run as part of CI/CD. Other tests are not yet ready for automated execution.
 
 ## Pull Request Process
 
