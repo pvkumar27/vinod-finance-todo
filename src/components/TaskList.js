@@ -18,7 +18,7 @@ const TaskList = ({ tasks, onToggleComplete, onTogglePin, onEdit, onDelete }) =>
       items={tasks.map(task => task.id)} 
       strategy={verticalListSortingStrategy}
     >
-      <div className="space-y-0">
+      <div className="space-y-0.5">
         {tasks.map((task) => (
           <div key={task.id} data-id={task.id} className="task-item">
             <TaskItem
