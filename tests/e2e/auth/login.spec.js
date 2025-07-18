@@ -24,10 +24,8 @@ test.describe('Authentication', () => {
       throw new Error('BASE_URL is not set. Check workflow and secrets!');
     }
 
-    // Log the base URL being used
-    const baseUrl = page.context().browser().options.baseURL || 'No baseURL set';
+    // Log environment info
     console.log('\n\n==== TEST ENVIRONMENT INFO ====');
-    console.log(`Using baseURL: ${baseUrl}`);
     console.log(`Environment BASE_URL: ${process.env.BASE_URL}`);
     console.log(`TEST_USER_EMAIL defined: ${!!process.env.TEST_USER_EMAIL}`);
     console.log(`TEST_USER_PASSWORD defined: ${!!process.env.TEST_USER_PASSWORD}`);
