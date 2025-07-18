@@ -46,19 +46,28 @@ jobs:
       
       # Start the app in background
       - name: Build app
-        run: npm run build
+        run: |
+          echo "Building app with environment variables:"
+          echo "REACT_APP_SUPABASE_URL=${{ secrets.REACT_APP_SUPABASE_URL }}"
+          echo "REACT_APP_SITE_URL=${{ secrets.REACT_APP_SITE_URL || 'http://localhost:3000' }}"
+          npm run build
         env:
           REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
           REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
           REACT_APP_SITE_URL: ${{ secrets.REACT_APP_SITE_URL || 'http://localhost:3000' }}
       
       - name: Start local server
-        run: npx serve -s build &
-        env:
-          PORT: 3000
+        run: |
+          echo "Starting server on port 3000"
+          npx serve -s build --listen 3000 > server.log 2>&1 &
+          echo $! > server.pid
+          sleep 5
+          echo "Server process ID: $(cat server.pid)"
+          echo "Server log:"
+          cat server.log
       
-      # Wait for server to start
-      - name: Wait for server
+      # Wait for server to start and verify content
+      - name: Wait for server and verify content
         run: |
           timeout=30
           while ! curl -s http://localhost:3000 > /dev/null; do
@@ -70,11 +79,41 @@ jobs:
             sleep 1
             timeout=$((timeout - 1))
           done
-          echo "Server is running at http://localhost:3000"
+          echo "Server is responding at http://localhost:3000"
+          
+          # Verify server is serving HTML content
+          echo "Checking server response content:"
+          curl -s http://localhost:3000 > server_response.html
+          
+          # Check if response contains expected HTML elements
+          if grep -q "<html" server_response.html && grep -q "<body" server_response.html && grep -q "<div id=\"root\"" server_response.html; then
+            echo "Server is serving proper HTML content"
+            head -20 server_response.html
+          else
+            echo "WARNING: Server response doesn't contain expected HTML elements"
+            cat server_response.html
+            echo "Server log:"
+            cat server.log
+          fi
       
       # Run login tests with just chromium against local server
       - name: Run login tests
-        run: npx playwright test tests/e2e/auth/login.spec.js --project=chromium-desktop
+        run: |
+          # Verify server is still running
+          if ! ps -p $(cat server.pid) > /dev/null; then
+            echo "ERROR: Server process is not running!"
+            echo "Restarting server..."
+            npx serve -s build --listen 3000 > server_restart.log 2>&1 &
+            echo $! > server.pid
+            sleep 5
+          fi
+          
+          # Check server response again
+          echo "Checking server before running tests:"
+          curl -I http://localhost:3000
+          
+          # Run tests with debug logging
+          PWDEBUG=console npx playwright test tests/e2e/auth/login.spec.js --project=chromium-desktop
         env:
           BASE_URL: http://localhost:3000
           TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}

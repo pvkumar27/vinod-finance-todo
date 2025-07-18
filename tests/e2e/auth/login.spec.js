@@ -25,6 +25,9 @@ test.describe('Authentication', () => {
     // Wait for page to be fully loaded
     await page.waitForLoadState('networkidle');
 
+    // Take screenshot of initial page
+    await page.screenshot({ path: 'tests/reports/01-initial-page.png' });
+
     // Verify login form is displayed
     await expect(page.locator('form')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('input[type="email"]')).toBeVisible({ timeout: 10000 });
@@ -33,6 +36,10 @@ test.describe('Authentication', () => {
     // Login directly without using the helper
     await page.fill('input[type="email"]', credentials.email);
     await page.fill('input[type="password"]', credentials.password);
+
+    // Take screenshot before submitting
+    await page.screenshot({ path: 'tests/reports/02-before-submit.png' });
+
     await page.click('button[type="submit"]');
 
     // Wait for navigation to complete
@@ -45,6 +52,9 @@ test.describe('Authentication', () => {
       // Timeout is okay, we'll check if still on login page
     }
 
+    // Take screenshot after navigation
+    await page.screenshot({ path: 'tests/reports/03-after-navigation.png' });
+
     // Verify successful login (check for absence of login form)
     const loginForm = page.locator('form input[type="email"]');
     await expect(loginForm).not.toBeVisible({ timeout: 10000 });
@@ -52,6 +62,9 @@ test.describe('Authentication', () => {
     // Verify we're on the main app page
     const mainNav = page.locator('nav').first();
     await expect(mainNav).toBeVisible();
+
+    // Take screenshot of main app page
+    await page.screenshot({ path: 'tests/reports/04-main-app.png' });
 
     // Define tabs to check
     const tabs = [

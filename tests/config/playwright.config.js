@@ -41,6 +41,12 @@ module.exports = defineConfig({
     // Base URL for all tests - Default to localhost for all environments
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
 
+    // Navigation timeout - increase for CI environments
+    navigationTimeout: 30000,
+
+    // Wait for page load state
+    waitForNavigation: 'networkidle',
+
     // Run in headless mode by default
     headless: true,
 
