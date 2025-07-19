@@ -9,6 +9,7 @@ on:
 
 jobs:
   e2e_test:
+    name: E2E Test
     timeout-minutes: 30
     runs-on: ubuntu-latest
     steps:
