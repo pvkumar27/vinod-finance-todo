@@ -158,21 +158,22 @@ The app uses Plaid for bank account integration. For testing:
 3. Select any bank account to connect
 4. Credit cards will be imported with the 🏦 Plaid Synced badge
 
-## 🔔 Push Notifications
+## 🔔 Daily Notifications
 
-The app uses Firebase Cloud Messaging (FCM) for push notifications:
+The app uses Firebase Spark (Free) Plan for daily notifications:
 
 ### Daily Task Reminders
-- Automatically sends notifications at 8:00 AM in the user's local timezone
-- Summarizes tasks due within the next 24 hours
-- Groups multiple tasks into a single notification
-- Supports both iOS and Android devices with platform-specific features
-- Handles badge counts on iOS and notification channels on Android
+- Sends notifications at 8:00 AM Central Time via GitHub Actions scheduler
+- Email notification with detailed task list via Firebase Extension: Trigger Email
+- Push notification via Firebase Cloud Messaging (FCM)
+- Supports both iOS and Android devices
+- Works within Firebase Spark Plan free limits
 
 ### Setup
-1. Enable Firebase Cloud Messaging in your Firebase project
-2. Deploy the Cloud Functions: `cd functions && npm run deploy`
-3. Ensure users have granted notification permissions in the app
+1. Install the "Trigger Email" extension from Firebase Console
+2. Deploy the HTTP-triggered Cloud Function: `cd functions && npm run deploy`
+3. Set up environment variables (see `.env.notification.example`)
+4. Configure GitHub Actions secrets for the daily trigger
 
 ## 📁 Project Structure
 ```

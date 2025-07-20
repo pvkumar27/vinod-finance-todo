@@ -1,195 +1,168 @@
+/**
+ * Firebase Cloud Functions for FinTask - Spark Plan Compatible
+ * 
+ * This implementation uses:
+ * 1. HTTP trigger function (compatible with Spark plan)
+ * 2. Firebase Extension: Trigger Email
+ * 3. Firebase Cloud Messaging (FCM)
+ */
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const moment = require('moment-timezone');
 
 admin.initializeApp();
 
 /**
- * Helper function to create platform-specific notification payloads
- * @param {string} title - Notification title
- * @param {string} body - Notification body
- * @param {number} taskCount - Number of tasks
- * @param {string} deviceType - 'ios' or 'android'
- * @return {Object} Notification payload
+ * HTTP triggered function that sends daily task reminders
+ * Can be triggered by a scheduled HTTP request (e.g., from GitHub Actions)
  */
-function createNotificationPayload(title, body, taskCount, deviceType) {
-  // Common payload for both platforms
-  const payload = {
-    notification: {
-      title: title,
-      body: body,
-    },
-    data: {
-      type: 'DAILY_TASKS',
-      taskCount: taskCount.toString(),
-      click_action: 'FLUTTER_NOTIFICATION_CLICK', // For Flutter apps
-    },
-  };
-  
-  // iOS specific configurations
-  if (deviceType === 'ios') {
-    payload.apns = {
-      payload: {
-        aps: {
-          sound: 'default',
-          badge: taskCount,
-          content_available: true,
-          mutable_content: true,
-          category: 'TASK_REMINDER',
-        },
-      },
-      fcm_options: {
-        image: 'https://fintask.netlify.app/icons/icon-192x192.png',
-      },
-    };
+exports.sendDailyTaskReminders = functions.https.onRequest(async (req, res) => {
+  try {
+    // Basic auth check - use API key for security
+    const apiKey = req.query.key || req.headers.authorization?.split('Bearer ')[1];
+    if (apiKey !== process.env.NOTIFICATION_API_KEY) {
+      console.error('Unauthorized request to sendDailyTaskReminders');
+      return res.status(401).send('Unauthorized');
+    }
+
+    // Get current date range (today)
+    const now = admin.firestore.Timestamp.now();
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+    
+    const startTimestamp = admin.firestore.Timestamp.fromDate(startOfDay);
+    const endTimestamp = admin.firestore.Timestamp.fromDate(endOfDay);
+
+    // Query for incomplete tasks due today
+    const db = admin.firestore();
+    const tasksSnapshot = await db.collection('todos')
+      .where('completed', '==', false)
+      .where('dueDate', '>=', startTimestamp)
+      .where('dueDate', '<=', endTimestamp)
+      .get();
+
+    if (tasksSnapshot.empty) {
+      console.log('No tasks due today');
+      return res.status(200).send('No tasks due today');
+    }
+
+    // Collect task information
+    const tasks = tasksSnapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        title: data.title || 'Untitled Task',
+        dueDate: data.dueDate?.toDate() || null,
+      };
+    });
+
+    // Send email notification using Trigger Email extension
+    await sendEmailNotification(tasks);
+    
+    // Send push notification using FCM
+    await sendPushNotification(tasks.length);
+
+    console.log(`Sent notifications for ${tasks.length} tasks`);
+    return res.status(200).send(`Sent notifications for ${tasks.length} tasks`);
+  } catch (error) {
+    console.error('Error sending notifications:', error);
+    return res.status(500).send(`Error: ${error.message}`);
   }
+});
+
+/**
+ * Send email notification using Firebase Extension: Trigger Email
+ * @param {Array} tasks - List of tasks
+ */
+async function sendEmailNotification(tasks) {
+  const db = admin.firestore();
   
-  // Android specific configurations
-  if (deviceType === 'android') {
-    payload.android = {
-      priority: 'high',
-      notification: {
-        sound: 'default',
-        priority: 'high',
-        channel_id: 'task_reminders',
-        icon: 'notification_icon',
-        color: '#4285F4',
-      },
-    };
-  }
+  // Format tasks for email
+  const taskListHtml = tasks.map(task => {
+    const dueDate = task.dueDate 
+      ? `(Due: ${task.dueDate.toLocaleDateString()})` 
+      : '';
+    return `<li>${task.title} ${dueDate}</li>`;
+  }).join('');
+
+  // Create email using the Trigger Email extension
+  await db.collection('mail').add({
+    to: process.env.NOTIFICATION_EMAIL || 'user@example.com',
+    message: {
+      subject: '📝 Your FinTask To-Dos for Today',
+      html: `
+        <h2>Your FinTask To-Dos for Today</h2>
+        <p>You have ${tasks.length} pending task(s) for today:</p>
+        <ul>
+          ${taskListHtml}
+        </ul>
+        <p>Open FinTask to manage your tasks.</p>
+      `,
+      text: `Your FinTask To-Dos for Today\n\nYou have ${tasks.length} pending task(s) for today:\n\n${
+        tasks.map(task => `- ${task.title} ${task.dueDate ? `(Due: ${task.dueDate.toLocaleDateString()})` : ''}`).join('\n')
+      }\n\nOpen FinTask to manage your tasks.`
+    }
+  });
   
-  return payload;
+  console.log('Email notification sent');
 }
 
 /**
- * Scheduled function that runs daily at 8:00 AM in each timezone
- * and sends notifications for tasks due within 24 hours
+ * Send push notification using Firebase Cloud Messaging
+ * @param {number} taskCount - Number of tasks
  */
-exports.sendDailyTaskNotifications = functions.pubsub
-    .schedule('0 8 * * *')
-    .timeZone('America/New_York') // Default timezone
-    .onRun(async (context) => {
-      const db = admin.firestore();
-      const messaging = admin.messaging();
-      
-      // Get all users to process by timezone
-      const usersSnapshot = await db.collection('users').get();
-      
-      for (const userDoc of usersSnapshot.docs) {
-        try {
-          const userData = userDoc.data();
-          const userId = userDoc.id;
-          const userTimezone = userData.timezone || 'America/New_York';
-          
-          // Check if it's 8:00 AM in the user's timezone
-          const userTime = moment().tz(userTimezone);
-          const userHour = userTime.hour();
-          
-          // Only proceed if it's 8:00 AM (±30 min) in the user's timezone
-          if (userHour < 7 || userHour > 8) {
-            continue;
+async function sendPushNotification(taskCount) {
+  try {
+    const db = admin.firestore();
+    
+    // Get device token from Firestore
+    const tokenSnapshot = await db.collection('userTokens')
+      .limit(1) // Only need one token for the single user
+      .get();
+    
+    if (tokenSnapshot.empty) {
+      console.log('No FCM token found');
+      return;
+    }
+    
+    const token = tokenSnapshot.docs[0].data().token;
+    const deviceType = tokenSnapshot.docs[0].data().deviceType || 'android';
+    
+    // Create notification message
+    const message = {
+      notification: {
+        title: '🔔 FinTask Reminder',
+        body: 'You have pending To-Dos. Open FinTask to view them.'
+      },
+      token: token
+    };
+    
+    // Add platform-specific configurations
+    if (deviceType === 'ios') {
+      message.apns = {
+        payload: {
+          aps: {
+            sound: 'default',
+            badge: taskCount
           }
-          
-          // Calculate the time range for tasks due in the next 24 hours
-          const now = admin.firestore.Timestamp.now();
-          const tomorrow = admin.firestore.Timestamp.fromDate(
-              new Date(Date.now() + 24 * 60 * 60 * 1000)
-          );
-          
-          // Query for tasks due in the next 24 hours for this user
-          const tasksSnapshot = await db.collection('todos')
-              .where('userId', '==', userId)
-              .where('dueDate', '>=', now)
-              .where('dueDate', '<=', tomorrow)
-              .where('completed', '==', false)
-              .get();
-          
-          if (tasksSnapshot.empty) {
-            console.log(`No upcoming tasks for user ${userId}`);
-            continue;
-          }
-          
-          // Collect task information
-          const tasks = tasksSnapshot.docs.map(doc => doc.data().title || 'Untitled Task');
-          const taskCount = tasks.length;
-          
-          // Get the user's FCM tokens (may have multiple devices)
-          const tokenSnapshot = await db.collection('userTokens')
-              .where('userId', '==', userId)
-              .get();
-          
-          if (tokenSnapshot.empty) {
-            console.log(`No FCM tokens found for user ${userId}`);
-            continue;
-          }
-          
-          // Get all tokens and device types
-          const userDevices = tokenSnapshot.docs.map(doc => ({
-            token: doc.data().token,
-            deviceType: doc.data().deviceType || 'android', // Default to android if not specified
-          }));
-          
-          // Create notification content
-          let notificationTitle = '';
-          let notificationBody = '';
-          
-          if (taskCount === 1) {
-            notificationTitle = '1 Task Due Today';
-            notificationBody = `"${tasks[0]}" is due in the next 24 hours.`;
-          } else {
-            notificationTitle = `${taskCount} Tasks Due Today`;
-            notificationBody = `You have ${taskCount} tasks due in the next 24 hours.`;
-            
-            // Add first 3 tasks to the notification
-            if (taskCount <= 3) {
-              notificationBody += ' ' + tasks.map(t => `"${t}"`).join(', ');
-            } else {
-              const firstThree = tasks.slice(0, 3).map(t => `"${t}"`).join(', ');
-              notificationBody += ` Including ${firstThree}, and ${taskCount - 3} more.`;
-            }
-          }
-          
-          // Send notifications to all user devices
-          for (const device of userDevices) {
-            try {
-              // Create platform-specific payload
-              const message = createNotificationPayload(
-                  notificationTitle,
-                  notificationBody,
-                  taskCount,
-                  device.deviceType
-              );
-              
-              // Add the token to the message
-              message.token = device.token;
-              
-              // Send the notification
-              await messaging.send(message);
-              console.log(`Notification sent to user ${userId} on ${device.deviceType} device for ${taskCount} tasks`);
-            } catch (deviceError) {
-              console.error(`Error sending notification to device:`, deviceError);
-              
-              // Check if token is invalid and remove it
-              if (deviceError.code === 'messaging/invalid-registration-token' ||
-                  deviceError.code === 'messaging/registration-token-not-registered') {
-                console.log(`Removing invalid token for user ${userId}`);
-                // Find and delete the token document
-                const invalidTokenDocs = await db.collection('userTokens')
-                    .where('userId', '==', userId)
-                    .where('token', '==', device.token)
-                    .get();
-                
-                for (const doc of invalidTokenDocs.docs) {
-                  await doc.ref.delete();
-                }
-              }
-            }
-          }
-          
-        } catch (error) {
-          console.error(`Error processing user ${userDoc.id}:`, error);
         }
-      }
-      
-      return null;
-    });
+      };
+    } else {
+      message.android = {
+        priority: 'high',
+        notification: {
+          sound: 'default',
+          priority: 'high',
+          channelId: 'task_reminders'
+        }
+      };
+    }
+    
+    // Send the notification
+    await admin.messaging().send(message);
+    console.log('Push notification sent');
+  } catch (error) {
+    console.error('Error sending push notification:', error);
+  }
+}

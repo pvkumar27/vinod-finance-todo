@@ -11,9 +11,9 @@ The `main` branch is protected with the following rules:
 1. **Require status checks to pass before merging**
    - Require branches to be up to date before merging
    - Required status checks:
-     - CI/CD Pipeline
-     - E2E Tests
-     - Branch Protection Check
+     - CI/CD Pipeline / CI Test
+     - E2E Tests / E2E Test
+     - Branch Protection Check / Branch Protection Check
 
 2. **Include administrators**
    - Apply these rules to repository administrators as well
@@ -31,9 +31,9 @@ To set up branch protection:
    - Check "Require status checks to pass before merging"
    - Check "Require branches to be up to date before merging"
    - Search for and select the status checks:
-     - CI/CD Pipeline
-     - E2E Tests
-     - Branch Protection Check
+     - CI/CD Pipeline / CI Test
+     - E2E Tests / E2E Test
+     - Branch Protection Check / Branch Protection Check
    - Check "Include administrators"
 7. Click "Create" or "Save changes"
 

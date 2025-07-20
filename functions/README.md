@@ -1,58 +1,84 @@
-# FinTask Firebase Functions
+# FinTask Firebase Functions (Spark Plan)
 
-This directory contains Firebase Cloud Functions for the FinTask application.
+This directory contains Firebase Cloud Functions for the FinTask application, designed to work with the Firebase Spark (Free) Plan.
 
 ## Functions
 
-### sendDailyTaskNotifications
+### sendDailyTaskReminders
 
-A scheduled function that runs daily at 8:00 AM in each user's local timezone and sends push notifications for tasks due within the next 24 hours.
+An HTTP-triggered function that sends daily task reminders via email and push notification.
 
 #### Features:
-- Respects user's timezone (defaults to America/New_York if not set)
-- Groups multiple tasks into a single notification
-- Only sends notifications if tasks are due within 24 hours
-- Handles errors gracefully for each user
-- Supports both iOS and Android devices with platform-specific payloads
-- Automatically cleans up invalid tokens
+- Works with Firebase Spark (Free) Plan
+- Sends email using Firebase Extension: Trigger Email
+- Sends push notification using Firebase Cloud Messaging (FCM)
+- Supports both iOS and Android devices
+- Securely protected with API key
 
-## Development
+## Setup Requirements
 
-### Prerequisites
-- Node.js 18 or later
-- Firebase CLI: `npm install -g firebase-tools`
+### Firebase Extensions
+1. Install the "Trigger Email" extension from Firebase Console
+   - Go to Firebase Console > Extensions
+   - Find and install "Trigger Email"
+   - Configure with your SMTP settings or use the default provider
 
-### Setup
-1. Install dependencies: `npm install`
-2. Login to Firebase: `firebase login`
-3. Select project: `firebase use --add`
+### Environment Variables
+Set the following environment variables in Firebase Console:
+- `NOTIFICATION_API_KEY`: Secret key to authenticate requests
+- `NOTIFICATION_EMAIL`: Email address to receive notifications
 
-### Local Testing
-```bash
-npm run serve
-```
-
-### Deployment
-```bash
-npm run deploy
-```
-
-## Data Structure
-
-### Required Collections
-
-#### users
-- `id`: User ID
-- `timezone`: User's timezone (e.g., 'America/New_York')
+### Firestore Collections
 
 #### todos
-- `userId`: User ID
-- `title`: Task title
-- `dueDate`: Firestore timestamp
-- `completed`: Boolean
+- `title`: Task title (string)
+- `dueDate`: Due date (timestamp)
+- `completed`: Completion status (boolean)
 
 #### userTokens
-- `userId`: User ID
-- `token`: FCM token for the user's device
-- `deviceType`: Device type ('ios' or 'android')
-- `createdAt`: Timestamp when the token was created
+- `token`: FCM token for the user's device (string)
+- `deviceType`: "ios" or "android" (string)
+
+## Triggering the Function
+
+Since scheduled functions are not available on the Spark plan, you need to trigger this function externally. Options include:
+
+### Option 1: GitHub Actions (Recommended)
+
+Create a GitHub Action workflow to trigger the function daily:
+
+```yaml
+name: Daily Task Notifications
+
+on:
+  schedule:
+    - cron: '0 8 * * *'  # 8:00 AM UTC
+  workflow_dispatch:  # Allow manual trigger
+
+jobs:
+  trigger-notification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger notification function
+        run: |
+          curl -X POST "https://us-central1-[YOUR-PROJECT-ID].cloudfunctions.net/sendDailyTaskReminders?key=${{ secrets.NOTIFICATION_API_KEY }}"
+```
+
+### Option 2: Manual Trigger
+
+You can manually trigger the function by visiting:
+```
+https://us-central1-[YOUR-PROJECT-ID].cloudfunctions.net/sendDailyTaskReminders?key=YOUR_API_KEY
+```
+
+## Deployment
+
+```bash
+firebase deploy --only functions
+```
+
+## Limitations
+
+- The Spark plan allows up to 10 emails per day with the Trigger Email extension
+- The function must be triggered externally (no built-in scheduler on Spark plan)
+- Limited to 125K function invocations per month on Spark plan

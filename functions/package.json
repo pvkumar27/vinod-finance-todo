@@ -1,6 +1,6 @@
 {
   "name": "functions",
-  "description": "Firebase Cloud Functions for FinTask",
+  "description": "Firebase Cloud Functions for FinTask (Spark Plan)",
   "scripts": {
     "lint": "eslint .",
     "serve": "firebase emulators:start --only functions",
@@ -15,8 +15,7 @@
   "main": "index.js",
   "dependencies": {
     "firebase-admin": "^11.8.0",
-    "firebase-functions": "^4.3.1",
-    "moment-timezone": "^0.5.43"
+    "firebase-functions": "^4.3.1"
   },
   "devDependencies": {
     "eslint": "^8.15.0",
