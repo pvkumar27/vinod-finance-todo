@@ -25,8 +25,10 @@ exports.sendDailyTaskReminders = functions.https.onRequest(async (req, res) => {
       return res.status(401).send('Unauthorized');
     }
 
+    // Check if push notifications should be sent
+    const sendPush = req.query.sendPush === 'true';
+
     // Get current date range (today)
-    const now = admin.firestore.Timestamp.now();
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date();
@@ -62,8 +64,10 @@ exports.sendDailyTaskReminders = functions.https.onRequest(async (req, res) => {
     // Send email notification using Trigger Email extension
     await sendEmailNotification(tasks);
 
-    // Send push notification using FCM
-    await sendPushNotification(tasks.length);
+    // Send push notification using FCM if requested or by default
+    if (sendPush !== false) {
+      await sendPushNotification(tasks.length, tasks);
+    }
 
     console.log(`Sent notifications for ${tasks.length} tasks`);
     return res.status(200).send(`Sent notifications for ${tasks.length} tasks`);
@@ -116,59 +120,111 @@ async function sendEmailNotification(tasks) {
 /**
  * Send push notification using Firebase Cloud Messaging
  * @param {number} taskCount - Number of tasks
+ * @param {Array} tasks - Optional array of task objects
  */
-async function sendPushNotification(taskCount) {
+async function sendPushNotification(taskCount, tasks = []) {
   try {
     const db = admin.firestore();
 
-    // Get device token from Firestore
-    const tokenSnapshot = await db
-      .collection('userTokens')
-      .limit(1) // Only need one token for the single user
-      .get();
+    // Get all device tokens from Firestore
+    const tokenSnapshot = await db.collection('userTokens').get();
 
     if (tokenSnapshot.empty) {
-      console.log('No FCM token found');
+      console.log('No FCM tokens found');
       return;
     }
 
-    const token = tokenSnapshot.docs[0].data().token;
-    const deviceType = tokenSnapshot.docs[0].data().deviceType || 'android';
+    // Get task names for notification body
+    let notificationBody = `You have ${taskCount} pending task(s) for today.`;
 
-    // Create notification message
-    const message = {
-      notification: {
-        title: '🔔 FinTask Reminder',
-        body: 'You have pending To-Dos. Open FinTask to view them.',
-      },
-      token: token,
-    };
-
-    // Add platform-specific configurations
-    if (deviceType === 'ios') {
-      message.apns = {
-        payload: {
-          aps: {
-            sound: 'default',
-            badge: taskCount,
-          },
-        },
-      };
-    } else {
-      message.android = {
-        priority: 'high',
-        notification: {
-          sound: 'default',
-          priority: 'high',
-          channelId: 'task_reminders',
-        },
-      };
+    // Add task names if available (limit to 3)
+    if (tasks && tasks.length > 0) {
+      const taskNames = tasks.slice(0, 3).map(task => task.title);
+      if (taskNames.length === 1) {
+        notificationBody = `Task due today: ${taskNames[0]}`;
+      } else if (taskNames.length === 2) {
+        notificationBody = `Tasks due today: ${taskNames[0]} and ${taskNames[1]}`;
+      } else if (taskNames.length === 3) {
+        notificationBody = `Tasks due today: ${taskNames[0]}, ${taskNames[1]}, and more...`;
+      }
     }
 
-    // Send the notification
-    await admin.messaging().send(message);
-    console.log('Push notification sent');
+    // Send to all registered devices
+    const sendPromises = tokenSnapshot.docs.map(async doc => {
+      const tokenData = doc.data();
+      const token = tokenData.token;
+      const deviceType = tokenData.deviceType || 'android';
+
+      if (!token) {
+        console.log('Invalid token data:', tokenData);
+        return;
+      }
+
+      // Create notification message
+      const message = {
+        notification: {
+          title: '🔔 FinTask Daily Reminder',
+          body: notificationBody,
+        },
+        data: {
+          type: 'daily_reminder',
+          taskCount: String(taskCount),
+          timestamp: String(Date.now()),
+        },
+        token: token,
+      };
+
+      // Add platform-specific configurations
+      if (deviceType === 'ios') {
+        message.apns = {
+          payload: {
+            aps: {
+              sound: 'default',
+              badge: taskCount,
+              'content-available': 1,
+            },
+          },
+          fcmOptions: {
+            imageUrl: 'https://finance-to-dos.web.app/icons/official-logo.png',
+          },
+        };
+      } else {
+        message.android = {
+          priority: 'high',
+          notification: {
+            sound: 'default',
+            priority: 'high',
+            channelId: 'task_reminders',
+            icon: 'notification_icon',
+            color: '#4285F4',
+          },
+        };
+      }
+
+      try {
+        // Send the notification
+        await admin.messaging().send(message);
+        console.log(`Push notification sent to ${deviceType} device`);
+        return true;
+      } catch (sendError) {
+        console.error(`Error sending to token ${token}:`, sendError);
+
+        // If the token is invalid, remove it
+        if (
+          sendError.code === 'messaging/invalid-registration-token' ||
+          sendError.code === 'messaging/registration-token-not-registered'
+        ) {
+          await db.collection('userTokens').doc(doc.id).delete();
+          console.log(`Removed invalid token: ${token}`);
+        }
+        return false;
+      }
+    });
+
+    const results = await Promise.all(sendPromises);
+    const successCount = results.filter(Boolean).length;
+    console.log(`Push notifications sent to ${successCount}/${tokenSnapshot.size} devices`);
   } catch (error) {
-    console.error('Error sending push notification:', error);
+    console.error('Error in push notification process:', error);
   }
 }

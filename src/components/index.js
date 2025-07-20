@@ -9,3 +9,4 @@ export { default as CreditCardDashboard } from './CreditCardDashboard';
 export { default as ExpensesDashboard } from './ExpensesDashboard';
 export { default as MyFinancesDashboard } from './MyFinancesDashboard';
 export { default as TodosDashboard } from './TodosDashboard';
+export { default as NotificationSettings } from './NotificationSettings';

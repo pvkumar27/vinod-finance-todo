@@ -11,7 +11,8 @@ jobs:
     steps:
       - name: Trigger notification function
         run: |
-          RESPONSE=$(curl -X POST "https://us-central1-${{ secrets.FIREBASE_PROJECT_ID }}.cloudfunctions.net/sendDailyTaskReminders?key=${{ secrets.NOTIFICATION_API_KEY }}" -s)
+          # Send both email and push notifications
+          RESPONSE=$(curl -X POST "https://us-central1-${{ secrets.FIREBASE_PROJECT_ID }}.cloudfunctions.net/sendDailyTaskReminders?key=${{ secrets.NOTIFICATION_API_KEY }}&sendPush=true" -s)
           echo "Function response: $RESPONSE"
           if [[ "$RESPONSE" == *"Sent notifications"* ]]; then
             echo "✅ Notifications sent successfully"
