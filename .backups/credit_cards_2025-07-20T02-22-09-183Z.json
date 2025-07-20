@@ -1,0 +1,21 @@
+[
+  {
+    "id": "6dacf775-988b-488d-afea-1b71d105b5e6",
+    "user_id": "55a76048-3516-41e0-a72a-04f29ef3f518",
+    "card_name": "chase1323",
+    "bank_name": "ggr",
+    "is_active": true,
+    "last_used_date": null,
+    "bt_promo_available": false,
+    "purchase_promo_available": false,
+    "promo_end_date": null,
+    "reminder_days_before": 7,
+    "is_autopay_setup": false,
+    "balance": 0,
+    "notes": "",
+    "created_at": "2025-07-17T12:16:43.392463+00:00",
+    "owner": "self",
+    "sync_source": "Manual",
+    "plaid_account_id": null
+  }
+]

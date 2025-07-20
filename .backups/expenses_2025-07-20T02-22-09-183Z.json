@@ -1,0 +1,30 @@
+[
+  {
+    "id": "5fd7525d-8c2d-4cfa-80bf-2be28e750031",
+    "user_id": "55a76048-3516-41e0-a72a-04f29ef3f518",
+    "date": "2025-07-17T00:00:00",
+    "category": "Food",
+    "description": "rterter",
+    "amount": 6000,
+    "type": "expense",
+    "created_at": "2025-07-17T12:17:05.31387",
+    "updated_at": "2025-07-17T12:17:05.31387",
+    "is_income": false,
+    "owner": "self",
+    "sync_source": "Manual"
+  },
+  {
+    "id": "d006e9e7-5856-4dff-a577-2f3c5ac7af64",
+    "user_id": "55a76048-3516-41e0-a72a-04f29ef3f518",
+    "date": "2025-07-17T00:00:00",
+    "category": "Salary",
+    "description": "ddfgdgdf",
+    "amount": 7000,
+    "type": "income",
+    "created_at": "2025-07-17T12:17:21.783567",
+    "updated_at": "2025-07-17T12:17:21.783567",
+    "is_income": true,
+    "owner": "self",
+    "sync_source": "Plaid"
+  }
+]
