@@ -20,7 +20,7 @@ exports.sendDailyTaskReminders = functions.https.onRequest(async (req, res) => {
     // Basic auth check - use API key for security
     const apiKey =
       req.query.key || (req.headers.authorization && req.headers.authorization.split('Bearer ')[1]);
-    if (apiKey !== process.env.NOTIFICATION_API_KEY) {
+    if (apiKey !== functions.config().notification?.api_key) {
       console.error('Unauthorized request to sendDailyTaskReminders');
       return res.status(401).send('Unauthorized');
     }
@@ -90,7 +90,7 @@ async function sendEmailNotification(tasks) {
 
   // Create email using the Trigger Email extension
   await db.collection('mail').add({
-    to: process.env.NOTIFICATION_EMAIL || 'user@example.com',
+    to: functions.config().notification?.email || 'user@example.com',
     message: {
       subject: '📝 Your FinTask To-Dos for Today',
       html: `
