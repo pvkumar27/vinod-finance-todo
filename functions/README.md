@@ -6,27 +6,19 @@ This directory contains Firebase Cloud Functions for the FinTask application, de
 
 ### sendDailyTaskReminders
 
-An HTTP-triggered function that sends daily task reminders via email and push notification.
+An HTTP-triggered function that sends daily task reminders via push notification.
 
 #### Features:
 - Works with Firebase Spark (Free) Plan
-- Sends email using Firebase Extension: Trigger Email
 - Sends push notification using Firebase Cloud Messaging (FCM)
 - Supports both iOS and Android devices
 - Securely protected with API key
 
 ## Setup Requirements
 
-### Firebase Extensions
-1. Install the "Trigger Email" extension from Firebase Console
-   - Go to Firebase Console > Extensions
-   - Find and install "Trigger Email"
-   - Configure with your SMTP settings or use the default provider
-
 ### Environment Variables
 Set the following environment variables in Firebase Console:
 - `NOTIFICATION_API_KEY`: Secret key to authenticate requests
-- `NOTIFICATION_EMAIL`: Email address to receive notifications
 
 ### Firestore Collections
 
@@ -79,6 +71,5 @@ firebase deploy --only functions
 
 ## Limitations
 
-- The Spark plan allows up to 10 emails per day with the Trigger Email extension
 - The function must be triggered externally (no built-in scheduler on Spark plan)
 - Limited to 125K function invocations per month on Spark plan

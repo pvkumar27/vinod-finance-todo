@@ -3,8 +3,7 @@
  * 
  * This implementation uses:
  * 1. HTTP trigger function (compatible with Spark plan)
- * 2. Firebase Extension: Trigger Email
- * 3. Firebase Cloud Messaging (FCM)
+ * 2. Firebase Cloud Messaging (FCM) for push notifications
  */
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
@@ -57,9 +56,6 @@ exports.sendDailyTaskReminders = functions.https.onRequest(async (req, res) => {
       };
     });
 
-    // Send email notification using Trigger Email extension
-    await sendEmailNotification(tasks);
-    
     // Send push notification using FCM
     await sendPushNotification(tasks.length);
 
@@ -70,43 +66,6 @@ exports.sendDailyTaskReminders = functions.https.onRequest(async (req, res) => {
     return res.status(500).send(`Error: ${error.message}`);
   }
 });
-
-/**
- * Send email notification using Firebase Extension: Trigger Email
- * @param {Array} tasks - List of tasks
- */
-async function sendEmailNotification(tasks) {
-  const db = admin.firestore();
-  
-  // Format tasks for email
-  const taskListHtml = tasks.map(task => {
-    const dueDate = task.dueDate 
-      ? `(Due: ${task.dueDate.toLocaleDateString()})` 
-      : '';
-    return `<li>${task.title} ${dueDate}</li>`;
-  }).join('');
-
-  // Create email using the Trigger Email extension
-  await db.collection('mail').add({
-    to: process.env.NOTIFICATION_EMAIL || 'user@example.com',
-    message: {
-      subject: '📝 Your FinTask To-Dos for Today',
-      html: `
-        <h2>Your FinTask To-Dos for Today</h2>
-        <p>You have ${tasks.length} pending task(s) for today:</p>
-        <ul>
-          ${taskListHtml}
-        </ul>
-        <p>Open FinTask to manage your tasks.</p>
-      `,
-      text: `Your FinTask To-Dos for Today\n\nYou have ${tasks.length} pending task(s) for today:\n\n${
-        tasks.map(task => `- ${task.title} ${task.dueDate ? `(Due: ${task.dueDate.toLocaleDateString()})` : ''}`).join('\n')
-      }\n\nOpen FinTask to manage your tasks.`
-    }
-  });
-  
-  console.log('Email notification sent');
-}
 
 /**
  * Send push notification using Firebase Cloud Messaging
