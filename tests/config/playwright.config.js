@@ -56,8 +56,8 @@ module.exports = defineConfig({
     // Take screenshot only on failure
     screenshot: 'only-on-failure',
 
-    // Record video only on failure
-    video: 'on-first-retry',
+    // Record video for all tests
+    video: 'on',
 
     // Browser viewport size
     viewport: { width: 1280, height: 720 },
