@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  check:
+  branch_protection_check:
     name: Branch Protection Check
     runs-on: ubuntu-latest
     steps:
