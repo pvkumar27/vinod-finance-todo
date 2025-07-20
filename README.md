@@ -160,13 +160,13 @@ The app uses Plaid for bank account integration. For testing:
 
 ## 🔔 Daily Notifications
 
-The app uses Firebase Spark (Free) Plan for daily notifications:
+The app uses Firebase Blaze Plan (staying within free tier limits) for daily notifications:
 
 ### Daily Task Reminders
 - Sends notifications at 8:00 AM Central Time via GitHub Actions scheduler
 - Push notification via Firebase Cloud Messaging (FCM)
 - Supports both iOS and Android devices
-- Works within Firebase Spark Plan free limits
+- Works within Firebase free tier limits (costs $0/month)
 
 ### Setup
 1. Deploy the HTTP-triggered Cloud Function: `cd functions && npm run deploy`

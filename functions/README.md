@@ -1,24 +1,31 @@
-# FinTask Firebase Functions (Spark Plan)
+# FinTask Firebase Functions
 
-This directory contains Firebase Cloud Functions for the FinTask application, designed to work with the Firebase Spark (Free) Plan.
+This directory contains Firebase Cloud Functions for the FinTask application.
 
 ## Functions
 
 ### sendDailyTaskReminders
 
-An HTTP-triggered function that sends daily task reminders via push notification.
+An HTTP-triggered function that sends daily task reminders via email and push notification.
 
 #### Features:
-- Works with Firebase Spark (Free) Plan
+- Sends email using Firebase Extension: Trigger Email
 - Sends push notification using Firebase Cloud Messaging (FCM)
 - Supports both iOS and Android devices
 - Securely protected with API key
 
 ## Setup Requirements
 
+### Firebase Extensions
+1. Install the "Trigger Email" extension from Firebase Console
+   - Go to Firebase Console > Extensions
+   - Find and install "Trigger Email"
+   - Configure with your SMTP settings or use the default provider
+
 ### Environment Variables
 Set the following environment variables in Firebase Console:
 - `NOTIFICATION_API_KEY`: Secret key to authenticate requests
+- `NOTIFICATION_EMAIL`: Email address to receive notifications
 
 ### Firestore Collections
 
@@ -33,7 +40,7 @@ Set the following environment variables in Firebase Console:
 
 ## Triggering the Function
 
-Since scheduled functions are not available on the Spark plan, you need to trigger this function externally. Options include:
+You can trigger this function in several ways:
 
 ### Option 1: GitHub Actions (Recommended)
 
@@ -69,7 +76,11 @@ https://us-central1-[YOUR-PROJECT-ID].cloudfunctions.net/sendDailyTaskReminders?
 firebase deploy --only functions
 ```
 
-## Limitations
+## Cost Management
 
-- The function must be triggered externally (no built-in scheduler on Spark plan)
-- Limited to 125K function invocations per month on Spark plan
+This implementation uses the Blaze plan but stays within free tier limits:
+- Functions: 2M invocations/month free (you'll use ~30)
+- Firestore: 50K reads/20K writes/20K deletes per day free
+- FCM: Unlimited free notifications
+
+Set a budget alert in Firebase Console to be notified if you ever exceed free tier.
