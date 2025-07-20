@@ -1,22 +1,22 @@
 import { supabase } from '../supabaseClient';
-
-// Don't initialize Firebase in test environment
-let app;
-let db;
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, doc, setDoc } from 'firebase/firestore';
+import { firebaseConfig } from '../firebase-config';
 
 // Check if we're in a test environment
 const isTestEnv = process.env.NODE_ENV === 'test';
 
-// Only initialize Firebase if not in test environment
+// Initialize Firebase conditionally
+let app;
+let db;
+
 if (!isTestEnv && typeof window !== 'undefined') {
-  import('firebase/app').then(({ initializeApp }) => {
-    import('firebase/firestore').then(({ getFirestore }) => {
-      import('../firebase-config').then(({ firebaseConfig }) => {
-        app = initializeApp(firebaseConfig);
-        db = getFirestore(app);
-      });
-    });
-  });
+  try {
+    app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+  } catch (error) {
+    console.error('Error initializing Firebase:', error);
+  }
 }
 
 /**
@@ -50,21 +50,14 @@ export const saveUserToken = async token => {
       return true;
     }
     
+    // Check if Firebase is initialized
+    if (!app || !db) {
+      console.error('Firebase not initialized');
+      return false;
+    }
+    
     // Generate a unique ID for this token
     const tokenId = `${user.id}-${Date.now()}`;
-    
-    // Dynamically import Firebase if needed
-    if (!app || !db) {
-      const { initializeApp } = await import('firebase/app');
-      const { getFirestore, collection, doc, setDoc } = await import('firebase/firestore');
-      const { firebaseConfig } = await import('../firebase-config');
-      
-      app = initializeApp(firebaseConfig);
-      db = getFirestore(app);
-    } else {
-      // Import only what we need for the operation
-      const { collection, doc, setDoc } = await import('firebase/firestore');
-    }
     
     // Save to userTokens collection with a unique ID
     await setDoc(doc(collection(db, 'userTokens'), tokenId), {
