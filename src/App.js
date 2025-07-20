@@ -3,7 +3,12 @@ import { AuthForm } from './components';
 import { Navbar } from './layout';
 import { Home } from './pages';
 import { supabase } from './supabaseClient';
-import { requestNotificationPermission, setupForegroundMessageListener } from './utils/notifications';
+import {
+  requestNotificationPermission,
+  setupForegroundMessageListener,
+} from './utils/notifications';
+import { saveUserToken } from './utils/tokenStorage';
+import { registerMessagingServiceWorker } from './utils/serviceWorkerUtils';
 import './App.css';
 
 function App() {
@@ -23,7 +28,7 @@ function App() {
     } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
       setLoading(false);
-      
+
       // Setup push notifications when user logs in
       if (session) {
         initializePushNotifications();
@@ -35,14 +40,20 @@ function App() {
 
   const initializePushNotifications = async () => {
     try {
+      // Register Firebase messaging service worker
+      await registerMessagingServiceWorker();
+
       // Request notification permission and get FCM token
       const token = await requestNotificationPermission();
-      
+
       if (token) {
         console.log('Push notification token obtained:', token);
-        // TODO: Send token to your backend to store for the user
+        // Save token to Firestore
+        await saveUserToken(token);
+      } else {
+        console.warn('Failed to obtain FCM token. Push notifications will not work.');
       }
-      
+
       // Setup foreground message listener
       setupForegroundMessageListener();
     } catch (error) {
