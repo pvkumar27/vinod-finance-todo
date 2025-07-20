@@ -55,8 +55,11 @@ export const requestNotificationPermission = async () => {
           vapidKey: vapidKey,
         });
 
-        if (token) {
-          console.log('FCM Token:', token);
+        if (token && typeof token === 'string' && token.length > 20) {
+          console.log(
+            'FCM Token:',
+            token.substring(0, 10) + '...' + token.substring(token.length - 5)
+          );
 
           // Send a test notification to verify it's working
           new Notification('FinTask Notifications Enabled', {
@@ -66,7 +69,7 @@ export const requestNotificationPermission = async () => {
 
           return token;
         } else {
-          console.log('No registration token available.');
+          console.log('No valid registration token available.');
           return null;
         }
       } catch (tokenError) {

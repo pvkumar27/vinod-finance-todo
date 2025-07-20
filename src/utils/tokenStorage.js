@@ -1,4 +1,11 @@
 import { supabase } from '../supabaseClient';
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, doc, setDoc } from 'firebase/firestore';
+import { firebaseConfig } from '../firebase-config';
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 /**
  * Save FCM token to Firestore for the current user
@@ -7,6 +14,11 @@ import { supabase } from '../supabaseClient';
  */
 export const saveUserToken = async token => {
   try {
+    if (!token || typeof token !== 'string' || token.trim() === '') {
+      console.error('Invalid token provided');
+      return false;
+    }
+
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -20,18 +32,11 @@ export const saveUserToken = async token => {
     const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const deviceType = isIOS ? 'ios' : 'android';
 
-    // Save token to Firestore using Firebase SDK
-    // Since we're using Supabase for auth but Firebase for messaging,
-    // we need to use the Firebase SDK directly for this operation
-    const { initializeApp } = await import('firebase/app');
-    const { getFirestore, collection, doc, setDoc } = await import('firebase/firestore');
-    const { firebaseConfig } = await import('../firebase-config');
+    // Generate a unique ID for this token
+    const tokenId = `${user.id}-${Date.now()}`;
 
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-
-    // Save to userTokens collection with user ID as document ID
-    await setDoc(doc(collection(db, 'userTokens'), user.id), {
+    // Save to userTokens collection with a unique ID
+    await setDoc(doc(collection(db, 'userTokens'), tokenId), {
       token,
       userId: user.id,
       email: user.email,
