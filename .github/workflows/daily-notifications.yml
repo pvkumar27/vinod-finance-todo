@@ -1,4 +1,4 @@
-name: Daily Task Notifications
+name: Daily Task Notifications (8:00 AM CT)
 
 on:
   schedule:
