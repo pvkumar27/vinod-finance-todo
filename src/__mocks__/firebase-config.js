@@ -1,10 +1,13 @@
-// Mock Firebase for testing
-export const messaging = {
-  // Add mock methods that return resolved promises
-  getToken: jest.fn().mockResolvedValue('mock-token'),
-  onMessage: jest.fn()
+// Mock Firebase configuration for tests
+export const firebaseConfig = {
+  apiKey: 'mock-api-key',
+  authDomain: 'mock-auth-domain',
+  projectId: 'mock-project-id',
+  storageBucket: 'mock-storage-bucket',
+  messagingSenderId: 'mock-sender-id',
+  appId: 'mock-app-id',
+  measurementId: 'mock-measurement-id'
 };
 
-export const analytics = {
-  logEvent: jest.fn()
-};
+// Mock messaging object
+export const messaging = null;
