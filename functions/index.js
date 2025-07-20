@@ -1,8 +1,8 @@
 /**
- * Firebase Cloud Functions for FinTask - Spark Plan Compatible
+ * Firebase Cloud Functions for FinTask
  * 
  * This implementation uses:
- * 1. HTTP trigger function (compatible with Spark plan)
+ * 1. HTTP trigger function
  * 2. Firebase Extension: Trigger Email
  * 3. Firebase Cloud Messaging (FCM)
  */

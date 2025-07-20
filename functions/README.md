@@ -1,6 +1,6 @@
-# FinTask Firebase Functions (Spark Plan)
+# FinTask Firebase Functions
 
-This directory contains Firebase Cloud Functions for the FinTask application, designed to work with the Firebase Spark (Free) Plan.
+This directory contains Firebase Cloud Functions for the FinTask application.
 
 ## Functions
 
@@ -9,7 +9,6 @@ This directory contains Firebase Cloud Functions for the FinTask application, de
 An HTTP-triggered function that sends daily task reminders via email and push notification.
 
 #### Features:
-- Works with Firebase Spark (Free) Plan
 - Sends email using Firebase Extension: Trigger Email
 - Sends push notification using Firebase Cloud Messaging (FCM)
 - Supports both iOS and Android devices
@@ -41,7 +40,7 @@ Set the following environment variables in Firebase Console:
 
 ## Triggering the Function
 
-Since scheduled functions are not available on the Spark plan, you need to trigger this function externally. Options include:
+You can trigger this function in several ways:
 
 ### Option 1: GitHub Actions (Recommended)
 
@@ -77,8 +76,11 @@ https://us-central1-[YOUR-PROJECT-ID].cloudfunctions.net/sendDailyTaskReminders?
 firebase deploy --only functions
 ```
 
-## Limitations
+## Cost Management
 
-- The Spark plan allows up to 10 emails per day with the Trigger Email extension
-- The function must be triggered externally (no built-in scheduler on Spark plan)
-- Limited to 125K function invocations per month on Spark plan
+This implementation uses the Blaze plan but stays within free tier limits:
+- Functions: 2M invocations/month free (you'll use ~30)
+- Firestore: 50K reads/20K writes/20K deletes per day free
+- FCM: Unlimited free notifications
+
+Set a budget alert in Firebase Console to be notified if you ever exceed free tier.
