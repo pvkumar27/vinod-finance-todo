@@ -164,16 +164,14 @@ The app uses Firebase Blaze Plan (staying within free tier limits) for daily not
 
 ### Daily Task Reminders
 - Sends notifications at 8:00 AM Central Time via GitHub Actions scheduler
-- Email notification with detailed task list via Firebase Extension: Trigger Email
 - Push notification via Firebase Cloud Messaging (FCM)
 - Supports both iOS and Android devices
 - Works within Firebase free tier limits (costs $0/month)
 
 ### Setup
-1. Install the "Trigger Email" extension from Firebase Console
-2. Deploy the HTTP-triggered Cloud Function: `cd functions && npm run deploy`
-3. Set up environment variables (see `.env.notification.example`)
-4. Configure GitHub Actions secrets for the daily trigger
+1. Deploy the HTTP-triggered Cloud Function: `cd functions && npm run deploy`
+2. Set up environment variables in Firebase Console
+3. Configure GitHub Actions secrets for the daily trigger
 
 ## 📁 Project Structure
 ```
