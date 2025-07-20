@@ -158,11 +158,30 @@ The app uses Plaid for bank account integration. For testing:
 3. Select any bank account to connect
 4. Credit cards will be imported with the 🏦 Plaid Synced badge
 
+## 🔔 Push Notifications
+
+The app uses Firebase Cloud Messaging (FCM) for push notifications:
+
+### Daily Task Reminders
+- Automatically sends notifications at 8:00 AM in the user's local timezone
+- Summarizes tasks due within the next 24 hours
+- Groups multiple tasks into a single notification
+- Supports both iOS and Android devices with platform-specific features
+- Handles badge counts on iOS and notification channels on Android
+
+### Setup
+1. Enable Firebase Cloud Messaging in your Firebase project
+2. Deploy the Cloud Functions: `cd functions && npm run deploy`
+3. Ensure users have granted notification permissions in the app
+
 ## 📁 Project Structure
 ```
 /
 ├── public/                # Static assets
 ├── src/                   # Application source code
+├── functions/             # Firebase Cloud Functions
+│   ├── index.js           # Cloud Functions code
+│   └── package.json       # Functions dependencies
 ├── tests/                 # Test files
 │   ├── e2e/               # End-to-end tests
 │   │   ├── auth/          # Authentication tests
@@ -181,5 +200,6 @@ The app uses Plaid for bank account integration. For testing:
 └── .github/workflows/     # GitHub Actions workflows
     ├── ci-cd.yml          # CI/CD pipeline
     ├── e2e-tests.yml      # E2E test workflow
+    ├── package-upgrades.yml # Package upgrade workflow
     └── backup.yml         # Backup workflow
 ```
