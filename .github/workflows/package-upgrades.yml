@@ -1,0 +1,108 @@
+name: Package Upgrades
+
+on:
+  schedule:
+    # Run weekly on Monday at 1:00 AM UTC
+    - cron: '0 1 * * 1'
+  workflow_dispatch:
+    # Allow manual triggering
+
+jobs:
+  upgrade_packages:
+    name: Check & Upgrade Packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Check for outdated packages
+        id: outdated
+        run: |
+          echo "Checking for outdated packages..."
+          npm outdated --json > outdated.json || true
+          
+          # Check if there are any outdated packages
+          if [ -s outdated.json ] && [ "$(cat outdated.json)" != "{}" ]; then
+            echo "Outdated packages found!"
+            echo "has_outdated=true" >> $GITHUB_OUTPUT
+            cat outdated.json
+          else
+            echo "No outdated packages found."
+            echo "has_outdated=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Update non-major versions
+        if: steps.outdated.outputs.has_outdated == 'true'
+        run: |
+          echo "Updating non-major versions..."
+          npx npm-check-updates -u --target minor --doctor --doctorTest "npm test -- --watchAll=false"
+          
+          # Check if any changes were made
+          if git diff --name-only | grep -q "package.json\|package-lock.json"; then
+            echo "Packages were updated!"
+            echo "packages_updated=true" >> $GITHUB_OUTPUT
+          else
+            echo "No packages were updated."
+            echo "packages_updated=false" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Create Pull Request
+        if: steps.outdated.outputs.has_outdated == 'true'
+        id: create-pr
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "chore: update npm packages"
+          title: "📦 Update npm packages"
+          body: |
+            This PR updates npm packages to their latest compatible versions.
+            
+            ## Updates
+            
+            <details>
+            <summary>View package updates</summary>
+            
+            ```
+            $(cat outdated.json)
+            ```
+            
+            </details>
+            
+            This PR was created automatically by the Package Upgrades workflow.
+            It will be auto-merged if all checks pass.
+          branch: deps/package-updates
+          base: main
+          delete-branch: true
+          labels: dependencies, automated-pr
+      
+      - name: Enable Auto-Merge
+        if: steps.create-pr.outputs.pull-request-number
+        run: |
+          PR_NUMBER=${{ steps.create-pr.outputs.pull-request-number }}
+          echo "Enabling auto-merge for PR #${PR_NUMBER}"
+          
+          gh pr merge ${PR_NUMBER} --auto --merge
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Notify on success
+        if: success() && steps.outdated.outputs.has_outdated == 'true'
+        run: |
+          echo "📦 Package update PR created successfully!"
+      
+      - name: Notify on no updates
+        if: success() && steps.outdated.outputs.has_outdated == 'false'
+        run: |
+          echo "✅ All packages are up to date!"
