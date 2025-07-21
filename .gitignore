@@ -57,7 +57,11 @@ yarn-debug.log*
 yarn-error.log*
 tests/reports/index.html
 tests/reports
+/logs/
 
 # Local binaries
 /bin/
 bin/
+
+# Archive folder
+/archive

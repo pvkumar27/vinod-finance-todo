@@ -5,6 +5,12 @@
 
 A Progressive Web App for managing finances and to-dos.
 
+## 📚 Documentation
+
+- [Developer Setup Guide](DEVELOPER_SETUP.md) - Complete setup instructions for new developers
+- [Health Check Summary](HEALTH_CHECK_SUMMARY.md) - Latest repository health check results
+- [Project Guidelines](docs/PWA_Project_Guidelines.md) - Project strategy and guidelines
+
 ## 🧪 End-to-End Testing
 
 Automated E2E testing with Playwright ensures PWA functionality across devices:
