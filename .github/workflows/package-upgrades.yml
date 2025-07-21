@@ -63,7 +63,7 @@ jobs:
         id: create-pr
         uses: peter-evans/create-pull-request@v5
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.ACTIONS_PAT }}
           commit-message: "chore: update npm packages"
           title: "📦 Update npm packages"
           body: |
@@ -95,7 +95,7 @@ jobs:
           
           gh pr merge ${PR_NUMBER} --auto --merge
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ACTIONS_PAT }}
       
       - name: Notify on success
         if: success() && steps.outdated.outputs.has_outdated == 'true'
