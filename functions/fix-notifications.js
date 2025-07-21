@@ -279,7 +279,7 @@ async function runAllSteps() {
     console.log('\n📋 SUMMARY:');
     if (success) {
       console.log('✅ All steps completed successfully!');
-      console.log('✅ Notification system is now working correctly with both today\\'s and overdue tasks.');
+      console.log('✅ Notification system is now working correctly with both today and overdue tasks.');
     } else {
       console.log('⚠️ The notification system is working but may not include all tasks.');
       console.log('⚠️ Check the logs above for more details.');
