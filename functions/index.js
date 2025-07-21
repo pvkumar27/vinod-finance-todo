@@ -5,6 +5,7 @@
  * 1. HTTP trigger function
  * 2. Firebase Extension: Trigger Email
  * 3. Firebase Cloud Messaging (FCM)
+ * 4. Noon motivation notification
  */
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
@@ -172,22 +173,52 @@ exports.sendDailyTaskReminders = functions.https.onRequest(async (req, res) => {
 async function sendEmailNotification(tasks) {
   const db = admin.firestore();
 
-  // Format tasks for email
+  // Format tasks for email with modern styling
   const taskListHtml = tasks
     .map(task => {
       let dueDateStr = '';
+      let dueDateClass = '';
+      
       if (task.dueDate) {
         // Format the date as MM/DD/YYYY
         const month = task.dueDate.getMonth() + 1;
         const day = task.dueDate.getDate();
         const year = task.dueDate.getFullYear();
-        dueDateStr = `(Due: ${month}/${day}/${year})`;
+        dueDateStr = `${month}/${day}/${year}`;
+        
+        // Check if task is overdue
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const dueDate = new Date(task.dueDate);
+        dueDate.setHours(0, 0, 0, 0);
+        
+        if (dueDate < today) {
+          dueDateClass = 'color: #e53e3e; font-weight: 600;'; // Red for overdue
+        } else if (dueDate.getTime() === today.getTime()) {
+          dueDateClass = 'color: #dd6b20; font-weight: 600;'; // Orange for today
+        } else {
+          dueDateClass = 'color: #718096;'; // Gray for future
+        }
       }
-      return `<li>${task.title} ${dueDateStr}</li>`;
+      
+      return `
+        <tr>
+          <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0;">
+            <div style="display: flex; align-items: center;">
+              <span style="margin-right: 8px;">📌</span>
+              <span style="font-weight: 500;">${task.title}</span>
+            </div>
+          </td>
+          <td style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; text-align: right; ${dueDateClass}">
+            ${dueDateStr ? `Due: ${dueDateStr}` : ''}
+          </td>
+        </tr>
+      `;
     })
     .join('');
 
-  // Create email using the Trigger Email extension
+  // Create email using the Trigger Email extension with modern styling
   const emailTo = functions.config().app.email || 'user@example.com';
   console.log(`Sending email notification to: ${emailTo}`);
   await db.collection('mail').add({
@@ -195,12 +226,43 @@ async function sendEmailNotification(tasks) {
     message: {
       subject: '📝 Your FinTask To-Dos: Due Today & Overdue',
       html: `
-        <h2>Your FinTask To-Dos: Due Today & Overdue</h2>
-        <p>You have ${tasks.length} pending task(s) that need attention:</p>
-        <ul>
-          ${taskListHtml}
-        </ul>
-        <p>Open FinTask to manage your tasks.</p>
+        <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
+          <div style="background-color: #4299e1; padding: 20px; border-radius: 8px 8px 0 0; text-align: center;">
+            <h1 style="color: white; margin: 0; font-size: 24px;">📝 Your Daily Tasks</h1>
+          </div>
+          
+          <div style="background-color: #ffffff; padding: 24px; border-radius: 0 0 8px 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+            <p style="font-size: 16px; margin-bottom: 24px; color: #4a5568;">
+              You have <strong>${tasks.length} pending task${tasks.length !== 1 ? 's' : ''}</strong> that need attention:
+            </p>
+            
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 24px; background-color: #f7fafc; border-radius: 8px; overflow: hidden;">
+              <thead>
+                <tr>
+                  <th style="padding: 12px 16px; text-align: left; background-color: #edf2f7; border-bottom: 2px solid #e2e8f0; color: #4a5568; font-size: 14px;">
+                    Task
+                  </th>
+                  <th style="padding: 12px 16px; text-align: right; background-color: #edf2f7; border-bottom: 2px solid #e2e8f0; color: #4a5568; font-size: 14px;">
+                    Due Date
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                ${taskListHtml}
+              </tbody>
+            </table>
+            
+            <div style="text-align: center; margin-top: 24px;">
+              <a href="https://finance-to-dos.web.app" style="display: inline-block; background-color: #4299e1; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 600; font-size: 16px;">
+                Open FinTask
+              </a>
+            </div>
+            
+            <p style="font-size: 14px; color: #718096; margin-top: 24px; text-align: center;">
+              Stay productive and organized with FinTask!
+            </p>
+          </div>
+        </div>
       `,
       text: `Your FinTask To-Dos: Due Today & Overdue\n\nYou have ${tasks.length} pending task(s) that need attention:\n\n${tasks
         .map(task => {
@@ -213,7 +275,7 @@ async function sendEmailNotification(tasks) {
           }
           return `- ${task.title} ${dueDateStr}`;
         })
-        .join('\n')}\n\nOpen FinTask to manage your tasks.`,
+        .join('\n')}\n\nOpen FinTask to manage your tasks: https://finance-to-dos.web.app`,
     },
   });
 
@@ -354,5 +416,217 @@ async function sendPushNotification(taskCount, tasks = []) {
     console.log(`Push notifications sent to ${successCount}/${sendPromises.length} devices`);
   } catch (error) {
     console.error('Error in push notification process:', error);
+  }
+}
+
+/**
+ * HTTP triggered function that sends noon motivation notifications
+ * Can be triggered by a scheduled HTTP request (e.g., from GitHub Actions)
+ */
+exports.sendNoonMotivation = functions.https.onRequest(async (req, res) => {
+  try {
+    // Basic auth check - use API key for security
+    const apiKey =
+      req.query.key || (req.headers.authorization && req.headers.authorization.split('Bearer ')[1]);
+    if (apiKey !== functions.config().app.key) {
+      console.error('Unauthorized request to sendNoonMotivation');
+      return res.status(401).send('Unauthorized');
+    }
+
+    // Get the user ID from the config
+    const userId = functions.config().app.user_id || '370621bf-3d54-4c3f-ae21-97a30062b0f9';
+    console.log(`Sending noon motivation for user: ${userId}`);
+    
+    // Initialize Supabase client
+    const supabase = initSupabase();
+    if (!supabase) {
+      console.error('Failed to initialize Supabase client');
+      return res.status(500).send('Failed to initialize Supabase client');
+    }
+    
+    // Get today's date
+    const now = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+    
+    // Query Supabase for completed tasks today
+    const { data: completedTasks, error: completedError } = await supabase
+      .from('todos')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('completed', true)
+      .gte('updated_at', `${todayStr}T00:00:00.000Z`)
+      .lte('updated_at', `${todayStr}T23:59:59.999Z`);
+    
+    if (completedError) {
+      console.error('Error querying completed tasks:', completedError);
+      return res.status(500).send(`Error: ${completedError.message}`);
+    }
+    
+    // Query Supabase for pending tasks
+    const { data: pendingTasks, error: pendingError } = await supabase
+      .from('todos')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('completed', false);
+    
+    if (pendingError) {
+      console.error('Error querying pending tasks:', pendingError);
+      return res.status(500).send(`Error: ${pendingError.message}`);
+    }
+    
+    const completedCount = completedTasks?.length || 0;
+    const pendingCount = pendingTasks?.length || 0;
+    
+    console.log(`User has completed ${completedCount} tasks today and has ${pendingCount} pending tasks`);
+    
+    // Send the motivation notification
+    await sendMotivationNotification(completedCount, pendingCount);
+    
+    return res.status(200).send(`Sent noon motivation notification. Completed: ${completedCount}, Pending: ${pendingCount}`);
+  } catch (error) {
+    console.error('Error sending noon motivation:', error);
+    return res.status(500).send(`Error: ${error.message}`);
+  }
+});
+
+/**
+ * Send motivation push notification using Firebase Cloud Messaging
+ * @param {number} completedCount - Number of tasks completed today
+ * @param {number} pendingCount - Number of pending tasks
+ */
+async function sendMotivationNotification(completedCount, pendingCount) {
+  try {
+    const db = admin.firestore();
+
+    // Get all device tokens from Firestore
+    const tokenSnapshot = await db.collection('userTokens').get();
+
+    if (tokenSnapshot.empty) {
+      console.log('No FCM tokens found');
+      return;
+    }
+
+    // Create a motivational message based on completed tasks
+    let title = '🌟 FinTask Midday Check-in';
+    let body;
+    
+    if (completedCount >= 4) {
+      body = `Amazing! You've completed ${completedCount} tasks today. Keep up the great work!`;
+    } else if (completedCount > 0) {
+      body = `You've completed ${completedCount} task${completedCount === 1 ? '' : 's'} today. Can you complete at least 4 before the day ends?`;
+    } else {
+      body = `Time to get started! Try to complete at least 4 tasks today. You can do it!`;
+    }
+
+    // Group tokens by user ID
+    const tokensByUser = {};
+    tokenSnapshot.docs.forEach(doc => {
+      const data = doc.data();
+      const userId = data.userId;
+      if (!userId) return;
+      
+      if (!tokensByUser[userId]) {
+        tokensByUser[userId] = [];
+      }
+      tokensByUser[userId].push({
+        token: data.token,
+        deviceType: data.deviceType || 'android'
+      });
+    });
+
+    // Send one notification per user
+    const sendPromises = [];
+    for (const userId in tokensByUser) {
+      const userTokens = tokensByUser[userId];
+      
+      // Send to each device for this user
+      for (const tokenData of userTokens) {
+        const { token, deviceType } = tokenData;
+        
+        if (!token) continue;
+
+        // Create notification message
+        const message = {
+          notification: {
+            title: title,
+            body: body,
+          },
+          data: {
+            type: 'motivation',
+            completedCount: String(completedCount),
+            pendingCount: String(pendingCount),
+            timestamp: String(Date.now()),
+          },
+          token: token,
+        };
+
+        // Add platform-specific configurations
+        if (deviceType === 'ios') {
+          message.apns = {
+            payload: {
+              aps: {
+                sound: 'default',
+                badge: pendingCount,
+                'content-available': 1,
+              },
+            },
+            fcmOptions: {
+              imageUrl: 'https://finance-to-dos.web.app/icons/official-logo.png',
+            },
+          };
+        } else {
+          message.android = {
+            priority: 'high',
+            notification: {
+              sound: 'default',
+              priority: 'high',
+              channelId: 'task_reminders',
+              icon: 'notification_icon',
+              color: '#4285F4',
+            },
+          };
+        }
+
+        // Add to promises
+        sendPromises.push({
+          promise: admin.messaging().send(message),
+          token,
+          deviceType
+        });
+      }
+    }
+
+    // Wait for all promises to resolve
+    let successCount = 0;
+    for (const { promise, token, deviceType } of sendPromises) {
+      try {
+        await promise;
+        console.log(`Motivation notification sent to ${deviceType} device`);
+        successCount++;
+      } catch (sendError) {
+        console.error(`Error sending to token ${token}:`, sendError);
+
+        // If the token is invalid, remove it
+        if (
+          sendError.code === 'messaging/invalid-registration-token' ||
+          sendError.code === 'messaging/registration-token-not-registered'
+        ) {
+          // Find and delete the token document
+          const tokenDocs = await db.collection('userTokens')
+            .where('token', '==', token)
+            .limit(1)
+            .get();
+            
+          if (!tokenDocs.empty) {
+            await tokenDocs.docs[0].ref.delete();
+            console.log(`Removed invalid token: ${token}`);
+          }
+        }
+      }
+    }
+
+    console.log(`Motivation notifications sent to ${successCount}/${sendPromises.length} devices`);
+  } catch (error) {
+    console.error('Error in motivation notification process:', error);
   }
 }

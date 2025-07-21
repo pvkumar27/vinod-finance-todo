@@ -1,5 +1,37 @@
 # 📋 Release Notes - FinTask
 
+## v2.3.2 - 2025-07-23
+### 🐛 Bugfixes for To-Dos
+- **Due Date Fix**: Completely resolved date handling issues with a simpler approach
+- **Mobile UI**: Further improved task card layout for iPhone 16 Pro Max
+- **Action Buttons**: Optimized action buttons to take minimal space while remaining touch-friendly
+- **Text Alignment**: Fixed left alignment of task descriptions and due dates
+- **Edit UX**: Improved editing experience by auto-scrolling and focusing the input field
+
+### 🔧 Technical Improvements
+- **Date Handling**: Simplified date parsing to avoid timezone complications
+- **Mobile Layout**: Enhanced UI density for better information display on mobile
+- **Touch Targets**: Maintained accessibility with compact but usable touch targets
+
+---
+
+## v2.3.1 - 2025-07-22
+### 🐛 Bugfixes for To-Dos
+- **Due Date Fix**: Fixed issue with edited tasks showing one day earlier than selected date
+- **Mobile UI**: Improved left alignment of task descriptions and due dates in card view
+- **Space Optimization**: Reduced space occupied by action buttons in mobile view
+- **Date Selection**: Added "Today" button for easier date selection on mobile devices
+- **Noon Motivation**: Added midday push notification to motivate task completion
+- **Email Formatting**: Modernized daily task reminder emails with improved styling
+
+### 🔧 Technical Improvements
+- **Timezone Handling**: Better handling of date strings to prevent timezone issues
+- **Mobile Responsiveness**: Enhanced UI for smaller screens with optimized spacing
+- **Notification System**: Added new notification type for midday motivation
+- **Email Templates**: Redesigned email templates with modern HTML/CSS
+
+---
+
 ## v2.3.0 - 2025-07-20
 ### 🔔 Push Notifications
 - **Daily Task Reminders**: Added push notifications for daily tasks at 8:00 AM CT
