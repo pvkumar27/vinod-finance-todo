@@ -10,7 +10,7 @@ const DashboardCard = ({ title, value, subtitle, icon, color = 'primary', trend,
 
   return (
     <div 
-      className={`p-6 rounded-xl border-2 shadow-card hover:shadow-card-hover transition-all duration-200 cursor-pointer transform hover:scale-105 ${colorClasses[color]}`}
+      className={`p-6 rounded-xl card-fancy transition-all duration-300 cursor-pointer transform hover:scale-105 hover:translate-y-[-5px] ${colorClasses[color]}`}
       onClick={onClick}
     >
       <div className="flex items-center justify-between">

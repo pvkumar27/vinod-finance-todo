@@ -39,7 +39,7 @@ const NotificationSettings = () => {
   };
 
   return (
-    <div className="p-4 bg-white rounded-lg shadow-md">
+    <div className="p-4 card-fancy rounded-lg">
       <h2 className="text-lg font-semibold mb-4">Notification Settings</h2>
 
       {notificationStatus === 'unsupported' && (

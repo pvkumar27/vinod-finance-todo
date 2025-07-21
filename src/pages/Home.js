@@ -3,7 +3,6 @@ import TabNavigation from '../components/TabNavigation';
 import CreditCardDashboard from '../components/CreditCardDashboard';
 import MyFinancesDashboard from '../components/MyFinancesDashboard';
 import TodosDashboard from '../components/TodosDashboard';
-import NotificationSettings from '../components/NotificationSettings';
 import { APP_VERSION } from '../constants/version';
 
 const Home = () => {
@@ -41,33 +40,32 @@ const Home = () => {
     : null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
+    <div>
       <div className="max-w-6xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        {/* Hero Section */}
-        <div className="text-center mb-8">
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Manage your cards, expenses, and tasks in one place
-          </p>
-        </div>
+        {/* Hero Section removed */}
 
         {/* Main Application Modules - Now more prominent */}
-        <div className="bg-white rounded-2xl shadow-xl p-6 mb-12 border border-blue-100">
-          <TabNavigation />
+        <div className="card-fancy rounded-2xl p-6 mb-8 hover-lift">
+          <h2 className="section-header text-xl font-semibold mb-6">Task Management</h2>
+          <div className="card-content">
+            <TabNavigation />
+          </div>
         </div>
 
-        {/* Dashboard Cards - Now less prominent */}
-        <div className="mb-8">
-          <h2 className="text-xl font-medium text-gray-700 mb-4">Quick Access Dashboards</h2>
+        {/* Dashboard Cards */}
+        <div>
+          <h2 className="section-header text-xl font-semibold mb-6">Quick Access Dashboards</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {dashboardCards.map(card => (
               <div
                 key={card.id}
                 onClick={() => setActiveDashboard(card.id)}
-                className="group cursor-pointer border border-gray-200 hover:border-gray-300 bg-white rounded-lg p-4 shadow-sm hover:shadow transition-all duration-200"
+                className="group cursor-pointer card-fancy rounded-lg p-5 hover-lift float"
               >
                 <div className="flex items-center space-x-3">
                   <div
-                    className={`text-2xl p-2 rounded-full bg-gradient-to-r ${card.gradient} text-white`}
+                    className={`text-2xl p-3 rounded-full bg-gradient-to-r ${card.gradient} text-white shadow-md`}
+                    style={{boxShadow: `0 4px 10px -1px rgba(0,0,0,0.1), 0 2px 6px -2px rgba(0,0,0,0.1)`}}
                   >
                     {card.icon}
                   </div>
@@ -76,10 +74,10 @@ const Home = () => {
                     <p className="text-gray-500 text-sm">{card.description}</p>
                   </div>
                 </div>
-                <div className="mt-3 flex items-center text-sm text-blue-600 group-hover:text-blue-700">
-                  <span>View Dashboard</span>
+                <div className="mt-4 flex items-center text-sm font-medium">
+                  <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent group-hover:from-blue-700 group-hover:to-indigo-700 transition-all duration-300">View Dashboard</span>
                   <svg
-                    className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform"
+                    className="w-4 h-4 ml-1 group-hover:translate-x-2 transition-all duration-300 text-blue-600 group-hover:text-blue-700"
                     fill="none"
                     stroke="currentColor"
                     viewBox="0 0 24 24"
@@ -97,17 +95,13 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Notification Settings */}
-        <div className="mb-8">
-          <h2 className="text-xl font-medium text-gray-700 mb-4">Settings</h2>
-          <NotificationSettings />
-        </div>
-
         {/* Version Footer */}
-        <div className="mt-8 text-center">
-          <p className="text-sm text-gray-500">
-            FinTask {APP_VERSION} • Built with React & Supabase
-          </p>
+        <div className="mt-8 text-center pb-2">
+          <div className="inline-block px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/5 to-indigo-500/5 border border-blue-100">
+            <p className="text-sm bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent font-medium">
+              FinTask {APP_VERSION} • Built with React & Supabase
+            </p>
+          </div>
         </div>
       </div>
 

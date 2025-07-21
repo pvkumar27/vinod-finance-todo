@@ -12,7 +12,7 @@ const Navbar = ({ session }) => {
   const displayName = userEmail ? userEmail.split('@')[0] : 'User';
 
   return (
-    <nav className="bg-white/95 backdrop-blur-sm shadow-lg border-b border-gray-100 sticky top-0 z-40">
+    <nav className="bg-white/95 backdrop-blur-sm sticky top-0 z-40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo and Brand */}
@@ -71,7 +71,7 @@ const Navbar = ({ session }) => {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="sm:hidden border-t border-gray-200 py-4">
+          <div className="sm:hidden py-4">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
                 <span className="text-white font-bold">
