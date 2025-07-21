@@ -1,5 +1,24 @@
 # 📋 Release Notes - FinTask
 
+## v2.3.0 - 2025-07-20
+### 🔔 Push Notifications
+- **Daily Task Reminders**: Added push notifications for daily tasks at 8:00 AM CT
+- **Firebase Integration**: Implemented Firebase Cloud Messaging for reliable delivery
+- **Permission Management**: Added user-friendly notification permission handling
+- **Token Storage**: Secure storage of FCM tokens with improved validation
+- **Cross-Browser Support**: Works on Chrome, Firefox, Edge, and Safari
+- **Mobile Support**: Push notifications on both iOS and Android devices
+- **Test Environment**: Added comprehensive test environment support
+
+### 🔧 Technical Improvements
+- **Service Worker**: Added Firebase messaging service worker
+- **Token Validation**: Enhanced token validation and storage
+- **Error Handling**: Improved error handling for notification permissions
+- **Test Mocks**: Added mocks for testing notification components
+- **Documentation**: Added upgrade plan for Node.js runtime
+
+---
+
 ## v2.2.16 - 2025-07-18
 ### 🚀 Release
 - **Version Update**: v2.2.16
