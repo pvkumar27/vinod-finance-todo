@@ -1,4 +1,15 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+# Run version validation if both version files are changed
+if git diff --cached --name-only | grep -q "package.json" && \
+   git diff --cached --name-only | grep -q "src/constants/version.js"; then
+  echo "🔍 Validating version consistency..."
+  node scripts/validate-versions.js
+  if [ $? -ne 0 ]; then
+    echo "❌ Version validation failed. Please fix the versions before committing."
+    exit 1
+  fi
+fi
+
 npx lint-staged
