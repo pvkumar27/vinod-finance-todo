@@ -29,9 +29,15 @@ exports.sendDailyTaskReminders = functions.https.onRequest(async (req, res) => {
     const sendPush = req.query.sendPush === 'true';
 
     // Get current date range (today)
-    const startOfDay = new Date();
+    // Use Central Time (America/Chicago) for consistency with the 8:00 AM CT schedule
+    const now = new Date();
+    // Convert to CT (UTC-6 or UTC-5 depending on DST)
+    const centralTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Chicago' }));
+    console.log('Current time (CT):', centralTime.toISOString());
+
+    const startOfDay = new Date(centralTime);
     startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date();
+    const endOfDay = new Date(centralTime);
     endOfDay.setHours(23, 59, 59, 999);
 
     const startTimestamp = admin.firestore.Timestamp.fromDate(startOfDay);
@@ -45,6 +51,10 @@ exports.sendDailyTaskReminders = functions.https.onRequest(async (req, res) => {
       .where('dueDate', '>=', startTimestamp)
       .where('dueDate', '<=', endTimestamp)
       .get();
+
+    console.log(
+      `Searching for tasks between ${startTimestamp.toDate().toISOString()} and ${endTimestamp.toDate().toISOString()}`
+    );
 
     if (tasksSnapshot.empty) {
       console.log('No tasks due today');
@@ -93,8 +103,10 @@ async function sendEmailNotification(tasks) {
     .join('');
 
   // Create email using the Trigger Email extension
+  const emailTo = functions.config().app.email || 'user@example.com';
+  console.log(`Sending email notification to: ${emailTo}`);
   await db.collection('mail').add({
-    to: functions.config().app.email || 'user@example.com',
+    to: emailTo,
     message: {
       subject: '📝 Your FinTask To-Dos for Today',
       html: `
