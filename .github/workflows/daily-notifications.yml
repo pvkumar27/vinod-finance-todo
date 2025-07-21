@@ -14,8 +14,8 @@ jobs:
           # Send both email and push notifications
           RESPONSE=$(curl -X POST "https://us-central1-${{ secrets.FIREBASE_PROJECT_ID }}.cloudfunctions.net/sendDailyTaskReminders?key=${{ secrets.NOTIFICATION_API_KEY }}&sendPush=true" -s)
           echo "Function response: $RESPONSE"
-          if [[ "$RESPONSE" == *"Sent notifications"* ]]; then
-            echo "✅ Notifications sent successfully"
+          if [[ "$RESPONSE" == *"Sent notifications"* || "$RESPONSE" == *"No tasks due today"* ]]; then
+            echo "✅ Notifications processed successfully"
           else
-            echo "❌ Notification may have failed"
+            echo "❌ Notification may have failed: $RESPONSE"
           fi
