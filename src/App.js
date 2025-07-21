@@ -10,6 +10,10 @@ import {
 import { saveUserToken } from './utils/tokenStorage';
 import { registerMessagingServiceWorker } from './utils/serviceWorkerUtils';
 import './App.css';
+import './styles/background.css';
+import './styles/typography.css';
+import './styles/decorative.css';
+import './styles/components.css';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -71,16 +75,28 @@ function App() {
 
   if (!session) {
     return (
-      <div className="App">
-        <AuthForm />
+      <div className="App bg-mesh relative">
+        <div className="dots-pattern"></div>
+        <div className="shape-circle shape-circle-1"></div>
+        <div className="shape-circle shape-circle-2"></div>
+        <div className="shape-circle shape-circle-3"></div>
+        <div className="app-content relative z-10">
+          <AuthForm />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="App">
-      <Navbar session={session} />
-      <Home />
+    <div className="App bg-mesh relative">
+      <div className="dots-pattern"></div>
+      <div className="shape-circle shape-circle-1"></div>
+      <div className="shape-circle shape-circle-2"></div>
+      <div className="shape-circle shape-circle-3"></div>
+      <div className="app-content relative z-10">
+        <Navbar session={session} />
+        <Home />
+      </div>
     </div>
   );
 }

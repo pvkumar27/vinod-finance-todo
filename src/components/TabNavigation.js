@@ -34,29 +34,35 @@ const TabNavigation = () => {
 
   return (
     <div className="w-full">
-      {/* Tab Headers - Now more prominent */}
-      <div className="overflow-x-auto mb-2">
-        <nav className="flex flex-nowrap min-w-full bg-gray-50 rounded-lg p-2">
+      {/* Modern Tab Navigation */}
+      <div className="w-full overflow-x-auto">
+        <nav className="flex w-full rounded-xl p-2 card-fancy">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`flex items-center justify-center space-x-2 py-4 px-4 sm:px-8 font-medium text-sm transition-all duration-200 whitespace-nowrap rounded-lg flex-1 ${
-                activeTab === tab.id
-                  ? 'bg-white text-blue-600 shadow-md border-b-2 border-blue-500'
-                  : 'text-gray-600 hover:text-gray-800 hover:bg-gray-100'
-              }`}
+              className={`
+                flex items-center justify-center space-x-2 py-3 px-4 
+                font-medium text-sm font-['Segoe UI',system-ui,sans-serif]
+                transition-all duration-300 ease-in-out
+                rounded-lg flex-1 min-w-[100px]
+                ${activeTab === tab.id
+                  ? 'bg-gradient-to-r from-blue-500/10 to-indigo-500/10 text-blue-700 shadow-sm transform scale-[1.02]'
+                  : 'text-gray-600 hover:bg-gray-200/50 hover:text-gray-800'}
+              `}
+              aria-selected={activeTab === tab.id}
+              role="tab"
             >
               <span className="text-xl">{tab.icon}</span>
-              <span className="hidden sm:inline font-medium">{tab.label}</span>
-              <span className="sm:hidden text-xs font-medium">{tab.shortLabel}</span>
+              <span className="hidden sm:inline">{tab.label}</span>
+              <span className="sm:hidden text-xs">{tab.shortLabel}</span>
             </button>
           ))}
         </nav>
       </div>
 
       {/* Tab Content */}
-      <div className="mt-8">
+      <div className="mt-6">
         {ActiveComponent && <ActiveComponent />}
       </div>
     </div>
