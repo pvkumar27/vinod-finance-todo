@@ -29,34 +29,74 @@ exports.sendDailyTaskReminders = functions.https.onRequest(async (req, res) => {
     const sendPush = req.query.sendPush === 'true';
 
     // Get current date range (today)
-    const startOfDay = new Date();
+    // Use both UTC and Central Time to cover all bases
+    const now = new Date();
+    
+    // Get today's date string in YYYY-MM-DD format for both UTC and CT
+    const utcDateStr = now.toISOString().split('T')[0]; // e.g., "2025-07-21"
+    
+    // Convert to CT (Dallas, TX timezone)
+    const centralTime = new Date(now.toLocaleString('en-US', { timeZone: 'America/Chicago' }));
+    const ctDateStr = centralTime.toISOString().split('T')[0]; // e.g., "2025-07-20"
+    
+    console.log('Current UTC date:', utcDateStr);
+    console.log('Current Dallas, TX date:', ctDateStr);
+    
+    // Use the beginning of the earlier date and end of the later date to cover both timezones
+    const startDate = ctDateStr < utcDateStr ? ctDateStr : utcDateStr;
+    const endDate = ctDateStr > utcDateStr ? ctDateStr : utcDateStr;
+    
+    const startOfDay = new Date(startDate);
     startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date();
+    
+    const endOfDay = new Date(endDate);
     endOfDay.setHours(23, 59, 59, 999);
+    
+    console.log(`Using date range from ${startDate} to ${endDate} to find tasks`);
 
     const startTimestamp = admin.firestore.Timestamp.fromDate(startOfDay);
     const endTimestamp = admin.firestore.Timestamp.fromDate(endOfDay);
 
-    // Query for incomplete tasks due today
+    // Query for incomplete tasks due today or overdue
     const db = admin.firestore();
+    
+    // First, check if the collection exists
+    const collections = await db.listCollections();
+    const collectionNames = collections.map(col => col.id);
+    console.log('Available collections:', collectionNames);
+    
+    if (!collectionNames.includes('todos')) {
+      console.log('The "todos" collection does not exist');
+      return res.status(200).send('The "todos" collection does not exist');
+    }
+    
+    // Query for incomplete tasks due today or earlier
     const tasksSnapshot = await db
       .collection('todos')
       .where('completed', '==', false)
-      .where('dueDate', '>=', startTimestamp)
       .where('dueDate', '<=', endTimestamp)
       .get();
+      
+    console.log(`Searching for tasks due on or before ${endTimestamp.toDate().toISOString()}`);
 
     if (tasksSnapshot.empty) {
-      console.log('No tasks due today');
-      return res.status(200).send('No tasks due today');
+      console.log('No tasks due today or overdue');
+      return res.status(200).send('No tasks due today or overdue');
     }
+    
+    // Log the found tasks
+    console.log(`Found ${tasksSnapshot.size} tasks due today or overdue:`);
+    tasksSnapshot.forEach(doc => {
+      const data = doc.data();
+      console.log(`- Task "${data.task || data.title}": Due ${data.dueDate.toDate().toISOString()}`);
+    });
 
     // Collect task information
     const tasks = tasksSnapshot.docs.map(doc => {
       const data = doc.data();
       return {
         id: doc.id,
-        title: data.title || 'Untitled Task',
+        title: data.task || data.title || 'Untitled Task',
         dueDate: (data.dueDate && data.dueDate.toDate()) || null,
       };
     });
@@ -93,19 +133,21 @@ async function sendEmailNotification(tasks) {
     .join('');
 
   // Create email using the Trigger Email extension
+  const emailTo = functions.config().app.email || 'user@example.com';
+  console.log(`Sending email notification to: ${emailTo}`);
   await db.collection('mail').add({
-    to: functions.config().app.email || 'user@example.com',
+    to: emailTo,
     message: {
-      subject: '📝 Your FinTask To-Dos for Today',
+      subject: '📝 Your FinTask To-Dos: Due Today & Overdue',
       html: `
-        <h2>Your FinTask To-Dos for Today</h2>
-        <p>You have ${tasks.length} pending task(s) for today:</p>
+        <h2>Your FinTask To-Dos: Due Today & Overdue</h2>
+        <p>You have ${tasks.length} pending task(s) that need attention:</p>
         <ul>
           ${taskListHtml}
         </ul>
         <p>Open FinTask to manage your tasks.</p>
       `,
-      text: `Your FinTask To-Dos for Today\n\nYou have ${tasks.length} pending task(s) for today:\n\n${tasks
+      text: `Your FinTask To-Dos: Due Today & Overdue\n\nYou have ${tasks.length} pending task(s) that need attention:\n\n${tasks
         .map(
           task =>
             `- ${task.title} ${task.dueDate ? `(Due: ${task.dueDate.toLocaleDateString()})` : ''}`
@@ -135,17 +177,17 @@ async function sendPushNotification(taskCount, tasks = []) {
     }
 
     // Get task names for notification body
-    let notificationBody = `You have ${taskCount} pending task(s) for today.`;
+    let notificationBody = `You have ${taskCount} pending task(s) that need attention.`;
 
     // Add task names if available (limit to 3)
     if (tasks && tasks.length > 0) {
       const taskNames = tasks.slice(0, 3).map(task => task.title);
       if (taskNames.length === 1) {
-        notificationBody = `Task due today: ${taskNames[0]}`;
+        notificationBody = `Task needs attention: ${taskNames[0]}`;
       } else if (taskNames.length === 2) {
-        notificationBody = `Tasks due today: ${taskNames[0]} and ${taskNames[1]}`;
-      } else if (taskNames.length === 3) {
-        notificationBody = `Tasks due today: ${taskNames[0]}, ${taskNames[1]}, and more...`;
+        notificationBody = `Tasks need attention: ${taskNames[0]} and ${taskNames[1]}`;
+      } else if (taskNames.length >= 3) {
+        notificationBody = `Tasks need attention: ${taskNames[0]}, ${taskNames[1]}, and more...`;
       }
     }
 
@@ -163,7 +205,7 @@ async function sendPushNotification(taskCount, tasks = []) {
       // Create notification message
       const message = {
         notification: {
-          title: '🔔 FinTask Daily Reminder',
+          title: '🔔 FinTask Tasks Reminder',
           body: notificationBody,
         },
         data: {
