@@ -12,7 +12,9 @@ jobs:
       - name: Trigger notification function
         run: |
           # Send both email and push notifications
-          RESPONSE=$(curl -X POST "https://us-central1-${{ secrets.FIREBASE_PROJECT_ID }}.cloudfunctions.net/sendDailyTaskReminders?key=${{ secrets.NOTIFICATION_API_KEY }}&sendPush=true" -s)
+          # URL encode the API key to handle special characters
+          API_KEY=$(echo -n "${{ secrets.NOTIFICATION_API_KEY }}" | perl -MURI::Escape -ne 'print uri_escape($_)')
+          RESPONSE=$(curl -X POST "https://us-central1-${{ secrets.FIREBASE_PROJECT_ID }}.cloudfunctions.net/sendDailyTaskReminders?key=${API_KEY}&sendPush=true" -s)
           echo "Function response: $RESPONSE"
           if [[ "$RESPONSE" == *"Sent notifications"* || "$RESPONSE" == *"No tasks due today"* ]]; then
             echo "✅ Notifications processed successfully"
