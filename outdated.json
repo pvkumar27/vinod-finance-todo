@@ -1,0 +1,156 @@
+{
+  "@testing-library/jest-dom": {
+    "current": "5.17.0",
+    "wanted": "5.17.0",
+    "latest": "6.6.3",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/@testing-library/jest-dom"
+  },
+  "@testing-library/react": {
+    "current": "13.4.0",
+    "wanted": "13.4.0",
+    "latest": "16.3.0",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/@testing-library/react"
+  },
+  "@testing-library/user-event": {
+    "current": "13.5.0",
+    "wanted": "13.5.0",
+    "latest": "14.6.1",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/@testing-library/user-event"
+  },
+  "dotenv": {
+    "current": "16.6.1",
+    "wanted": "16.6.1",
+    "latest": "17.2.0",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/dotenv"
+  },
+  "firebase": {
+    "current": "11.10.0",
+    "wanted": "11.10.0",
+    "latest": "12.0.0",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/firebase"
+  },
+  "husky": {
+    "current": "8.0.3",
+    "wanted": "8.0.3",
+    "latest": "9.1.7",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/husky"
+  },
+  "react": {
+    "current": "18.3.1",
+    "wanted": "18.3.1",
+    "latest": "19.1.0",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/react"
+  },
+  "react-dom": {
+    "current": "18.3.1",
+    "wanted": "18.3.1",
+    "latest": "19.1.0",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/react-dom"
+  },
+  "tailwindcss": {
+    "current": "3.4.17",
+    "wanted": "3.4.17",
+    "latest": "4.1.11",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/tailwindcss"
+  },
+  "web-vitals": {
+    "current": "2.1.4",
+    "wanted": "2.1.4",
+    "latest": "5.0.3",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/web-vitals"
+  },
+  "workbox-background-sync": {
+    "current": "6.6.1",
+    "wanted": "6.6.0",
+    "latest": "7.3.0",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/workbox-background-sync"
+  },
+  "workbox-broadcast-update": {
+    "current": "6.6.0",
+    "wanted": "6.6.0",
+    "latest": "7.3.0",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/workbox-broadcast-update"
+  },
+  "workbox-cacheable-response": {
+    "current": "6.6.1",
+    "wanted": "6.6.1",
+    "latest": "7.3.0",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/workbox-cacheable-response"
+  },
+  "workbox-core": {
+    "current": "6.6.0",
+    "wanted": "6.6.0",
+    "latest": "7.3.0",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/workbox-core"
+  },
+  "workbox-expiration": {
+    "current": "6.6.0",
+    "wanted": "6.6.0",
+    "latest": "7.3.0",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/workbox-expiration"
+  },
+  "workbox-google-analytics": {
+    "current": "6.6.1",
+    "wanted": "6.6.1",
+    "latest": "7.3.0",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/workbox-google-analytics"
+  },
+  "workbox-navigation-preload": {
+    "current": "6.6.0",
+    "wanted": "6.6.0",
+    "latest": "7.3.0",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/workbox-navigation-preload"
+  },
+  "workbox-precaching": {
+    "current": "6.6.0",
+    "wanted": "6.6.0",
+    "latest": "7.3.0",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/workbox-precaching"
+  },
+  "workbox-range-requests": {
+    "current": "6.6.0",
+    "wanted": "6.6.0",
+    "latest": "7.3.0",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/workbox-range-requests"
+  },
+  "workbox-routing": {
+    "current": "6.6.0",
+    "wanted": "6.6.0",
+    "latest": "7.3.0",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/workbox-routing"
+  },
+  "workbox-strategies": {
+    "current": "6.6.0",
+    "wanted": "6.6.0",
+    "latest": "7.3.0",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/workbox-strategies"
+  },
+  "workbox-streams": {
+    "current": "6.6.0",
+    "wanted": "6.6.0",
+    "latest": "7.3.0",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/workbox-streams"
+  }
+}
