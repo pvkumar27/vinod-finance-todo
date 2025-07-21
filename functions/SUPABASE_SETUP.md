@@ -1,45 +1,60 @@
-# Setting Up Supabase Connection for Notifications
+# Supabase Setup for FinTask Notifications
 
-This guide will help you set up the connection between Firebase Cloud Functions and Supabase for the notification system.
+This document explains how to set up Supabase integration for the FinTask notification system.
 
-## 1. Get Supabase Credentials
+## Prerequisites
+
+1. A Supabase project with the FinTask database
+2. Firebase project with Cloud Functions enabled
+3. Firebase CLI installed and configured
+
+## Setup Steps
+
+### 1. Get Supabase Credentials
 
 1. Go to the [Supabase Dashboard](https://app.supabase.io/)
 2. Select your project
 3. Go to Project Settings > API
-4. Find the following credentials:
-   - **Project URL**: `https://your-project-id.supabase.co`
-   - **Service Role Key**: This is a secret key that starts with `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...`
+4. Copy the URL and service role key
 
-## 2. Update Firebase Functions Configuration
+### 2. Configure Firebase Functions
 
-Run the following commands to set the Supabase configuration:
+Set the Supabase URL and key in Firebase Functions config:
 
 ```bash
+firebase use finance-to-dos
 firebase functions:config:set supabase.url="YOUR_SUPABASE_URL"
 firebase functions:config:set supabase.key="YOUR_SUPABASE_SERVICE_ROLE_KEY"
 ```
 
-Replace `YOUR_SUPABASE_URL` and `YOUR_SUPABASE_SERVICE_ROLE_KEY` with the values from step 1.
+### 3. Set User ID and Email
 
-## 3. Update the Cloud Function
-
-Run the script to update the Cloud Function to connect to Supabase:
+Set the user ID and email for notifications:
 
 ```bash
-node fix-supabase-connection.js
+firebase functions:config:set app.user_id="YOUR_USER_ID"
+firebase functions:config:set app.email="YOUR_EMAIL"
 ```
 
-## 4. Install Dependencies and Deploy
+### 4. Set API Key for Security
+
+Set an API key for securing the HTTP endpoint:
 
 ```bash
-cd functions
-npm install
-cd ..
+firebase functions:config:set app.key="YOUR_API_KEY"
+```
+
+### 5. Deploy the Function
+
+Deploy the function to Firebase:
+
+```bash
 firebase deploy --only functions
 ```
 
-## 5. Test the Notification Function
+### 6. Test the Function
+
+Test the function using the simple-test.js script:
 
 ```bash
 node simple-test.js
@@ -47,16 +62,18 @@ node simple-test.js
 
 ## Troubleshooting
 
-If you encounter any issues, check the following:
+If you encounter issues:
 
-1. **Table Structure**: Make sure the `todos` table in Supabase has the following fields:
-   - `user_email`: The email of the user who owns the task
-   - `completed`: A boolean indicating if the task is completed
-   - `due_date`: The due date of the task
-
-2. **Permissions**: Make sure the Service Role Key has access to the `todos` table
-
-3. **Logs**: Check the Firebase Functions logs for any errors:
+1. Check the Firebase Functions logs:
    ```bash
-   firebase functions:log
+   firebase functions:log --only sendDailyTaskReminders
    ```
+
+2. Verify that the Supabase URL and key are correctly set:
+   ```bash
+   firebase functions:config:get
+   ```
+
+3. Ensure that the user ID exists in your Supabase database.
+
+4. Check that the todos table has the correct structure with user_id, due_date, and completed fields.

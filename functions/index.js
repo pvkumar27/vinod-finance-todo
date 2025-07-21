@@ -8,8 +8,22 @@
  */
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
+const { createClient } = require('@supabase/supabase-js');
 
 admin.initializeApp();
+
+// Initialize Supabase client
+const initSupabase = () => {
+  const supabaseUrl = functions.config().supabase.url;
+  const supabaseKey = functions.config().supabase.key;
+  
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('Supabase URL or key not configured');
+    return null;
+  }
+  
+  return createClient(supabaseUrl, supabaseKey);
+};
 
 /**
  * HTTP triggered function that sends daily task reminders
@@ -54,9 +68,6 @@ exports.sendDailyTaskReminders = functions.https.onRequest(async (req, res) => {
     
     console.log(`Using date range from ${startDate} to ${endDate} to find tasks`);
 
-    const startTimestamp = admin.firestore.Timestamp.fromDate(startOfDay);
-    const endTimestamp = admin.firestore.Timestamp.fromDate(endOfDay);
-
     // Query for incomplete tasks due today or overdue
     const db = admin.firestore();
     
@@ -70,14 +81,46 @@ exports.sendDailyTaskReminders = functions.https.onRequest(async (req, res) => {
       return res.status(200).send('The "todos" collection does not exist');
     }
     
-    // Query for incomplete tasks due today or earlier
-    const tasksSnapshot = await db
-      .collection('todos')
-      .where('completed', '==', false)
-      .where('dueDate', '<=', endTimestamp)
-      .get();
+    // Get the user ID from the config
+    const userId = functions.config().app.user_id || '370621bf-3d54-4c3f-ae21-97a30062b0f9';
+    console.log(`Filtering tasks for user: ${userId}`);
+    
+    // Initialize Supabase client
+    const supabase = initSupabase();
+    if (!supabase) {
+      console.error('Failed to initialize Supabase client');
+      return res.status(500).send('Failed to initialize Supabase client');
+    }
+    
+    // Convert timestamps to ISO strings for Supabase
+    const endDateISO = endOfDay.toISOString();
+    
+    // Query Supabase for incomplete tasks due today or earlier
+    const { data: tasks, error } = await supabase
+      .from('todos')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('completed', false)
+      .lte('due_date', endDateISO)
+      .order('due_date', { ascending: true });
+    
+    if (error) {
+      console.error('Error querying Supabase:', error);
+      return res.status(500).send(`Error: ${error.message}`);
+    }
+    
+    // Create a mock snapshot for compatibility with the rest of the function
+    const tasksSnapshot = {
+      empty: tasks.length === 0,
+      size: tasks.length,
+      forEach: (callback) => tasks.forEach(callback),
+      docs: tasks.map(task => ({
+        id: task.id,
+        data: () => task
+      }))
+    };
       
-    console.log(`Searching for tasks due on or before ${endTimestamp.toDate().toISOString()}`);
+    console.log(`Searching for tasks due on or before ${endDateISO}`);
 
     if (tasksSnapshot.empty) {
       console.log('No tasks due today or overdue');
@@ -86,31 +129,36 @@ exports.sendDailyTaskReminders = functions.https.onRequest(async (req, res) => {
     
     // Log the found tasks
     console.log(`Found ${tasksSnapshot.size} tasks due today or overdue:`);
-    tasksSnapshot.forEach(doc => {
-      const data = doc.data();
-      console.log(`- Task "${data.task || data.title}": Due ${data.dueDate.toDate().toISOString()}`);
+    tasksSnapshot.forEach(task => {
+      console.log(`- Task "${task.task || task.title}": Due ${task.due_date}`);
     });
 
     // Collect task information
-    const tasks = tasksSnapshot.docs.map(doc => {
+    const taskItems = tasksSnapshot.docs.map(doc => {
       const data = doc.data();
+      // Format the due date correctly
+      let dueDate = null;
+      if (data.due_date) {
+        dueDate = new Date(data.due_date);
+      }
+      
       return {
         id: doc.id,
         title: data.task || data.title || 'Untitled Task',
-        dueDate: (data.dueDate && data.dueDate.toDate()) || null,
+        dueDate: dueDate,
       };
     });
 
     // Send email notification using Trigger Email extension
-    await sendEmailNotification(tasks);
+    await sendEmailNotification(taskItems);
 
     // Send push notification using FCM if requested or by default
     if (sendPush !== false) {
-      await sendPushNotification(tasks.length, tasks);
+      await sendPushNotification(taskItems.length, taskItems);
     }
 
-    console.log(`Sent notifications for ${tasks.length} tasks`);
-    return res.status(200).send(`Sent notifications for ${tasks.length} tasks`);
+    console.log(`Sent notifications for ${taskItems.length} tasks`);
+    return res.status(200).send(`Sent notifications for ${taskItems.length} tasks`);
   } catch (error) {
     console.error('Error sending notifications:', error);
     return res.status(500).send(`Error: ${error.message}`);
@@ -127,8 +175,15 @@ async function sendEmailNotification(tasks) {
   // Format tasks for email
   const taskListHtml = tasks
     .map(task => {
-      const dueDate = task.dueDate ? `(Due: ${task.dueDate.toLocaleDateString()})` : '';
-      return `<li>${task.title} ${dueDate}</li>`;
+      let dueDateStr = '';
+      if (task.dueDate) {
+        // Format the date as MM/DD/YYYY
+        const month = task.dueDate.getMonth() + 1;
+        const day = task.dueDate.getDate();
+        const year = task.dueDate.getFullYear();
+        dueDateStr = `(Due: ${month}/${day}/${year})`;
+      }
+      return `<li>${task.title} ${dueDateStr}</li>`;
     })
     .join('');
 
@@ -148,10 +203,16 @@ async function sendEmailNotification(tasks) {
         <p>Open FinTask to manage your tasks.</p>
       `,
       text: `Your FinTask To-Dos: Due Today & Overdue\n\nYou have ${tasks.length} pending task(s) that need attention:\n\n${tasks
-        .map(
-          task =>
-            `- ${task.title} ${task.dueDate ? `(Due: ${task.dueDate.toLocaleDateString()})` : ''}`
-        )
+        .map(task => {
+          let dueDateStr = '';
+          if (task.dueDate) {
+            const month = task.dueDate.getMonth() + 1;
+            const day = task.dueDate.getDate();
+            const year = task.dueDate.getFullYear();
+            dueDateStr = `(Due: ${month}/${day}/${year})`;
+          }
+          return `- ${task.title} ${dueDateStr}`;
+        })
         .join('\n')}\n\nOpen FinTask to manage your tasks.`,
     },
   });
@@ -176,78 +237,98 @@ async function sendPushNotification(taskCount, tasks = []) {
       return;
     }
 
-    // Get task names for notification body
-    let notificationBody = `You have ${taskCount} pending task(s) that need attention.`;
+    // Create a single notification body with task count
+    let notificationBody;
+    if (taskCount === 1) {
+      notificationBody = `You have 1 pending task due today or overdue.`;
+    } else {
+      notificationBody = `You have ${taskCount} pending tasks due today or overdue.`;
+    }
 
-    // Add task names if available (limit to 3)
-    if (tasks && tasks.length > 0) {
-      const taskNames = tasks.slice(0, 3).map(task => task.title);
-      if (taskNames.length === 1) {
-        notificationBody = `Task needs attention: ${taskNames[0]}`;
-      } else if (taskNames.length === 2) {
-        notificationBody = `Tasks need attention: ${taskNames[0]} and ${taskNames[1]}`;
-      } else if (taskNames.length >= 3) {
-        notificationBody = `Tasks need attention: ${taskNames[0]}, ${taskNames[1]}, and more...`;
+    // Group tokens by user ID
+    const tokensByUser = {};
+    tokenSnapshot.docs.forEach(doc => {
+      const data = doc.data();
+      const userId = data.userId;
+      if (!userId) return;
+      
+      if (!tokensByUser[userId]) {
+        tokensByUser[userId] = [];
+      }
+      tokensByUser[userId].push({
+        token: data.token,
+        deviceType: data.deviceType || 'android'
+      });
+    });
+
+    // Send one notification per user
+    const sendPromises = [];
+    for (const userId in tokensByUser) {
+      const userTokens = tokensByUser[userId];
+      
+      // Send to each device for this user
+      for (const tokenData of userTokens) {
+        const { token, deviceType } = tokenData;
+        
+        if (!token) continue;
+
+        // Create notification message
+        const message = {
+          notification: {
+            title: '🔔 FinTask Daily Summary',
+            body: notificationBody,
+          },
+          data: {
+            type: 'daily_reminder',
+            taskCount: String(taskCount),
+            timestamp: String(Date.now()),
+          },
+          token: token,
+        };
+
+        // Add platform-specific configurations
+        if (deviceType === 'ios') {
+          message.apns = {
+            payload: {
+              aps: {
+                sound: 'default',
+                badge: taskCount,
+                'content-available': 1,
+              },
+            },
+            fcmOptions: {
+              imageUrl: 'https://finance-to-dos.web.app/icons/official-logo.png',
+            },
+          };
+        } else {
+          message.android = {
+            priority: 'high',
+            notification: {
+              sound: 'default',
+              priority: 'high',
+              channelId: 'task_reminders',
+              icon: 'notification_icon',
+              color: '#4285F4',
+            },
+          };
+        }
+
+        // Add to promises
+        sendPromises.push({
+          promise: admin.messaging().send(message),
+          token,
+          deviceType
+        });
       }
     }
 
-    // Send to all registered devices
-    const sendPromises = tokenSnapshot.docs.map(async doc => {
-      const tokenData = doc.data();
-      const token = tokenData.token;
-      const deviceType = tokenData.deviceType || 'android';
-
-      if (!token) {
-        console.log('Invalid token data:', tokenData);
-        return;
-      }
-
-      // Create notification message
-      const message = {
-        notification: {
-          title: '🔔 FinTask Tasks Reminder',
-          body: notificationBody,
-        },
-        data: {
-          type: 'daily_reminder',
-          taskCount: String(taskCount),
-          timestamp: String(Date.now()),
-        },
-        token: token,
-      };
-
-      // Add platform-specific configurations
-      if (deviceType === 'ios') {
-        message.apns = {
-          payload: {
-            aps: {
-              sound: 'default',
-              badge: taskCount,
-              'content-available': 1,
-            },
-          },
-          fcmOptions: {
-            imageUrl: 'https://finance-to-dos.web.app/icons/official-logo.png',
-          },
-        };
-      } else {
-        message.android = {
-          priority: 'high',
-          notification: {
-            sound: 'default',
-            priority: 'high',
-            channelId: 'task_reminders',
-            icon: 'notification_icon',
-            color: '#4285F4',
-          },
-        };
-      }
-
+    // Wait for all promises to resolve
+    let successCount = 0;
+    for (const { promise, token, deviceType } of sendPromises) {
       try {
-        // Send the notification
-        await admin.messaging().send(message);
+        await promise;
         console.log(`Push notification sent to ${deviceType} device`);
-        return true;
+        successCount++;
       } catch (sendError) {
         console.error(`Error sending to token ${token}:`, sendError);
 
@@ -256,16 +337,21 @@ async function sendPushNotification(taskCount, tasks = []) {
           sendError.code === 'messaging/invalid-registration-token' ||
           sendError.code === 'messaging/registration-token-not-registered'
         ) {
-          await db.collection('userTokens').doc(doc.id).delete();
-          console.log(`Removed invalid token: ${token}`);
+          // Find and delete the token document
+          const tokenDocs = await db.collection('userTokens')
+            .where('token', '==', token)
+            .limit(1)
+            .get();
+            
+          if (!tokenDocs.empty) {
+            await tokenDocs.docs[0].ref.delete();
+            console.log(`Removed invalid token: ${token}`);
+          }
         }
-        return false;
       }
-    });
+    }
 
-    const results = await Promise.all(sendPromises);
-    const successCount = results.filter(Boolean).length;
-    console.log(`Push notifications sent to ${successCount}/${tokenSnapshot.size} devices`);
+    console.log(`Push notifications sent to ${successCount}/${sendPromises.length} devices`);
   } catch (error) {
     console.error('Error in push notification process:', error);
   }

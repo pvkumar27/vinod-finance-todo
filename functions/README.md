@@ -1,76 +1,66 @@
-# FinTask Notification System
+# FinTask Cloud Functions
 
-This directory contains Firebase Cloud Functions and utility scripts for the FinTask notification system.
+This directory contains the Firebase Cloud Functions for the FinTask application.
 
-## Quick Start
+## Functions
 
-To fix all notification issues at once:
+### sendDailyTaskReminders
 
-1. Create a service account file:
-   - Follow the instructions in `create-service-account.md`
-   - Save the file as `service-account.json` in this directory
+An HTTP-triggered function that sends daily task reminders via email and push notifications.
 
-2. Run the comprehensive fix script:
-   ```bash
-   node fix-notifications.js
-   ```
+#### Features
 
-This script will:
-- Check the todos collection structure
-- Fix any issues with the todos collection
-- Add a test overdue task if none exist
-- Check and fix FCM tokens for push notifications
-- Test the notification function
+- Sends email notifications using Firebase Extension: Trigger Email
+- Sends push notifications using Firebase Cloud Messaging (FCM)
+- Integrates with Supabase to fetch tasks
+- Handles timezone differences between UTC and Central Time
+- Formats dates in a user-friendly way (MM/DD/YYYY)
+- Groups push notifications by user
 
-## Individual Scripts
+#### Triggering
 
-If you prefer to run the steps individually:
+The function can be triggered via an HTTP request:
 
-### 1. Check Todos Structure
-```bash
-node check-todos-structure.js
 ```
-Shows the structure of todos in the database and identifies issues.
-
-### 2. Fix Todos Structure
-```bash
-node fix-todos-structure.js
+https://us-central1-finance-to-dos.cloudfunctions.net/sendDailyTaskReminders?key=YOUR_API_KEY&sendPush=true
 ```
-Fixes common issues with todos and adds a test overdue task.
 
-### 3. Check FCM Tokens
+Parameters:
+- `key`: API key for authentication (required)
+- `sendPush`: Whether to send push notifications (optional, defaults to false)
+
+## Setup
+
+See [SUPABASE_SETUP.md](./SUPABASE_SETUP.md) for instructions on setting up the Supabase integration.
+
+## Testing
+
+Use the `simple-test.js` script to test the function:
+
 ```bash
-node check-tokens.js
+node simple-test.js
 ```
-Shows the FCM tokens in the database for push notifications.
 
-### 4. Fix FCM Tokens
+## Deployment
+
+Deploy the function using the Firebase CLI:
+
 ```bash
-node fix-tokens.js
+firebase deploy --only functions
 ```
-Deletes invalid FCM tokens.
-
-### 5. Test Notification
-```bash
-node test-notification.js
-```
-Tests the notification function and verifies that it includes all tasks.
-
-## Notification Function
-
-The `sendDailyTaskReminders` function:
-- Finds all incomplete tasks due today or earlier
-- Sends an email notification with the tasks
-- Sends push notifications to registered devices
 
 ## Configuration
 
-The function uses these configuration values:
-- `app.email`: Email address to send notifications to
-- `app.key`: API key for authentication
+The function uses the following configuration values:
 
-To update the email address:
+- `supabase.url`: Supabase project URL
+- `supabase.key`: Supabase service role key
+- `app.user_id`: User ID for filtering tasks
+- `app.email`: Email address for notifications
+- `app.key`: API key for securing the HTTP endpoint
+
+Set these values using the Firebase CLI:
+
 ```bash
-firebase functions:config:set app.email="your-email@example.com"
-firebase deploy --only functions
+firebase functions:config:set key=value
 ```
