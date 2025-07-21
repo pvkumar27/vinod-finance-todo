@@ -1,152 +1,97 @@
-# 🚀 Release Process - FinTask
+# Release Process
 
-## 📋 Release Workflow
+This document outlines the process for creating new releases of the FinTask application.
 
-### **Option 1: Automated Release (Recommended)**
+## Version Management
+
+FinTask follows semantic versioning (SemVer) with the format `vX.Y.Z`:
+
+- **X**: Major version (breaking changes)
+- **Y**: Minor version (new features, non-breaking)
+- **Z**: Patch version (bug fixes, non-breaking)
+
+## Version Files
+
+Versions are maintained in two places:
+
+1. **package.json**: Contains the version without the 'v' prefix (e.g., `2.3.0`)
+2. **src/constants/version.js**: Contains the version with the 'v' prefix (e.g., `v2.3.0`)
+
+Both files must be kept in sync. The validation script will check this.
+
+## Release Steps
+
+### Automated Release (Recommended)
+
 ```bash
-# Single command release with automatic package updates
-npm run release v1.5.0
-
-# This automatically:
-# - Updates all packages
-# - Fixes security issues
-# - Tests build
-# - Updates version
-# - Creates commit and tag
-# - Pushes to production
+# Create a new release with version vX.Y.Z
+npm run release vX.Y.Z
 ```
 
-### **Option 2: Manual Release Process**
+This will:
+1. Run pre-release checks (tests, security audit, etc.)
+2. Create a release branch
+3. Update versions in both files
+4. Update the CHANGELOG.md
+5. Create a git tag
+6. Push the branch and create a PR
 
-### 1. **Development Phase**
+### Manual Release (If needed)
+
+1. Create a release branch:
+   ```bash
+   git checkout -b release/vX.Y.Z
+   ```
+
+2. Update the version in package.json:
+   ```json
+   {
+     "name": "fintask",
+     "version": "X.Y.Z",
+     ...
+   }
+   ```
+
+3. Update the version in src/constants/version.js:
+   ```javascript
+   export const APP_VERSION = 'vX.Y.Z';
+   ```
+
+4. Update CHANGELOG.md with release notes
+
+5. Commit changes:
+   ```bash
+   git add package.json src/constants/version.js CHANGELOG.md
+   git commit -m "Release vX.Y.Z"
+   ```
+
+6. Create a tag:
+   ```bash
+   git tag vX.Y.Z
+   ```
+
+7. Push branch and tag:
+   ```bash
+   git push -u origin release/vX.Y.Z
+   git push --tags
+   ```
+
+8. Create a PR to merge into main
+
+## Post-Release
+
+After the PR is merged:
+
+1. Netlify will automatically deploy the new version
+2. Verify the deployment is successful
+3. Check that the correct version is displayed in the app
+
+## Version Validation
+
+To validate that versions are in sync:
+
 ```bash
-# Local development and testing
-npm start
-# Test features thoroughly
-# Fix any issues
+node scripts/validate-versions.js
 ```
 
-### 2. **Automated Pre-Release Checks**
-```bash
-# Run automated pre-release script
-npm run pre-release
-
-# This automatically:
-# - Updates all packages to latest versions
-# - Fixes security vulnerabilities
-# - Tests production build
-# - Validates code quality
-```
-
-### 3. **Manual Pre-Release Checklist**
-- [ ] All features working locally
-- [ ] Forms validate properly
-- [ ] Database operations successful
-- [ ] Mobile responsive design verified
-- [ ] PWA functionality tested
-
-### 4. **Version Update**
-```bash
-# Update CHANGELOG.md with new version
-# Update src/constants/version.js
-# Document new features, bug fixes, improvements
-```
-
-### 5. **Git Release**
-```bash
-git add .
-git commit -m "Release v1.x.x: [Brief description]"
-git push
-
-# Tag the release
-git tag v1.x.x
-git push --tags
-
-# Update version constant
-# Edit src/constants/version.js with new version
-git add src/constants/version.js
-git commit -m "Update version display to v1.x.x"
-git push
-```
-
-### 6. **Post-Release**
-- [ ] Verify Netlify auto-deployment
-- [ ] Test production app at https://fintask.netlify.app
-- [ ] Verify PWA installation works
-- [ ] Check all modules function correctly
-- [ ] Update project documentation if needed
-
-## 📝 Commit Message Format
-
-### **Feature Releases:**
-```
-Release v1.x.x: Add [feature name] with [key improvements]
-```
-
-### **Bug Fix Releases:**
-```
-Release v1.x.x: Fix [issue description] and improve [area]
-```
-
-### **Major Updates:**
-```
-Release v1.x.x: Major update with [list key features]
-```
-
-## 🏷️ Version Numbering
-
-### **Format: v[MAJOR].[MINOR].[PATCH]**
-
-- **MAJOR**: Breaking changes, major new features
-- **MINOR**: New features, significant improvements
-- **PATCH**: Bug fixes, small improvements
-
-### **Examples:**
-- `v1.0.0` - Initial release
-- `v1.1.0` - Added natural language input
-- `v1.1.1` - Fixed edit button bugs
-- `v2.0.0` - Major UI overhaul with dashboards
-
-## 📊 Release Tracking
-
-### **Current Version:** v1.4.0
-### **Next Planned:** v1.4.0 (Live Dashboards)
-### **Release Frequency:** As features are completed
-### **Testing Environment:** Local development server
-### **Production Environment:** Netlify (https://fintask.netlify.app)
-
-## 🔄 Rollback Process
-
-### **If Issues Found in Production:**
-1. Identify the problematic commit
-2. Create hotfix branch if needed
-3. Test fix locally
-4. Deploy hotfix as patch version
-5. Update CHANGELOG.md with hotfix details
-
-### **Version-Based Rollback (Recommended):**
-```bash
-# Rollback to specific version
-npm run rollback v1.2.0
-
-# Verify available versions
-git tag -l
-
-# Check rollback status
-git log --oneline -5
-```
-
-### **Emergency Rollback (Manual):**
-```bash
-# If automated script fails
-git checkout v1.2.0 -- .
-# Edit src/constants/version.js manually
-git add . && git commit -m "Emergency rollback to v1.2.0"
-git push
-```
-
-### **Post-Rollback Verification:**
-- [ ] Check https://fintask.netlify.app loads
-- [ ] Verify version display in UI footer
-- [ ] Test core CRUD functionality
-- [ ] Confirm PWA installation works
+This script is automatically run during pre-release checks and when committing changes to both version files.

@@ -5,6 +5,16 @@ const fs = require('fs');
 
 console.log('🔍 Pre-release checks starting...\n');
 
+// 0. Validate current versions are in sync
+console.log('🔄 Validating version consistency...');
+try {
+  execSync('node scripts/validate-versions.js', { stdio: 'inherit' });
+  console.log('✅ Versions are in sync\n');
+} catch (error) {
+  console.log('❌ Version mismatch detected - please fix before release');
+  process.exit(1);
+}
+
 // 1. Check for outdated packages
 console.log('📦 Checking for outdated packages...');
 let hasOutdatedPackages = false;
@@ -19,7 +29,7 @@ try {
   if (error.stdout && error.stdout.trim()) {
     hasOutdatedPackages = true;
     console.log('⚠️  Outdated packages found');
-    
+
     // Parse and display outdated packages
     try {
       const packages = JSON.parse(error.stdout);
@@ -29,10 +39,10 @@ try {
     } catch (parseError) {
       console.log('   (Package details parsing failed)');
     }
-    
+
     console.log('\n🔄 Updating compatible packages...');
     execSync('npm update', { stdio: 'inherit' });
-    
+
     // Check if major version upgrades are available
     const majorUpgrades = [];
     try {
@@ -47,13 +57,13 @@ try {
     } catch (parseError) {
       // Ignore parsing errors
     }
-    
+
     if (majorUpgrades.length > 0) {
       console.log('\n⚠️  Major version upgrades available (require manual review):');
       majorUpgrades.forEach(upgrade => console.log(`   ${upgrade}`));
       console.log('   These are skipped to prevent breaking changes.\n');
     }
-    
+
     console.log('✅ Compatible packages updated successfully\n');
   } else {
     console.log('✅ All packages are up to date\n');
@@ -65,7 +75,7 @@ console.log('🔒 Checking for security vulnerabilities...');
 try {
   const auditResult = execSync('npm audit --json', { encoding: 'utf8' });
   const audit = JSON.parse(auditResult);
-  
+
   if (audit.metadata.vulnerabilities.total > 0) {
     console.log(`⚠️  Found ${audit.metadata.vulnerabilities.total} vulnerabilities, fixing...`);
     execSync('npm audit fix', { stdio: 'inherit' });
