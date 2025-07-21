@@ -16,6 +16,8 @@
 - **Build Process**: Fixed build issues with simplified test components
 - **Dependencies**: Updated non-breaking dependencies
 - **Security**: Identified and documented security vulnerabilities
+- **CI/CD**: Fixed Package Upgrades workflow to use proper token permissions
+- **Testing**: Updated React tests to use proper act() implementation
 
 ---
 
