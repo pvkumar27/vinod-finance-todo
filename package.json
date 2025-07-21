@@ -1,6 +1,6 @@
 {
   "name": "fintask",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "homepage": "https://fintask.netlify.app",
   "private": true,
   "dependencies": {
@@ -69,7 +69,8 @@
     "restore": "node scripts/restore-backup.js",
     "test:backup": "node scripts/create-test-backup.js",
     "test:restore": "node scripts/test-restore.js",
-    "backup:admin": "node scripts/backup-supabase-admin.js"
+    "backup:admin": "node scripts/backup-supabase-admin.js",
+    "cleanup": "node scripts/cleanup.js"
   },
   "eslintConfig": {
     "extends": [

@@ -1,6 +1,27 @@
 # 📋 Release Notes - FinTask
 
-## v2.3.2 - 2025-07-23
+## v2.3.1 - 2025-07-24
+### 🧹 Repository Health Check & Cleanup
+- **Security**: Removed hardcoded Firebase credentials from source code
+- **Documentation**: Added comprehensive developer setup guide
+- **Code Cleanup**: Moved obsolete test files to archive directory
+- **Configuration**: Improved .env.example with all required variables
+- **Backup**: Added .env.backup.example for backup configuration
+- **Maintenance**: Created cleanup script for repository maintenance
+- **Version Sync**: Synchronized version numbers across all files
+- **Gitignore**: Updated to exclude additional generated directories
+
+### 🔧 Technical Improvements
+- **Documentation**: Created HEALTH_CHECK_SUMMARY.md with detailed findings
+- **Build Process**: Fixed build issues with simplified test components
+- **Dependencies**: Updated non-breaking dependencies
+- **Security**: Identified and documented security vulnerabilities
+- **CI/CD**: Fixed Package Upgrades workflow to use proper token permissions
+- **Testing**: Updated React tests to use proper act() implementation
+
+---
+
+## v2.3.0 - 2025-07-20
 ### 🐛 Bugfixes for To-Dos
 - **Due Date Fix**: Completely resolved date handling issues with a simpler approach
 - **Mobile UI**: Further improved task card layout for iPhone 16 Pro Max

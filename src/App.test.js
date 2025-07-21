@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { act } from 'react';
 import { render } from '@testing-library/react';
 
 // Set up Jest mocks before importing App
@@ -54,6 +54,10 @@ jest.mock('./firebase-config', () => ({
 }));
 
 test('renders App component', async () => {
-  const { container } = render(<App />);
+  let container;
+  await act(async () => {
+    const renderResult = render(<App />);
+    container = renderResult.container;
+  });
   expect(container).toBeInTheDocument();
 });
