@@ -183,12 +183,9 @@ test.describe('Authentication', () => {
     // Define tabs to check
     const tabs = [
       { name: 'To-Dos', expectedElement: 'h2:has-text("To-Do Manager")' },
-      { name: 'Cards', expectedElement: 'h2:has-text("Credit Cards")' },
+      { name: 'Credit', expectedElement: 'h2:has-text("Credit Cards")' },
       { name: 'Finances', expectedElement: 'h2:has-text("Finances")' },
     ];
-    
-    // Set viewport to desktop size to ensure tab labels are visible
-    await page.setViewportSize({ width: 1280, height: 800 });
 
     // Navigate through each tab and verify content
     for (const tab of tabs) {
