@@ -11,6 +11,7 @@ const TaskManager = () => {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState('');
   const [newTask, setNewTask] = useState('');
+  // Default due date is today
   const [taskDate, setTaskDate] = useState(new Date().toISOString().split('T')[0]);
   const [editingTodo, setEditingTodo] = useState(null);
   const [isListening, setIsListening] = useState(false);
@@ -40,7 +41,30 @@ const TaskManager = () => {
   const handleEdit = (todo) => {
     setEditingTodo(todo);
     setNewTask(todo.task);
-    setTaskDate(todo.due_date || new Date().toISOString().split('T')[0]);
+    
+    // Simply use the date string directly without any manipulation
+    if (todo.due_date) {
+      setTaskDate(todo.due_date.split('T')[0]);
+    } else {
+      setTaskDate(new Date().toISOString().split('T')[0]);
+    }
+    
+    // Scroll to the top and focus the input after a short delay
+    // Use a longer delay on mobile to ensure the UI has updated
+    setTimeout(() => {
+      // Force scroll to absolute top for mobile devices
+      window.scrollTo(0, 0);
+      
+      // Try to focus the input field
+      const inputField = document.getElementById('task-input');
+      if (inputField) {
+        inputField.focus();
+        // On mobile, also try to show the virtual keyboard
+        if ('ontouchstart' in window) {
+          inputField.click();
+        }
+      }
+    }, 300);
   };
 
   const handleVoiceInput = () => {
@@ -105,6 +129,8 @@ const TaskManager = () => {
 
     try {
       if (editingTodo) {
+        // When updating a task, we need to ensure the date is properly formatted
+        // No need to add a day since we already added it in handleEdit
         await updateTodo(editingTodo.id, { 
           task: newTask.trim(),
           due_date: taskDate
@@ -138,6 +164,7 @@ const TaskManager = () => {
       }
       
       setNewTask('');
+      // Reset to today's date after adding/updating a task
       setTaskDate(new Date().toISOString().split('T')[0]);
       loadTodos();
     } catch (err) {
@@ -367,14 +394,23 @@ const TaskManager = () => {
           </div>
           <div className="flex flex-col w-full sm:w-auto">
             <label htmlFor="task-due-date" className="text-xs font-medium text-gray-700 mb-1 ml-1">Due Date</label>
-            <input
-              id="task-due-date"
-              type="date"
-              value={taskDate}
-              onChange={(e) => setTaskDate(e.target.value)}
-              className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-40 text-sm"
-              required
-            />
+            <div className="flex items-center gap-2">
+              <input
+                id="task-due-date"
+                type="date"
+                value={taskDate}
+                onChange={(e) => setTaskDate(e.target.value)}
+                className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-40 text-sm"
+                required
+              />
+              <button
+                type="button"
+                onClick={() => setTaskDate(new Date().toISOString().split('T')[0])}
+                className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-lg transition-colors"
+              >
+                Today
+              </button>
+            </div>
           </div>
           <div className="flex flex-col w-full sm:w-auto justify-end mt-4 sm:mt-0">
             <button
@@ -390,6 +426,7 @@ const TaskManager = () => {
                 onClick={() => {
                   setEditingTodo(null);
                   setNewTask('');
+                  // Reset to today's date when canceling
                   setTaskDate(new Date().toISOString().split('T')[0]);
                 }}
                 className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors w-full sm:w-auto text-sm mt-2 sm:mt-2 font-medium shadow-md"
