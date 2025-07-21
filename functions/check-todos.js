@@ -1,5 +1,5 @@
 /**
- * Script to directly check the database for tasks
+ * Script to check todos in the database
  */
 const admin = require('firebase-admin');
 const serviceAccount = require('./service-account.json');
@@ -25,24 +25,35 @@ async function checkTodos() {
     
     console.log(`Found ${todosSnapshot.size} todos in the database`);
     
-    // Log all todos with their due dates
+    // Group todos by due date
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    console.log('\nTodos by due date:');
+    
     todosSnapshot.forEach(doc => {
       const data = doc.data();
-      console.log(`Todo: ${data.task || data.title || 'Untitled'}`);
-      console.log(`  ID: ${doc.id}`);
-      console.log(`  Completed: ${data.completed}`);
+      console.log(`\nTodo ID: ${doc.id}`);
+      console.log(`  Task: ${data.task || data.title || 'MISSING'}`);
+      console.log(`  Completed: ${data.completed !== undefined ? data.completed : 'MISSING'}`);
       
       if (data.dueDate) {
-        const dueDate = data.dueDate.toDate ? data.dueDate.toDate() : new Date(data.dueDate);
+        const dueDate = data.dueDate.toDate();
+        const dueDateOnly = new Date(dueDate);
+        dueDateOnly.setHours(0, 0, 0, 0);
+        
         console.log(`  Due Date: ${dueDate.toISOString()} (${dueDate.toLocaleDateString()})`);
-      } else if (data.due_date) {
-        console.log(`  Due Date: ${data.due_date} (string format)`);
+        
+        if (dueDateOnly < today) {
+          console.log('  Status: OVERDUE');
+        } else if (dueDateOnly.getTime() === today.getTime()) {
+          console.log('  Status: DUE TODAY');
+        } else {
+          console.log('  Status: FUTURE');
+        }
       } else {
-        console.log('  No due date');
+        console.log('  Due Date: MISSING');
       }
-      
-      console.log('  Raw data:', JSON.stringify(data));
-      console.log('---');
     });
     
   } catch (error) {
@@ -51,7 +62,7 @@ async function checkTodos() {
 }
 
 checkTodos().then(() => {
-  console.log('Done checking todos');
+  console.log('\nDone checking todos');
   process.exit(0);
 }).catch(err => {
   console.error('Fatal error:', err);
