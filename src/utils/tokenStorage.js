@@ -65,7 +65,8 @@ export const saveUserToken = async token => {
       userId: user.id,
       email: user.email,
       deviceType,
-      lastUpdated: new Date(),
+      lastUpdated: new Date().toISOString(),
+      createdAt: new Date().toISOString()
     });
 
     console.log('FCM token saved successfully');

@@ -51,6 +51,14 @@ export const requestNotificationPermission = async () => {
       console.log('Using VAPID key:', vapidKey);
 
       try {
+        // Special handling for iOS
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
+                           window.navigator.standalone === true;
+        
+        console.log('Device info:', { isIOS, isStandalone });
+        
+        // Get token with VAPID key
         const token = await getToken(messaging, {
           vapidKey: vapidKey,
         });
