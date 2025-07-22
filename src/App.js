@@ -14,6 +14,7 @@ import './styles/background.css';
 import './styles/typography.css';
 import './styles/decorative.css';
 import './styles/components.css';
+import './styles/animations.css';
 
 function App() {
   const [session, setSession] = useState(null);

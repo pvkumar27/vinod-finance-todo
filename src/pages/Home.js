@@ -3,6 +3,7 @@ import TabNavigation from '../components/TabNavigation';
 import CreditCardDashboard from '../components/CreditCardDashboard';
 import MyFinancesDashboard from '../components/MyFinancesDashboard';
 import TodosDashboard from '../components/TodosDashboard';
+import NotificationButton from '../components/NotificationButton';
 import { APP_VERSION } from '../constants/version';
 
 const Home = () => {
@@ -95,12 +96,20 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Version Footer */}
+        {/* Version Footer with Notification Button */}
         <div className="mt-8 text-center pb-2">
-          <div className="inline-block px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/5 to-indigo-500/5 border border-blue-100">
-            <p className="text-sm bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent font-medium">
-              FinTask {APP_VERSION} • Built with React & Supabase
-            </p>
+          <div className="flex flex-col items-center space-y-4">
+            {/* Notification Button */}
+            <div className="mb-2">
+              <NotificationButton />
+            </div>
+            
+            {/* Version Info */}
+            <div className="inline-block px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/5 to-indigo-500/5 border border-blue-100">
+              <p className="text-sm bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent font-medium">
+                FinTask {APP_VERSION} • Built with React & Supabase
+              </p>
+            </div>
           </div>
         </div>
       </div>

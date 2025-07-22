@@ -6,6 +6,7 @@
  * 2. Firebase Extension: Trigger Email
  * 3. Firebase Cloud Messaging (FCM)
  * 4. Noon motivation notification
+ * 5. Token management functions
  */
 const functions = require('firebase-functions');
 const admin = require('firebase-admin');
@@ -567,6 +568,12 @@ async function sendPushNotification(taskCount, tasks = []) {
  * HTTP triggered function that sends noon motivation notifications
  * Can be triggered by a scheduled HTTP request (e.g., from GitHub Actions)
  */
+// Import the clearAllTokens function
+const { clearAllTokens } = require('./clear-tokens-function');
+
+// Export the clearAllTokens function
+exports.clearAllTokens = clearAllTokens;
+
 exports.sendNoonMotivation = functions.https.onRequest(async (req, res) => {
   try {
     // Basic auth check - use API key for security
