@@ -2,12 +2,9 @@
  * Script to check FCM tokens in the database
  */
 const admin = require('firebase-admin');
-const serviceAccount = require('./service-account.json');
 
-// Initialize Firebase Admin with service account
-admin.initializeApp({
-  credential: admin.credential.cert(serviceAccount)
-});
+// Initialize Firebase Admin with application default credentials
+admin.initializeApp();
 
 async function checkTokens() {
   try {

@@ -1,5 +1,20 @@
 # 📋 Release Notes - FinTask
 
+## v2.3.2 - 2025-07-26
+### 🐛 Bugfixes
+- **Push Notifications**: Fixed "Requested entity was not found" error in Firebase Cloud Messaging
+- **Email Links**: Updated all URLs from finance-to-dos.web.app to fintask.app
+- **Mobile UI**: Optimized button sizes for better touch targets on mobile devices
+- **Due Date**: Fixed date handling to prevent timezone issues with task due dates
+
+### 🔧 Technical Improvements
+- **Error Handling**: Added robust error handling for FCM token management
+- **Token Cleanup**: Removed invalid FCM tokens from the database
+- **Documentation**: Added comprehensive guides for notification testing and verification
+- **Date Utilities**: Simplified date handling with consistent utility functions
+
+---
+
 ## v2.3.1 - 2025-07-24
 ### 🧹 Repository Health Check & Cleanup
 - **Security**: Removed hardcoded Firebase credentials from source code

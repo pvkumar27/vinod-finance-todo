@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { getTodayDateString, formatDateString } from '../utils/dateUtils';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
@@ -12,7 +13,7 @@ const TaskManager = () => {
   const [message, setMessage] = useState('');
   const [newTask, setNewTask] = useState('');
   // Default due date is today
-  const [taskDate, setTaskDate] = useState(new Date().toISOString().split('T')[0]);
+  const [taskDate, setTaskDate] = useState(getTodayDateString());
   const [editingTodo, setEditingTodo] = useState(null);
   const [isListening, setIsListening] = useState(false);
   const [showCompleted, setShowCompleted] = useState(false);
@@ -42,24 +43,21 @@ const TaskManager = () => {
     setEditingTodo(todo);
     setNewTask(todo.task);
     
-    // Simply use the date string directly without any manipulation
+    // Use the date string directly
     if (todo.due_date) {
+      // Extract just the date part (YYYY-MM-DD)
       setTaskDate(todo.due_date.split('T')[0]);
     } else {
-      setTaskDate(new Date().toISOString().split('T')[0]);
+      setTaskDate(getTodayDateString());
     }
     
     // Scroll to the top and focus the input after a short delay
-    // Use a longer delay on mobile to ensure the UI has updated
     setTimeout(() => {
-      // Force scroll to absolute top for mobile devices
       window.scrollTo(0, 0);
       
-      // Try to focus the input field
       const inputField = document.getElementById('task-input');
       if (inputField) {
         inputField.focus();
-        // On mobile, also try to show the virtual keyboard
         if ('ontouchstart' in window) {
           inputField.click();
         }
@@ -129,11 +127,10 @@ const TaskManager = () => {
 
     try {
       if (editingTodo) {
-        // When updating a task, we need to ensure the date is properly formatted
-        // No need to add a day since we already added it in handleEdit
+        // When updating a task, use the date string directly
         await updateTodo(editingTodo.id, { 
           task: newTask.trim(),
-          due_date: taskDate
+          due_date: taskDate // YYYY-MM-DD format
         });
         setMessage('✅ Task updated successfully!');
         setTimeout(() => setMessage(''), 4000);
@@ -153,7 +150,7 @@ const TaskManager = () => {
         } else {
           todoData = { 
             task: newTask.trim(),
-            due_date: taskDate,
+            due_date: taskDate, // YYYY-MM-DD format
             pinned: false
           };
         }
@@ -165,7 +162,7 @@ const TaskManager = () => {
       
       setNewTask('');
       // Reset to today's date after adding/updating a task
-      setTaskDate(new Date().toISOString().split('T')[0]);
+      setTaskDate(getTodayDateString());
       loadTodos();
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
@@ -370,7 +367,7 @@ const TaskManager = () => {
       <form onSubmit={handleAddTodo} className="mb-8">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 relative">
-            <label htmlFor="task-input" className="text-xs font-medium text-gray-700 mb-1 ml-1 block">Task</label>
+            <label htmlFor="task-input" className="text-xs font-medium text-gray-700 mb-1 block text-left">Task</label>
             <div className="relative">
               <input
                 id="task-input"
@@ -393,7 +390,7 @@ const TaskManager = () => {
             </div>
           </div>
           <div className="flex flex-col w-full sm:w-auto">
-            <label htmlFor="task-due-date" className="text-xs font-medium text-gray-700 mb-1 ml-1">Due Date</label>
+            <label htmlFor="task-due-date" className="text-xs font-medium text-gray-700 mb-1 text-left block">Due Date</label>
             <div className="flex items-center gap-2">
               <input
                 id="task-due-date"
@@ -405,7 +402,7 @@ const TaskManager = () => {
               />
               <button
                 type="button"
-                onClick={() => setTaskDate(new Date().toISOString().split('T')[0])}
+                onClick={() => setTaskDate(getTodayDateString())}
                 className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-lg transition-colors"
               >
                 Today
@@ -427,7 +424,7 @@ const TaskManager = () => {
                   setEditingTodo(null);
                   setNewTask('');
                   // Reset to today's date when canceling
-                  setTaskDate(new Date().toISOString().split('T')[0]);
+                  setTaskDate(getTodayDateString());
                 }}
                 className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors w-full sm:w-auto text-sm mt-2 sm:mt-2 font-medium shadow-md"
               >
@@ -506,7 +503,7 @@ const TaskManager = () => {
                         <span className="text-sm text-gray-900 font-medium">{activeTask.task}</span>
                         {activeTask.due_date && (
                           <span className="text-xs text-gray-500 ml-2">
-                            Due: {new Date(activeTask.due_date).toLocaleDateString()}
+                            Due: {formatDateString(activeTask.due_date)}
                           </span>
                         )}
                       </div>
@@ -552,7 +549,7 @@ const TaskManager = () => {
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-left font-medium text-sm">{todo.task}</td>
                     <td className="border border-gray-300 px-4 py-2 text-left text-xs">
-                      {todo.due_date ? new Date(todo.due_date).toLocaleDateString() : '-'}
+                      {todo.due_date ? formatDateString(todo.due_date) : '-'}
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-left">
                       <div className="flex space-x-2">
@@ -608,7 +605,7 @@ const TaskManager = () => {
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-left font-medium text-sm">{todo.task}</td>
                     <td className="border border-gray-300 px-4 py-2 text-left text-xs">
-                      {todo.due_date ? new Date(todo.due_date).toLocaleDateString() : '-'}
+                      {todo.due_date ? formatDateString(todo.due_date) : '-'}
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-left">
                       <div className="flex space-x-2">
@@ -684,7 +681,7 @@ const TaskManager = () => {
                     <div className="flex flex-wrap sm:flex-nowrap items-center">
                       <span className="line-through text-gray-600 text-sm">{todo.task}</span>
                       <span className="text-xs text-gray-500 ml-2 whitespace-nowrap">
-                        Completed: {new Date(todo.updated_at).toLocaleDateString()}
+                        Completed: {formatDateString(todo.updated_at)}
                       </span>
                     </div>
                   </div>

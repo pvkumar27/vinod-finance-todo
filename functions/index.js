@@ -253,7 +253,7 @@ async function sendEmailNotification(tasks) {
             </table>
             
             <div style="text-align: center; margin-top: 24px;">
-              <a href="https://finance-to-dos.web.app" style="display: inline-block; background-color: #4299e1; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 600; font-size: 16px;">
+              <a href="https://fintask.netlify.app/" style="display: inline-block; background-color: #4299e1; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: 600; font-size: 16px;">
                 Open FinTask
               </a>
             </div>
@@ -275,12 +275,155 @@ async function sendEmailNotification(tasks) {
           }
           return `- ${task.title} ${dueDateStr}`;
         })
-        .join('\n')}\n\nOpen FinTask to manage your tasks: https://finance-to-dos.web.app`,
+        .join('\n')}\n\nOpen FinTask to manage your tasks: https://fintask.netlify.app/`,
     },
   });
 
   console.log('Email notification sent');
 }
+
+/**
+ * HTTP triggered function to send a test push notification
+ */
+exports.testPushNotification = functions.https.onRequest(async (req, res) => {
+  try {
+    // Basic auth check - use API key for security
+    const apiKey =
+      req.query.key || (req.headers.authorization && req.headers.authorization.split('Bearer ')[1]);
+    if (apiKey !== functions.config().app.key) {
+      console.error('Unauthorized request to testPushNotification');
+      return res.status(401).send('Unauthorized');
+    }
+    
+    const db = admin.firestore();
+    
+    // Get all device tokens from Firestore
+    const tokenSnapshot = await db.collection('userTokens').get();
+
+    if (tokenSnapshot.empty) {
+      console.log('No FCM tokens found');
+      return res.status(200).send('No FCM tokens found');
+    }
+    
+    console.log(`Found ${tokenSnapshot.size} FCM tokens`);
+    
+    // Send a test notification to each device
+    let successCount = 0;
+    for (const doc of tokenSnapshot.docs) {
+      const data = doc.data();
+      const token = data.token;
+      const deviceType = data.deviceType || 'unknown';
+      const email = data.email || 'unknown';
+      const userId = data.userId || 'unknown';
+      
+      console.log(`Sending to device: ${deviceType}, email: ${email}, userId: ${userId}`);
+      
+      // Create notification message
+      const message = {
+        notification: {
+          title: '🧪 FinTask Test Notification',
+          body: `This is a test notification. Device: ${deviceType}, Email: ${email}`,
+        },
+        data: {
+          type: 'test',
+          timestamp: String(Date.now()),
+        },
+        token: token,
+      };
+      
+      // Add platform-specific configurations
+      if (deviceType === 'ios') {
+        message.apns = {
+          payload: {
+            aps: {
+              sound: 'default',
+              badge: 1,
+              'content-available': 1,
+            },
+          },
+          fcmOptions: {
+            imageUrl: 'https://fintask.netlify.app/icons/official-logo.png',
+          },
+        };
+      } else {
+        message.android = {
+          priority: 'high',
+          notification: {
+            sound: 'default',
+            priority: 'high',
+            channelId: 'task_reminders',
+            icon: 'notification_icon',
+            color: '#4285F4',
+          },
+        };
+      }
+      
+      try {
+        await admin.messaging().send(message);
+        console.log(`Test notification sent to ${deviceType} device`);
+        successCount++;
+      } catch (error) {
+        console.error(`Error sending to token: ${error.message}`);
+        
+        // If the token is invalid, remove it
+        if (
+          error.code === 'messaging/invalid-registration-token' ||
+          error.code === 'messaging/registration-token-not-registered' ||
+          error.message.includes('Requested entity was not found')
+        ) {
+          await doc.ref.delete();
+          console.log(`Removed invalid token for ${deviceType} device`);
+        }
+      }
+    }
+    
+    return res.status(200).send(`Test notifications sent to ${successCount}/${tokenSnapshot.size} devices`);
+  } catch (error) {
+    console.error('Error sending test notification:', error);
+    return res.status(500).send(`Error: ${error.message}`);
+  }
+});
+
+/**
+ * Function to fix FCM token record
+ */
+exports.fixTokenRecord = functions.https.onRequest(async (req, res) => {
+  try {
+    // Basic auth check - use API key for security
+    const apiKey =
+      req.query.key || (req.headers.authorization && req.headers.authorization.split('Bearer ')[1]);
+    if (apiKey !== functions.config().app.key) {
+      console.error('Unauthorized request to fixTokenRecord');
+      return res.status(401).send('Unauthorized');
+    }
+    
+    const db = admin.firestore();
+    
+    // Find the token record with issues
+    const tokenSnapshot = await db.collection('userTokens')
+      .where('token', '==', 'etR8K5hDLBBmpOtQVp42rP:APA91bEihJt_E8LkwyRa2CVtwSNFStUZe8x5Ck1rHQzSjcYuvxjeWHHKviQC-fT18TtK9ls-YRa1ctm5RsOOGyKyKVbgo8SpTkbztLHTqF5S9eQ04BzaNhE')
+      .get();
+    
+    if (tokenSnapshot.empty) {
+      console.log('Token record not found');
+      return res.status(200).send('Token record not found');
+    }
+    
+    // Delete the token record
+    const promises = tokenSnapshot.docs.map(doc => {
+      console.log(`Deleting token record with ID: ${doc.id}`);
+      return doc.ref.delete();
+    });
+    
+    await Promise.all(promises);
+    console.log(`Deleted ${promises.length} token record(s)`);
+    
+    return res.status(200).send(`Deleted ${promises.length} token record(s). Please re-register the device by opening the app and allowing notifications.`);
+  } catch (error) {
+    console.error('Error fixing token record:', error);
+    return res.status(500).send(`Error: ${error.message}`);
+  }
+});
 
 /**
  * Send push notification using Firebase Cloud Messaging
@@ -359,7 +502,7 @@ async function sendPushNotification(taskCount, tasks = []) {
               },
             },
             fcmOptions: {
-              imageUrl: 'https://finance-to-dos.web.app/icons/official-logo.png',
+              imageUrl: 'https://fintask.netlify.app/icons/official-logo.png',
             },
           };
         } else {
@@ -397,7 +540,8 @@ async function sendPushNotification(taskCount, tasks = []) {
         // If the token is invalid, remove it
         if (
           sendError.code === 'messaging/invalid-registration-token' ||
-          sendError.code === 'messaging/registration-token-not-registered'
+          sendError.code === 'messaging/registration-token-not-registered' ||
+          sendError.message.includes('Requested entity was not found')
         ) {
           // Find and delete the token document
           const tokenDocs = await db.collection('userTokens')
@@ -571,7 +715,7 @@ async function sendMotivationNotification(completedCount, pendingCount) {
               },
             },
             fcmOptions: {
-              imageUrl: 'https://finance-to-dos.web.app/icons/official-logo.png',
+              imageUrl: 'https://fintask.netlify.app/icons/official-logo.png',
             },
           };
         } else {
@@ -609,7 +753,8 @@ async function sendMotivationNotification(completedCount, pendingCount) {
         // If the token is invalid, remove it
         if (
           sendError.code === 'messaging/invalid-registration-token' ||
-          sendError.code === 'messaging/registration-token-not-registered'
+          sendError.code === 'messaging/registration-token-not-registered' ||
+          sendError.message.includes('Requested entity was not found')
         ) {
           // Find and delete the token document
           const tokenDocs = await db.collection('userTokens')
