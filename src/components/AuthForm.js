@@ -100,22 +100,11 @@ const AuthForm = () => {
           <Auth
             supabaseClient={supabase}
             onError={(error) => {
-              console.error('Auth error:', error);
-              
-              // Check if it's an API key error
-              if (error.message && error.message.includes('Invalid API key')) {
-                setAuthState({
-                  loading: false,
-                  error: 'The Supabase API key is invalid or expired. Please check your project settings.',
-                  success: null
-                });
-              } else {
-                setAuthState({
-                  loading: false,
-                  error: `Error: ${error.message}. Please check console for details.`,
-                  success: null
-                });
-              }
+              setAuthState({
+                loading: false,
+                error: error.message,
+                success: null
+              });
             }}
             onAuthStateChange={handleAuthStateChange}
             appearance={{ 

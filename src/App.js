@@ -22,11 +22,7 @@ function App() {
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Auth session result:', session ? 'Session found' : 'No session');
       setSession(session);
-      setLoading(false);
-    }).catch(error => {
-      console.error('Error getting session:', error);
       setLoading(false);
     });
 
