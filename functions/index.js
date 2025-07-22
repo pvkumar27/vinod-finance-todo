@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /**
  * Firebase Cloud Functions for FinTask
  *
@@ -132,7 +133,7 @@ exports.sendDailyTaskReminders = functions.https.onRequest(async (req, res) => {
     // Log the found tasks
     console.log(`Found ${tasksSnapshot.size} tasks due today or overdue:`);
     tasksSnapshot.forEach(task => {
-      console.log(`- Task "${task.task || task.title}": Due ${task.due_date}`);
+      console.log(`- Task '${task.task || task.title}': Due ${task.due_date}`);
     });
 
     // Collect task information
@@ -156,7 +157,7 @@ exports.sendDailyTaskReminders = functions.https.onRequest(async (req, res) => {
 
     // Send push notification using FCM if requested or by default
     if (sendPush !== false) {
-      await sendPushNotification(taskItems.length, taskItems);
+      await sendPushNotification(taskItems.length);
     }
 
     console.log(`Sent notifications for ${taskItems.length} tasks`);
@@ -431,7 +432,7 @@ exports.fixTokenRecord = functions.https.onRequest(async (req, res) => {
  * @param {number} taskCount - Number of tasks
  * @param {Array} tasks - Optional array of task objects
  */
-async function sendPushNotification(taskCount, tasks = []) {
+async function sendPushNotification(taskCount) {
   try {
     const db = admin.firestore();
 
@@ -446,7 +447,7 @@ async function sendPushNotification(taskCount, tasks = []) {
     // Create a single notification body with task count
     let notificationBody;
     if (taskCount === 1) {
-      notificationBody = `You have 1 pending task due today or overdue.`;
+      notificationBody = 'You have 1 pending task due today or overdue.';
     } else {
       notificationBody = `You have ${taskCount} pending tasks due today or overdue.`;
     }
@@ -568,11 +569,13 @@ async function sendPushNotification(taskCount, tasks = []) {
  * HTTP triggered function that sends noon motivation notifications
  * Can be triggered by a scheduled HTTP request (e.g., from GitHub Actions)
  */
-// Import the clearAllTokens function
+// Import the functions
 const { clearAllTokens } = require('./clear-tokens-function');
+const { registerTestToken } = require('./register-test-token-function');
 
-// Export the clearAllTokens function
+// Export the functions
 exports.clearAllTokens = clearAllTokens;
+exports.registerTestToken = registerTestToken;
 
 exports.sendNoonMotivation = functions.https.onRequest(async (req, res) => {
   try {
@@ -666,7 +669,7 @@ async function sendMotivationNotification(completedCount, pendingCount) {
     } else if (completedCount > 0) {
       body = `You've completed ${completedCount} task${completedCount === 1 ? '' : 's'} today. Can you complete at least 4 before the day ends?`;
     } else {
-      body = `Time to get started! Try to complete at least 4 tasks today. You can do it!`;
+      body = 'Time to get started! Try to complete at least 4 tasks today. You can do it!';
     }
 
     // Group tokens by user ID
