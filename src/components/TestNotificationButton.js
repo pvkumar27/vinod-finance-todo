@@ -14,7 +14,6 @@ const TestNotificationButton = () => {
         return;
       }
 
-      const subscriptionData = JSON.parse(subscription);
       setTestResult('✅ Found subscription. Sending test notification...');
 
       // Send a test notification directly using the browser API
