@@ -4,6 +4,7 @@ import CreditCardDashboard from '../components/CreditCardDashboard';
 import MyFinancesDashboard from '../components/MyFinancesDashboard';
 import TodosDashboard from '../components/TodosDashboard';
 import NotificationButton from '../components/NotificationButton';
+import TestNotificationButton from '../components/TestNotificationButton';
 import { APP_VERSION } from '../constants/version';
 
 const Home = () => {
@@ -102,6 +103,7 @@ const Home = () => {
             {/* Notification Button */}
             <div className="mb-2">
               <NotificationButton />
+              <TestNotificationButton />
             </div>
             
             {/* Version Info */}
