@@ -1,5 +1,15 @@
 # 📋 Release Notes - FinTask
 
+## v2.4.0 - 2025-07-28
+### 🚀 Release
+- **Version Update**: v2.4.0
+- **Package Updates**: Latest compatible versions
+- **Security Fixes**: Automated vulnerability patches
+- **Build Verification**: Production build tested
+
+---
+
+
 ## v2.3.2 - 2025-07-26
 ### 🐛 Bugfixes
 - **Push Notifications**: Fixed "Requested entity was not found" error in Firebase Cloud Messaging
