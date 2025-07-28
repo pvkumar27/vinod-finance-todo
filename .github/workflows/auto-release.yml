@@ -1,0 +1,118 @@
+name: 🚀 Automated Release
+
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - 'README.md'
+      - 'docs/**'
+      - '.github/**'
+      - 'tests/**'
+
+jobs:
+  auto-release:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, '[skip release]')"
+    
+    steps:
+    - name: 📥 Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: 📦 Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: 📋 Install dependencies
+      run: npm ci
+
+    - name: 🔍 Determine version bump
+      id: version
+      run: |
+        # Get the last commit message
+        COMMIT_MSG=$(git log -1 --pretty=%B)
+        echo "Commit message: $COMMIT_MSG"
+        
+        # Determine version bump type based on commit message or changes
+        if [[ "$COMMIT_MSG" =~ \[major\]|\[breaking\] ]]; then
+          echo "bump=major" >> $GITHUB_OUTPUT
+          echo "🚨 Major version bump detected"
+        elif [[ "$COMMIT_MSG" =~ \[minor\]|\[feature\] ]] || git diff HEAD~1 --name-only | grep -E "(src/components|src/pages)" | head -1; then
+          echo "bump=minor" >> $GITHUB_OUTPUT
+          echo "✨ Minor version bump detected"
+        else
+          echo "bump=patch" >> $GITHUB_OUTPUT
+          echo "🔧 Patch version bump detected"
+        fi
+
+    - name: 📈 Calculate new version
+      id: new_version
+      run: |
+        # Get current version from package.json
+        CURRENT_VERSION=$(node -p "require('./package.json').version")
+        echo "Current version: $CURRENT_VERSION"
+        
+        # Split version into parts
+        IFS='.' read -ra VERSION_PARTS <<< "$CURRENT_VERSION"
+        MAJOR=${VERSION_PARTS[0]}
+        MINOR=${VERSION_PARTS[1]}
+        PATCH=${VERSION_PARTS[2]}
+        
+        # Bump version based on type
+        case "${{ steps.version.outputs.bump }}" in
+          major)
+            MAJOR=$((MAJOR + 1))
+            MINOR=0
+            PATCH=0
+            ;;
+          minor)
+            MINOR=$((MINOR + 1))
+            PATCH=0
+            ;;
+          patch)
+            PATCH=$((PATCH + 1))
+            ;;
+        esac
+        
+        NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+        echo "New version: $NEW_VERSION"
+        echo "version=$NEW_VERSION" >> $GITHUB_OUTPUT
+        echo "v_version=v$NEW_VERSION" >> $GITHUB_OUTPUT
+
+    - name: 🏷️ Create release
+      run: |
+        # Configure git
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        
+        # Run the release script
+        npm run release ${{ steps.new_version.outputs.v_version }}
+
+    - name: 🎉 Create GitHub Release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.new_version.outputs.v_version }}
+        release_name: Release ${{ steps.new_version.outputs.v_version }}
+        body: |
+          ## 🚀 Release ${{ steps.new_version.outputs.v_version }}
+          
+          **Type**: ${{ steps.version.outputs.bump }} release
+          
+          ### Changes
+          - Automated release based on recent commits
+          - Version bumped from previous release
+          
+          ### Deployment
+          - ✅ Automatically deployed to production
+          - 🔗 Live at: https://fintask.netlify.app
+          
+          ---
+          *This release was automatically generated*
+        draft: false
+        prerelease: false
