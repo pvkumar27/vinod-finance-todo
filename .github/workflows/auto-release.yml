@@ -9,6 +9,11 @@ on:
       - '.github/**'
       - 'tests/**'
 
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
 jobs:
   auto-release:
     runs-on: ubuntu-latest
@@ -84,10 +89,15 @@ jobs:
         echo "v_version=v$NEW_VERSION" >> $GITHUB_OUTPUT
 
     - name: 🏷️ Create release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         # Configure git
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
+        
+        # Set up authentication
+        git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git
         
         # Run the release script
         npm run release ${{ steps.new_version.outputs.v_version }}
