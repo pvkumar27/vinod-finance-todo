@@ -3,8 +3,6 @@ import TabNavigation from '../components/TabNavigation';
 import CreditCardDashboard from '../components/CreditCardDashboard';
 import MyFinancesDashboard from '../components/MyFinancesDashboard';
 import TodosDashboard from '../components/TodosDashboard';
-import NotificationButton from '../components/NotificationButton';
-import TestNotificationButton from '../components/TestNotificationButton';
 import { APP_VERSION } from '../constants/version';
 
 const Home = () => {
@@ -100,11 +98,7 @@ const Home = () => {
         {/* Version Footer with Notification Button */}
         <div className="mt-8 text-center pb-2">
           <div className="flex flex-col items-center space-y-4">
-            {/* Notification Button */}
-            <div className="mb-2">
-              <NotificationButton />
-              <TestNotificationButton />
-            </div>
+            {/* App info */}
             
             {/* Version Info */}
             <div className="inline-block px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/5 to-indigo-500/5 border border-blue-100">
