@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getMessaging, getToken } from 'firebase/messaging';
+import { getAuth, signInAnonymously } from 'firebase/auth';
 import { messaging as existingMessaging } from '../firebase-config';
 
 // Helper function to detect iOS
@@ -124,12 +125,17 @@ const NotificationButton = () => {
         }
       }
       
+      // Authenticate with Firebase first
+      setDebugInfo('Authenticating with Firebase...');
+      const auth = getAuth();
+      await signInAnonymously(auth);
+      setDebugInfo('✅ Firebase authenticated');
+      
       // Use existing messaging if available, or initialize a new one
       const messaging = existingMessaging || getMessaging();
       setDebugInfo('Getting FCM token...');
       
       const vapidKey = 'BJbhCDjg0hLxllQlzsveswOa1s5wN0sqRG7opcfI9UAP4UPMeztPd5gI1t1chiHpYbc0cmFB7ZvqvF02we4FSug';
-      setDebugInfo('Using VAPID key: ' + vapidKey.substring(0, 10) + '...');
       
       const currentToken = await getToken(messaging, { vapidKey });
 
