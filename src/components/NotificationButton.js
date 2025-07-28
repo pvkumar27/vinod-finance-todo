@@ -57,7 +57,16 @@ const NotificationButton = () => {
       
       setNotificationStatus('requesting');
       
-      // Force request permission even if previously denied
+      // If already granted, just test registration
+      if (Notification.permission === 'granted') {
+        setDebugInfo('Permission already granted, testing registration...');
+        await registerDevice();
+        setShowConfirmation(true);
+        setTimeout(() => setShowConfirmation(false), 3000);
+        return;
+      }
+      
+      // Request permission
       const permission = await Notification.requestPermission();
       console.log('Permission result:', permission);
       setNotificationStatus(permission);
@@ -67,7 +76,6 @@ const NotificationButton = () => {
         setShowConfirmation(true);
         setTimeout(() => setShowConfirmation(false), 3000);
       } else if (permission === 'denied' && isIOS()) {
-        // Show help for iOS denied state
         setShowIOSHelp(true);
         setTimeout(() => setShowIOSHelp(false), 15000);
       }
@@ -120,9 +128,10 @@ const NotificationButton = () => {
       const messaging = existingMessaging || getMessaging();
       setDebugInfo('Getting FCM token...');
       
-      const currentToken = await getToken(messaging, {
-        vapidKey: 'BJbhCDjg0hLxllQlzsveswOa1s5wN0sqRG7opcfI9UAP4UPMeztPd5gI1t1chiHpYbc0cmFB7ZvqvF02we4FSug'
-      });
+      const vapidKey = 'BJbhCDjg0hLxllQlzsveswOa1s5wN0sqRG7opcfI9UAP4UPMeztPd5gI1t1chiHpYbc0cmFB7ZvqvF02we4FSug';
+      setDebugInfo('Using VAPID key: ' + vapidKey.substring(0, 10) + '...');
+      
+      const currentToken = await getToken(messaging, { vapidKey });
 
       if (currentToken) {
         setDebugInfo('Token obtained: ' + currentToken.substring(0, 20) + '...');
@@ -169,7 +178,7 @@ const NotificationButton = () => {
       case 'denied':
         return 'Try enable notifications';
       case 'granted':
-        return 'Notifications enabled';
+        return 'Test notification registration';
       case 'requesting':
         return 'Requesting permission...';
       case 'default':
@@ -194,7 +203,7 @@ const NotificationButton = () => {
   };
 
   const isButtonDisabled = () => {
-    return ['checking', 'requesting', 'granted', 'unsupported', 'error'].includes(notificationStatus);
+    return ['checking', 'requesting', 'unsupported', 'error'].includes(notificationStatus);
   };
 
   return (
