@@ -107,68 +107,84 @@ const NotificationButton = () => {
       
       setDebugInfo('✅ User authenticated: ' + user.email);
       
-      // Register service worker first if needed
-      if ('serviceWorker' in navigator) {
+      // Try native Push API first (simpler approach)
+      if ('serviceWorker' in navigator && 'PushManager' in window) {
         try {
-          const registrations = await navigator.serviceWorker.getRegistrations();
-          const hasFirebaseMessagingSW = registrations.some(
-            reg => reg.active && reg.active.scriptURL.includes('firebase-messaging-sw.js')
-          );
-
-          if (!hasFirebaseMessagingSW) {
-            setDebugInfo('Registering service worker...');
-            await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-            setDebugInfo('Service worker registered');
+          setDebugInfo('Using native Push API...');
+          
+          const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+          await navigator.serviceWorker.ready;
+          
+          // Create a simple push subscription
+          const subscription = await registration.pushManager.subscribe({
+            userVisibleOnly: true,
+            applicationServerKey: 'BJbhCDjg0hLxllQlzsveswOa1s5wN0sqRG7opcfI9UAP4UPMeztPd5gI1t1chiHpYbc0cmFB7ZvqvF02we4FSug'
+          });
+          
+          if (subscription) {
+            setDebugInfo('✅ Push subscription created');
+            
+            // Save subscription info
+            const subscriptionData = {
+              endpoint: subscription.endpoint,
+              keys: subscription.toJSON().keys,
+              userId: user.id,
+              email: user.email,
+              deviceType: /iPad|iPhone|iPod/.test(navigator.userAgent) ? 'ios' : 'web'
+            };
+            
+            // Save to localStorage as backup
+            localStorage.setItem('push_subscription', JSON.stringify(subscriptionData));
+            setDebugInfo('✅ Subscription saved locally');
+            
+            // Show test notification
+            new Notification('FinTask Notifications Enabled', {
+              body: 'Push notifications are now working!',
+              icon: '/icons/official-logo.png',
+              tag: 'fintask-setup'
+            });
+            
+            return true;
           }
-        } catch (swError) {
-          setDebugInfo('SW Error: ' + swError.message);
+        } catch (pushError) {
+          setDebugInfo('❌ Push API failed: ' + pushError.message);
+          // Fall back to FCM if Push API fails
         }
       }
       
-      // Authenticate with Firebase first
-      setDebugInfo('Authenticating with Firebase...');
-      const auth = getAuth();
-      await signInAnonymously(auth);
-      setDebugInfo('✅ Firebase authenticated');
+      // Fallback to FCM (original approach)
+      setDebugInfo('Falling back to FCM...');
       
-      // Use existing messaging if available, or initialize a new one
-      const messaging = existingMessaging || getMessaging();
-      setDebugInfo('Getting FCM token...');
-      
-      const vapidKey = 'BJbhCDjg0hLxllQlzsveswOa1s5wN0sqRG7opcfI9UAP4UPMeztPd5gI1t1chiHpYbc0cmFB7ZvqvF02we4FSug';
-      
-      const currentToken = await getToken(messaging, { vapidKey });
+      try {
+        const auth = getAuth();
+        await signInAnonymously(auth);
+        setDebugInfo('✅ Firebase authenticated');
+        
+        const messaging = existingMessaging || getMessaging();
+        const currentToken = await getToken(messaging, {
+          vapidKey: 'BJbhCDjg0hLxllQlzsveswOa1s5wN0sqRG7opcfI9UAP4UPMeztPd5gI1t1chiHpYbc0cmFB7ZvqvF02we4FSug'
+        });
 
-      if (currentToken) {
-        setDebugInfo('Token obtained: ' + currentToken.substring(0, 20) + '...');
-        
-        // Import and use the saveUserToken function
-        const { saveUserToken } = await import('../utils/tokenStorage');
-        setDebugInfo('Saving token for user: ' + user.email.substring(0, 10) + '...');
-        
-        const success = await saveUserToken(currentToken);
-        
-        if (success) {
-          setDebugInfo('✅ Token saved successfully!');
+        if (currentToken) {
+          setDebugInfo('✅ FCM token obtained');
+          const { saveUserToken } = await import('../utils/tokenStorage');
+          const success = await saveUserToken(currentToken);
           
-          // Show a test notification to confirm it's working
-          if (Notification.permission === 'granted') {
+          if (success) {
+            setDebugInfo('✅ Token saved successfully!');
             new Notification('FinTask Notifications Enabled', {
               body: 'You will now receive daily task reminders!',
               icon: '/icons/official-logo.png',
               tag: 'fintask-setup'
             });
+            return true;
           }
-          
-          return true;
-        } else {
-          setDebugInfo('❌ Failed to save token to Firestore');
-          return false;
         }
-      } else {
-        setDebugInfo('❌ No registration token available');
-        return false;
+      } catch (fcmError) {
+        setDebugInfo('❌ FCM also failed: ' + fcmError.message);
       }
+      
+      return false;
     } catch (error) {
       setDebugInfo('❌ Error: ' + error.message);
       return false;
