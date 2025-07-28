@@ -88,8 +88,15 @@ const NotificationButton = () => {
       if (currentToken) {
         console.log('Device token:', currentToken);
         
-        // In production, this would save the token to Firestore
-        console.log('Token would be saved to Firestore in production');
+        // Import and use the saveUserToken function
+        const { saveUserToken } = await import('../utils/tokenStorage');
+        const success = await saveUserToken(currentToken);
+        
+        if (success) {
+          console.log('Token saved successfully to Firestore');
+        } else {
+          console.error('Failed to save token to Firestore');
+        }
       } else {
         console.log('No registration token available');
       }
