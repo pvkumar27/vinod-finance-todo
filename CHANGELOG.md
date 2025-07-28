@@ -1,5 +1,15 @@
 # 📋 Release Notes - FinTask
 
+## v2.5.0 - 2025-07-28
+### 🚀 Release
+- **Version Update**: v2.5.0
+- **Package Updates**: Latest compatible versions
+- **Security Fixes**: Automated vulnerability patches
+- **Build Verification**: Production build tested
+
+---
+
+
 ## v2.4.0 - 2025-07-28
 ### 🚀 Release
 - **Version Update**: v2.4.0
