@@ -87,6 +87,17 @@ const NotificationButton = () => {
         return true;
       }
       
+      // Check if user is authenticated
+      const { supabase } = await import('../supabaseClient');
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        setDebugInfo('❌ User not authenticated');
+        return false;
+      }
+      
+      setDebugInfo('✅ User authenticated: ' + user.email);
+      
       // Register service worker first if needed
       if ('serviceWorker' in navigator) {
         try {
@@ -118,7 +129,7 @@ const NotificationButton = () => {
         
         // Import and use the saveUserToken function
         const { saveUserToken } = await import('../utils/tokenStorage');
-        setDebugInfo('Saving token to Firestore...');
+        setDebugInfo('Saving token for user: ' + user.email.substring(0, 10) + '...');
         
         const success = await saveUserToken(currentToken);
         
