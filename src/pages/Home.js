@@ -103,7 +103,7 @@ const Home = () => {
             {/* Version Info */}
             <div className="inline-block px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/5 to-indigo-500/5 border border-blue-100">
               <p className="text-sm bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent font-medium">
-                FinTask {APP_VERSION} • Built with React & Supabase • Auto-Release Enabled
+                FinTask {APP_VERSION} • Built with React & Supabase • Auto-Release Active ✅
               </p>
             </div>
           </div>
