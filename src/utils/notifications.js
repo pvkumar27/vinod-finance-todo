@@ -1,5 +1,6 @@
 import { getToken, onMessage } from 'firebase/messaging';
-import { messaging } from '../firebase-config';
+import { signInAnonymously } from 'firebase/auth';
+import { messaging, auth } from '../firebase-config';
 
 export const requestNotificationPermission = async () => {
   // Check if we're in a test environment or if the browser supports notifications
@@ -51,6 +52,12 @@ export const requestNotificationPermission = async () => {
       console.log('Using VAPID key:', vapidKey);
 
       try {
+        // Sign in anonymously to Firebase for FCM token
+        if (auth) {
+          await signInAnonymously(auth);
+          console.log('Signed in anonymously to Firebase');
+        }
+        
         // Special handling for iOS
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
