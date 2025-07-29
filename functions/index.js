@@ -156,8 +156,11 @@ exports.sendDailyTaskReminders = functions.https.onRequest(async (req, res) => {
     await sendEmailNotification(taskItems);
 
     // Send push notification using FCM if requested or by default
-    if (sendPush !== false) {
+    if (sendPush === true) {
+      console.log('Sending push notifications as requested');
       await sendPushNotification(taskItems.length);
+    } else {
+      console.log('Push notifications not requested, sendPush:', sendPush);
     }
 
     console.log(`Sent notifications for ${taskItems.length} tasks`);
@@ -434,15 +437,19 @@ exports.fixTokenRecord = functions.https.onRequest(async (req, res) => {
  */
 async function sendPushNotification(taskCount) {
   try {
+    console.log(`Starting push notification process for ${taskCount} tasks`);
     const db = admin.firestore();
 
     // Get all device tokens from Firestore
     const tokenSnapshot = await db.collection('userTokens').get();
 
     if (tokenSnapshot.empty) {
-      console.log('No FCM tokens found');
+      console.log('❌ No FCM tokens found in Firestore');
+      console.log('User needs to enable notifications in the app');
       return;
     }
+
+    console.log(`✅ Found ${tokenSnapshot.size} FCM token(s) in Firestore`);
 
     // Create a single notification body with task count
     let notificationBody;
@@ -559,7 +566,10 @@ async function sendPushNotification(taskCount) {
       }
     }
 
-    console.log(`Push notifications sent to ${successCount}/${sendPromises.length} devices`);
+    console.log(`✅ Push notifications sent to ${successCount}/${sendPromises.length} devices`);
+    if (successCount === 0) {
+      console.log('❌ No push notifications were successfully sent');
+    }
   } catch (error) {
     console.error('Error in push notification process:', error);
   }
@@ -569,13 +579,7 @@ async function sendPushNotification(taskCount) {
  * HTTP triggered function that sends noon motivation notifications
  * Can be triggered by a scheduled HTTP request (e.g., from GitHub Actions)
  */
-// Import the functions
-const { clearAllTokens } = require('./clear-tokens-function');
-const { registerTestToken } = require('./register-test-token-function');
-
-// Export the functions
-exports.clearAllTokens = clearAllTokens;
-exports.registerTestToken = registerTestToken;
+// Note: Additional token management functions can be added here if needed
 
 exports.sendNoonMotivation = functions.https.onRequest(async (req, res) => {
   try {

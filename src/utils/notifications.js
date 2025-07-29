@@ -58,9 +58,10 @@ export const requestNotificationPermission = async () => {
         
         console.log('Device info:', { isIOS, isStandalone });
         
-        // Get token with VAPID key
+        // Get token with VAPID key and service worker
         const token = await getToken(messaging, {
           vapidKey: vapidKey,
+          serviceWorkerRegistration: await navigator.serviceWorker.getRegistration('/firebase-cloud-messaging-push-scope') || await navigator.serviceWorker.getRegistration()
         });
 
         if (token && typeof token === 'string' && token.length > 20) {
