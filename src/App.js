@@ -47,7 +47,7 @@ function App() {
 
   const initializePushNotifications = async () => {
     try {
-      console.log('🚀 Initializing push notifications...');
+      alert('🚀 Starting push notification setup...');
       
       // Register Firebase messaging service worker
       await registerMessagingServiceWorker();
@@ -56,19 +56,24 @@ function App() {
       const token = await requestNotificationPermission();
 
       if (token) {
-        console.log('✅ Push notification token obtained:', token.substring(0, 20) + '...');
+        alert('✅ Got FCM token: ' + token.substring(0, 20) + '...');
         // Save token to Firestore
-        await saveUserToken(token);
+        const saved = await saveUserToken(token);
+        if (saved) {
+          alert('✅ Token saved to Firestore!');
+        } else {
+          alert('❌ Failed to save token to Firestore');
+        }
       } else {
-        console.warn('⚠️ Failed to obtain FCM token. Push notifications will not work.');
+        alert('❌ No FCM token obtained');
       }
 
       // Setup foreground message listener
       setupForegroundMessageListener();
       
-      console.log('✅ Push notification initialization complete');
+      alert('✅ Push notification setup complete');
     } catch (error) {
-      console.error('❌ Error initializing push notifications:', error);
+      alert('❌ Error: ' + error.message);
     }
   };
 
