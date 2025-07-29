@@ -1,7 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getMessaging } from 'firebase/messaging';
 import { getAnalytics } from 'firebase/analytics';
-import { getAuth, signInAnonymously } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY || 'AIzaSyD7aka6dAL8A-YWW4mxkD_9WsWUlh9dqrM',
