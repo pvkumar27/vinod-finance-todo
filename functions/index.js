@@ -579,13 +579,7 @@ async function sendPushNotification(taskCount) {
  * HTTP triggered function that sends noon motivation notifications
  * Can be triggered by a scheduled HTTP request (e.g., from GitHub Actions)
  */
-// Import the functions
-const { clearAllTokens } = require('./clear-tokens-function');
-const { registerTestToken } = require('./register-test-token-function');
-
-// Export the functions
-exports.clearAllTokens = clearAllTokens;
-exports.registerTestToken = registerTestToken;
+// Note: Additional token management functions can be added here if needed
 
 exports.sendNoonMotivation = functions.https.onRequest(async (req, res) => {
   try {
