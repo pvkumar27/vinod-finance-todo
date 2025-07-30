@@ -67,17 +67,27 @@ export const requestNotificationPermission = async () => {
       console.log('Using VAPID key:', vapidKey);
 
       try {
-        // Sign in with custom token using Supabase user for FCM token
+        // Use Supabase user session for Firebase authentication
         if (auth) {
           try {
-            // Get current Supabase user
-            const { data: { user } } = await supabase.auth.getUser();
-            if (user) {
-              // Use the user's email for Firebase auth
+            // Get current Supabase user and session
+            const { data: { user, session } } = await supabase.auth.getUser();
+            if (user && session) {
+              console.log('Using Supabase user for Firebase auth:', user.email);
+              
+              // Try to use Supabase JWT as Firebase custom token
               const { signInWithCustomToken } = await import('firebase/auth');
-              // For now, try anonymous auth but with user context
-              await signInAnonymously(auth);
-              console.log('Signed in to Firebase with user context');
+              
+              try {
+                // Use Supabase access token as custom token
+                await signInWithCustomToken(auth, session.access_token);
+                console.log('Signed in to Firebase with Supabase token');
+              } catch (customTokenError) {
+                console.log('Custom token failed, trying anonymous:', customTokenError.message);
+                // Fallback to anonymous auth
+                await signInAnonymously(auth);
+                console.log('Signed in anonymously to Firebase');
+              }
             } else {
               await signInAnonymously(auth);
               console.log('Signed in anonymously to Firebase');
