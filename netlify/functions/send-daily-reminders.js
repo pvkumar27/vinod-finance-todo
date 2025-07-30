@@ -48,12 +48,24 @@ exports.handler = async (event, context) => {
       tasksByUser[task.user_id].push(task);
     }
 
-    // Get user emails
+    // Get user emails from users table
     const userIds = Object.keys(tasksByUser);
-    const { data: profiles } = await supabase
-      .from('profiles')
+    const { data: profiles, error: profileError } = await supabase
+      .from('users')
       .select('id, email')
       .in('id', userIds);
+
+    if (profileError) {
+      console.error('User query error:', profileError);
+      throw new Error(`Failed to get users: ${profileError.message}`);
+    }
+
+    if (!profiles || profiles.length === 0) {
+      return {
+        statusCode: 200,
+        body: JSON.stringify({ message: 'No user emails found for tasks' }),
+      };
+    }
 
     // Create email transporter
     const transporter = nodemailer.createTransport({
