@@ -4,7 +4,7 @@ import { getAnalytics } from 'firebase/analytics';
 import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
-  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || 'AIzaSyD7aka6dAL8A-YWW4mxkD_9WsWUlh9dqrM',
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY || 'AIzaSyClLhE6scPoFfnQ9oXcGW19lFDtJcGYG5s',
   authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || 'finance-to-dos.firebaseapp.com',
   projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID || 'finance-to-dos',
   storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET || 'finance-to-dos.firebasestorage.app',

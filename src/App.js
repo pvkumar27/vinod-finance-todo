@@ -49,14 +49,8 @@ function App() {
     try {
       console.log('🚀 Push notification setup started');
       
-      // Check if we're in production (HTTPS)
-      const isProduction = window.location.protocol === 'https:' && window.location.hostname !== 'localhost';
-      
-      if (!isProduction) {
-        console.log('🛠️ Development mode: Push notifications will work in production (HTTPS)');
-        console.log('🚀 Deploy to https://vinod-pwa.netlify.app to test full push notifications');
-        return;
-      }
+      // Temporarily allow testing in development
+      console.log('🧪 Testing FCM in development mode');
       
       // Production environment - full Firebase setup
       if ('serviceWorker' in navigator && 'Notification' in window) {

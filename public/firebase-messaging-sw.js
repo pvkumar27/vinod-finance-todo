@@ -12,7 +12,7 @@ const vapidKey =
   'BJbhCDjg0hLxllQlzsveswOa1s5wN0sqRG7opcfI9UAP4UPMeztPd5gI1t1chiHpYbc0cmFB7ZvqvF02we4FSug';
 
 const firebaseConfig = {
-  apiKey: 'AIzaSyD7aka6dAL8A-YWW4mxkD_9WsWUlh9dqrM',
+  apiKey: 'AIzaSyClLhE6scPoFfnQ9oXcGW19lFDtJcGYG5s',
   authDomain: 'finance-to-dos.firebaseapp.com',
   projectId: 'finance-to-dos',
   storageBucket: 'finance-to-dos.firebasestorage.app',

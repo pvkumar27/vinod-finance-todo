@@ -70,21 +70,53 @@ export const requestNotificationPermission = async () => {
         // Use Supabase user session for Firebase authentication
         if (auth) {
           try {
-            // Get current Supabase user and session
-            const { data: { user, session } } = await supabase.auth.getUser();
-            if (user && session) {
-              console.log('Using Supabase user for Firebase auth:', user.email);
+            // Get current Supabase session with access token
+            const { data: { session } } = await supabase.auth.getSession();
+            console.log('Supabase session check:', { session: !!session, user: !!session?.user, email: session?.user?.email });
+            
+            if (session && session.user) {
+              console.log('Using Supabase user for Firebase auth:', session.user.email);
               
               // Try to use Supabase JWT as Firebase custom token
               const { signInWithCustomToken } = await import('firebase/auth');
               
               try {
-                // Use Supabase access token as custom token
-                await signInWithCustomToken(auth, session.access_token);
-                console.log('Signed in to Firebase with Supabase token');
-              } catch (customTokenError) {
-                console.log('Custom token failed, trying anonymous:', customTokenError.message);
-                // Fallback to anonymous auth
+                // Try signing in with email (using a dummy password)
+                const { signInWithEmailAndPassword, createUserWithEmailAndPassword } = await import('firebase/auth');
+                
+                try {
+                  // Try to sign in with email and a default password
+                  await signInWithEmailAndPassword(auth, session.user.email, 'defaultPassword123');
+                  console.log('Signed in to Firebase with email/password');
+                  
+                  // Get ID token for FCM authentication
+                  const user = auth.currentUser;
+                  if (user) {
+                    const idToken = await user.getIdToken();
+                    console.log('Got Firebase ID token for FCM:', idToken.substring(0, 20) + '...');
+                  }
+                } catch (signInError) {
+                  console.log('Email sign-in failed, trying to create user:', signInError.message);
+                  
+                  try {
+                    // If sign-in fails, try to create the user
+                    await createUserWithEmailAndPassword(auth, session.user.email, 'defaultPassword123');
+                    console.log('Created and signed in to Firebase with email/password');
+                    
+                    // Get ID token for FCM authentication
+                    const user = auth.currentUser;
+                    if (user) {
+                      const idToken = await user.getIdToken();
+                      console.log('Got Firebase ID token for FCM:', idToken.substring(0, 20) + '...');
+                    }
+                  } catch (createError) {
+                    console.log('User creation failed, using anonymous:', createError.message);
+                    await signInAnonymously(auth);
+                    console.log('Signed in anonymously to Firebase');
+                  }
+                }
+              } catch (authError) {
+                console.log('Firebase email auth failed, using anonymous:', authError.message);
                 await signInAnonymously(auth);
                 console.log('Signed in anonymously to Firebase');
               }
@@ -133,6 +165,12 @@ export const requestNotificationPermission = async () => {
         }
       } catch (tokenError) {
         console.error('Error getting FCM token:', tokenError);
+        console.error('FCM Error details:', {
+          code: tokenError.code,
+          message: tokenError.message,
+          customData: tokenError.customData,
+          stack: tokenError.stack
+        });
         
         // If FCM token fails, still show basic notification support
         console.log('FCM token generation failed, but basic notifications are enabled');
