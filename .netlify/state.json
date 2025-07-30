@@ -1,0 +1,20 @@
+{
+	"geolocation": {
+		"data": {
+			"city": "Celina",
+			"country": {
+				"code": "US",
+				"name": "United States"
+			},
+			"subdivision": {
+				"code": "TX",
+				"name": "Texas"
+			},
+			"timezone": "America/Chicago",
+			"latitude": 33.3246,
+			"longitude": -96.7844,
+			"postalCode": "75009"
+		},
+		"timestamp": 1753866425164
+	}
+}
