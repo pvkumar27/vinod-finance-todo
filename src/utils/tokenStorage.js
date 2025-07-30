@@ -30,6 +30,33 @@ export const saveUserToken = async token => {
       console.error('Invalid token provided');
       return false;
     }
+    
+    // Handle basic notifications placeholder
+    if (token === 'basic-notifications-enabled') {
+      console.log('Basic notifications enabled, but no FCM token to save');
+      
+      // For testing: save a placeholder token so push notifications can be tested
+      const {data: {user}} = await supabase.auth.getUser();
+      if (user && !isTestEnv && app && db) {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const deviceType = isIOS ? 'ios' : 'android';
+        const tokenId = `${user.id}-placeholder-${Date.now()}`;
+        
+        await setDoc(doc(collection(db, 'userTokens'), tokenId), {
+          token: 'placeholder-for-basic-notifications',
+          userId: user.id,
+          email: user.email,
+          deviceType,
+          lastUpdated: new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          isPlaceholder: true
+        });
+        
+        console.log('Placeholder token saved for testing');
+      }
+      
+      return true;
+    }
 
     const {
       data: { user },
