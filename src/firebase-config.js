@@ -1,7 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getMessaging } from 'firebase/messaging';
 import { getAnalytics } from 'firebase/analytics';
-import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_FIREBASE_API_KEY || 'AIzaSyD7aka6dAL8A-YWW4mxkD_9WsWUlh9dqrM',
@@ -18,16 +17,12 @@ const app = initializeApp(firebaseConfig);
 // Only initialize messaging and analytics if in browser environment
 let messaging = null;
 let analytics = null;
-let auth = null;
 
 // Check if we're in a browser environment and not in a test environment
 if (typeof window !== 'undefined' && !window.navigator.userAgent.includes('Playwright')) {
   try {
     // Initialize analytics in all browser environments
     analytics = getAnalytics(app);
-    
-    // Initialize auth for FCM
-    auth = getAuth(app);
 
     // Only initialize messaging if notifications are supported
     if ('Notification' in window && navigator.serviceWorker) {
@@ -38,4 +33,4 @@ if (typeof window !== 'undefined' && !window.navigator.userAgent.includes('Playw
   }
 }
 
-export { messaging, analytics, auth, firebaseConfig };
+export { messaging, analytics, firebaseConfig };
