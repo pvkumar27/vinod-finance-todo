@@ -1,6 +1,5 @@
 import { getToken, onMessage } from 'firebase/messaging';
-import { signInAnonymously } from 'firebase/auth';
-import { messaging, auth } from '../firebase-config';
+import { messaging } from '../firebase-config';
 
 export const requestNotificationPermission = async () => {
   // Check if we're in a test environment
@@ -66,12 +65,6 @@ export const requestNotificationPermission = async () => {
       console.log('Using VAPID key:', vapidKey);
 
       try {
-        // Sign in anonymously to Firebase for FCM token
-        if (auth) {
-          await signInAnonymously(auth);
-          console.log('Signed in anonymously to Firebase');
-        }
-        
         // Special handling for iOS
         const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
         const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
@@ -79,10 +72,13 @@ export const requestNotificationPermission = async () => {
         
         console.log('Device info:', { isIOS, isStandalone });
         
+        // Get the service worker registration
+        const registration = await navigator.serviceWorker.getRegistration();
+        
         // Get token with VAPID key and service worker
         const token = await getToken(messaging, {
           vapidKey: vapidKey,
-          serviceWorkerRegistration: await navigator.serviceWorker.getRegistration('/firebase-cloud-messaging-push-scope') || await navigator.serviceWorker.getRegistration()
+          serviceWorkerRegistration: registration
         });
 
         if (token && typeof token === 'string' && token.length > 20) {
