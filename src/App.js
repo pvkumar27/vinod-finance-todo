@@ -47,33 +47,32 @@ function App() {
 
   const initializePushNotifications = async () => {
     try {
-      alert('🚀 Starting push notification setup...');
+      console.log('🚀 Push notification setup started');
       
-      // Register Firebase messaging service worker
-      await registerMessagingServiceWorker();
-
-      // Request notification permission and get FCM token
-      const token = await requestNotificationPermission();
-
-      if (token) {
-        alert('✅ Got FCM token: ' + token.substring(0, 20) + '...');
-        // Save token to Firestore
-        const saved = await saveUserToken(token);
-        if (saved) {
-          alert('✅ Token saved to Firestore!');
-        } else {
-          alert('❌ Failed to save token to Firestore');
-        }
-      } else {
-        alert('❌ No FCM token obtained');
+      // Check if we're in production (HTTPS)
+      const isProduction = window.location.protocol === 'https:' && window.location.hostname !== 'localhost';
+      
+      if (!isProduction) {
+        console.log('🛠️ Development mode: Push notifications will work in production (HTTPS)');
+        console.log('🚀 Deploy to https://vinod-pwa.netlify.app to test full push notifications');
+        return;
       }
-
-      // Setup foreground message listener
-      setupForegroundMessageListener();
       
-      alert('✅ Push notification setup complete');
+      // Production environment - full Firebase setup
+      if ('serviceWorker' in navigator && 'Notification' in window) {
+        await registerMessagingServiceWorker();
+        const token = await requestNotificationPermission();
+        
+        if (token) {
+          console.log('✅ FCM token obtained');
+          await saveUserToken(token);
+        }
+        
+        setupForegroundMessageListener();
+        console.log('✅ Push notifications ready');
+      }
     } catch (error) {
-      alert('❌ Error: ' + error.message);
+      console.error('❌ Push notification error:', error);
     }
   };
 
