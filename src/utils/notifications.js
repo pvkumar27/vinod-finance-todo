@@ -75,10 +75,9 @@ export const requestNotificationPermission = async () => {
         // Get the service worker registration
         const registration = await navigator.serviceWorker.getRegistration();
         
-        // Get token with VAPID key and service worker
+        // Get token with VAPID key
         const token = await getToken(messaging, {
-          vapidKey: vapidKey,
-          serviceWorkerRegistration: registration
+          vapidKey: vapidKey
         });
 
         if (token && typeof token === 'string' && token.length > 20) {
