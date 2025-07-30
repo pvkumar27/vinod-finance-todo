@@ -83,9 +83,14 @@ export const requestNotificationPermission = async () => {
         
         console.log('Device info:', { isIOS, isStandalone });
         
-        // Get token with VAPID key
+        // For iOS PWA, we need to pass the service worker registration
+        const registration = await navigator.serviceWorker.ready;
+        console.log('Using service worker registration for FCM token');
+        
+        // Get token with VAPID key and service worker registration
         const token = await getToken(messaging, {
-          vapidKey: vapidKey
+          vapidKey: vapidKey,
+          serviceWorkerRegistration: registration
         });
 
         if (token && typeof token === 'string' && token.length > 20) {
