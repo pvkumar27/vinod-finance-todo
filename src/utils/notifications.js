@@ -3,15 +3,29 @@ import { signInAnonymously } from 'firebase/auth';
 import { messaging, auth } from '../firebase-config';
 
 export const requestNotificationPermission = async () => {
-  // Check if we're in a test environment or if the browser supports notifications
+  // Check if we're in a test environment
   if (
-    !messaging ||
     typeof window === 'undefined' ||
-    !('Notification' in window) ||
-    !navigator.serviceWorker ||
     window.navigator.userAgent.includes('Playwright')
   ) {
-    console.log('Messaging not supported in this environment');
+    console.log('Messaging not supported in test environment');
+    return null;
+  }
+  
+  // Check if basic notifications are supported
+  if (!('Notification' in window)) {
+    console.log('Notifications not supported in this browser');
+    return null;
+  }
+  
+  // If Firebase messaging is not available, fall back to basic notifications
+  if (!messaging || !navigator.serviceWorker) {
+    console.log('Firebase messaging not available - using basic notifications');
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      console.log('Basic notification permission granted');
+      return 'basic-notifications-enabled';
+    }
     return null;
   }
 
@@ -103,15 +117,18 @@ export const requestNotificationPermission = async () => {
 };
 
 export const setupForegroundMessageListener = () => {
-  // Check if we're in a test environment or if the browser supports notifications
+  // Check if we're in a test environment
   if (
-    !messaging ||
     typeof window === 'undefined' ||
-    !('Notification' in window) ||
-    !navigator.serviceWorker ||
     window.navigator.userAgent.includes('Playwright')
   ) {
-    console.log('Messaging not supported in this environment');
+    console.log('Messaging not supported in test environment');
+    return;
+  }
+  
+  // If Firebase messaging is not available, just log it
+  if (!messaging || !navigator.serviceWorker) {
+    console.log('Firebase messaging not available - foreground messages will use basic notifications');
     return;
   }
 
