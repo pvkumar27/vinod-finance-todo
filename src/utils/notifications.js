@@ -72,9 +72,6 @@ export const requestNotificationPermission = async () => {
         
         console.log('Device info:', { isIOS, isStandalone });
         
-        // Get the service worker registration
-        const registration = await navigator.serviceWorker.getRegistration();
-        
         // Get token with VAPID key
         const token = await getToken(messaging, {
           vapidKey: vapidKey
