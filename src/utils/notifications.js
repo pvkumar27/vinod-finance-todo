@@ -77,9 +77,6 @@ export const requestNotificationPermission = async () => {
             if (session && session.user) {
               console.log('Using Supabase user for Firebase auth:', session.user.email);
               
-              // Try to use Supabase JWT as Firebase custom token
-              const { signInWithCustomToken } = await import('firebase/auth');
-              
               try {
                 // Try signing in with email (using a dummy password)
                 const { signInWithEmailAndPassword, createUserWithEmailAndPassword } = await import('firebase/auth');
