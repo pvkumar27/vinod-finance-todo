@@ -4,11 +4,7 @@
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
 
-// Mock Firebase
-jest.mock('./firebase-config', () => ({
-  messaging: {},
-  analytics: {}
-}));
+// Firebase removed - no mocking needed
 
 // Mock Firebase messaging functions
 jest.mock('./utils/notifications', () => ({
