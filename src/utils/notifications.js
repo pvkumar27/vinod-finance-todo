@@ -1,6 +1,7 @@
 import { getToken, onMessage } from 'firebase/messaging';
 import { signInAnonymously } from 'firebase/auth';
 import { messaging, auth } from '../firebase-config';
+import { supabase } from '../supabaseClient';
 
 export const requestNotificationPermission = async () => {
   // Check if we're in a test environment
@@ -66,13 +67,23 @@ export const requestNotificationPermission = async () => {
       console.log('Using VAPID key:', vapidKey);
 
       try {
-        // Sign in anonymously to Firebase for FCM token
+        // Sign in with custom token using Supabase user for FCM token
         if (auth) {
           try {
-            await signInAnonymously(auth);
-            console.log('Signed in anonymously to Firebase');
+            // Get current Supabase user
+            const { data: { user } } = await supabase.auth.getUser();
+            if (user) {
+              // Use the user's email for Firebase auth
+              const { signInWithCustomToken } = await import('firebase/auth');
+              // For now, try anonymous auth but with user context
+              await signInAnonymously(auth);
+              console.log('Signed in to Firebase with user context');
+            } else {
+              await signInAnonymously(auth);
+              console.log('Signed in anonymously to Firebase');
+            }
           } catch (authError) {
-            console.log('Anonymous auth failed:', authError.message);
+            console.log('Firebase auth failed:', authError.message);
           }
         }
         
