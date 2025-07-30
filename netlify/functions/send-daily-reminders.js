@@ -11,14 +11,14 @@ exports.handler = async (event, context) => {
   if (!apiKey || apiKey !== process.env.NOTIFICATION_API_KEY) {
     return {
       statusCode: 401,
-      body: JSON.stringify({ error: 'Unauthorized' })
+      body: JSON.stringify({ error: 'Unauthorized' }),
     };
   }
 
   try {
     // Get today's date in Central Time
     const today = new Date();
-    const centralTime = new Date(today.toLocaleString("en-US", {timeZone: "America/Chicago"}));
+    const centralTime = new Date(today.toLocaleString('en-US', { timeZone: 'America/Chicago' }));
     const todayStr = centralTime.toISOString().split('T')[0];
 
     // Get overdue and today's tasks
@@ -35,7 +35,7 @@ exports.handler = async (event, context) => {
     if (!tasks || tasks.length === 0) {
       return {
         statusCode: 200,
-        body: JSON.stringify({ message: 'No tasks due today or overdue' })
+        body: JSON.stringify({ message: 'No tasks due today or overdue' }),
       };
     }
 
@@ -56,12 +56,12 @@ exports.handler = async (event, context) => {
       .in('id', userIds);
 
     // Create email transporter
-    const transporter = nodemailer.createTransporter({
+    const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
+        pass: process.env.EMAIL_PASS,
+      },
     });
 
     let emailsSent = 0;
@@ -104,7 +104,7 @@ exports.handler = async (event, context) => {
         from: process.env.EMAIL_USER,
         to: profile.email,
         subject: `📋 Daily Reminder: ${userTasks.length} task(s) pending`,
-        html: emailBody
+        html: emailBody,
       });
 
       emailsSent++;
@@ -112,16 +112,15 @@ exports.handler = async (event, context) => {
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ 
-        message: `Sent notifications for ${tasks.length} tasks to ${emailsSent} users`
-      })
+      body: JSON.stringify({
+        message: `Sent notifications for ${tasks.length} tasks to ${emailsSent} users`,
+      }),
     };
-
   } catch (error) {
     console.error('Error:', error);
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: error.message })
+      body: JSON.stringify({ error: error.message }),
     };
   }
 };
