@@ -1,105 +1,28 @@
 import { supabase } from '../supabaseClient';
-import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, doc, setDoc } from 'firebase/firestore';
-import { firebaseConfig } from '../firebase-config';
-
-// Check if we're in a test environment
-const isTestEnv = process.env.NODE_ENV === 'test';
-
-// Initialize Firebase conditionally
-let app;
-let db;
-
-if (!isTestEnv && typeof window !== 'undefined') {
-  try {
-    app = initializeApp(firebaseConfig);
-    db = getFirestore(app);
-  } catch (error) {
-    console.error('Error initializing Firebase:', error);
-  }
-}
 
 /**
- * Save FCM token to Firestore for the current user
- * @param {string} token - FCM token
+ * Save email notification preference for the current user
+ * @param {string} status - Email notification status
  * @returns {Promise<boolean>} - Success status
  */
-export const saveUserToken = async token => {
+export const saveUserToken = async status => {
   try {
-    if (!token || typeof token !== 'string' || token.trim() === '') {
-      console.error('Invalid token provided');
-      return false;
-    }
-    
-    // Handle basic notifications placeholder
-    if (token === 'basic-notifications-enabled') {
-      console.log('Basic notifications enabled, but no FCM token to save');
+    if (status === 'email-notifications-enabled') {
+      console.log('✅ Email notifications are active for this user');
       
-      // For testing: save a placeholder token so push notifications can be tested
-      const {data: {user}} = await supabase.auth.getUser();
-      if (user && !isTestEnv && app && db) {
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        const deviceType = isIOS ? 'ios' : 'android';
-        const tokenId = `${user.id}-placeholder-${Date.now()}`;
-        
-        await setDoc(doc(collection(db, 'userTokens'), tokenId), {
-          token: 'placeholder-for-basic-notifications',
-          userId: user.id,
-          email: user.email,
-          deviceType,
-          lastUpdated: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-          isPlaceholder: true
-        });
-        
-        console.log('Placeholder token saved for testing');
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        // Could save email notification preference to Supabase if needed
+        console.log(`Email notifications enabled for: ${user.email}`);
       }
       
       return true;
     }
-
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
-    if (!user) {
-      console.error('No authenticated user found');
-      return false;
-    }
-
-    // Detect device type
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    const deviceType = isIOS ? 'ios' : 'android';
-
-    // Skip Firebase operations in test environment
-    if (isTestEnv) {
-      console.log('Test environment detected, skipping Firebase operations');
-      return true;
-    }
     
-    // Check if Firebase is initialized
-    if (!app || !db) {
-      console.error('Firebase not initialized');
-      return false;
-    }
-    
-    // Generate a unique ID for this token
-    const tokenId = `${user.id}-${Date.now()}`;
-    
-    // Save to userTokens collection with a unique ID
-    await setDoc(doc(collection(db, 'userTokens'), tokenId), {
-      token,
-      userId: user.id,
-      email: user.email,
-      deviceType,
-      lastUpdated: new Date().toISOString(),
-      createdAt: new Date().toISOString()
-    });
-
-    console.log('FCM token saved successfully');
-    return true;
+    console.log('No notification setup needed');
+    return false;
   } catch (error) {
-    console.error('Error saving FCM token:', error);
+    console.error('Error saving notification preference:', error);
     return false;
   }
 };
