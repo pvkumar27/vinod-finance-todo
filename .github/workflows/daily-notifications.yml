@@ -9,15 +9,14 @@ jobs:
   trigger-notification:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger notification function
+      - name: Send daily email reminders
         run: |
-          # Send both email and push notifications
-          # URL encode the API key to handle special characters
+          # Send email notifications via Netlify function
           API_KEY=$(echo -n "${{ secrets.NOTIFICATION_API_KEY }}" | perl -MURI::Escape -ne 'print uri_escape($_)')
-          RESPONSE=$(curl -X POST "https://us-central1-${{ secrets.FIREBASE_PROJECT_ID }}.cloudfunctions.net/sendDailyTaskReminders?key=${API_KEY}&sendPush=true" -s)
+          RESPONSE=$(curl -X POST "https://fintask.netlify.app/.netlify/functions/send-daily-reminders?key=${API_KEY}" -s)
           echo "Function response: $RESPONSE"
-          if [[ "$RESPONSE" == *"Sent notifications"* || "$RESPONSE" == *"No tasks due today"* || "$RESPONSE" == *"No tasks due today or overdue"* ]]; then
-            echo "✅ Notifications processed successfully"
+          if [[ "$RESPONSE" == *"Sent notifications"* || "$RESPONSE" == *"No tasks due today"* ]]; then
+            echo "✅ Email notifications sent successfully"
           else
-            echo "❌ Notification may have failed: $RESPONSE"
+            echo "❌ Email notification may have failed: $RESPONSE"
           fi

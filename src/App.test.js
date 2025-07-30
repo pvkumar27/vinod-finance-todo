@@ -2,8 +2,7 @@ import React, { act } from 'react';
 import { render } from '@testing-library/react';
 
 // Set up Jest mocks before importing App
-jest.mock('./firebase-config');
-jest.mock('./utils/serviceWorkerUtils');
+// Firebase removed - no mocking needed
 jest.mock('./utils/permissionUtils');
 jest.mock('./utils/permissionHelper');
 
@@ -39,19 +38,7 @@ jest.mock('./utils/tokenStorage', () => ({
   saveUserToken: () => Promise.resolve(true),
 }));
 
-// Mock firebase-config
-jest.mock('./firebase-config', () => ({
-  firebaseConfig: {
-    apiKey: 'mock-api-key',
-    authDomain: 'mock-auth-domain',
-    projectId: 'mock-project-id',
-    storageBucket: 'mock-storage-bucket',
-    messagingSenderId: 'mock-sender-id',
-    appId: 'mock-app-id',
-    measurementId: 'mock-measurement-id'
-  },
-  messaging: null
-}));
+// Firebase completely removed - no config needed
 
 test('renders App component', async () => {
   let container;

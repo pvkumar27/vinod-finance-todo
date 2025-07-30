@@ -8,7 +8,6 @@ import {
   setupForegroundMessageListener,
 } from './utils/notifications';
 import { saveUserToken } from './utils/tokenStorage';
-import { registerMessagingServiceWorker } from './utils/serviceWorkerUtils';
 import IOSInstallPrompt from './components/IOSInstallPrompt';
 import './utils/notificationTest'; // Import test utilities for debugging
 import './App.css';
@@ -36,37 +35,30 @@ function App() {
       setSession(session);
       setLoading(false);
 
-      // Setup push notifications when user logs in
+      // Setup email notifications when user logs in
       if (session) {
-        initializePushNotifications();
+        initializeEmailNotifications();
       }
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const initializePushNotifications = async () => {
+  const initializeEmailNotifications = async () => {
     try {
-      console.log('🚀 Push notification setup started');
+      console.log('📧 Email notification setup started');
       
-      // Temporarily allow testing in development
-      console.log('🧪 Testing FCM in development mode');
+      const status = await requestNotificationPermission();
       
-      // Production environment - full Firebase setup
-      if ('serviceWorker' in navigator && 'Notification' in window) {
-        await registerMessagingServiceWorker();
-        const token = await requestNotificationPermission();
-        
-        if (token) {
-          console.log('✅ FCM token obtained');
-          await saveUserToken(token);
-        }
-        
-        setupForegroundMessageListener();
-        console.log('✅ Push notifications ready');
+      if (status) {
+        console.log('✅ Email notifications ready');
+        await saveUserToken(status);
       }
+      
+      setupForegroundMessageListener();
+      console.log('✅ Notification system ready');
     } catch (error) {
-      console.error('❌ Push notification error:', error);
+      console.error('❌ Notification setup error:', error);
     }
   };
 
