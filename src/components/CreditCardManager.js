@@ -1,5 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { getCreditCards, addCreditCard, updateCreditCard, deleteCreditCard } from '../services';
+import {
+  getCreditCards,
+  addCreditCard,
+  updateCreditCard,
+  deleteCreditCard,
+} from '../services/creditCards';
 import PlaidLink from './PlaidLink';
 
 const CreditCardManager = () => {
@@ -10,19 +15,24 @@ const CreditCardManager = () => {
   const [editingCard, setEditingCard] = useState(null);
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
   const [formData, setFormData] = useState({
-    card_name: '',
     bank_name: '',
-    is_active: true,
-    last_used_date: '',
-    bt_promo_available: false,
-    purchase_promo_available: false,
+    card_type: '',
+    last4: '',
+    account_nickname: '',
+    account_owner: 'self',
+    opened_date: '',
+    due_date: '',
+    closing_date: '',
+    credit_limit: '',
+    current_balance: '',
+    minimum_due: '',
+    purchase_apr: '',
+    promo_apr: false,
     promo_end_date: '',
-    reminder_days_before: 7,
-    is_autopay_setup: false,
-    balance: '',
-    notes: '',
+    sync_source: 'Manual',
     owner: 'self',
-    sync_source: 'Manual'
+    autopay: false,
+    last_transaction_date: '',
   });
 
   const loadCards = async () => {
@@ -36,16 +46,22 @@ const CreditCardManager = () => {
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     try {
       const cardData = {
         ...formData,
-        balance: formData.balance ? parseFloat(formData.balance) : 0,
-        last_used_date: formData.last_used_date || null,
-        promo_end_date: formData.promo_end_date || null
+        current_balance: formData.current_balance ? parseFloat(formData.current_balance) : 0,
+        credit_limit: formData.credit_limit ? parseFloat(formData.credit_limit) : null,
+        minimum_due: formData.minimum_due ? parseFloat(formData.minimum_due) : null,
+        purchase_apr: formData.purchase_apr ? parseFloat(formData.purchase_apr) : null,
+        opened_date: formData.opened_date || null,
+        due_date: formData.due_date || null,
+        closing_date: formData.closing_date || null,
+        promo_end_date: formData.promo_end_date || null,
+        last_transaction_date: formData.last_transaction_date || null,
       };
-      
+
       if (editingCard) {
         await updateCreditCard(editingCard.id, cardData);
         setMessage('✅ Credit card updated successfully!');
@@ -55,21 +71,26 @@ const CreditCardManager = () => {
         setMessage('✅ Credit card added successfully!');
         setTimeout(() => setMessage(''), 4000);
       }
-      
+
       setFormData({
-        card_name: '',
         bank_name: '',
-        is_active: true,
-        last_used_date: '',
-        bt_promo_available: false,
-        purchase_promo_available: false,
+        card_type: '',
+        last4: '',
+        account_nickname: '',
+        account_owner: 'self',
+        opened_date: '',
+        due_date: '',
+        closing_date: '',
+        credit_limit: '',
+        current_balance: '',
+        minimum_due: '',
+        purchase_apr: '',
+        promo_apr: false,
         promo_end_date: '',
-        reminder_days_before: 7,
-        is_autopay_setup: false,
-        balance: '',
-        notes: '',
+        sync_source: 'Manual',
         owner: 'self',
-        sync_source: 'Manual'
+        autopay: false,
+        last_transaction_date: '',
       });
       setShowForm(false);
       setEditingCard(null);
@@ -79,27 +100,32 @@ const CreditCardManager = () => {
     }
   };
 
-  const handleEdit = (card) => {
+  const handleEdit = card => {
     setEditingCard(card);
     setFormData({
-      card_name: card.card_name,
-      bank_name: card.bank_name,
-      is_active: card.is_active,
-      last_used_date: card.last_used_date || '',
-      bt_promo_available: card.bt_promo_available,
-      purchase_promo_available: card.purchase_promo_available,
+      bank_name: card.bank_name || '',
+      card_type: card.card_type || '',
+      last4: card.last4 || '',
+      account_nickname: card.account_nickname || '',
+      account_owner: card.account_owner || 'self',
+      opened_date: card.opened_date || '',
+      due_date: card.due_date || '',
+      closing_date: card.closing_date || '',
+      credit_limit: card.credit_limit || '',
+      current_balance: card.current_balance || '',
+      minimum_due: card.minimum_due || '',
+      purchase_apr: card.purchase_apr || '',
+      promo_apr: card.promo_apr || false,
       promo_end_date: card.promo_end_date || '',
-      reminder_days_before: card.reminder_days_before,
-      is_autopay_setup: card.is_autopay_setup,
-      balance: card.balance || '',
-      notes: card.notes || '',
+      sync_source: card.sync_source || 'Manual',
       owner: card.owner || 'self',
-      sync_source: card.sync_source || 'Manual'
+      autopay: card.autopay || false,
+      last_transaction_date: card.last_transaction_date || '',
     });
     setShowForm(true);
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async id => {
     try {
       await deleteCreditCard(id);
       setMessage('✅ Credit card deleted!');
@@ -128,8 +154,8 @@ const CreditCardManager = () => {
             <button
               onClick={() => setViewMode('cards')}
               className={`px-4 py-2 rounded-full text-sm transition-all flex-1 sm:flex-auto ${
-                viewMode === 'cards' 
-                  ? 'bg-white shadow-md text-blue-600 font-medium' 
+                viewMode === 'cards'
+                  ? 'bg-white shadow-md text-blue-600 font-medium'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
@@ -138,8 +164,8 @@ const CreditCardManager = () => {
             <button
               onClick={() => setViewMode('table')}
               className={`px-4 py-2 rounded-full text-sm transition-all flex-1 sm:flex-auto ${
-                viewMode === 'table' 
-                  ? 'bg-white shadow-md text-blue-600 font-medium' 
+                viewMode === 'table'
+                  ? 'bg-white shadow-md text-blue-600 font-medium'
                   : 'text-gray-600 hover:text-gray-900'
               }`}
             >
@@ -148,12 +174,12 @@ const CreditCardManager = () => {
           </div>
           <div className="flex gap-2 w-full sm:w-auto">
             <PlaidLink
-              onSuccess={(cards) => {
+              onSuccess={cards => {
                 setMessage(`✅ Successfully synced ${cards.length} credit card(s) from Plaid!`);
                 setTimeout(() => setMessage(''), 4000);
                 loadCards();
               }}
-              onError={(error) => {
+              onError={error => {
                 setMessage(`❌ Plaid sync error: ${error.message}`);
                 setTimeout(() => setMessage(''), 6000);
               }}
@@ -168,9 +194,11 @@ const CreditCardManager = () => {
           </div>
         </div>
       </div>
-      
+
       {message && (
-        <div className={`p-3 rounded mb-4 ${message.includes('❌') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+        <div
+          className={`p-3 rounded mb-4 ${message.includes('❌') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}
+        >
           {message}
         </div>
       )}
@@ -178,127 +206,158 @@ const CreditCardManager = () => {
       {/* Add Card Form */}
       {showForm && (
         <form onSubmit={handleSubmit} className="mb-8 p-4 bg-gray-50 rounded-lg">
-          <h3 className="text-lg font-semibold mb-4">{editingCard ? 'Edit Credit Card' : 'Add New Credit Card'}</h3>
-          
+          <h3 className="text-lg font-semibold mb-4">
+            {editingCard ? 'Edit Credit Card' : 'Add New Credit Card'}
+          </h3>
+
           {/* Basic Info */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <input
               type="text"
-              placeholder="Card name (e.g., Chase Freedom)"
-              value={formData.card_name}
-              onChange={(e) => setFormData({...formData, card_name: e.target.value})}
+              placeholder="Bank name (e.g., Chase)"
+              value={formData.bank_name}
+              onChange={e => setFormData({ ...formData, bank_name: e.target.value })}
               className="p-2 border rounded"
               required
             />
             <input
               type="text"
-              placeholder="Bank name"
-              value={formData.bank_name}
-              onChange={(e) => setFormData({...formData, bank_name: e.target.value})}
+              placeholder="Card type (e.g., Freedom Unlimited)"
+              value={formData.card_type}
+              onChange={e => setFormData({ ...formData, card_type: e.target.value })}
               className="p-2 border rounded"
-              required
             />
             <input
-              type="number"
-              step="0.01"
-              placeholder="Current balance"
-              value={formData.balance}
-              onChange={(e) => setFormData({...formData, balance: e.target.value})}
+              type="text"
+              placeholder="Last 4 digits"
+              value={formData.last4}
+              onChange={e => setFormData({ ...formData, last4: e.target.value })}
+              className="p-2 border rounded"
+              maxLength="4"
+            />
+            <input
+              type="text"
+              placeholder="Account nickname (optional)"
+              value={formData.account_nickname}
+              onChange={e => setFormData({ ...formData, account_nickname: e.target.value })}
               className="p-2 border rounded"
             />
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">Owner</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                Owner
+              </label>
               <select
                 value={formData.owner}
-                onChange={(e) => setFormData({...formData, owner: e.target.value})}
+                onChange={e => setFormData({ ...formData, owner: e.target.value })}
                 className="w-full p-2 border rounded"
               >
                 <option value="self">Self</option>
                 <option value="spouse">Spouse</option>
               </select>
             </div>
+          </div>
+
+          {/* Financial Info */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Current balance"
+              value={formData.current_balance}
+              onChange={e => setFormData({ ...formData, current_balance: e.target.value })}
+              className="p-2 border rounded"
+            />
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Credit limit"
+              value={formData.credit_limit}
+              onChange={e => setFormData({ ...formData, credit_limit: e.target.value })}
+              className="p-2 border rounded"
+            />
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Purchase APR (%)"
+              value={formData.purchase_apr}
+              onChange={e => setFormData({ ...formData, purchase_apr: e.target.value })}
+              className="p-2 border rounded"
+            />
+          </div>
+
+          {/* Dates */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">Last Used Date</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                Due Date
+              </label>
               <input
                 type="date"
-                value={formData.last_used_date}
-                onChange={(e) => setFormData({...formData, last_used_date: e.target.value})}
+                value={formData.due_date}
+                onChange={e => setFormData({ ...formData, due_date: e.target.value })}
+                className="w-full p-2 border rounded"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                Closing Date
+              </label>
+              <input
+                type="date"
+                value={formData.closing_date}
+                onChange={e => setFormData({ ...formData, closing_date: e.target.value })}
+                className="w-full p-2 border rounded"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                Last Transaction
+              </label>
+              <input
+                type="date"
+                value={formData.last_transaction_date}
+                onChange={e => setFormData({ ...formData, last_transaction_date: e.target.value })}
                 className="w-full p-2 border rounded"
               />
             </div>
           </div>
 
           {/* Promo Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-4 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">Promo End Date</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">
+                Promo End Date
+              </label>
               <input
                 type="date"
                 value={formData.promo_end_date}
-                onChange={(e) => setFormData({...formData, promo_end_date: e.target.value})}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1 text-left">Reminder Days Before</label>
-              <input
-                type="number"
-                placeholder="7"
-                value={formData.reminder_days_before}
-                onChange={(e) => setFormData({...formData, reminder_days_before: parseInt(e.target.value) || 7})}
+                onChange={e => setFormData({ ...formData, promo_end_date: e.target.value })}
                 className="w-full p-2 border rounded"
               />
             </div>
           </div>
 
           {/* Checkboxes */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+          <div className="grid grid-cols-2 md:grid-cols-2 gap-4 mb-4">
             <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
-                checked={formData.is_active}
-                onChange={(e) => setFormData({...formData, is_active: e.target.checked})}
+                checked={formData.promo_apr}
+                onChange={e => setFormData({ ...formData, promo_apr: e.target.checked })}
                 className="rounded"
               />
-              <span className="text-sm">Active</span>
+              <span className="text-sm">Has Promo APR</span>
             </label>
             <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
-                checked={formData.bt_promo_available}
-                onChange={(e) => setFormData({...formData, bt_promo_available: e.target.checked})}
+                checked={formData.autopay}
+                onChange={e => setFormData({ ...formData, autopay: e.target.checked })}
                 className="rounded"
               />
-              <span className="text-sm">BT Promo</span>
-            </label>
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={formData.purchase_promo_available}
-                onChange={(e) => setFormData({...formData, purchase_promo_available: e.target.checked})}
-                className="rounded"
-              />
-              <span className="text-sm">Purchase Promo</span>
-            </label>
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={formData.is_autopay_setup}
-                onChange={(e) => setFormData({...formData, is_autopay_setup: e.target.checked})}
-                className="rounded"
-              />
-              <span className="text-sm">Autopay</span>
+              <span className="text-sm">Autopay Setup</span>
             </label>
           </div>
-
-          {/* Notes */}
-          <textarea
-            placeholder="Notes (optional)"
-            value={formData.notes}
-            onChange={(e) => setFormData({...formData, notes: e.target.value})}
-            className="w-full p-2 border rounded mb-4"
-            rows="2"
-          />
 
           <div className="flex space-x-2">
             <button
@@ -314,19 +373,24 @@ const CreditCardManager = () => {
                   setEditingCard(null);
                   setShowForm(false);
                   setFormData({
-                    card_name: '',
                     bank_name: '',
-                    is_active: true,
-                    last_used_date: '',
-                    bt_promo_available: false,
-                    purchase_promo_available: false,
+                    card_type: '',
+                    last4: '',
+                    account_nickname: '',
+                    account_owner: 'self',
+                    opened_date: '',
+                    due_date: '',
+                    closing_date: '',
+                    credit_limit: '',
+                    current_balance: '',
+                    minimum_due: '',
+                    purchase_apr: '',
+                    promo_apr: false,
                     promo_end_date: '',
-                    reminder_days_before: 7,
-                    is_autopay_setup: false,
-                    balance: '',
-                    notes: '',
+                    sync_source: 'Manual',
                     owner: 'self',
-                    sync_source: 'Manual'
+                    autopay: false,
+                    last_transaction_date: '',
                   });
                 }}
                 className="bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600"
@@ -345,15 +409,19 @@ const CreditCardManager = () => {
           <p className="text-gray-600 text-center py-8">No credit cards added yet.</p>
         ) : viewMode === 'cards' ? (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {cards.map((card) => (
+            {cards.map(card => (
               <div key={card.id} className="border rounded-lg p-4 bg-gray-50">
                 <div className="flex justify-between items-start mb-2">
                   <div>
-                    <h4 className="font-bold text-lg text-left">{card.card_name}</h4>
-                    <p className="text-gray-600 text-left">{card.bank_name}</p>
+                    <h4 className="font-bold text-lg text-left">
+                      {card.bank_name} {card.card_type}
+                      {card.last4 && <span className="text-gray-500 ml-2">••••{card.last4}</span>}
+                    </h4>
+                    {card.account_nickname && (
+                      <p className="text-gray-600 text-left text-sm">{card.account_nickname}</p>
+                    )}
                   </div>
                   <div className="flex items-center space-x-2">
-                    {!card.is_active && <span className="text-red-500 text-xs">Inactive</span>}
                     <button
                       onClick={() => handleEdit(card)}
                       className="text-blue-500 hover:text-blue-700 text-sm"
@@ -368,34 +436,61 @@ const CreditCardManager = () => {
                     </button>
                   </div>
                 </div>
-                
-                {card.balance > 0 && (
+
+                {card.current_balance > 0 && (
                   <p className="text-left">
                     <span className="text-slate-700 font-bold bg-slate-100 px-2 py-1 rounded">
-                      Balance: ${card.balance.toLocaleString()}
+                      Balance: ${card.current_balance.toLocaleString()}
                     </span>
+                    {card.credit_limit && (
+                      <span className="text-gray-500 text-sm ml-2">
+                        / ${card.credit_limit.toLocaleString()} limit
+                      </span>
+                    )}
                   </p>
                 )}
-                
+
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {card.sync_source === 'Plaid' && <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded font-medium">🏦 Plaid Synced</span>}
-                  {card.bt_promo_available && <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded">BT Promo</span>}
-                  {card.purchase_promo_available && <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Purchase Promo</span>}
-                  {card.is_autopay_setup && <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Autopay</span>}
+                  {card.sync_source === 'Plaid' && (
+                    <span className="bg-indigo-100 text-indigo-800 text-xs px-2 py-1 rounded font-medium">
+                      🏦 Plaid Synced
+                    </span>
+                  )}
+                  {card.promo_apr && (
+                    <span className="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">
+                      Promo APR
+                    </span>
+                  )}
+                  {card.autopay && (
+                    <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">
+                      Autopay
+                    </span>
+                  )}
+                  {card.owner === 'spouse' && (
+                    <span className="bg-pink-100 text-pink-800 text-xs px-2 py-1 rounded">
+                      Spouse
+                    </span>
+                  )}
                 </div>
-                
+
                 {card.promo_end_date && (
-                  <p className="text-orange-600 text-sm mt-1 text-left">Promo ends: {card.promo_end_date}</p>
+                  <p className="text-orange-600 text-sm mt-1 text-left">
+                    Promo ends: {new Date(card.promo_end_date).toLocaleDateString()}
+                  </p>
                 )}
-                
-                {card.last_used_date && (
-                  <p className="text-gray-500 text-sm text-left">Last used: {card.last_used_date}</p>
+
+                {card.last_transaction_date && (
+                  <p className="text-gray-500 text-sm text-left">
+                    Last transaction: {new Date(card.last_transaction_date).toLocaleDateString()}
+                  </p>
                 )}
-                
-                {card.notes && (
-                  <p className="text-gray-600 text-sm mt-2 italic text-left">{card.notes}</p>
+
+                {card.due_date && (
+                  <p className="text-blue-600 text-sm text-left">
+                    Due date: {new Date(card.due_date).toLocaleDateString()}
+                  </p>
                 )}
-                
+
                 <p className="text-gray-400 text-xs mt-2 text-left">
                   Added: {new Date(card.created_at).toLocaleDateString()}
                 </p>
@@ -407,44 +502,69 @@ const CreditCardManager = () => {
             <table className="w-full border-collapse border border-gray-300">
               <thead>
                 <tr className="bg-gray-50">
-                  <th className="border border-gray-300 px-4 py-2 text-left">Card Name</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Bank</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Status</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left">Card</th>
                   <th className="border border-gray-300 px-4 py-2 text-left">Balance</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Promos</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Last Used</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left">Limit</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left">APR</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left">Features</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left">Due Date</th>
                   <th className="border border-gray-300 px-4 py-2 text-left">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {cards.map((card) => (
+                {cards.map(card => (
                   <tr key={card.id} className="hover:bg-gray-50">
-                    <td className="border border-gray-300 px-4 py-2 text-left font-medium">{card.card_name}</td>
-                    <td className="border border-gray-300 px-4 py-2 text-left">{card.bank_name}</td>
-                    <td className="border border-gray-300 px-4 py-2">
-                      <span className={`px-2 py-1 rounded-full text-xs ${
-                        card.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                      }`}>
-                        {card.is_active ? 'Active' : 'Inactive'}
-                      </span>
+                    <td className="border border-gray-300 px-4 py-2 text-left font-medium">
+                      <div>
+                        <div>
+                          {card.bank_name} {card.card_type}
+                        </div>
+                        {card.last4 && (
+                          <div className="text-xs text-gray-500">••••{card.last4}</div>
+                        )}
+                      </div>
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-left">
-                      {card.balance > 0 ? (
-                        <span className="text-slate-700 bg-slate-100 px-2 py-1 rounded">${card.balance.toLocaleString()}</span>
+                      {card.current_balance > 0 ? (
+                        <span className="text-slate-700 bg-slate-100 px-2 py-1 rounded">
+                          ${card.current_balance.toLocaleString()}
+                        </span>
                       ) : (
                         <span className="text-gray-400">$0</span>
                       )}
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-left">
+                      {card.credit_limit ? `$${card.credit_limit.toLocaleString()}` : '-'}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2 text-left">
+                      {card.purchase_apr ? `${card.purchase_apr}%` : '-'}
+                    </td>
+                    <td className="border border-gray-300 px-4 py-2 text-left">
                       <div className="flex flex-wrap gap-1">
-                        {card.sync_source === 'Plaid' && <span className="bg-indigo-100 text-indigo-800 text-xs px-1 py-0.5 rounded font-medium">🏦</span>}
-                        {card.bt_promo_available && <span className="bg-blue-100 text-blue-800 text-xs px-1 py-0.5 rounded">BT</span>}
-                        {card.purchase_promo_available && <span className="bg-green-100 text-green-800 text-xs px-1 py-0.5 rounded">Purchase</span>}
-                        {card.is_autopay_setup && <span className="bg-purple-100 text-purple-800 text-xs px-1 py-0.5 rounded">Autopay</span>}
+                        {card.sync_source === 'Plaid' && (
+                          <span className="bg-indigo-100 text-indigo-800 text-xs px-1 py-0.5 rounded font-medium">
+                            🏦
+                          </span>
+                        )}
+                        {card.promo_apr && (
+                          <span className="bg-green-100 text-green-800 text-xs px-1 py-0.5 rounded">
+                            Promo
+                          </span>
+                        )}
+                        {card.autopay && (
+                          <span className="bg-purple-100 text-purple-800 text-xs px-1 py-0.5 rounded">
+                            Auto
+                          </span>
+                        )}
+                        {card.owner === 'spouse' && (
+                          <span className="bg-pink-100 text-pink-800 text-xs px-1 py-0.5 rounded">
+                            Spouse
+                          </span>
+                        )}
                       </div>
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-left text-sm">
-                      {card.last_used_date ? new Date(card.last_used_date).toLocaleDateString() : '-'}
+                      {card.due_date ? new Date(card.due_date).toLocaleDateString() : '-'}
                     </td>
                     <td className="border border-gray-300 px-4 py-2 text-left">
                       <div className="flex space-x-2">

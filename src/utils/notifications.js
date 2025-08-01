@@ -1,40 +1,17 @@
-import { getToken, onMessage } from 'firebase/messaging';
-import { messaging } from '../firebase-config';
+// Local notification utilities
 
 export const requestNotificationPermission = async () => {
   // Check if we're in a test environment or if the browser supports notifications
   if (
-    !messaging ||
     typeof window === 'undefined' ||
     !('Notification' in window) ||
-    !navigator.serviceWorker ||
     window.navigator.userAgent.includes('Playwright')
   ) {
-    console.log('Messaging not supported in this environment');
+    console.log('Notifications not supported in this environment');
     return null;
   }
 
   try {
-    // First, register service worker if needed
-    if ('serviceWorker' in navigator) {
-      try {
-        // Check if firebase-messaging-sw.js is registered
-        const registrations = await navigator.serviceWorker.getRegistrations();
-        const hasFirebaseMessagingSW = registrations.some(
-          reg => reg.active && reg.active.scriptURL.includes('firebase-messaging-sw.js')
-        );
-
-        if (!hasFirebaseMessagingSW) {
-          console.log('Registering Firebase messaging service worker...');
-          await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-          console.log('Firebase messaging service worker registered');
-        }
-      } catch (swError) {
-        console.error('Error registering service worker:', swError);
-      }
-    }
-
-    // Now request permission
     console.log('Requesting notification permission...');
     const permission = await Notification.requestPermission();
     console.log('Permission result:', permission);
@@ -42,48 +19,13 @@ export const requestNotificationPermission = async () => {
     if (permission === 'granted') {
       console.log('Notification permission granted.');
 
-      // VAPID key for web push notifications
-      const vapidKey =
-        process.env.REACT_APP_FIREBASE_VAPID_KEY ||
-        process.env.VITE_FIREBASE_VAPID_KEY ||
-        'BJbhCDjg0hLxllQlzsveswOa1s5wN0sqRG7opcfI9UAP4UPMeztPd5gI1t1chiHpYbc0cmFB7ZvqvF02we4FSug';
+      // Send a test notification to verify it's working
+      new Notification('FinTask Notifications Enabled', {
+        body: 'You will now receive local notifications from FinTask!',
+        icon: '/icons/official-logo.png',
+      });
 
-      console.log('Using VAPID key:', vapidKey);
-
-      try {
-        // Special handling for iOS
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || 
-                           window.navigator.standalone === true;
-        
-        console.log('Device info:', { isIOS, isStandalone });
-        
-        // Get token with VAPID key
-        const token = await getToken(messaging, {
-          vapidKey: vapidKey,
-        });
-
-        if (token && typeof token === 'string' && token.length > 20) {
-          console.log(
-            'FCM Token:',
-            token.substring(0, 10) + '...' + token.substring(token.length - 5)
-          );
-
-          // Send a test notification to verify it's working
-          new Notification('FinTask Notifications Enabled', {
-            body: 'You will now receive notifications from FinTask!',
-            icon: '/icons/official-logo.png',
-          });
-
-          return token;
-        } else {
-          console.log('No valid registration token available.');
-          return null;
-        }
-      } catch (tokenError) {
-        console.error('Error getting FCM token:', tokenError);
-        return null;
-      }
+      return 'local-notifications-enabled';
     } else {
       console.log('Unable to get permission to notify:', permission);
       return null;
@@ -95,35 +37,21 @@ export const requestNotificationPermission = async () => {
 };
 
 export const setupForegroundMessageListener = () => {
-  // Check if we're in a test environment or if the browser supports notifications
-  if (
-    !messaging ||
-    typeof window === 'undefined' ||
-    !('Notification' in window) ||
-    !navigator.serviceWorker ||
-    window.navigator.userAgent.includes('Playwright')
-  ) {
-    console.log('Messaging not supported in this environment');
-    return;
+  // Placeholder for future implementation
+  console.log('Local notification listener setup (placeholder)');
+};
+
+// Helper function to show local notifications
+export const showLocalNotification = (title, body, options = {}) => {
+  if ('Notification' in window && Notification.permission === 'granted') {
+    new Notification(title, {
+      body,
+      icon: '/icons/official-logo.png',
+      badge: '/icons/official-logo.png',
+      tag: 'fintask-local',
+      ...options,
+    });
+  } else {
+    console.log('Notification permission not granted or not supported');
   }
-
-  onMessage(messaging, payload => {
-    console.log('Message received in foreground:', payload);
-
-    const title = payload.notification?.title || 'FinTask';
-    const body = payload.notification?.body || 'You have a new notification';
-
-    // Show custom toast or alert
-    if ('Notification' in window && Notification.permission === 'granted') {
-      new Notification(title, {
-        body: body,
-        icon: '/icons/official-logo.png',
-        badge: '/icons/official-logo.png',
-        tag: 'fintask-foreground',
-      });
-    } else {
-      // Fallback to alert
-      alert(`${title}: ${body}`);
-    }
-  });
 };

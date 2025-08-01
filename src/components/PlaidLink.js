@@ -1,57 +1,56 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { usePlaidLink } from 'react-plaid-link';
-import { createLinkToken, storePlaidToken, fetchPlaidAccounts, convertPlaidAccountToCreditCard } from '../services/plaid';
+import { createLinkToken, storePlaidToken, fetchPlaidAccounts } from '../services/plaid';
 import { supabase } from '../supabaseClient';
-import { addCreditCard } from '../services/creditCards';
+import { syncPlaidCreditCards } from '../services/creditCards';
 
 const PlaidLink = ({ onSuccess, onError }) => {
   const [loading, setLoading] = useState(false);
 
-  const onPlaidSuccess = useCallback(async (publicToken, metadata) => {
-    setLoading(true);
-    try {
-      let accessToken;
-      
-      // Exchange public token for access token via backend
-      const response = await fetch('/.netlify/functions/plaid-exchange-token', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-        },
-        body: JSON.stringify({ public_token: publicToken })
-      });
-      const data = await response.json();
-      accessToken = data.access_token;
-      
-      // Store token securely
-      await storePlaidToken(
-        accessToken,
-        metadata.link_session_id,
-        metadata.institution?.institution_id
-      );
+  const onPlaidSuccess = useCallback(
+    async (publicToken, metadata) => {
+      setLoading(true);
+      try {
+        let accessToken;
 
-      // Fetch accounts from Plaid
-      const accountsResponse = await fetchPlaidAccounts(accessToken);
-      
-      // Filter for credit card accounts and add to our database
-      const creditCards = accountsResponse.accounts
-        .filter(account => account.type === 'credit')
-        .map(account => convertPlaidAccountToCreditCard(account, metadata.institution?.name));
+        // Exchange public token for access token via backend
+        const response = await fetch('/.netlify/functions/plaid-exchange-token', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+          },
+          body: JSON.stringify({ public_token: publicToken }),
+        });
+        const data = await response.json();
+        accessToken = data.access_token;
 
-      // Add each credit card to database
-      for (const card of creditCards) {
-        await addCreditCard(card);
+        // Store token securely
+        await storePlaidToken(
+          accessToken,
+          metadata.link_session_id,
+          metadata.institution?.institution_id
+        );
+
+        // Fetch accounts from Plaid
+        const accountsResponse = await fetchPlaidAccounts(accessToken);
+
+        // Sync credit cards using the new service function
+        const creditCards = await syncPlaidCreditCards({
+          accounts: accountsResponse.accounts,
+          institution: metadata.institution,
+        });
+
+        onSuccess && onSuccess(creditCards);
+      } catch (error) {
+        console.error('Plaid integration error:', error);
+        onError && onError(error);
+      } finally {
+        setLoading(false);
       }
-
-      onSuccess && onSuccess(creditCards);
-    } catch (error) {
-      console.error('Plaid integration error:', error);
-      onError && onError(error);
-    } finally {
-      setLoading(false);
-    }
-  }, [onSuccess, onError]);
+    },
+    [onSuccess, onError]
+  );
 
   const [linkToken, setLinkToken] = useState(null);
 
@@ -84,7 +83,7 @@ const PlaidLink = ({ onSuccess, onError }) => {
     <button
       onClick={() => open()}
       disabled={!ready || loading}
-      className={`flex items-center space-x-1 px-3 py-2 rounded-lg font-medium transition-colors ${ 
+      className={`flex items-center space-x-1 px-3 py-2 rounded-lg font-medium transition-colors ${
         loading
           ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
           : 'bg-blue-600 text-white hover:bg-blue-700'

@@ -17,8 +17,8 @@ export const createLinkToken = async () => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
-      }
+        Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
+      },
     });
     const data = await response.json();
     return data.link_token;
@@ -30,7 +30,9 @@ export const createLinkToken = async () => {
 
 // Store Plaid access token securely in Supabase
 export const storePlaidToken = async (accessToken, itemId, institutionId) => {
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
   const { data, error } = await supabase
@@ -41,7 +43,7 @@ export const storePlaidToken = async (accessToken, itemId, institutionId) => {
       item_id: itemId,
       institution_id: institutionId,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     })
     .select();
 
@@ -51,28 +53,27 @@ export const storePlaidToken = async (accessToken, itemId, institutionId) => {
 
 // Get stored Plaid tokens for user
 export const getPlaidTokens = async () => {
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) throw new Error('User not authenticated');
 
-  const { data, error } = await supabase
-    .from('plaid_tokens')
-    .select('*')
-    .eq('user_id', user.id);
+  const { data, error } = await supabase.from('plaid_tokens').select('*').eq('user_id', user.id);
 
   if (error) throw error;
   return data;
 };
 
 // Fetch Plaid accounts - calls backend for real account data
-export const fetchPlaidAccounts = async (accessToken) => {
+export const fetchPlaidAccounts = async accessToken => {
   try {
     const response = await fetch('/.netlify/functions/plaid-accounts', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`,
       },
-      body: JSON.stringify({ access_token: accessToken })
+      body: JSON.stringify({ access_token: accessToken }),
     });
     const data = await response.json();
     return data;
@@ -85,19 +86,16 @@ export const fetchPlaidAccounts = async (accessToken) => {
 // Convert Plaid account to our credit card format
 export const convertPlaidAccountToCreditCard = (account, institutionName) => {
   return {
-    card_name: account.name || account.official_name,
     bank_name: institutionName || account.institution_name || 'Unknown Bank',
-    is_active: true,
-    balance: Math.abs(account.balances?.current || 0),
-    last_used_date: null,
-    bt_promo_available: false,
-    purchase_promo_available: false,
-    promo_end_date: null,
-    reminder_days_before: 7,
-    is_autopay_setup: false,
-    notes: `Synced from Plaid • Last 4: ${account.mask || 'N/A'}`,
-    owner: 'self',
+    card_type: account.official_name || account.name || 'Credit Card',
+    last4: account.mask || null,
+    account_nickname: account.name,
+    current_balance: Math.abs(account.balances?.current || 0),
+    credit_limit: account.balances?.limit || null,
     sync_source: 'Plaid',
-    plaid_account_id: account.account_id
+    owner: 'self',
+    autopay: false,
+    promo_apr: false,
+    plaid_account_id: account.account_id,
   };
 };
