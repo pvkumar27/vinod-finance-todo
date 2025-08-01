@@ -1,1 +1,1 @@
-module.exports = require('./netlify/functions/send-daily-reminders.js');
+module.exports = require('./netlify/functions/send-daily-reminders.js')

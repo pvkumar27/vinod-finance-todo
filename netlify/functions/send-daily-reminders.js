@@ -17,11 +17,7 @@ exports.handler = async event => {
     const centralTime = new Date(today.toLocaleString('en-US', { timeZone: 'America/Chicago' }));
     const todayStr = `${centralTime.getFullYear()}-${String(centralTime.getMonth() + 1).padStart(2, '0')}-${String(centralTime.getDate()).padStart(2, '0')}`;
 
-    const { data: tasks, error } = await supabase
-      .from('todos')
-      .select('*')
-      .or(`due_date.lt.${todayStr},due_date.eq.${todayStr}`)
-      .eq('completed', false);
+    const { data: tasks, error } = await supabase.from('todos').select('*').eq('completed', false);
 
     if (error) throw error;
     if (!tasks || tasks.length === 0) {
@@ -148,11 +144,12 @@ exports.handler = async event => {
 
         
         <!-- All Tasks Combined -->
-        ${[...todayTasks, ...overdueTasks]
+        ${userTasks
           .sort((a, b) => new Date(a.due_date) - new Date(b.due_date))
           .map((task, index, allTasks) => {
             const isToday = task.due_date === todayStr;
             const isOverdue = task.due_date < todayStr;
+            const isFuture = task.due_date > todayStr;
 
             let bgColor, borderColor, textColor;
 
@@ -177,13 +174,17 @@ exports.handler = async event => {
               bgColor = `rgb(${redBg}, ${Math.floor(200 + 55 * (1 - intensity))}, ${Math.floor(200 + 55 * (1 - intensity))})`;
               borderColor = `rgb(${redBorder}, ${Math.floor(38 + 62 * (1 - intensity))}, ${Math.floor(38 + 62 * (1 - intensity))})`;
               textColor = `rgb(${redText}, ${Math.floor(28 + 72 * (1 - intensity))}, ${Math.floor(28 + 72 * (1 - intensity))})`;
+            } else if (isFuture) {
+              bgColor = '#f0f9ff';
+              borderColor = '#0ea5e9';
+              textColor = '#0369a1';
             } else {
               bgColor = '#ffffff';
               borderColor = '#e2e8f0';
               textColor = '#2d3748';
             }
 
-            const indicator = isToday ? '📅' : isOverdue ? '⚠️' : '';
+            const indicator = isToday ? '📅' : isOverdue ? '⚠️' : isFuture ? '🔮' : '';
 
             return `
           <div style="background: ${bgColor}; border-left: 3px solid ${borderColor}; padding: 12px; margin-bottom: 8px; border-radius: 6px;">
