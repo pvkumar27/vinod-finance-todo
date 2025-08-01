@@ -88,8 +88,6 @@ exports.handler = async event => {
 
     for (const profile of profiles) {
       const userTasks = tasksByUser[profile.id];
-      const overdueTasks = userTasks.filter(t => t.due_date < todayStr);
-      const todayTasks = userTasks.filter(t => t.due_date === todayStr);
 
       const html = `<!DOCTYPE html>
 <html>

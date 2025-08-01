@@ -34,16 +34,14 @@ const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete }) => 
   const isFuture = task.due_date > todayStr;
 
   // Calculate visual styling
-  let bgColor, borderColor, indicator;
+  let bgColor, borderColor;
 
   if (isPinned) {
     bgColor = 'bg-yellow-50';
     borderColor = 'border-l-2 border-yellow-400';
-    indicator = '📌';
   } else if (isToday) {
     bgColor = 'bg-green-50';
     borderColor = 'border-l-4 border-green-500';
-    indicator = '📅';
   } else if (isOverdue) {
     const daysOverdue = Math.floor(
       (new Date(todayStr) - new Date(task.due_date)) / (1000 * 60 * 60 * 24)
@@ -58,15 +56,12 @@ const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete }) => 
       bgColor = 'bg-red-50';
       borderColor = 'border-l-4 border-red-400';
     }
-    indicator = '⚠️';
   } else if (isFuture) {
     bgColor = 'bg-blue-50';
     borderColor = 'border-l-4 border-blue-400';
-    indicator = '🔮';
   } else {
     bgColor = 'bg-gray-50';
     borderColor = 'border-l-2 border-gray-300';
-    indicator = '';
   }
 
   return (

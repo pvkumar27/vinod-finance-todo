@@ -26296,8 +26296,6 @@ exports.handler = async (event) => {
     };
     for (const profile of profiles) {
       const userTasks = tasksByUser[profile.id];
-      const overdueTasks = userTasks.filter((t) => t.due_date < todayStr);
-      const todayTasks = userTasks.filter((t) => t.due_date === todayStr);
       const html = `<!DOCTYPE html>
 <html>
 <head>
@@ -26361,13 +26359,13 @@ exports.handler = async (event) => {
           borderColor = "#16a34a";
           textColor = "#15803d";
         } else if (isOverdue) {
-          const overdueTasks2 = allTasks.filter((t) => t.due_date < todayStr);
-          const overdueIndex = overdueTasks2.findIndex(
+          const overdueTasks = allTasks.filter((t) => t.due_date < todayStr);
+          const overdueIndex = overdueTasks.findIndex(
             (t) => t.due_date === task.due_date && getTaskTitle(t) === getTaskTitle(task)
           );
           const intensity = Math.max(
             0.3,
-            1 - overdueIndex / Math.max(1, overdueTasks2.length - 1) * 0.7
+            1 - overdueIndex / Math.max(1, overdueTasks.length - 1) * 0.7
           );
           const redBg = Math.floor(255 - 55 * (1 - intensity));
           const redBorder = Math.floor(220 - 100 * (1 - intensity));
