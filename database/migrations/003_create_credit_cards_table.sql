@@ -4,7 +4,7 @@
 -- Features: Owner tracking, autopay status, Plaid integration ready
 
 -- Create credit_cards table
-create table credit_cards (
+create table if not exists credit_cards (
   id uuid primary key default uuid_generate_v4(),
   user_id uuid references auth.users(id),
   bank_name text,
@@ -38,21 +38,20 @@ create table credit_cards (
 alter table credit_cards enable row level security;
 
 -- RLS Policies for user isolation
-create policy "Select own cards"
-on credit_cards for select
-using (user_id = auth.uid());
-
-create policy "Insert own cards"
-on credit_cards for insert
-with check (user_id = auth.uid());
-
-create policy "Update own cards"
-on credit_cards for update
-using (user_id = auth.uid());
-
-create policy "Delete own cards"
-on credit_cards for delete
-using (user_id = auth.uid());
+do $$ begin
+  if not exists (select 1 from pg_policies where tablename = 'credit_cards' and policyname = 'Select own cards') then
+    create policy "Select own cards" on credit_cards for select using (user_id = auth.uid());
+  end if;
+  if not exists (select 1 from pg_policies where tablename = 'credit_cards' and policyname = 'Insert own cards') then
+    create policy "Insert own cards" on credit_cards for insert with check (user_id = auth.uid());
+  end if;
+  if not exists (select 1 from pg_policies where tablename = 'credit_cards' and policyname = 'Update own cards') then
+    create policy "Update own cards" on credit_cards for update using (user_id = auth.uid());
+  end if;
+  if not exists (select 1 from pg_policies where tablename = 'credit_cards' and policyname = 'Delete own cards') then
+    create policy "Delete own cards" on credit_cards for delete using (user_id = auth.uid());
+  end if;
+end $$;
 
 -- Auto-update trigger for updated_at
 create or replace function update_updated_at_column()
@@ -63,11 +62,12 @@ begin
 end;
 $$ language plpgsql;
 
+drop trigger if exists update_credit_cards_updated_at on credit_cards;
 create trigger update_credit_cards_updated_at
 before update on credit_cards
 for each row execute function update_updated_at_column();
 
 -- Add indexes for performance
-create index idx_credit_cards_user_id on credit_cards(user_id);
-create index idx_credit_cards_plaid_account_id on credit_cards(plaid_account_id);
-create index idx_credit_cards_sync_source on credit_cards(sync_source);
+create index if not exists idx_credit_cards_user_id on credit_cards(user_id);
+create index if not exists idx_credit_cards_plaid_account_id on credit_cards(plaid_account_id);
+create index if not exists idx_credit_cards_sync_source on credit_cards(sync_source);

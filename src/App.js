@@ -3,13 +3,7 @@ import { AuthForm } from './components';
 import { Navbar } from './layout';
 import { Home } from './pages';
 import { supabase } from './supabaseClient';
-import {
-  requestNotificationPermission,
-  setupForegroundMessageListener,
-} from './utils/notifications';
-import { saveUserToken } from './utils/tokenStorage';
 import IOSInstallPrompt from './components/IOSInstallPrompt';
-import './utils/notificationTest'; // Import test utilities for debugging
 import './App.css';
 import './styles/background.css';
 import './styles/typography.css';
@@ -35,32 +29,11 @@ function App() {
       setSession(session);
       setLoading(false);
 
-      // Setup email notifications when user logs in
-      if (session) {
-        initializeEmailNotifications();
-      }
+      // User session established
     });
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const initializeEmailNotifications = async () => {
-    try {
-      console.log('📧 Email notification setup started');
-      
-      const status = await requestNotificationPermission();
-      
-      if (status) {
-        console.log('✅ Email notifications ready');
-        await saveUserToken(status);
-      }
-      
-      setupForegroundMessageListener();
-      console.log('✅ Notification system ready');
-    } catch (error) {
-      console.error('❌ Notification setup error:', error);
-    }
-  };
 
   if (loading) {
     return (
