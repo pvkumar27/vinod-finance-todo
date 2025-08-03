@@ -165,211 +165,215 @@ const CreditCardUpload = () => {
     }
   };
 
+  const downloadTemplate = () => {
+    const templateData = [
+      {
+        'Card Holder': 'John Doe',
+        Bank: 'Chase',
+        'Card Type': 'Credit',
+        'Card Last4': '1234',
+        'Amount Due': '150.00',
+        'Min Payment Due': '25.00',
+        'Due Date': '2025-02-15',
+        'Last Used Date': '2025-01-20',
+        'Credit Limit': '5000.00',
+        'Promo Used': 'true',
+        'Promo Amount Due': '100.00',
+        'Promo Expiry Date': '2025-06-30',
+        'Promo APR': '0.00',
+        'APR After': '18.99',
+        'Interest Charge': '0.00',
+        Notes: 'Sample card entry',
+      },
+    ];
+    const ws = XLSX.utils.json_to_sheet(templateData);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Credit Cards Template');
+    XLSX.writeFile(wb, 'credit-cards-upload-template.xlsx');
+  };
+
   return (
-    <div className="p-6 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold text-blue-700 mb-6 flex items-center">
-        <span className="mr-2">📤</span>
-        Upload Credit Cards
-      </h2>
-
-      {/* Instructions */}
-      <div className="mb-6 p-4 bg-blue-50 rounded-lg">
-        <h3 className="font-semibold text-blue-800 mb-3">📋 Upload Instructions</h3>
-        <div className="grid md:grid-cols-2 gap-4 text-sm text-blue-700">
-          <div>
-            <h4 className="font-medium mb-2">Required Fields:</h4>
-            <ul className="space-y-1">
-              <li>• Card Holder (text)</li>
-              <li>• Bank (text)</li>
-              <li>• Card Type (Credit/Store/Other)</li>
-              <li>• Card Last4 (4 digits)</li>
-              <li>• Amount Due (number)</li>
-              <li>• Due Date (YYYY-MM-DD)</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-medium mb-2">Format Guidelines:</h4>
-            <ul className="space-y-1">
-              <li>• Dates: YYYY-MM-DD format</li>
-              <li>• Numbers: No currency symbols</li>
-              <li>• Booleans: true/false or yes/no</li>
-              <li>• Files: .xlsx or .xls only</li>
-            </ul>
-          </div>
-        </div>
-        <div className="mt-4">
-          <button
-            onClick={generateUploadTemplate}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-          >
-            📥 Download Template
-          </button>
-        </div>
+    <div className="bg-white rounded-lg shadow-md border border-gray-200">
+      {/* Header */}
+      <div className="px-6 py-4 border-b border-gray-200">
+        <h2 className="text-xl font-bold text-gray-900 flex items-center">
+          <span className="mr-2">📤</span>
+          Upload Credit Cards
+        </h2>
       </div>
 
-      {/* File Upload */}
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">
-          Select Excel File (.xlsx or .xls)
-        </label>
-        <input
-          id="file-upload"
-          type="file"
-          accept=".xlsx,.xls"
-          onChange={handleFileUpload}
-          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
-        />
-      </div>
+      {/* Main Content */}
+      <div className="p-6">
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          {/* Upload Form - Left Side */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* File Upload Section */}
+            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+              <div className="space-y-4">
+                <div>
+                  <label
+                    htmlFor="file-upload"
+                    className="block text-sm font-medium text-gray-700 mb-3"
+                  >
+                    Select Excel File (.xlsx or .xls)
+                  </label>
+                  <input
+                    id="file-upload"
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={handleFileUpload}
+                    className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition-colors"
+                    aria-describedby="file-upload-help"
+                  />
+                  <p id="file-upload-help" className="mt-2 text-xs text-gray-500">
+                    Upload your Excel file with credit card data
+                  </p>
+                </div>
 
-      {/* Message */}
-      {message && (
-        <div
-          className={`p-3 rounded mb-4 ${
-            message.includes('❌') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
-          }`}
-        >
-          {message}
-        </div>
-      )}
+                <div className="flex justify-center pt-2">
+                  <button
+                    type="button"
+                    onClick={downloadTemplate}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium transition-colors flex items-center"
+                    aria-label="Download Excel template file"
+                  >
+                    <span className="mr-2">📥</span>
+                    Download Template
+                  </button>
+                </div>
+              </div>
+            </div>
 
-      {/* Preview Table */}
-      {parsedData.length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold mb-4">Preview ({parsedData.length} rows)</h3>
-          <div className="overflow-x-auto max-h-96 border rounded">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50 sticky top-0">
-                <tr>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                    Row
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                    Bank
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                    Card Type
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                    Card Holder
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                    Last 4
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                    Amount Due
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                    Due Date
-                  </th>
-                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-                    Credit Limit
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {parsedData.map((row, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-3 py-2 text-sm text-gray-900">{row._rowIndex}</td>
-                    <td className="px-3 py-2 text-sm text-gray-900">{row.bank || '-'}</td>
-                    <td className="px-3 py-2 text-sm text-gray-900">{row.card_type || '-'}</td>
-                    <td className="px-3 py-2 text-sm text-gray-900">{row.card_holder || '-'}</td>
-                    <td className="px-3 py-2 text-sm text-gray-900">{row.card_last4 || '-'}</td>
-                    <td className="px-3 py-2 text-sm text-gray-900">
-                      {row.amount_due ? `$${row.amount_due}` : '-'}
-                    </td>
-                    <td className="px-3 py-2 text-sm text-gray-900">{row.due_date || '-'}</td>
-                    <td className="px-3 py-2 text-sm text-gray-900">
-                      {row.credit_limit ? `$${row.credit_limit}` : '-'}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      )}
-
-      {/* Submit Button */}
-      {parsedData.length > 0 && (
-        <div className="flex justify-end">
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-          >
-            {loading ? (
-              <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                Uploading...
-              </>
-            ) : (
-              <>
-                <span className="mr-2">🚀</span>
-                Submit to Supabase
-              </>
+            {/* Message */}
+            {message && (
+              <div
+                className={`p-3 rounded-lg text-sm ${
+                  message.includes('❌')
+                    ? 'bg-red-100 text-red-700 border border-red-200'
+                    : 'bg-green-100 text-green-700 border border-green-200'
+                }`}
+                role="alert"
+              >
+                {message}
+              </div>
             )}
-          </button>
-        </div>
-      )}
 
-      {/* Instructions */}
-      <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
-          <h4 className="font-semibold text-blue-800 mb-2 sm:mb-0">📋 Upload Instructions</h4>
-          <button
-            onClick={() => {
-              const templateData = [
-                {
-                  'Card Holder': 'John Doe',
-                  Bank: 'Chase',
-                  'Card Type': 'Credit',
-                  'Card Last4': '1234',
-                  'Amount Due': '150.00',
-                  'Min Payment Due': '25.00',
-                  'Due Date': '2025-02-15',
-                  'Last Used Date': '2025-01-20',
-                  'Credit Limit': '5000.00',
-                  'Promo Used': 'true',
-                  'Promo Amount Due': '100.00',
-                  'Promo Expiry Date': '2025-06-30',
-                  'Promo APR': '0.00',
-                  'APR After': '18.99',
-                  'Interest Charge': '0.00',
-                  Notes: 'Sample card entry',
-                },
-              ];
-              const ws = XLSX.utils.json_to_sheet(templateData);
-              const wb = XLSX.utils.book_new();
-              XLSX.utils.book_append_sheet(wb, ws, 'Credit Cards Template');
-              XLSX.writeFile(wb, 'credit-cards-upload-template.xlsx');
-            }}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-          >
-            📥 Download Template
-          </button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-700">
-          <div>
-            <h5 className="font-medium mb-2">Required Fields:</h5>
-            <ul className="space-y-1">
-              <li>• Card Holder (text)</li>
-              <li>• Bank (text)</li>
-              <li>• Card Type (Credit/Store/Other)</li>
-              <li>• Card Last4 (4 digits)</li>
-              <li>• Amount Due (number)</li>
-              <li>• Due Date (YYYY-MM-DD)</li>
-            </ul>
+            {/* Submit Button */}
+            {parsedData.length > 0 && (
+              <div className="flex justify-end">
+                <button
+                  onClick={handleSubmit}
+                  disabled={loading}
+                  className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center font-medium transition-colors"
+                  aria-label={loading ? 'Uploading data to database' : 'Submit data to database'}
+                >
+                  {loading ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Uploading...
+                    </>
+                  ) : (
+                    <>
+                      <span className="mr-2">🚀</span>
+                      Submit to Database
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
           </div>
-          <div>
-            <h5 className="font-medium mb-2">Format Guidelines:</h5>
-            <ul className="space-y-1">
-              <li>• Dates: YYYY-MM-DD format</li>
-              <li>• Numbers: No currency symbols</li>
-              <li>• Booleans: true/false or yes/no</li>
-              <li>• Files: .xlsx or .xls only</li>
-            </ul>
+
+          {/* Instructions - Right Side */}
+          <div className="lg:col-span-2">
+            <div className="bg-blue-50 rounded-lg p-3 border border-blue-200">
+              <h3 className="font-semibold text-blue-800 mb-3 flex items-center">
+                <span className="mr-2">📋</span>
+                Upload Instructions
+              </h3>
+              <div className="space-y-3 text-sm text-blue-700">
+                <div>
+                  <h4 className="font-medium mb-2">Required Fields:</h4>
+                  <ul className="space-y-1 text-xs">
+                    <li>• Card Holder (text)</li>
+                    <li>• Bank (text)</li>
+                    <li>• Card Type (Credit/Store/Other)</li>
+                    <li>• Card Last4 (4 digits)</li>
+                    <li>• Amount Due (number)</li>
+                    <li>• Due Date (YYYY-MM-DD)</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-medium mb-2">Format Guidelines:</h4>
+                  <ul className="space-y-1 text-xs">
+                    <li>• Dates: YYYY-MM-DD format</li>
+                    <li>• Numbers: No currency symbols</li>
+                    <li>• Booleans: true/false or yes/no</li>
+                    <li>• Files: .xlsx or .xls only</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
+
+        {/* Preview Table */}
+        {parsedData.length > 0 && (
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">
+              Preview ({parsedData.length} rows)
+            </h3>
+            <div className="overflow-x-auto max-h-96 border border-gray-200 rounded-lg">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50 sticky top-0">
+                  <tr>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Row
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Bank
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Card Type
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Card Holder
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Last 4
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Amount Due
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Due Date
+                    </th>
+                    <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                      Credit Limit
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {parsedData.map((row, index) => (
+                    <tr key={index} className="hover:bg-gray-50">
+                      <td className="px-3 py-2 text-sm text-gray-900">{row._rowIndex}</td>
+                      <td className="px-3 py-2 text-sm text-gray-900">{row.bank || '-'}</td>
+                      <td className="px-3 py-2 text-sm text-gray-900">{row.card_type || '-'}</td>
+                      <td className="px-3 py-2 text-sm text-gray-900">{row.card_holder || '-'}</td>
+                      <td className="px-3 py-2 text-sm text-gray-900">{row.card_last4 || '-'}</td>
+                      <td className="px-3 py-2 text-sm text-gray-900">
+                        {row.amount_due ? `$${row.amount_due}` : '-'}
+                      </td>
+                      <td className="px-3 py-2 text-sm text-gray-900">{row.due_date || '-'}</td>
+                      <td className="px-3 py-2 text-sm text-gray-900">
+                        {row.credit_limit ? `$${row.credit_limit}` : '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
