@@ -180,11 +180,10 @@ test.describe('Authentication', () => {
     // Take screenshot of main app page
     await page.screenshot({ path: 'tests/reports/04-main-app.png' });
 
-    // Define tabs to check
+    // Define tabs to check (only existing tabs after v3.0.0 cleanup)
     const tabs = [
       { name: 'To-Dos', expectedElement: 'h2:has-text("To-Do Manager")' },
       { name: 'Credit', expectedElement: 'h2:has-text("Credit Cards")' },
-      { name: 'Finances', expectedElement: 'h2:has-text("Finances")' },
     ];
 
     // Navigate through each tab and verify content
