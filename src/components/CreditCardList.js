@@ -279,7 +279,9 @@ const CreditCardList = () => {
   };
 
   const formatDate = date => {
-    return date ? new Date(date).toLocaleDateString() : '-';
+    if (!date) return '-';
+    const parsedDate = new Date(date);
+    return isNaN(parsedDate.getTime()) ? '-' : parsedDate.toLocaleDateString();
   };
 
   if (loading) {
