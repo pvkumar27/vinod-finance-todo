@@ -23,10 +23,6 @@ const CreditCardDashboardInsights = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchInsights();
-  }, [fetchInsights]);
-
   const fetchInsights = useCallback(async () => {
     try {
       setLoading(true);
@@ -44,6 +40,10 @@ const CreditCardDashboardInsights = () => {
       setLoading(false);
     }
   }, []);
+
+  useEffect(() => {
+    fetchInsights();
+  }, [fetchInsights]);
 
   const computeInsights = cards => {
     const totalCards = cards.length;
