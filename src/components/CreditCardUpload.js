@@ -26,6 +26,7 @@ const CreditCardUpload = () => {
     'promo expiry date': 'promo_expiry_date',
     'promo apr': 'promo_apr',
     'apr after': 'apr_after',
+    'apr after promo': 'apr_after',
     'interest charge': 'interest_charge',
     notes: 'notes',
   };
@@ -135,11 +136,40 @@ const CreditCardUpload = () => {
         throw new Error('User not authenticated');
       }
 
-      // Prepare data for insertion
+      // Prepare data for insertion - only include known columns
+      const allowedColumns = [
+        'bank',
+        'card_type',
+        'card_holder',
+        'card_last4',
+        'amount_due',
+        'min_payment_due',
+        'due_date',
+        'last_used_date',
+        'credit_limit',
+        'promo_available',
+        'promo_used',
+        'promo_amount_due',
+        'promo_expiry_date',
+        'promo_apr',
+        'apr_after',
+        'interest_charge',
+        'notes',
+      ];
+
       const dataToInsert = parsedData.map(row => {
         const { _rowIndex, ...cleanRow } = row;
+        const filteredRow = {};
+
+        // Only include allowed columns
+        allowedColumns.forEach(col => {
+          if (cleanRow[col] !== undefined) {
+            filteredRow[col] = cleanRow[col];
+          }
+        });
+
         return {
-          ...cleanRow,
+          ...filteredRow,
           user_id: user.id,
           source: 'manual',
         };
@@ -148,7 +178,11 @@ const CreditCardUpload = () => {
       // Insert into Supabase
       const { error } = await supabase.from('credit_cards_manual').insert(dataToInsert);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase insert error:', error);
+        console.error('Data being inserted:', dataToInsert[0]);
+        throw error;
+      }
 
       setMessage(`🎉 Successfully uploaded ${parsedData.length} credit cards!`);
       setParsedData([]);
