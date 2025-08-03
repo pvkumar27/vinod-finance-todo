@@ -17,9 +17,20 @@ const CreditCardList = () => {
   const [showReminderForm, setShowReminderForm] = useState(false);
   const [reminderCard, setReminderCard] = useState(null);
 
-  useEffect(() => {
-    fetchCards();
-  }, [fetchCards]);
+  const fetchReminders = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('credit_card_reminders')
+        .select('*')
+        .gte('date', new Date().toISOString().split('T')[0])
+        .order('date', { ascending: true });
+
+      if (error) throw error;
+      setReminders(data || []);
+    } catch (err) {
+      console.error('Failed to fetch reminders:', err.message);
+    }
+  }, []);
 
   const fetchCards = useCallback(async () => {
     try {
@@ -37,22 +48,11 @@ const CreditCardList = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fetchReminders]);
 
-  const fetchReminders = useCallback(async () => {
-    try {
-      const { data, error } = await supabase
-        .from('credit_card_reminders')
-        .select('*')
-        .gte('date', new Date().toISOString().split('T')[0])
-        .order('date', { ascending: true });
-
-      if (error) throw error;
-      setReminders(data || []);
-    } catch (err) {
-      console.error('Failed to fetch reminders:', err.message);
-    }
-  }, []);
+  useEffect(() => {
+    fetchCards();
+  }, [fetchCards]);
 
   const handleAddCard = () => {
     setEditingCard(null);
