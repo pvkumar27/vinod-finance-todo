@@ -55,29 +55,31 @@ const CreditCardTable = ({
         <tbody className="bg-white divide-y divide-gray-200">
           {cards.map(card => (
             <tr key={card.id} className="hover:bg-gray-50">
-              <td className="px-2 py-2 whitespace-nowrap text-xs font-medium text-gray-900">
+              <td className="px-2 py-2 whitespace-nowrap text-xs font-medium text-gray-900 text-left">
                 {card.card_holder || 'Unknown'}
               </td>
-              <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500">{card.bank}</td>
-              <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500">
+              <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500 text-left">
+                {card.bank}
+              </td>
+              <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500 text-left">
                 {card.card_type}
               </td>
-              <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500">
+              <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500 text-left">
                 {card.card_last4 ? `••••${card.card_last4}` : '-'}
               </td>
-              <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500">
+              <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500 text-left">
                 {formatDate(card.due_date)}
               </td>
-              <td className="px-2 py-2 whitespace-nowrap text-xs font-medium text-red-600">
+              <td className="px-2 py-2 whitespace-nowrap text-xs font-medium text-red-600 text-left">
                 {formatCurrency(card.amount_due)}
               </td>
-              <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500">
+              <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500 text-left">
                 {formatDate(card.promo_expiry_date)}
               </td>
-              <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500">
+              <td className="px-2 py-2 whitespace-nowrap text-xs text-gray-500 text-left">
                 {card.last_used_date ? formatDate(card.last_used_date) : '❌ Never'}
               </td>
-              <td className="px-2 py-2 whitespace-nowrap">
+              <td className="px-2 py-2 whitespace-nowrap text-left">
                 <div className="flex flex-wrap gap-1">
                   {getInactivityBadge(card.last_used_date) && (
                     <span className="inline-flex px-1 py-0.5 text-xs font-bold rounded bg-red-100 text-red-700">
@@ -96,7 +98,7 @@ const CreditCardTable = ({
                   )}
                 </div>
               </td>
-              <td className="px-2 py-2 whitespace-nowrap text-xs">
+              <td className="px-2 py-2 whitespace-nowrap text-xs text-left">
                 <div className="flex gap-0.5">
                   <button
                     onClick={() => onSetReminder(card)}
