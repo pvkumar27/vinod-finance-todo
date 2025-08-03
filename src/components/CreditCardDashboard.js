@@ -3,8 +3,6 @@ import DashboardCard from './DashboardCard';
 
 // To be replaced by credit_cards_manual UI after table creation
 const CreditCardDashboard = ({ onClose }) => {
-  const cards = []; // Empty array - no cards during migration
-
   const stats = {
     totalCards: 0,
     activeCards: 0,
