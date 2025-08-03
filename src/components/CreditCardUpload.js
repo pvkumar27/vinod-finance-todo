@@ -39,7 +39,11 @@ const CreditCardUpload = () => {
   const parseDate = value => {
     if (!value) return null;
     const date = new Date(value);
-    return isNaN(date.getTime()) ? null : date.toISOString().split('T')[0];
+    if (isNaN(date.getTime())) return null;
+    const dateStr = date.toISOString().split('T')[0];
+    // Treat 1970-01-01 as invalid date (Unix epoch)
+    if (dateStr === '1970-01-01') return null;
+    return dateStr;
   };
 
   const parseNumber = value => {
