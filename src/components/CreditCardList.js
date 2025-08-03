@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
+import CreditCardForm from './CreditCardForm';
 
 const CreditCardList = () => {
   const [cards, setCards] = useState([]);
@@ -8,6 +9,9 @@ const CreditCardList = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('due_date');
+  const [showForm, setShowForm] = useState(false);
+  const [editingCard, setEditingCard] = useState(null);
+  const [message, setMessage] = useState('');
 
   useEffect(() => {
     fetchCards();
@@ -28,6 +32,51 @@ const CreditCardList = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleAddCard = () => {
+    setEditingCard(null);
+    setShowForm(true);
+  };
+
+  const handleEditCard = card => {
+    setEditingCard(card);
+    setShowForm(true);
+  };
+
+  const handleDeleteCard = async card => {
+    if (!window.confirm(`Delete card ending in ${card.card_last4}?`)) return;
+
+    try {
+      const { error } = await supabase.from('credit_cards_manual').delete().eq('id', card.id);
+
+      if (error) throw error;
+
+      setCards(prev => prev.filter(c => c.id !== card.id));
+      setMessage('✅ Card deleted successfully');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (err) {
+      setMessage(`❌ Failed to delete card: ${err.message}`);
+      setTimeout(() => setMessage(''), 5000);
+    }
+  };
+
+  const handleFormSave = savedCard => {
+    if (editingCard) {
+      setCards(prev => prev.map(c => (c.id === savedCard.id ? savedCard : c)));
+      setMessage('✅ Card updated successfully');
+    } else {
+      setCards(prev => [savedCard, ...prev]);
+      setMessage('✅ Card added successfully');
+    }
+    setShowForm(false);
+    setEditingCard(null);
+    setTimeout(() => setMessage(''), 3000);
+  };
+
+  const handleFormCancel = () => {
+    setShowForm(false);
+    setEditingCard(null);
   };
 
   const getInactivityBadge = lastUsedDate => {
@@ -100,13 +149,32 @@ const CreditCardList = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold text-gray-900">💳 Credit Cards ({sortedCards.length})</h2>
-        <button
-          onClick={fetchCards}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
-        >
-          🔄 Refresh
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleAddCard}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+          >
+            ➕ Add Card
+          </button>
+          <button
+            onClick={fetchCards}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+          >
+            🔄 Refresh
+          </button>
+        </div>
       </div>
+
+      {/* Message */}
+      {message && (
+        <div
+          className={`p-3 rounded-lg text-sm ${
+            message.includes('❌') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+          }`}
+        >
+          {message}
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
@@ -185,17 +253,35 @@ const CreditCardList = () => {
                     <p className="text-xs text-gray-500">•••• {card.card_last4}</p>
                   )}
                 </div>
-                <div className="flex flex-col gap-1">
-                  {getInactivityBadge(card.last_used_date) && (
-                    <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full">
-                      ⚠️ Inactive
-                    </span>
-                  )}
-                  {getPromoExpiryBadge(card.promo_expiry_date) && (
-                    <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">
-                      ⏳ Promo Soon
-                    </span>
-                  )}
+                <div className="flex items-start gap-2">
+                  <div className="flex flex-col gap-1">
+                    {getInactivityBadge(card.last_used_date) && (
+                      <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full">
+                        ⚠️ Inactive
+                      </span>
+                    )}
+                    {getPromoExpiryBadge(card.promo_expiry_date) && (
+                      <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">
+                        ⏳ Promo Soon
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => handleEditCard(card)}
+                      className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                      title="Edit card"
+                    >
+                      ✏️
+                    </button>
+                    <button
+                      onClick={() => handleDeleteCard(card)}
+                      className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"
+                      title="Delete card"
+                    >
+                      🗑️
+                    </button>
+                  </div>
                 </div>
               </div>
 
@@ -253,6 +339,14 @@ const CreditCardList = () => {
           ))}
         </div>
       )}
+
+      {/* Form Modal */}
+      <CreditCardForm
+        card={editingCard}
+        isOpen={showForm}
+        onSave={handleFormSave}
+        onCancel={handleFormCancel}
+      />
     </div>
   );
 };
