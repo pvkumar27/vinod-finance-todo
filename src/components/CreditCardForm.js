@@ -273,16 +273,24 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
             )}
           </div>
 
-          {/* Additional Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Last Used Date</label>
-              <input
-                type="date"
-                value={formData.last_used_date}
-                onChange={e => handleChange('last_used_date', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-              />
+          {/* Usage Info */}
+          <div className="border-t pt-4">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3">📅 Usage Information</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Last Used Date
+                </label>
+                <input
+                  type="date"
+                  value={formData.last_used_date}
+                  onChange={e => handleChange('last_used_date', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  ⚠️ Cards unused for 90+ days are marked inactive
+                </p>
+              </div>
             </div>
           </div>
 

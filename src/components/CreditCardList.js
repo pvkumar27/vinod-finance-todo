@@ -120,6 +120,23 @@ const CreditCardList = () => {
     if (sortBy === 'amount_due') {
       return (b.amount_due || 0) - (a.amount_due || 0);
     }
+    if (sortBy === 'last_used_newest') {
+      return (
+        new Date(b.last_used_date || '1900-01-01') - new Date(a.last_used_date || '1900-01-01')
+      );
+    }
+    if (sortBy === 'last_used_oldest') {
+      return (
+        new Date(a.last_used_date || '9999-12-31') - new Date(b.last_used_date || '9999-12-31')
+      );
+    }
+    if (sortBy === 'never_used') {
+      const aNeverUsed = !a.last_used_date;
+      const bNeverUsed = !b.last_used_date;
+      if (aNeverUsed && !bNeverUsed) return -1;
+      if (!aNeverUsed && bNeverUsed) return 1;
+      return 0;
+    }
     return 0;
   });
 
@@ -229,6 +246,9 @@ const CreditCardList = () => {
           <option value="due_date">Sort by Due Date</option>
           <option value="promo_expiry_date">Sort by Promo Expiry</option>
           <option value="amount_due">Sort by Amount Due</option>
+          <option value="last_used_newest">Last Used (Newest First)</option>
+          <option value="last_used_oldest">Last Used (Oldest First)</option>
+          <option value="never_used">Never Used First</option>
         </select>
       </div>
 
@@ -252,12 +272,17 @@ const CreditCardList = () => {
                   {card.card_last4 && (
                     <p className="text-xs text-gray-500">•••• {card.card_last4}</p>
                   )}
+                  <p className="text-xs text-gray-500 mt-1">
+                    {card.last_used_date
+                      ? `Last used: ${formatDate(card.last_used_date)}`
+                      : '❌ Never Used'}
+                  </p>
                 </div>
                 <div className="flex items-start gap-2">
                   <div className="flex flex-col gap-1">
                     {getInactivityBadge(card.last_used_date) && (
-                      <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full">
-                        ⚠️ Inactive
+                      <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full font-bold">
+                        ⚠️ {card.last_used_date ? 'Inactive' : 'Never Used'}
                       </span>
                     )}
                     {getPromoExpiryBadge(card.promo_expiry_date) && (
