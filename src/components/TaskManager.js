@@ -1,6 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { getTodayDateString, formatDateString } from '../utils/dateUtils';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragOverlay } from '@dnd-kit/core';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragOverlay,
+} from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
 import { fetchTodos, addTodo, updateTodo, deleteTodo, updateTodoOrder } from '../services/todos';
@@ -21,10 +29,7 @@ const TaskManager = () => {
   const [viewMode, setViewMode] = useState('cards');
 
   // Configure sensors with no constraints for better mobile support
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor)
-  );
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
 
   const loadTodos = async () => {
     try {
@@ -39,10 +44,10 @@ const TaskManager = () => {
     }
   };
 
-  const handleEdit = (todo) => {
+  const handleEdit = todo => {
     setEditingTodo(todo);
     setNewTask(todo.task);
-    
+
     // Use the date string directly
     if (todo.due_date) {
       // Extract just the date part (YYYY-MM-DD)
@@ -50,11 +55,11 @@ const TaskManager = () => {
     } else {
       setTaskDate(getTodayDateString());
     }
-    
+
     // Scroll to the top and focus the input after a short delay
     setTimeout(() => {
       window.scrollTo(0, 0);
-      
+
       const inputField = document.getElementById('task-input');
       if (inputField) {
         inputField.focus();
@@ -74,7 +79,7 @@ const TaskManager = () => {
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
-    
+
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.lang = 'en-US';
@@ -84,12 +89,12 @@ const TaskManager = () => {
       setMessage('🎤 Listening... Speak your task');
     };
 
-    recognition.onresult = async (event) => {
+    recognition.onresult = async event => {
       const transcript = event.results[0][0].transcript;
-      
+
       // Parse the voice input for natural language
       const parsed = parseInput(transcript);
-      
+
       if (parsed.intent === 'add_todo') {
         // Auto-submit the parsed task
         try {
@@ -109,7 +114,7 @@ const TaskManager = () => {
       }
     };
 
-    recognition.onerror = (event) => {
+    recognition.onerror = event => {
       setMessage(`❌ Voice recognition error: ${event.error}`);
       setTimeout(() => setMessage(''), 4000);
     };
@@ -121,16 +126,16 @@ const TaskManager = () => {
     recognition.start();
   };
 
-  const handleAddTodo = async (e) => {
+  const handleAddTodo = async e => {
     e.preventDefault();
     if (!newTask.trim()) return;
 
     try {
       if (editingTodo) {
         // When updating a task, use the date string directly
-        await updateTodo(editingTodo.id, { 
+        await updateTodo(editingTodo.id, {
           task: newTask.trim(),
-          due_date: taskDate // YYYY-MM-DD format
+          due_date: taskDate, // YYYY-MM-DD format
         });
         setMessage('✅ Task updated successfully!');
         setTimeout(() => setMessage(''), 4000);
@@ -138,28 +143,29 @@ const TaskManager = () => {
       } else {
         const parsed = parseInput(newTask);
         let todoData;
-        
+
         if (parsed.intent === 'add_todo' || parsed.intent === 'reminder') {
-          todoData = parsed.intent === 'add_todo' 
-            ? parsed.payload 
-            : {
-                task: parsed.payload.task,
-                due_date: parsed.payload.due_date,
-                notes: `Reminder for ${parsed.payload.card_name}`
-              };
+          todoData =
+            parsed.intent === 'add_todo'
+              ? parsed.payload
+              : {
+                  task: parsed.payload.task,
+                  due_date: parsed.payload.due_date,
+                  notes: `Reminder for ${parsed.payload.card_name}`,
+                };
         } else {
-          todoData = { 
+          todoData = {
             task: newTask.trim(),
             due_date: taskDate, // YYYY-MM-DD format
-            pinned: false
+            pinned: false,
           };
         }
-        
+
         await addTodo(todoData);
         setMessage('✅ Task added successfully!');
         setTimeout(() => setMessage(''), 4000);
       }
-      
+
       setNewTask('');
       // Reset to today's date after adding/updating a task
       setTaskDate(getTodayDateString());
@@ -194,7 +200,7 @@ const TaskManager = () => {
     }
   };
 
-  const handleDelete = async (id) => {
+  const handleDelete = async id => {
     try {
       await deleteTodo(id);
       setMessage('✅ Task deleted!');
@@ -206,46 +212,46 @@ const TaskManager = () => {
     }
   };
 
-  const handleDragStart = (event) => {
+  const handleDragStart = event => {
     setActiveId(event.active.id);
     document.body.classList.add('dragging-active');
   };
 
-  const handleDragEnd = async (event) => {
+  const handleDragEnd = async event => {
     setActiveId(null);
     document.body.classList.remove('dragging-active');
-    
+
     const { active, over } = event;
-    
+
     if (!over || active.id === over.id) return;
-    
+
     try {
       // Find the active and over tasks
       const activeTask = todos.find(t => t.id === active.id);
       const overTask = todos.find(t => t.id === over.id);
-      
+
       if (!activeTask || !overTask) return;
-      
+
       // Don't allow dragging between pinned and unpinned sections
       if (activeTask.pinned !== overTask.pinned) {
         return;
       }
-      
+
       // Get the list we're working with (pinned or unpinned)
-      const taskList = activeTask.pinned 
+      const taskList = activeTask.pinned
         ? todos.filter(t => t.pinned && !t.completed)
         : todos.filter(t => !t.pinned && !t.completed);
-      
+
       // Find the indices
       const oldIndex = taskList.findIndex(t => t.id === active.id);
       const newIndex = taskList.findIndex(t => t.id === over.id);
-      
+
       // Reorder the list
       const reorderedList = arrayMove(taskList, oldIndex, newIndex);
-      
+
       // Update the local state immediately for a responsive UI
       const updatedTodos = [...todos];
-      
+
       // First, remove all the tasks that were reordered
       reorderedList.forEach(task => {
         const index = updatedTodos.findIndex(t => t.id === task.id);
@@ -253,7 +259,7 @@ const TaskManager = () => {
           updatedTodos.splice(index, 1);
         }
       });
-      
+
       // Then add them back in the correct order
       // Find where to insert them
       let insertIndex = 0;
@@ -264,13 +270,13 @@ const TaskManager = () => {
         // Insert after all pinned tasks for unpinned tasks
         insertIndex = updatedTodos.filter(t => t.pinned && !t.completed).length;
       }
-      
+
       // Insert the reordered tasks
       updatedTodos.splice(insertIndex, 0, ...reorderedList);
-      
+
       // Update the state
       setTodos(updatedTodos);
-      
+
       // Update the order in the database
       await updateTodoOrder(reorderedList);
     } catch (err) {
@@ -288,7 +294,7 @@ const TaskManager = () => {
 
   useEffect(() => {
     loadTodos();
-    
+
     // Add global styles for drag and drop
     const style = document.createElement('style');
     style.textContent = `
@@ -302,21 +308,23 @@ const TaskManager = () => {
       }
     `;
     document.head.appendChild(style);
-    
+
     return () => {
       document.head.removeChild(style);
     };
   }, []);
 
-  // Separate pinned and unpinned todos
+  // Separate pinned and unpinned todos with chronological sorting
   const pendingTodos = React.useMemo(() => {
-    return todos.filter(t => !t.completed);
+    return todos
+      .filter(t => !t.completed)
+      .sort((a, b) => new Date(a.due_date || '9999-12-31') - new Date(b.due_date || '9999-12-31'));
   }, [todos]);
-  
+
   const pinnedTodos = React.useMemo(() => {
     return pendingTodos.filter(t => t.pinned);
   }, [pendingTodos]);
-  
+
   const unpinnedTodos = React.useMemo(() => {
     return pendingTodos.filter(t => !t.pinned);
   }, [pendingTodos]);
@@ -337,8 +345,8 @@ const TaskManager = () => {
           <button
             onClick={() => setViewMode('cards')}
             className={`px-4 py-2 rounded-full text-sm transition-all flex-1 sm:flex-auto ${
-              viewMode === 'cards' 
-                ? 'bg-white shadow-md text-blue-600 font-medium' 
+              viewMode === 'cards'
+                ? 'bg-white shadow-md text-blue-600 font-medium'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -347,8 +355,8 @@ const TaskManager = () => {
           <button
             onClick={() => setViewMode('table')}
             className={`px-4 py-2 rounded-full text-sm transition-all flex-1 sm:flex-auto ${
-              viewMode === 'table' 
-                ? 'bg-white shadow-md text-blue-600 font-medium' 
+              viewMode === 'table'
+                ? 'bg-white shadow-md text-blue-600 font-medium'
                 : 'text-gray-600 hover:text-gray-900'
             }`}
           >
@@ -356,9 +364,11 @@ const TaskManager = () => {
           </button>
         </div>
       </div>
-      
+
       {message && (
-        <div className={`p-3 rounded mb-4 ${message.includes('❌') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}>
+        <div
+          className={`p-3 rounded mb-4 ${message.includes('❌') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}
+        >
           {message}
         </div>
       )}
@@ -367,21 +377,28 @@ const TaskManager = () => {
       <form onSubmit={handleAddTodo} className="mb-8">
         <div className="flex flex-col sm:flex-row gap-3">
           <div className="flex-1 relative">
-            <label htmlFor="task-input" className="text-xs font-medium text-gray-700 mb-1 block text-left">Task</label>
+            <label
+              htmlFor="task-input"
+              className="text-xs font-medium text-gray-700 mb-1 block text-left"
+            >
+              Task
+            </label>
             <div className="relative">
               <input
                 id="task-input"
                 type="text"
-                placeholder={editingTodo ? "Edit task..." : "Add a new task..."}
+                placeholder={editingTodo ? 'Edit task...' : 'Add a new task...'}
                 value={newTask}
-                onChange={(e) => setNewTask(e.target.value)}
+                onChange={e => setNewTask(e.target.value)}
                 className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12 text-sm shadow-sm"
               />
               <button
                 type="button"
                 onClick={handleVoiceInput}
                 className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full transition-colors shadow-sm ${
-                  isListening ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600'
+                  isListening
+                    ? 'bg-red-100 text-red-600'
+                    : 'bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600'
                 }`}
                 title="Voice input"
               >
@@ -390,13 +407,18 @@ const TaskManager = () => {
             </div>
           </div>
           <div className="flex flex-col w-full sm:w-auto">
-            <label htmlFor="task-due-date" className="text-xs font-medium text-gray-700 mb-1 text-left block">Due Date</label>
+            <label
+              htmlFor="task-due-date"
+              className="text-xs font-medium text-gray-700 mb-1 text-left block"
+            >
+              Due Date
+            </label>
             <div className="flex items-center gap-2">
               <input
                 id="task-due-date"
                 type="date"
                 value={taskDate}
-                onChange={(e) => setTaskDate(e.target.value)}
+                onChange={e => setTaskDate(e.target.value)}
                 className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-40 text-sm"
                 required
               />
@@ -434,7 +456,8 @@ const TaskManager = () => {
           </div>
         </div>
         <p className="text-xs text-gray-500 mt-1">
-          💡 Tip: You can use natural language like "Remind me to pay bills tomorrow" or "Create task: fix sink"
+          💡 Tip: You can use natural language like "Remind me to pay bills tomorrow" or "Create
+          task: fix sink"
         </p>
       </form>
 
@@ -443,7 +466,7 @@ const TaskManager = () => {
         <h3 className="text-lg font-semibold mb-4">
           Tasks ({pendingTodos.length} pending, {todos.filter(t => t.completed).length} completed)
         </h3>
-        
+
         {pendingTodos.length === 0 ? (
           <p className="text-gray-600 text-center py-8">No pending tasks. Great job! 🎉</p>
         ) : viewMode === 'cards' ? (
@@ -489,7 +512,9 @@ const TaskManager = () => {
               {/* Drag Overlay */}
               <DragOverlay>
                 {activeTask ? (
-                  <div className={`${activeTask.pinned ? 'bg-yellow-50 shadow-xl rounded-lg border-2 border-yellow-300' : 'bg-blue-50 shadow-xl rounded-lg border-2 border-blue-300'} p-3 w-full max-w-md opacity-95`}>
+                  <div
+                    className={`${activeTask.pinned ? 'bg-yellow-50 shadow-xl rounded-lg border-2 border-yellow-300' : 'bg-blue-50 shadow-xl rounded-lg border-2 border-blue-300'} p-3 w-full max-w-md opacity-95`}
+                  >
                     <div className="flex items-center">
                       <div className="mr-3">
                         <input
@@ -518,23 +543,34 @@ const TaskManager = () => {
             <table className="w-full border-collapse border border-gray-300">
               <thead>
                 <tr className="bg-gray-50">
-                  <th className="border border-gray-300 px-4 py-2 text-left text-xs font-medium">Status</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left text-xs font-medium">Task</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left text-xs font-medium">Due Date</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left text-xs font-medium">Actions</th>
+                  <th className="border border-gray-300 px-4 py-2 text-left text-xs font-medium">
+                    Status
+                  </th>
+                  <th className="border border-gray-300 px-4 py-2 text-left text-xs font-medium">
+                    Task
+                  </th>
+                  <th className="border border-gray-300 px-4 py-2 text-left text-xs font-medium">
+                    Due Date
+                  </th>
+                  <th className="border border-gray-300 px-4 py-2 text-left text-xs font-medium">
+                    Actions
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {/* Pinned todos */}
                 {pinnedTodos.length > 0 && (
                   <tr className="bg-yellow-100">
-                    <td colSpan="4" className="border border-gray-300 px-4 py-2 font-medium text-xs">
+                    <td
+                      colSpan="4"
+                      className="border border-gray-300 px-4 py-2 font-medium text-xs"
+                    >
                       📌 Pinned Tasks
                     </td>
                   </tr>
                 )}
-                
-                {pinnedTodos.map((todo) => (
+
+                {pinnedTodos.map(todo => (
                   <tr key={todo.id} className="bg-yellow-50">
                     <td className="border border-gray-300 px-4 py-2 text-left">
                       <div className="flex items-center space-x-2">
@@ -547,7 +583,9 @@ const TaskManager = () => {
                         <span title="Pinned task">📌</span>
                       </div>
                     </td>
-                    <td className="border border-gray-300 px-4 py-2 text-left font-medium text-sm">{todo.task}</td>
+                    <td className="border border-gray-300 px-4 py-2 text-left font-medium text-sm">
+                      {todo.task}
+                    </td>
                     <td className="border border-gray-300 px-4 py-2 text-left text-xs">
                       {todo.due_date ? formatDateString(todo.due_date) : '-'}
                     </td>
@@ -565,8 +603,18 @@ const TaskManager = () => {
                           className="text-blue-500 hover:text-blue-700"
                           title="Edit task"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
                           </svg>
                         </button>
                         <button
@@ -574,8 +622,18 @@ const TaskManager = () => {
                           className="text-red-500 hover:text-red-700"
                           title="Delete task"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
                           </svg>
                         </button>
                       </div>
@@ -591,7 +649,7 @@ const TaskManager = () => {
                 )}
 
                 {/* Unpinned todos */}
-                {unpinnedTodos.map((todo) => (
+                {unpinnedTodos.map(todo => (
                   <tr key={todo.id} className="hover:bg-gray-50">
                     <td className="border border-gray-300 px-4 py-2 text-left">
                       <div className="flex items-center space-x-2">
@@ -603,7 +661,9 @@ const TaskManager = () => {
                         />
                       </div>
                     </td>
-                    <td className="border border-gray-300 px-4 py-2 text-left font-medium text-sm">{todo.task}</td>
+                    <td className="border border-gray-300 px-4 py-2 text-left font-medium text-sm">
+                      {todo.task}
+                    </td>
                     <td className="border border-gray-300 px-4 py-2 text-left text-xs">
                       {todo.due_date ? formatDateString(todo.due_date) : '-'}
                     </td>
@@ -621,8 +681,18 @@ const TaskManager = () => {
                           className="text-blue-500 hover:text-blue-700"
                           title="Edit task"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                            />
                           </svg>
                         </button>
                         <button
@@ -630,8 +700,18 @@ const TaskManager = () => {
                           className="text-red-500 hover:text-red-700"
                           title="Delete task"
                         >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          <svg
+                            className="w-4 h-4"
+                            fill="none"
+                            stroke="currentColor"
+                            viewBox="0 0 24 24"
+                          >
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                            />
                           </svg>
                         </button>
                       </div>
@@ -654,47 +734,64 @@ const TaskManager = () => {
             <h3 className="text-lg font-semibold text-gray-700">
               Completed Tasks ({todos.filter(t => t.completed).length})
             </h3>
-            <svg 
+            <svg
               className={`w-5 h-5 text-gray-500 transition-transform ${showCompleted ? 'rotate-180' : ''}`}
-              fill="none" 
-              stroke="currentColor" 
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
             </svg>
           </button>
-          
+
           {showCompleted && (
             <div className="space-y-1">
-              {todos.filter(t => t.completed).map((todo) => (
-                <div
-                  key={todo.id}
-                  className="flex items-center justify-between p-2 bg-green-50 rounded-lg mb-1"
-                >
-                  <div className="flex items-center space-x-3">
-                    <input
-                      type="checkbox"
-                      checked={true}
-                      onChange={() => handleToggleComplete(todo.id, todo.completed)}
-                      className="w-4 h-4 text-green-600 rounded"
-                    />
-                    <div className="flex flex-wrap sm:flex-nowrap items-center">
-                      <span className="line-through text-gray-600 text-sm">{todo.task}</span>
-                      <span className="text-xs text-gray-500 ml-2 whitespace-nowrap">
-                        Completed: {formatDateString(todo.updated_at)}
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => handleDelete(todo.id)}
-                    className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded transition-colors"
+              {todos
+                .filter(t => t.completed)
+                .map(todo => (
+                  <div
+                    key={todo.id}
+                    className="flex items-center justify-between p-2 bg-green-50 rounded-lg mb-1"
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                    </svg>
-                  </button>
-                </div>
-              ))}
+                    <div className="flex items-center space-x-3">
+                      <input
+                        type="checkbox"
+                        checked={true}
+                        onChange={() => handleToggleComplete(todo.id, todo.completed)}
+                        className="w-4 h-4 text-green-600 rounded"
+                      />
+                      <div className="flex flex-wrap sm:flex-nowrap items-center">
+                        <span className="line-through text-gray-600 text-sm">{todo.task}</span>
+                        <span className="text-xs text-gray-500 ml-2 whitespace-nowrap">
+                          Completed: {formatDateString(todo.updated_at)}
+                        </span>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDelete(todo.id)}
+                      className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded transition-colors"
+                    >
+                      <svg
+                        className="w-4 h-4"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
             </div>
           )}
         </div>

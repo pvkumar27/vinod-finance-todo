@@ -65,3 +65,7 @@ bin/
 
 # Archive folder
 /archive
+
+# Local Netlify folder
+.netlify
+.amazonq/rules/FinTask_AI_Feature_Goals.md
