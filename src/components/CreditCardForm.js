@@ -105,7 +105,6 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
         promo_expiry_date: firstPromo.promo_expiry_date || null,
         due_date: formData.due_date || null,
         last_used_date: formData.last_used_date || null,
-        promos: promos,
       };
 
       let result;
