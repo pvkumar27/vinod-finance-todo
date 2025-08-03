@@ -111,8 +111,8 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-xl font-bold text-gray-900">
             {card ? '✏️ Edit Card' : '➕ Add New Card'}
@@ -123,7 +123,7 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
           {error && <div className="p-3 bg-red-100 text-red-700 rounded-lg text-sm">{error}</div>}
 
           {/* Basic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Card Holder *</label>
               <input
@@ -171,7 +171,7 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
           </div>
 
           {/* Payment Info */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Amount Due</label>
               <input
@@ -221,7 +221,7 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
             </div>
 
             {formData.promo_used && (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Promo Amount Due

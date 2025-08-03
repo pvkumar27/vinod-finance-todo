@@ -151,7 +151,7 @@ const CreditCardDashboardInsights = () => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
         <div className="bg-blue-50 rounded-lg p-4">
           <div className="flex items-center">
             <span className="text-2xl mr-3">💳</span>
@@ -200,7 +200,7 @@ const CreditCardDashboardInsights = () => {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Promo Usage Chart */}
         <div className="bg-gray-50 rounded-lg p-4">
           <h3 className="text-sm font-semibold text-gray-700 mb-3">Promo Usage</h3>

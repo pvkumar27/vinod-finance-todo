@@ -52,8 +52,8 @@ const ReminderForm = ({ card, isOpen, onSave, onCancel }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-md w-full">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="bg-white rounded-lg max-w-md w-full mx-2 sm:mx-0">
         <div className="p-6 border-b border-gray-200">
           <h2 className="text-lg font-bold text-gray-900">🔔 Set Reminder</h2>
           <p className="text-sm text-gray-600 mt-1">

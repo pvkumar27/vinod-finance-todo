@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import * as XLSX from 'xlsx';
 import { supabase } from '../supabaseClient';
+import { generateUploadTemplate } from '../utils/templateGenerator';
 
 const CreditCardUpload = () => {
   const [, setFile] = useState(null);
@@ -171,6 +172,41 @@ const CreditCardUpload = () => {
         Upload Credit Cards
       </h2>
 
+      {/* Instructions */}
+      <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+        <h3 className="font-semibold text-blue-800 mb-3">📋 Upload Instructions</h3>
+        <div className="grid md:grid-cols-2 gap-4 text-sm text-blue-700">
+          <div>
+            <h4 className="font-medium mb-2">Required Fields:</h4>
+            <ul className="space-y-1">
+              <li>• Card Holder (text)</li>
+              <li>• Bank (text)</li>
+              <li>• Card Type (Credit/Store/Other)</li>
+              <li>• Card Last4 (4 digits)</li>
+              <li>• Amount Due (number)</li>
+              <li>• Due Date (YYYY-MM-DD)</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-medium mb-2">Format Guidelines:</h4>
+            <ul className="space-y-1">
+              <li>• Dates: YYYY-MM-DD format</li>
+              <li>• Numbers: No currency symbols</li>
+              <li>• Booleans: true/false or yes/no</li>
+              <li>• Files: .xlsx or .xls only</li>
+            </ul>
+          </div>
+        </div>
+        <div className="mt-4">
+          <button
+            onClick={generateUploadTemplate}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+          >
+            📥 Download Template
+          </button>
+        </div>
+      </div>
+
       {/* File Upload */}
       <div className="mb-6">
         <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -278,13 +314,62 @@ const CreditCardUpload = () => {
 
       {/* Instructions */}
       <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-        <h4 className="font-semibold text-blue-800 mb-2">Excel Format Instructions:</h4>
-        <ul className="text-sm text-blue-700 space-y-1">
-          <li>• Headers: Bank, Card Type, Card Holder, Amount Due, Due Date, etc.</li>
-          <li>• Dates: Use Excel date format (MM/DD/YYYY or DD/MM/YYYY)</li>
-          <li>• Numbers: Use numeric values (no currency symbols)</li>
-          <li>• Booleans: Use true/false, 1/0, or yes/no for promo fields</li>
-        </ul>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4">
+          <h4 className="font-semibold text-blue-800 mb-2 sm:mb-0">📋 Upload Instructions</h4>
+          <button
+            onClick={() => {
+              const templateData = [
+                {
+                  'Card Holder': 'John Doe',
+                  Bank: 'Chase',
+                  'Card Type': 'Credit',
+                  'Card Last4': '1234',
+                  'Amount Due': '150.00',
+                  'Min Payment Due': '25.00',
+                  'Due Date': '2025-02-15',
+                  'Last Used Date': '2025-01-20',
+                  'Credit Limit': '5000.00',
+                  'Promo Used': 'true',
+                  'Promo Amount Due': '100.00',
+                  'Promo Expiry Date': '2025-06-30',
+                  'Promo APR': '0.00',
+                  'APR After': '18.99',
+                  'Interest Charge': '0.00',
+                  Notes: 'Sample card entry',
+                },
+              ];
+              const ws = XLSX.utils.json_to_sheet(templateData);
+              const wb = XLSX.utils.book_new();
+              XLSX.utils.book_append_sheet(wb, ws, 'Credit Cards Template');
+              XLSX.writeFile(wb, 'credit-cards-upload-template.xlsx');
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+          >
+            📥 Download Template
+          </button>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-700">
+          <div>
+            <h5 className="font-medium mb-2">Required Fields:</h5>
+            <ul className="space-y-1">
+              <li>• Card Holder (text)</li>
+              <li>• Bank (text)</li>
+              <li>• Card Type (Credit/Store/Other)</li>
+              <li>• Card Last4 (4 digits)</li>
+              <li>• Amount Due (number)</li>
+              <li>• Due Date (YYYY-MM-DD)</li>
+            </ul>
+          </div>
+          <div>
+            <h5 className="font-medium mb-2">Format Guidelines:</h5>
+            <ul className="space-y-1">
+              <li>• Dates: YYYY-MM-DD format</li>
+              <li>• Numbers: No currency symbols</li>
+              <li>• Booleans: true/false or yes/no</li>
+              <li>• Files: .xlsx or .xls only</li>
+            </ul>
+          </div>
+        </div>
       </div>
     </div>
   );

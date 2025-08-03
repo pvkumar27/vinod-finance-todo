@@ -43,53 +43,6 @@ const Home = () => {
           </div>
         </div>
 
-        {/* Dashboard Cards */}
-        <div>
-          <h2 className="section-header text-xl font-semibold mb-6">Quick Access Dashboards</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {dashboardCards.map(card => (
-              <div
-                key={card.id}
-                onClick={() => setActiveDashboard(card.id)}
-                className="group cursor-pointer card-fancy rounded-lg p-5 hover-lift float"
-              >
-                <div className="flex items-center space-x-3">
-                  <div
-                    className={`text-2xl p-3 rounded-full bg-gradient-to-r ${card.gradient} text-white shadow-md`}
-                    style={{
-                      boxShadow: `0 4px 10px -1px rgba(0,0,0,0.1), 0 2px 6px -2px rgba(0,0,0,0.1)`,
-                    }}
-                  >
-                    {card.icon}
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-800">{card.title}</h3>
-                    <p className="text-gray-500 text-sm">{card.description}</p>
-                  </div>
-                </div>
-                <div className="mt-4 flex items-center text-sm font-medium">
-                  <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent group-hover:from-blue-700 group-hover:to-indigo-700 transition-all duration-300">
-                    View Dashboard
-                  </span>
-                  <svg
-                    className="w-4 h-4 ml-1 group-hover:translate-x-2 transition-all duration-300 text-blue-600 group-hover:text-blue-700"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5l7 7-7 7"
-                    />
-                  </svg>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Version Footer with Notification Button */}
         <div className="mt-8 text-center pb-2">
           <div className="flex flex-col items-center space-y-4">
@@ -98,7 +51,7 @@ const Home = () => {
             {/* Version Info */}
             <div className="inline-block px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/5 to-indigo-500/5 border border-blue-100">
               <p className="text-sm bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent font-medium">
-                FinTask {APP_VERSION} • Built with React & Supabase • Auto-Release Active ✅
+                FinTask {APP_VERSION} • Built with React & Supabase
               </p>
             </div>
           </div>

@@ -3,6 +3,7 @@ import { supabase } from '../supabaseClient';
 import CreditCardForm from './CreditCardForm';
 import ReminderForm from './ReminderForm';
 import CreditCardExport from './CreditCardExport';
+import CreditCardTable from './CreditCardTable';
 
 const CreditCardList = () => {
   const [cards, setCards] = useState([]);
@@ -17,6 +18,9 @@ const CreditCardList = () => {
   const [reminders, setReminders] = useState([]);
   const [showReminderForm, setShowReminderForm] = useState(false);
   const [reminderCard, setReminderCard] = useState(null);
+  const [viewMode, setViewMode] = useState(() => {
+    return localStorage.getItem('creditCardViewMode') || 'cards';
+  });
 
   const fetchReminders = useCallback(async () => {
     try {
@@ -135,6 +139,11 @@ const CreditCardList = () => {
 
   const getCardReminders = cardId => {
     return reminders.filter(r => r.card_id === cardId);
+  };
+
+  const handleViewModeChange = mode => {
+    setViewMode(mode);
+    localStorage.setItem('creditCardViewMode', mode);
   };
 
   const getInactivityBadge = lastUsedDate => {
@@ -291,8 +300,8 @@ const CreditCardList = () => {
         </button>
       </div>
 
-      {/* Search and Sort */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      {/* Search, Sort, and View Toggle */}
+      <div className="flex flex-col lg:flex-row gap-4">
         <div className="flex-1">
           <input
             type="text"
@@ -302,28 +311,66 @@ const CreditCardList = () => {
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           />
         </div>
-        <select
-          value={sortBy}
-          onChange={e => setSortBy(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="due_date">Sort by Due Date</option>
-          <option value="promo_expiry_date">Sort by Promo Expiry</option>
-          <option value="amount_due">Sort by Amount Due</option>
-          <option value="last_used_newest">Last Used (Newest First)</option>
-          <option value="last_used_oldest">Last Used (Oldest First)</option>
-          <option value="never_used">Never Used First</option>
-        </select>
+        <div className="flex flex-col sm:flex-row gap-2">
+          <select
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="due_date">Sort by Due Date</option>
+            <option value="promo_expiry_date">Sort by Promo Expiry</option>
+            <option value="amount_due">Sort by Amount Due</option>
+            <option value="last_used_newest">Last Used (Newest First)</option>
+            <option value="last_used_oldest">Last Used (Oldest First)</option>
+            <option value="never_used">Never Used First</option>
+          </select>
+          <div className="flex bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => handleViewModeChange('cards')}
+              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                viewMode === 'cards'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              📋 Cards
+            </button>
+            <button
+              onClick={() => handleViewModeChange('table')}
+              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+                viewMode === 'table'
+                  ? 'bg-white text-blue-600 shadow-sm'
+                  : 'text-gray-600 hover:text-gray-900'
+              }`}
+            >
+              📋 Table
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Cards Grid */}
+      {/* Content View */}
       {sortedCards.length === 0 ? (
         <div className="text-center py-12 text-gray-500">
           <div className="text-4xl mb-2">💳</div>
           <p>No cards found matching your criteria</p>
         </div>
+      ) : viewMode === 'table' ? (
+        <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+          <CreditCardTable
+            cards={sortedCards}
+            reminders={reminders}
+            onEditCard={handleEditCard}
+            onDeleteCard={handleDeleteCard}
+            onSetReminder={handleSetReminder}
+            getInactivityBadge={getInactivityBadge}
+            getPromoExpiryBadge={getPromoExpiryBadge}
+            formatCurrency={formatCurrency}
+            formatDate={formatDate}
+          />
+        </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
           {sortedCards.map(card => (
             <div key={card.id} className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
               {/* Card Header */}
