@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   PieChart,
   Pie,
@@ -10,9 +10,8 @@ import {
   YAxis,
   Tooltip,
 } from 'recharts';
-import { supabase } from '../supabaseClient';
 
-const CreditCardDashboardInsights = () => {
+const CreditCardDashboardInsights = ({ cards = [] }) => {
   const [insights, setInsights] = useState({
     totalCards: 0,
     totalAmountDue: 0,
@@ -20,30 +19,11 @@ const CreditCardDashboardInsights = () => {
     promoExpiry: [],
     inactivity: [],
   });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  const fetchInsights = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError('');
-
-      const { data: cards, error } = await supabase.from('credit_cards_manual').select('*');
-
-      if (error) throw error;
-
-      const computedInsights = computeInsights(cards || []);
-      setInsights(computedInsights);
-    } catch (err) {
-      setError(`Failed to fetch insights: ${err.message}`);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   useEffect(() => {
-    fetchInsights();
-  }, [fetchInsights]);
+    const computedInsights = computeInsights(cards);
+    setInsights(computedInsights);
+  }, [cards]);
 
   const computeInsights = cards => {
     const totalCards = cards.length;
@@ -119,35 +99,10 @@ const CreditCardDashboardInsights = () => {
     }).format(amount);
   };
 
-  if (loading) {
-    return (
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div className="flex items-center justify-center py-8">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-          <span className="ml-2 text-gray-600">Loading insights...</span>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <div className="p-4 bg-red-100 text-red-700 rounded-lg">{error}</div>
-      </div>
-    );
-  }
-
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl font-bold text-gray-900">📊 Dashboard Insights</h2>
-        <button
-          onClick={fetchInsights}
-          className="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-        >
-          🔄 Refresh
-        </button>
       </div>
 
       {/* Summary Cards */}

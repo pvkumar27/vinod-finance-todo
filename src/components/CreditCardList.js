@@ -4,6 +4,8 @@ import CreditCardForm from './CreditCardForm';
 import ReminderForm from './ReminderForm';
 import CreditCardExport from './CreditCardExport';
 import CreditCardTable from './CreditCardTable';
+import CreditCardDashboardInsights from './CreditCardDashboardInsights';
+import CreditCardDetailModal from './CreditCardDetailModal';
 
 const CreditCardList = () => {
   const [cards, setCards] = useState([]);
@@ -21,6 +23,10 @@ const CreditCardList = () => {
   const [viewMode, setViewMode] = useState(() => {
     return localStorage.getItem('creditCardViewMode') || 'cards';
   });
+  const [selectedCards, setSelectedCards] = useState([]);
+  const [selectAll, setSelectAll] = useState(false);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [selectedCard, setSelectedCard] = useState(null);
 
   const fetchReminders = useCallback(async () => {
     try {
@@ -78,10 +84,56 @@ const CreditCardList = () => {
       if (error) throw error;
 
       setCards(prev => prev.filter(c => c.id !== card.id));
+      setSelectedCards(prev => prev.filter(id => id !== card.id));
       setMessage('✅ Card deleted successfully');
       setTimeout(() => setMessage(''), 3000);
     } catch (err) {
       setMessage(`❌ Failed to delete card: ${err.message}`);
+      setTimeout(() => setMessage(''), 5000);
+    }
+  };
+
+  const handleSelectAll = () => {
+    if (selectAll) {
+      setSelectedCards([]);
+      setSelectAll(false);
+    } else {
+      setSelectedCards(sortedCards.map(card => card.id));
+      setSelectAll(true);
+    }
+  };
+
+  const handleDeselectAll = () => {
+    setSelectedCards([]);
+    setSelectAll(false);
+  };
+
+  const handleCardSelect = cardId => {
+    setSelectedCards(prev => {
+      const newSelected = prev.includes(cardId)
+        ? prev.filter(id => id !== cardId)
+        : [...prev, cardId];
+      setSelectAll(newSelected.length === sortedCards.length);
+      return newSelected;
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedCards.length === 0) return;
+    if (!window.confirm(`Delete ${selectedCards.length} selected cards?`)) return;
+
+    try {
+      const { error } = await supabase.from('credit_cards_manual').delete().in('id', selectedCards);
+
+      if (error) throw error;
+
+      setCards(prev => prev.filter(c => !selectedCards.includes(c.id)));
+      setSelectedCards([]);
+      setSelectAll(false);
+      setMessage(`✅ ${selectedCards.length} cards deleted successfully`);
+      setTimeout(() => setMessage(''), 3000);
+    } catch (err) {
+      setMessage(`❌ Failed to delete cards: ${err.message}`);
       setTimeout(() => setMessage(''), 5000);
     }
   };
@@ -120,6 +172,21 @@ const CreditCardList = () => {
   const handleReminderCancel = () => {
     setShowReminderForm(false);
     setReminderCard(null);
+  };
+
+  const handleViewCard = card => {
+    setSelectedCard(card);
+    setShowDetailModal(true);
+  };
+
+  const handleCloseDetailModal = () => {
+    setShowDetailModal(false);
+    setSelectedCard(null);
+  };
+
+  const handleEditFromModal = card => {
+    setShowDetailModal(false);
+    handleEditCard(card);
   };
 
   const handleDeleteReminder = async reminderId => {
@@ -230,6 +297,9 @@ const CreditCardList = () => {
 
   return (
     <div className="space-y-6">
+      {/* Dashboard Insights */}
+      <CreditCardDashboardInsights cards={cards} />
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2 className="text-2xl font-bold text-gray-900">💳 Credit Cards ({sortedCards.length})</h2>
@@ -349,169 +419,224 @@ const CreditCardList = () => {
         </div>
       </div>
 
-      {/* Content View */}
-      {sortedCards.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
-          <div className="text-4xl mb-2">💳</div>
-          <p>No cards found matching your criteria</p>
-        </div>
-      ) : viewMode === 'table' ? (
-        <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
-          <CreditCardTable
-            cards={sortedCards}
-            reminders={reminders}
-            onEditCard={handleEditCard}
-            onDeleteCard={handleDeleteCard}
-            onSetReminder={handleSetReminder}
-            getInactivityBadge={getInactivityBadge}
-            getPromoExpiryBadge={getPromoExpiryBadge}
-            formatCurrency={formatCurrency}
-            formatDate={formatDate}
-          />
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-          {sortedCards.map(card => (
-            <div key={card.id} className="bg-white rounded-lg shadow-md border border-gray-200 p-6">
-              {/* Card Header */}
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="font-semibold text-gray-900">{card.card_holder || 'Unknown'}</h3>
-                  <p className="text-sm text-gray-600">
-                    {card.bank} • {card.card_type}
-                  </p>
-                  {card.card_last4 && (
-                    <p className="text-xs text-gray-500">•••• {card.card_last4}</p>
-                  )}
-                  <p className="text-xs text-gray-500 mt-1">
-                    {card.last_used_date
-                      ? `Last used: ${formatDate(card.last_used_date)}`
-                      : '❌ Never Used'}
-                  </p>
-                </div>
-                <div className="flex items-start gap-2">
-                  <div className="flex flex-col gap-1">
-                    {getInactivityBadge(card.last_used_date) && (
-                      <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full font-bold">
-                        ⚠️ {card.last_used_date ? 'Inactive' : 'Never Used'}
-                      </span>
-                    )}
-                    {getPromoExpiryBadge(card.promo_expiry_date) && (
-                      <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">
-                        ⏳ Promo Soon
-                      </span>
-                    )}
-                  </div>
-                  <div className="flex gap-1">
-                    <button
-                      onClick={() => handleSetReminder(card)}
-                      className="p-1 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded"
-                      title="Set reminder"
-                    >
-                      🔔
-                    </button>
-                    <button
-                      onClick={() => handleEditCard(card)}
-                      className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
-                      title="Edit card"
-                    >
-                      ✏️
-                    </button>
-                    <button
-                      onClick={() => handleDeleteCard(card)}
-                      className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"
-                      title="Delete card"
-                    >
-                      🗑️
-                    </button>
-                  </div>
-                </div>
-              </div>
-
-              {/* Payment Info */}
-              <div className="space-y-2 mb-4">
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Amount Due:</span>
-                  <span className="font-medium text-red-600">
-                    {formatCurrency(card.amount_due)}
-                  </span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Min Payment:</span>
-                  <span className="font-medium">{formatCurrency(card.min_payment_due)}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-sm text-gray-600">Due Date:</span>
-                  <span className="font-medium">{formatDate(card.due_date)}</span>
-                </div>
-              </div>
-
-              {/* Promo Info */}
-              {card.promo_used && (
-                <div className="bg-blue-50 rounded-lg p-3 mb-4">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-blue-700">Promo Amount:</span>
-                    <span className="font-medium text-blue-900">
-                      {formatCurrency(card.promo_amount_due)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-blue-700">Promo APR:</span>
-                    <span className="font-medium text-blue-900">{card.promo_apr}%</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-blue-700">Expires:</span>
-                    <span className="font-medium text-blue-900">
-                      {formatDate(card.promo_expiry_date)}
-                    </span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-blue-700">APR After:</span>
-                    <span className="font-medium text-blue-900">{card.apr_after}%</span>
-                  </div>
-                </div>
-              )}
-
-              {/* Reminders */}
-              {getCardReminders(card.id).length > 0 && (
-                <div className="bg-yellow-50 rounded-lg p-3 mb-4">
-                  <h4 className="text-sm font-semibold text-yellow-800 mb-2">
-                    🔔 Active Reminders
-                  </h4>
-                  {getCardReminders(card.id).map(reminder => (
-                    <div
-                      key={reminder.id}
-                      className="flex justify-between items-start text-sm mb-2 last:mb-0"
-                    >
-                      <div>
-                        <span className="font-medium text-yellow-900">{reminder.type}</span>
-                        <span className="text-yellow-700"> – {formatDate(reminder.date)}</span>
-                        {reminder.note && (
-                          <p className="text-xs text-yellow-600 mt-1">{reminder.note}</p>
-                        )}
-                      </div>
-                      <button
-                        onClick={() => handleDeleteReminder(reminder.id)}
-                        className="text-yellow-400 hover:text-red-600 ml-2"
-                        title="Delete reminder"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Notes */}
-              {card.notes && (
-                <div className="text-sm text-gray-600 bg-gray-50 rounded p-2">
-                  <strong>Notes:</strong> {card.notes}
-                </div>
-              )}
+      {/* Selection Toolbar */}
+      {sortedCards.length > 0 && (
+        <div
+          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+            selectedCards.length > 0 ? 'max-h-20 opacity-100 mb-4' : 'max-h-0 opacity-0 mb-0'
+          }`}
+        >
+          <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <span className="text-sm font-medium text-green-800">
+                ✅ {selectedCards.length} card{selectedCards.length !== 1 ? 's' : ''} selected
+              </span>
+              <button
+                onClick={handleDeselectAll}
+                className="text-sm text-green-700 hover:text-green-900 underline"
+              >
+                Deselect All
+              </button>
             </div>
-          ))}
+            <button
+              onClick={handleBulkDelete}
+              className="px-3 py-1 text-red-600 border border-red-300 rounded-md hover:border-red-600 hover:bg-red-50 text-sm font-medium transition-colors flex items-center gap-1"
+              title="Delete selected cards"
+            >
+              🗑️ Delete
+            </button>
+          </div>
         </div>
       )}
+
+      {/* Content View */}
+      <div className="min-h-[600px]">
+        {sortedCards.length === 0 ? (
+          <div className="text-center py-12 text-gray-500">
+            <div className="text-4xl mb-2">💳</div>
+            <p>No cards found matching your criteria</p>
+          </div>
+        ) : viewMode === 'table' ? (
+          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+            <div className="max-h-[600px] overflow-y-auto">
+              <CreditCardTable
+                cards={sortedCards}
+                reminders={reminders}
+                onEditCard={handleEditCard}
+                onDeleteCard={handleDeleteCard}
+                onSetReminder={handleSetReminder}
+                onViewCard={handleViewCard}
+                getInactivityBadge={getInactivityBadge}
+                getPromoExpiryBadge={getPromoExpiryBadge}
+                formatCurrency={formatCurrency}
+                formatDate={formatDate}
+                selectedCards={selectedCards}
+                onCardSelect={handleCardSelect}
+                selectAll={selectAll}
+                onSelectAll={handleSelectAll}
+                onBulkDelete={handleBulkDelete}
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="h-[600px] overflow-y-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+              {sortedCards.map(card => (
+                <div
+                  key={card.id}
+                  className={`bg-white rounded-lg shadow-md border p-6 transition-all duration-200 ease-in-out ${selectedCards.includes(card.id) ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
+                >
+                  {/* Card Header */}
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="checkbox"
+                        checked={selectedCards.includes(card.id)}
+                        onChange={() => handleCardSelect(card.id)}
+                        className="mt-1"
+                      />
+                      <div>
+                        <h3 className="font-semibold text-gray-900">
+                          {card.card_holder || 'Unknown'}
+                        </h3>
+                        <p className="text-sm text-gray-600">
+                          {card.bank} • {card.card_type}
+                        </p>
+                        {card.card_last4 && (
+                          <p className="text-xs text-gray-500">•••• {card.card_last4}</p>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">
+                          {card.last_used_date
+                            ? `Last used: ${formatDate(card.last_used_date)}`
+                            : '❌ Never Used'}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <div className="flex flex-col gap-1">
+                        {getInactivityBadge(card.last_used_date) && (
+                          <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full font-bold">
+                            ⚠️ {card.last_used_date ? 'Inactive' : 'Never Used'}
+                          </span>
+                        )}
+                        {getPromoExpiryBadge(card.promo_expiry_date) && (
+                          <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">
+                            ⏳ Promo Soon
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex gap-1">
+                        <button
+                          onClick={() => handleSetReminder(card)}
+                          className="p-1 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded"
+                          title="Set reminder"
+                        >
+                          🔔
+                        </button>
+                        <button
+                          onClick={() => handleEditCard(card)}
+                          className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                          title="Edit card"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={() => handleDeleteCard(card)}
+                          className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"
+                          title="Delete card"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Payment Info */}
+                  <div className="space-y-2 mb-4">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Amount Due:</span>
+                      <span className="font-medium text-red-600">
+                        {formatCurrency(card.amount_due)}
+                      </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Min Payment:</span>
+                      <span className="font-medium">{formatCurrency(card.min_payment_due)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Due Date:</span>
+                      <span className="font-medium">{formatDate(card.due_date)}</span>
+                    </div>
+                  </div>
+
+                  {/* Promo Info */}
+                  {card.promo_used && (
+                    <div className="bg-blue-50 rounded-lg p-3 mb-4">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-blue-700">Promo Amount:</span>
+                        <span className="font-medium text-blue-900">
+                          {formatCurrency(card.promo_amount_due)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-blue-700">Promo APR:</span>
+                        <span className="font-medium text-blue-900">{card.promo_apr}%</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-blue-700">Expires:</span>
+                        <span className="font-medium text-blue-900">
+                          {formatDate(card.promo_expiry_date)}
+                        </span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-blue-700">APR After:</span>
+                        <span className="font-medium text-blue-900">{card.apr_after}%</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Reminders */}
+                  {getCardReminders(card.id).length > 0 && (
+                    <div className="bg-yellow-50 rounded-lg p-3 mb-4">
+                      <h4 className="text-sm font-semibold text-yellow-800 mb-2">
+                        🔔 Active Reminders
+                      </h4>
+                      {getCardReminders(card.id).map(reminder => (
+                        <div
+                          key={reminder.id}
+                          className="flex justify-between items-start text-sm mb-2 last:mb-0"
+                        >
+                          <div>
+                            <span className="font-medium text-yellow-900">{reminder.type}</span>
+                            <span className="text-yellow-700"> – {formatDate(reminder.date)}</span>
+                            {reminder.note && (
+                              <p className="text-xs text-yellow-600 mt-1">{reminder.note}</p>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => handleDeleteReminder(reminder.id)}
+                            className="text-yellow-400 hover:text-red-600 ml-2"
+                            title="Delete reminder"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Notes */}
+                  {card.notes && (
+                    <div className="text-sm text-gray-600 bg-gray-50 rounded p-2">
+                      <strong>Notes:</strong> {card.notes}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* Form Modal */}
       <CreditCardForm
@@ -527,6 +652,14 @@ const CreditCardList = () => {
         isOpen={showReminderForm}
         onSave={handleReminderSave}
         onCancel={handleReminderCancel}
+      />
+
+      {/* Detail Modal */}
+      <CreditCardDetailModal
+        card={selectedCard}
+        isOpen={showDetailModal}
+        onClose={handleCloseDetailModal}
+        onEdit={handleEditFromModal}
       />
     </div>
   );
