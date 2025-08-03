@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import CreditCardUpload from './CreditCardUpload';
 import CreditCardList from './CreditCardList';
+import CreditCardDashboardInsights from './CreditCardDashboardInsights';
 
 const CreditCardManager = () => {
   const [activeView, setActiveView] = useState('manage');
@@ -30,6 +31,9 @@ const CreditCardManager = () => {
           📤 Upload Cards
         </button>
       </div>
+
+      {/* Dashboard Insights - Show only in manage view */}
+      {activeView === 'manage' && <CreditCardDashboardInsights />}
 
       {/* Content */}
       {activeView === 'manage' ? <CreditCardList /> : <CreditCardUpload />}
