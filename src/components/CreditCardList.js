@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
 import CreditCardForm from './CreditCardForm';
 import ReminderForm from './ReminderForm';
@@ -19,9 +19,9 @@ const CreditCardList = () => {
 
   useEffect(() => {
     fetchCards();
-  }, []);
+  }, [fetchCards]);
 
-  const fetchCards = async () => {
+  const fetchCards = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -37,9 +37,9 @@ const CreditCardList = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchReminders = async () => {
+  const fetchReminders = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('credit_card_reminders')
@@ -52,7 +52,7 @@ const CreditCardList = () => {
     } catch (err) {
       console.error('Failed to fetch reminders:', err.message);
     }
-  };
+  }, []);
 
   const handleAddCard = () => {
     setEditingCard(null);
