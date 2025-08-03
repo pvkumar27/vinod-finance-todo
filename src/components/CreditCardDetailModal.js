@@ -19,7 +19,7 @@ const CreditCardDetailModal = ({ card, isOpen, onClose, onEdit }) => {
 
   const formatCurrency = amount => (amount ? `$${amount.toLocaleString()}` : '-');
   const formatDate = date => {
-    if (!date) return '-';
+    if (!date || date === '1970-01-01') return '-';
     const parsedDate = new Date(date);
     return isNaN(parsedDate.getTime()) ? '-' : parsedDate.toLocaleDateString();
   };
