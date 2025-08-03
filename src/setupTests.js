@@ -5,9 +5,3 @@
 import '@testing-library/jest-dom';
 
 // Firebase removed - no mocking needed
-
-// Mock Firebase messaging functions
-jest.mock('./utils/notifications', () => ({
-  requestNotificationPermission: jest.fn(),
-  setupForegroundMessageListener: jest.fn()
-}));
