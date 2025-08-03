@@ -539,7 +539,7 @@ const TaskManager = () => {
             </DndContext>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <div>
             <table className="w-full border-collapse border border-gray-300">
               <thead>
                 <tr className="bg-gray-50">
