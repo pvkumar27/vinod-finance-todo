@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import CreditCardForm from './CreditCardForm';
+import ReminderForm from './ReminderForm';
 
 const CreditCardList = () => {
   const [cards, setCards] = useState([]);
@@ -12,6 +13,9 @@ const CreditCardList = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
   const [message, setMessage] = useState('');
+  const [reminders, setReminders] = useState([]);
+  const [showReminderForm, setShowReminderForm] = useState(false);
+  const [reminderCard, setReminderCard] = useState(null);
 
   useEffect(() => {
     fetchCards();
@@ -27,10 +31,26 @@ const CreditCardList = () => {
 
       if (error) throw error;
       setCards(data || []);
+      await fetchReminders();
     } catch (err) {
       setError(`Failed to fetch cards: ${err.message}`);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchReminders = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('credit_card_reminders')
+        .select('*')
+        .gte('date', new Date().toISOString().split('T')[0])
+        .order('date', { ascending: true });
+
+      if (error) throw error;
+      setReminders(data || []);
+    } catch (err) {
+      console.error('Failed to fetch reminders:', err.message);
     }
   };
 
@@ -77,6 +97,43 @@ const CreditCardList = () => {
   const handleFormCancel = () => {
     setShowForm(false);
     setEditingCard(null);
+  };
+
+  const handleSetReminder = card => {
+    setReminderCard(card);
+    setShowReminderForm(true);
+  };
+
+  const handleReminderSave = savedReminder => {
+    setReminders(prev => [...prev, savedReminder]);
+    setShowReminderForm(false);
+    setReminderCard(null);
+    setMessage('🔔 Reminder set successfully');
+    setTimeout(() => setMessage(''), 3000);
+  };
+
+  const handleReminderCancel = () => {
+    setShowReminderForm(false);
+    setReminderCard(null);
+  };
+
+  const handleDeleteReminder = async reminderId => {
+    try {
+      const { error } = await supabase.from('credit_card_reminders').delete().eq('id', reminderId);
+
+      if (error) throw error;
+
+      setReminders(prev => prev.filter(r => r.id !== reminderId));
+      setMessage('🗑️ Reminder deleted');
+      setTimeout(() => setMessage(''), 3000);
+    } catch (err) {
+      setMessage(`❌ Failed to delete reminder: ${err.message}`);
+      setTimeout(() => setMessage(''), 5000);
+    }
+  };
+
+  const getCardReminders = cardId => {
+    return reminders.filter(r => r.card_id === cardId);
   };
 
   const getInactivityBadge = lastUsedDate => {
@@ -293,6 +350,13 @@ const CreditCardList = () => {
                   </div>
                   <div className="flex gap-1">
                     <button
+                      onClick={() => handleSetReminder(card)}
+                      className="p-1 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded"
+                      title="Set reminder"
+                    >
+                      🔔
+                    </button>
+                    <button
                       onClick={() => handleEditCard(card)}
                       className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
                       title="Edit card"
@@ -354,6 +418,36 @@ const CreditCardList = () => {
                 </div>
               )}
 
+              {/* Reminders */}
+              {getCardReminders(card.id).length > 0 && (
+                <div className="bg-yellow-50 rounded-lg p-3 mb-4">
+                  <h4 className="text-sm font-semibold text-yellow-800 mb-2">
+                    🔔 Active Reminders
+                  </h4>
+                  {getCardReminders(card.id).map(reminder => (
+                    <div
+                      key={reminder.id}
+                      className="flex justify-between items-start text-sm mb-2 last:mb-0"
+                    >
+                      <div>
+                        <span className="font-medium text-yellow-900">{reminder.type}</span>
+                        <span className="text-yellow-700"> – {formatDate(reminder.date)}</span>
+                        {reminder.note && (
+                          <p className="text-xs text-yellow-600 mt-1">{reminder.note}</p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => handleDeleteReminder(reminder.id)}
+                        className="text-yellow-400 hover:text-red-600 ml-2"
+                        title="Delete reminder"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+
               {/* Notes */}
               {card.notes && (
                 <div className="text-sm text-gray-600 bg-gray-50 rounded p-2">
@@ -371,6 +465,14 @@ const CreditCardList = () => {
         isOpen={showForm}
         onSave={handleFormSave}
         onCancel={handleFormCancel}
+      />
+
+      {/* Reminder Form Modal */}
+      <ReminderForm
+        card={reminderCard}
+        isOpen={showReminderForm}
+        onSave={handleReminderSave}
+        onCancel={handleReminderCancel}
       />
     </div>
   );
