@@ -11,15 +11,14 @@
     "@supabase/auth-ui-react": "^0.4.7",
     "@supabase/auth-ui-shared": "^0.1.8",
     "@supabase/supabase-js": "^2.52.1",
-    "nodemailer": "^6.9.8",
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
     "chrono-node": "^2.8.3",
     "date-fns": "^4.1.0",
     "dotenv": "^16.6.1",
-
     "node-fetch": "^3.3.2",
+    "nodemailer": "^6.9.8",
     "react": "^18.3.1",
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.3.1",
@@ -36,7 +35,8 @@
     "workbox-range-requests": "^6.6.1",
     "workbox-routing": "^6.6.1",
     "workbox-strategies": "^6.6.1",
-    "workbox-streams": "^6.6.1"
+    "workbox-streams": "^6.6.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@playwright/test": "^1.54.1",
