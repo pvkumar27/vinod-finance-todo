@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import TabNavigation from '../components/TabNavigation';
 import CreditCardDashboard from '../components/CreditCardDashboard';
-import MyFinancesDashboard from '../components/MyFinancesDashboard';
 import TodosDashboard from '../components/TodosDashboard';
 import { APP_VERSION } from '../constants/version';
 
@@ -16,14 +15,6 @@ const Home = () => {
       icon: '💳',
       gradient: 'from-blue-500 to-purple-600',
       component: CreditCardDashboard,
-    },
-    {
-      id: 'expenses',
-      title: 'My Finances',
-      description: 'Track income and expenses overview',
-      icon: '💰',
-      gradient: 'from-green-500 to-teal-600',
-      component: MyFinancesDashboard,
     },
     {
       id: 'todos',
@@ -55,7 +46,7 @@ const Home = () => {
         {/* Dashboard Cards */}
         <div>
           <h2 className="section-header text-xl font-semibold mb-6">Quick Access Dashboards</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {dashboardCards.map(card => (
               <div
                 key={card.id}
@@ -65,7 +56,9 @@ const Home = () => {
                 <div className="flex items-center space-x-3">
                   <div
                     className={`text-2xl p-3 rounded-full bg-gradient-to-r ${card.gradient} text-white shadow-md`}
-                    style={{boxShadow: `0 4px 10px -1px rgba(0,0,0,0.1), 0 2px 6px -2px rgba(0,0,0,0.1)`}}
+                    style={{
+                      boxShadow: `0 4px 10px -1px rgba(0,0,0,0.1), 0 2px 6px -2px rgba(0,0,0,0.1)`,
+                    }}
                   >
                     {card.icon}
                   </div>
@@ -75,7 +68,9 @@ const Home = () => {
                   </div>
                 </div>
                 <div className="mt-4 flex items-center text-sm font-medium">
-                  <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent group-hover:from-blue-700 group-hover:to-indigo-700 transition-all duration-300">View Dashboard</span>
+                  <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent group-hover:from-blue-700 group-hover:to-indigo-700 transition-all duration-300">
+                    View Dashboard
+                  </span>
                   <svg
                     className="w-4 h-4 ml-1 group-hover:translate-x-2 transition-all duration-300 text-blue-600 group-hover:text-blue-700"
                     fill="none"
@@ -99,7 +94,7 @@ const Home = () => {
         <div className="mt-8 text-center pb-2">
           <div className="flex flex-col items-center space-y-4">
             {/* App info */}
-            
+
             {/* Version Info */}
             <div className="inline-block px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/5 to-indigo-500/5 border border-blue-100">
               <p className="text-sm bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent font-medium">

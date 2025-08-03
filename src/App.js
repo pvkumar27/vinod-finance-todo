@@ -3,14 +3,7 @@ import { AuthForm } from './components';
 import { Navbar } from './layout';
 import { Home } from './pages';
 import { supabase } from './supabaseClient';
-import {
-  requestNotificationPermission,
-  setupForegroundMessageListener,
-} from './utils/notifications';
-import { saveUserToken } from './utils/tokenStorage';
-import { registerMessagingServiceWorker } from './utils/serviceWorkerUtils';
 import IOSInstallPrompt from './components/IOSInstallPrompt';
-import './utils/notificationTest'; // Import test utilities for debugging
 import './App.css';
 import './styles/background.css';
 import './styles/typography.css';
@@ -36,41 +29,11 @@ function App() {
       setSession(session);
       setLoading(false);
 
-      // Setup push notifications when user logs in
-      if (session) {
-        initializePushNotifications();
-      }
+      // User session established
     });
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const initializePushNotifications = async () => {
-    try {
-      console.log('🚀 Initializing push notifications...');
-      
-      // Register Firebase messaging service worker
-      await registerMessagingServiceWorker();
-
-      // Request notification permission and get FCM token
-      const token = await requestNotificationPermission();
-
-      if (token) {
-        console.log('✅ Push notification token obtained:', token.substring(0, 20) + '...');
-        // Save token to Firestore
-        await saveUserToken(token);
-      } else {
-        console.warn('⚠️ Failed to obtain FCM token. Push notifications will not work.');
-      }
-
-      // Setup foreground message listener
-      setupForegroundMessageListener();
-      
-      console.log('✅ Push notification initialization complete');
-    } catch (error) {
-      console.error('❌ Error initializing push notifications:', error);
-    }
-  };
 
   if (loading) {
     return (

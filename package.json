@@ -1,6 +1,6 @@
 {
   "name": "fintask",
-  "version": "2.4.1",
+  "version": "3.0.0",
   "homepage": "https://fintask.netlify.app",
   "private": true,
   "dependencies": {
@@ -17,13 +17,11 @@
     "chrono-node": "^2.8.3",
     "date-fns": "^4.1.0",
     "dotenv": "^16.6.1",
-    "firebase": "^11.10.0",
+
     "node-fetch": "^3.3.2",
-    "plaid": "^36.0.0",
     "react": "^18.3.1",
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.3.1",
-    "react-plaid-link": "^4.0.1",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4",
     "workbox-background-sync": "^6.6.1",
@@ -49,7 +47,8 @@
     "tailwindcss": "^3.4.17"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "netlify dev",
+    "start:react": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "lint": "eslint src/**/*.{js,jsx}",

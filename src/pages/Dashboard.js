@@ -7,7 +7,8 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-lg font-semibold mb-2">Credit Cards</h3>
-          <p className="text-2xl font-bold text-blue-600">45</p>
+          <p className="text-2xl font-bold text-gray-400">-</p>
+          <p className="text-xs text-gray-500 mt-1">Migration in progress</p>
         </div>
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-lg font-semibold mb-2">Monthly Expenses</h3>
