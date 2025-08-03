@@ -18,7 +18,11 @@ const CreditCardDetailModal = ({ card, isOpen, onClose, onEdit }) => {
   if (!isOpen || !card) return null;
 
   const formatCurrency = amount => (amount ? `$${amount.toLocaleString()}` : '-');
-  const formatDate = date => (date ? new Date(date).toLocaleDateString() : '-');
+  const formatDate = date => {
+    if (!date) return '-';
+    const parsedDate = new Date(date);
+    return isNaN(parsedDate.getTime()) ? '-' : parsedDate.toLocaleDateString();
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
