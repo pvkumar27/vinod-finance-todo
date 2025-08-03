@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   PieChart,
   Pie,
@@ -25,9 +25,9 @@ const CreditCardDashboardInsights = () => {
 
   useEffect(() => {
     fetchInsights();
-  }, []);
+  }, [fetchInsights]);
 
-  const fetchInsights = async () => {
+  const fetchInsights = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -43,7 +43,7 @@ const CreditCardDashboardInsights = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const computeInsights = cards => {
     const totalCards = cards.length;
@@ -118,8 +118,6 @@ const CreditCardDashboardInsights = () => {
       currency: 'USD',
     }).format(amount);
   };
-
-  const COLORS = ['#10B981', '#F59E0B', '#EF4444', '#6B7280', '#8B5CF6'];
 
   if (loading) {
     return (
