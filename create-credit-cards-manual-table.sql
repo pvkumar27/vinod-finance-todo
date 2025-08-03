@@ -5,7 +5,7 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Create credit_cards_manual table
-CREATE TABLE credit_cards_manual (
+CREATE TABLE IF NOT EXISTS credit_cards_manual (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   bank text,
@@ -32,18 +32,21 @@ CREATE TABLE credit_cards_manual (
 -- Enable Row Level Security
 ALTER TABLE credit_cards_manual ENABLE ROW LEVEL SECURITY;
 
--- Create RLS policies
-CREATE POLICY "Users can view own credit cards" ON credit_cards_manual
-  FOR SELECT USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can insert own credit cards" ON credit_cards_manual
-  FOR INSERT WITH CHECK (auth.uid() = user_id);
-
-CREATE POLICY "Users can update own credit cards" ON credit_cards_manual
-  FOR UPDATE USING (auth.uid() = user_id);
-
-CREATE POLICY "Users can delete own credit cards" ON credit_cards_manual
-  FOR DELETE USING (auth.uid() = user_id);
+-- Create RLS policies (with conditional creation)
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'credit_cards_manual' AND policyname = 'Users can view own credit cards') THEN
+    CREATE POLICY "Users can view own credit cards" ON credit_cards_manual FOR SELECT USING (auth.uid() = user_id);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'credit_cards_manual' AND policyname = 'Users can insert own credit cards') THEN
+    CREATE POLICY "Users can insert own credit cards" ON credit_cards_manual FOR INSERT WITH CHECK (auth.uid() = user_id);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'credit_cards_manual' AND policyname = 'Users can update own credit cards') THEN
+    CREATE POLICY "Users can update own credit cards" ON credit_cards_manual FOR UPDATE USING (auth.uid() = user_id);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename = 'credit_cards_manual' AND policyname = 'Users can delete own credit cards') THEN
+    CREATE POLICY "Users can delete own credit cards" ON credit_cards_manual FOR DELETE USING (auth.uid() = user_id);
+  END IF;
+END $$;
 
 -- Create updated_at trigger function
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -55,15 +58,16 @@ END;
 $$ language 'plpgsql';
 
 -- Create trigger for updated_at
+DROP TRIGGER IF EXISTS update_credit_cards_manual_updated_at ON credit_cards_manual;
 CREATE TRIGGER update_credit_cards_manual_updated_at
   BEFORE UPDATE ON credit_cards_manual
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
 -- Create indexes for performance
-CREATE INDEX idx_credit_cards_manual_user_id ON credit_cards_manual(user_id);
-CREATE INDEX idx_credit_cards_manual_due_date ON credit_cards_manual(due_date);
-CREATE INDEX idx_credit_cards_manual_source ON credit_cards_manual(source);
+CREATE INDEX IF NOT EXISTS idx_credit_cards_manual_user_id ON credit_cards_manual(user_id);
+CREATE INDEX IF NOT EXISTS idx_credit_cards_manual_due_date ON credit_cards_manual(due_date);
+CREATE INDEX IF NOT EXISTS idx_credit_cards_manual_source ON credit_cards_manual(source);
 
 -- Verify table creation
 SELECT 
