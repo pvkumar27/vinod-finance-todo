@@ -3,7 +3,7 @@ import * as XLSX from 'xlsx';
 import { supabase } from '../supabaseClient';
 
 const CreditCardUpload = () => {
-  const [file, setFile] = useState(null);
+  const [, setFile] = useState(null);
   const [parsedData, setParsedData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
@@ -146,7 +146,7 @@ const CreditCardUpload = () => {
       });
 
       // Insert into Supabase
-      const { data, error } = await supabase.from('credit_cards_manual').insert(dataToInsert);
+      const { error } = await supabase.from('credit_cards_manual').insert(dataToInsert);
 
       if (error) throw error;
 
