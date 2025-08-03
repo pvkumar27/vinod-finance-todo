@@ -11,6 +11,7 @@ CREATE TABLE IF NOT EXISTS credit_cards_manual (
   bank text,
   card_type text,
   card_holder text,
+  card_last4 text,
   amount_due numeric,
   min_payment_due numeric,
   due_date date,

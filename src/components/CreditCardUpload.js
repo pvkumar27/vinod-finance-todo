@@ -13,6 +13,8 @@ const CreditCardUpload = () => {
     bank: 'bank',
     'card type': 'card_type',
     'card holder': 'card_holder',
+    'card last4': 'card_last4',
+    'last 4': 'card_last4',
     'amount due': 'amount_due',
     'min payment due': 'min_payment_due',
     'due date': 'due_date',
@@ -215,6 +217,9 @@ const CreditCardUpload = () => {
                     Card Holder
                   </th>
                   <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                    Last 4
+                  </th>
+                  <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
                     Amount Due
                   </th>
                   <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
@@ -232,6 +237,7 @@ const CreditCardUpload = () => {
                     <td className="px-3 py-2 text-sm text-gray-900">{row.bank || '-'}</td>
                     <td className="px-3 py-2 text-sm text-gray-900">{row.card_type || '-'}</td>
                     <td className="px-3 py-2 text-sm text-gray-900">{row.card_holder || '-'}</td>
+                    <td className="px-3 py-2 text-sm text-gray-900">{row.card_last4 || '-'}</td>
                     <td className="px-3 py-2 text-sm text-gray-900">
                       {row.amount_due ? `$${row.amount_due}` : '-'}
                     </td>
