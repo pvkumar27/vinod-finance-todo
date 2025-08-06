@@ -306,9 +306,12 @@ const CreditCardList = () => {
       <CreditCardDashboardInsights cards={cards} />
 
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h2 className="text-2xl font-bold text-gray-900">💳 Credit Cards ({sortedCards.length})</h2>
-        <div className="flex flex-wrap gap-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">💳 Credit Cards</h2>
+          <p className="text-sm text-gray-600">{sortedCards.length} cards total</p>
+        </div>
+        <div className="flex flex-wrap gap-3">
           <CreditCardExport
             cards={sortedCards}
             reminders={reminders}
@@ -317,13 +320,13 @@ const CreditCardList = () => {
           />
           <button
             onClick={handleAddCard}
-            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 text-sm"
+            className="px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-medium shadow-sm hover:shadow-md"
           >
             ➕ Add Card
           </button>
           <button
             onClick={fetchCards}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"
+            className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium shadow-sm hover:shadow-md"
           >
             🔄 Refresh
           </button>
@@ -342,33 +345,33 @@ const CreditCardList = () => {
       )}
 
       {/* Tabs */}
-      <div className="flex space-x-1 bg-gray-100 p-1 rounded-lg">
+      <div className="flex flex-wrap gap-1 bg-gray-100 p-1 rounded-lg mb-6">
         <button
           onClick={() => setActiveTab('all')}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-200 ${
             activeTab === 'all'
-              ? 'bg-white text-blue-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-white text-blue-600 shadow-sm border border-blue-200'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           }`}
         >
           All Cards ({cards.length})
         </button>
         <button
           onClick={() => setActiveTab('promo')}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-200 ${
             activeTab === 'promo'
-              ? 'bg-white text-blue-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-white text-orange-600 shadow-sm border border-orange-200'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           }`}
         >
           ⏳ Promo Expiring ({cards.filter(c => getPromoExpiryBadge(c.current_promos)).length})
         </button>
         <button
           onClick={() => setActiveTab('inactive')}
-          className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+          className={`px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-200 ${
             activeTab === 'inactive'
-              ? 'bg-white text-blue-600 shadow-sm'
-              : 'text-gray-600 hover:text-gray-900'
+              ? 'bg-white text-red-600 shadow-sm border border-red-200'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
           }`}
         >
           ⚠️ Inactive (
@@ -377,21 +380,26 @@ const CreditCardList = () => {
       </div>
 
       {/* Search, Sort, and View Toggle */}
-      <div className="flex flex-col lg:flex-row gap-4">
+      <div className="flex flex-col lg:flex-row gap-4 mb-6">
         <div className="flex-1">
-          <input
-            type="text"
-            placeholder="Search by card name..."
-            value={searchTerm}
-            onChange={e => setSearchTerm(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-          />
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by card name..."
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+            />
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span className="text-gray-400">🔍</span>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-2">
+        <div className="flex flex-col sm:flex-row gap-3">
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 bg-white"
           >
             <option value="card_name">Sort by Card Name</option>
             <option value="days_inactive">Sort by Days Inactive</option>
@@ -402,23 +410,23 @@ const CreditCardList = () => {
           <div className="flex bg-gray-100 rounded-lg p-1">
             <button
               onClick={() => handleViewModeChange('cards')}
-              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded text-sm font-medium transition-all duration-200 ${
                 viewMode === 'cards'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-white text-blue-600 shadow-sm border border-blue-200'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
               📋 Cards
             </button>
             <button
               onClick={() => handleViewModeChange('table')}
-              className={`px-3 py-1 rounded text-sm font-medium transition-colors ${
+              className={`px-4 py-2 rounded text-sm font-medium transition-all duration-200 ${
                 viewMode === 'table'
-                  ? 'bg-white text-blue-600 shadow-sm'
-                  : 'text-gray-600 hover:text-gray-900'
+                  ? 'bg-white text-blue-600 shadow-sm border border-blue-200'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
             >
-              📋 Table
+              📊 Table
             </button>
           </div>
         </div>
@@ -428,27 +436,27 @@ const CreditCardList = () => {
       {sortedCards.length > 0 && (
         <div
           className={`overflow-hidden transition-all duration-300 ease-in-out ${
-            selectedCards.length > 0 ? 'max-h-20 opacity-100 mb-4' : 'max-h-0 opacity-0 mb-0'
+            selectedCards.length > 0 ? 'max-h-20 opacity-100 mb-6' : 'max-h-0 opacity-0 mb-0'
           }`}
         >
-          <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center justify-between">
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between shadow-sm">
             <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-green-800">
+              <span className="text-sm font-medium text-blue-800">
                 ✅ {selectedCards.length} card{selectedCards.length !== 1 ? 's' : ''} selected
               </span>
               <button
                 onClick={handleDeselectAll}
-                className="text-sm text-green-700 hover:text-green-900 underline"
+                className="text-sm text-blue-700 hover:text-blue-900 underline font-medium transition-colors duration-200"
               >
                 Deselect All
               </button>
             </div>
             <button
               onClick={handleBulkDelete}
-              className="px-3 py-1 text-red-600 border border-red-300 rounded-md hover:border-red-600 hover:bg-red-50 text-sm font-medium transition-colors flex items-center gap-1"
+              className="px-4 py-2 text-red-600 border border-red-300 rounded-lg hover:border-red-500 hover:bg-red-50 text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md"
               title="Delete selected cards"
             >
-              🗑️ Delete
+              🗑️ Delete Selected
             </button>
           </div>
         </div>
@@ -489,34 +497,41 @@ const CreditCardList = () => {
               {sortedCards.map(card => (
                 <div
                   key={card.id}
-                  className={`bg-white rounded-lg shadow-md border p-6 transition-all duration-200 ease-in-out ${selectedCards.includes(card.id) ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
+                  className={`bg-white rounded-lg shadow-sm border p-6 transition-all duration-200 ease-in-out hover:shadow-md ${
+                    selectedCards.includes(card.id)
+                      ? 'border-blue-500 bg-blue-50 shadow-md'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
                 >
                   {/* Card Header */}
-                  <div className="flex justify-between items-start mb-4">
+                  <div className="flex justify-between items-start mb-5">
                     <div className="flex items-start gap-3">
                       <input
                         type="checkbox"
                         checked={selectedCards.includes(card.id)}
                         onChange={() => handleCardSelect(card.id)}
-                        className="mt-1"
+                        className="mt-1 h-4 w-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                       />
                       <div>
-                        <h3 className="font-semibold text-gray-900">
+                        <h3 className="font-semibold text-gray-900 text-lg mb-1">
                           {card.bank_name && card.last_four_digits
                             ? `${card.bank_name} ${card.last_four_digits}`
                             : 'Unknown Card'}
                         </h3>
-                        <p className="text-sm text-gray-600">
-                          {card.days_inactive ? `${card.days_inactive} days inactive` : 'Active'}
-                        </p>
-                        <p className="text-xs text-gray-500 mt-1">
-                          {card.last_used_date
-                            ? `Last used: ${formatDate(card.last_used_date)}`
-                            : '❌ Never Used'}
-                        </p>
-                        <p className="text-xs text-gray-500">
-                          {card.promo_end_date ? '1 active promo' : '0 active promos'}
-                        </p>
+                        <div className="space-y-1">
+                          <p className="text-sm text-gray-600">
+                            {card.days_inactive ? `${card.days_inactive} days inactive` : 'Active'}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {card.last_used_date
+                              ? `Last used: ${formatDate(card.last_used_date)}`
+                              : '❌ Never Used'}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {Array.isArray(card.current_promos) ? card.current_promos.length : 0}{' '}
+                            active promos
+                          </p>
+                        </div>
                       </div>
                     </div>
                     <div className="flex items-start gap-2">
@@ -540,21 +555,21 @@ const CreditCardList = () => {
                       <div className="flex gap-1">
                         <button
                           onClick={() => handleSetReminder(card)}
-                          className="p-1 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded"
+                          className="p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-all duration-200"
                           title="Set reminder"
                         >
                           🔔
                         </button>
                         <button
                           onClick={() => handleEditCard(card)}
-                          className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
+                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
                           title="Edit card"
                         >
                           ✏️
                         </button>
                         <button
                           onClick={() => handleDeleteCard(card)}
-                          className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"
+                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
                           title="Delete card"
                         >
                           🗑️
@@ -564,23 +579,33 @@ const CreditCardList = () => {
                   </div>
 
                   {/* Card Info */}
-                  <div className="space-y-2 mb-4">
-                    <div className="flex justify-between">
+                  <div className="bg-gray-50 rounded-lg p-4 space-y-3 mb-5">
+                    <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">Days Inactive:</span>
-                      <span className="font-medium">{card.days_inactive || 0}</span>
+                      <span className="font-semibold text-gray-900">{card.days_inactive || 0}</span>
                     </div>
-                    <div className="flex justify-between">
+                    <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">Last Used:</span>
-                      <span className="font-medium">{formatDate(card.last_used_date)}</span>
+                      <span className="font-semibold text-gray-900">
+                        {formatDate(card.last_used_date)}
+                      </span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Promo APR:</span>
-                      <span className="font-medium">{card.promo_apr ? 'Yes' : 'No'}</span>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm text-gray-600">Promo Used:</span>
+                      <span
+                        className={`font-semibold ${
+                          card.promo_used ? 'text-green-600' : 'text-gray-500'
+                        }`}
+                      >
+                        {card.promo_used ? 'Yes' : 'No'}
+                      </span>
                     </div>
-                    {card.purchase_apr && (
-                      <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Purchase APR:</span>
-                        <span className="font-medium">{card.purchase_apr}%</span>
+                    {card.interest_after_promo && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-sm text-gray-600">Interest After Promo:</span>
+                        <span className="font-semibold text-gray-900">
+                          {card.interest_after_promo}%
+                        </span>
                       </div>
                     )}
                   </div>
