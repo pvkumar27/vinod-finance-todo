@@ -80,13 +80,13 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
       if (card) {
         // Update existing card
         result = await supabase
-          .from('credit_cards_manual')
+          .from('credit_cards_simplified')
           .update(dataToSave)
           .eq('id', card.id)
           .select();
       } else {
         // Insert new card
-        result = await supabase.from('credit_cards_manual').insert([dataToSave]).select();
+        result = await supabase.from('credit_cards_simplified').insert([dataToSave]).select();
       }
 
       if (result.error) throw result.error;
