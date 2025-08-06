@@ -76,7 +76,7 @@ const CreditCardList = () => {
   };
 
   const handleDeleteCard = async card => {
-    if (!window.confirm(`Delete card ${card.bank_name} ${card.last4}?`)) return;
+    if (!window.confirm(`Delete card ${card.bank_name} ${card.last_four_digits}?`)) return;
 
     try {
       const { error } = await supabase.from('credit_cards_simplified').delete().eq('id', card.id);
@@ -237,7 +237,7 @@ const CreditCardList = () => {
   };
 
   const filteredCards = cards.filter(card => {
-    const matchesSearch = (card.bank_name + ' ' + card.last4)
+    const matchesSearch = (card.bank_name + ' ' + card.last_four_digits)
       ?.toLowerCase()
       .includes(searchTerm.toLowerCase());
 
@@ -252,8 +252,8 @@ const CreditCardList = () => {
 
   const sortedCards = [...filteredCards].sort((a, b) => {
     if (sortBy === 'card_name') {
-      return ((a.bank_name || '') + ' ' + (a.last4 || '')).localeCompare(
-        (b.bank_name || '') + ' ' + (b.last4 || '')
+      return ((a.bank_name || '') + ' ' + (a.last_four_digits || '')).localeCompare(
+        (b.bank_name || '') + ' ' + (b.last_four_digits || '')
       );
     }
     if (sortBy === 'days_inactive') {
@@ -266,14 +266,12 @@ const CreditCardList = () => {
     }
     if (sortBy === 'last_used_newest') {
       return (
-        new Date(b.last_transaction_date || '1900-01-01') -
-        new Date(a.last_transaction_date || '1900-01-01')
+        new Date(b.last_used_date || '1900-01-01') - new Date(a.last_used_date || '1900-01-01')
       );
     }
     if (sortBy === 'last_used_oldest') {
       return (
-        new Date(a.last_transaction_date || '9999-12-31') -
-        new Date(b.last_transaction_date || '9999-12-31')
+        new Date(a.last_used_date || '9999-12-31') - new Date(b.last_used_date || '9999-12-31')
       );
     }
     return 0;
@@ -525,7 +523,7 @@ const CreditCardList = () => {
                       <div className="flex flex-col gap-1">
                         {getInactivityBadge(card.days_inactive, card.last_used_date) && (
                           <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full font-bold">
-                            ⚠️ {card.last_transaction_date ? 'Inactive' : 'Never Used'}
+                            ⚠️ {card.last_used_date ? 'Inactive' : 'Never Used'}
                           </span>
                         )}
                         {getPromoExpiryBadge(card.current_promos) && (
