@@ -6,6 +6,7 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
     bank_name: '',
     last_four_digits: '',
     card_type: '',
+    card_holder: '',
     last_used_date: '',
     new_promo_available: false,
     promo_used: false,
@@ -39,11 +40,16 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
   const [error, setError] = useState('');
 
   useEffect(() => {
+    if (isOpen) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     if (card) {
       setFormData({
         bank_name: card.bank_name || '',
         last_four_digits: card.last_four_digits || '',
         card_type: card.card_type || '',
+        card_holder: card.card_holder || '',
         last_used_date: card.last_used_date || '',
         new_promo_available: card.new_promo_available || false,
         promo_used: card.promo_used || false,
@@ -72,6 +78,7 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
         bank_name: '',
         last_four_digits: '',
         card_type: '',
+        card_holder: '',
         last_used_date: '',
         new_promo_available: false,
         promo_used: false,
@@ -113,6 +120,7 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
         card_name: `${formData.bank_name} ${formData.last_four_digits}`,
         bank_name: formData.bank_name,
         card_type: formData.card_type,
+        card_holder: formData.card_holder,
         last_four_digits: formData.last_four_digits,
         last_used_date: formData.last_used_date || null,
         days_inactive: calculatedDaysInactive ? parseInt(calculatedDaysInactive) : null,
@@ -180,8 +188,8 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
-      <div className="bg-white rounded-xl max-w-3xl w-full max-h-[95vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-2 sm:p-4 overflow-y-auto">
+      <div className="bg-white rounded-xl max-w-3xl w-full my-4 max-h-[calc(100vh-2rem)] overflow-y-auto shadow-2xl">
         {/* Header */}
         <div className="p-6 text-center border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
           <h2 className="text-2xl font-bold text-gray-900 flex items-center justify-center">
@@ -249,6 +257,21 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Freedom, Gold, Platinum, etc."
                 />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Card Holder *
+                </label>
+                <select
+                  required
+                  value={formData.card_holder}
+                  onChange={e => handleChange('card_holder', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select Card Holder</option>
+                  <option value="Vinod">Vinod</option>
+                  <option value="Sreelatha">Sreelatha</option>
+                </select>
               </div>
             </div>
           </div>

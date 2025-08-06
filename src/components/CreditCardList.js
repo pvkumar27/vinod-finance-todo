@@ -497,12 +497,22 @@ const CreditCardList = () => {
               {sortedCards.map(card => (
                 <div
                   key={card.id}
-                  className={`bg-white rounded-lg shadow-sm border p-6 transition-all duration-200 ease-in-out hover:shadow-md ${
+                  className={`rounded-lg shadow-sm border p-6 transition-all duration-200 ease-in-out hover:shadow-md relative ${
                     selectedCards.includes(card.id)
-                      ? 'border-blue-500 bg-blue-50 shadow-md'
-                      : 'border-gray-200 hover:border-gray-300'
+                      ? 'border-blue-500 bg-blue-100 shadow-md'
+                      : getInactivityBadge(card.days_inactive, card.last_used_date) ||
+                          getPromoExpiryBadge(card.current_promos)
+                        ? 'border-red-300 bg-red-50 hover:border-red-400'
+                        : 'bg-blue-50 border-blue-200 hover:border-blue-300 hover:bg-blue-100'
                   }`}
                 >
+                  {/* Attention indicator */}
+                  {(getInactivityBadge(card.days_inactive, card.last_used_date) ||
+                    getPromoExpiryBadge(card.current_promos)) && (
+                    <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">!</span>
+                    </div>
+                  )}
                   {/* Card Header */}
                   <div className="flex justify-between items-start mb-5">
                     <div className="flex items-start gap-3">
@@ -579,7 +589,7 @@ const CreditCardList = () => {
                   </div>
 
                   {/* Card Info */}
-                  <div className="bg-gray-50 rounded-lg p-4 space-y-3 mb-5">
+                  <div className="bg-white bg-opacity-70 rounded-lg p-4 space-y-3 mb-5">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-gray-600">Days Inactive:</span>
                       <span className="font-semibold text-gray-900">{card.days_inactive || 0}</span>
