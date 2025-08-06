@@ -39,101 +39,74 @@ const CreditCardDetailModal = ({ card, isOpen, onClose, onEdit }) => {
         <div className="p-6 space-y-6">
           {/* Card Info */}
           <div className="bg-blue-50 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-blue-900 mb-3">📇 Card Information</h3>
+            <h3 className="text-lg font-semibold text-blue-900 mb-3">💳 Card Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
-                <span className="text-sm text-blue-700">Card Holder:</span>
-                <p className="font-medium">{card.card_holder || 'Unknown'}</p>
+                <span className="text-sm text-blue-700">Card Name:</span>
+                <p className="font-medium">{card.card_name || 'Unknown Card'}</p>
               </div>
               <div>
-                <span className="text-sm text-blue-700">Bank:</span>
-                <p className="font-medium">{card.bank}</p>
+                <span className="text-sm text-blue-700">Days Inactive:</span>
+                <p className="font-medium">{card.days_inactive || 0}</p>
               </div>
               <div>
-                <span className="text-sm text-blue-700">Card Type:</span>
-                <p className="font-medium">{card.card_type}</p>
+                <span className="text-sm text-blue-700">Last Used:</span>
+                <p className="font-medium">
+                  {card.last_used_date ? formatDate(card.last_used_date) : '❌ Never Used'}
+                </p>
               </div>
               <div>
-                <span className="text-sm text-blue-700">Last 4 Digits:</span>
-                <p className="font-medium">{card.card_last4 ? `••••${card.card_last4}` : '-'}</p>
+                <span className="text-sm text-blue-700">New Promo Available:</span>
+                <p className="font-medium">{card.new_promo_available ? '✅ Yes' : '❌ No'}</p>
               </div>
-              <div>
-                <span className="text-sm text-blue-700">Credit Limit:</span>
-                <p className="font-medium">{formatCurrency(card.credit_limit)}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Due Details */}
-          <div className="bg-red-50 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-red-900 mb-3">📅 Payment Details</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <span className="text-sm text-red-700">Amount Due:</span>
-                <p className="font-medium text-red-800">{formatCurrency(card.amount_due)}</p>
-              </div>
-              <div>
-                <span className="text-sm text-red-700">Minimum Payment:</span>
-                <p className="font-medium">{formatCurrency(card.min_payment_due)}</p>
-              </div>
-              <div>
-                <span className="text-sm text-red-700">Due Date:</span>
-                <p className="font-medium">{formatDate(card.due_date)}</p>
-              </div>
-              <div>
-                <span className="text-sm text-red-700">Interest Charge:</span>
-                <p className="font-medium">{formatCurrency(card.interest_charge)}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Promo Info */}
-          <div className="bg-yellow-50 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-yellow-900 mb-3">
-              🧾 Promotional Information
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <span className="text-sm text-yellow-700">Promo Available:</span>
-                <p className="font-medium">{card.promo_available ? '✅ Yes' : '❌ No'}</p>
-              </div>
-              <div>
-                <span className="text-sm text-yellow-700">Promo Used:</span>
-                <p className="font-medium">{card.promo_used ? '✅ Yes' : '❌ No'}</p>
-              </div>
-              {card.promo_used && (
-                <>
-                  <div>
-                    <span className="text-sm text-yellow-700">Promo Amount:</span>
-                    <p className="font-medium">{formatCurrency(card.promo_amount_due)}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-yellow-700">Promo APR:</span>
-                    <p className="font-medium">{card.promo_apr ? `${card.promo_apr}%` : '-'}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-yellow-700">Promo Expires:</span>
-                    <p className="font-medium">{formatDate(card.promo_expiry_date)}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-yellow-700">APR After Promo:</span>
-                    <p className="font-medium">{card.apr_after ? `${card.apr_after}%` : '-'}</p>
-                  </div>
-                </>
+              {card.interest_after_promo && (
+                <div>
+                  <span className="text-sm text-blue-700">Interest After Promo:</span>
+                  <p className="font-medium">{card.interest_after_promo}%</p>
+                </div>
               )}
             </div>
+          </div>
+
+          {/* Current Promos */}
+          <div className="bg-yellow-50 rounded-lg p-4">
+            <h3 className="text-lg font-semibold text-yellow-900 mb-3">
+              🎯 Current Promos (
+              {Array.isArray(card.current_promos) ? card.current_promos.length : 0})
+            </h3>
+            {Array.isArray(card.current_promos) && card.current_promos.length > 0 ? (
+              <div className="space-y-4">
+                {card.current_promos.map((promo, index) => (
+                  <div key={index} className="bg-white rounded-lg p-3 border border-yellow-200">
+                    <h4 className="font-medium text-yellow-900 mb-2">Promo #{index + 1}</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                      <div>
+                        <span className="text-sm text-yellow-700">APR:</span>
+                        <p className="font-medium">
+                          {promo.promo_apr ? `${promo.promo_apr}%` : '-'}
+                        </p>
+                      </div>
+                      <div>
+                        <span className="text-sm text-yellow-700">Amount:</span>
+                        <p className="font-medium">{formatCurrency(promo.promo_amount)}</p>
+                      </div>
+                      <div>
+                        <span className="text-sm text-yellow-700">Expires:</span>
+                        <p className="font-medium">{formatDate(promo.promo_expiry_date)}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-yellow-700">No active promos</p>
+            )}
           </div>
 
           {/* Activity */}
           <div className="bg-green-50 rounded-lg p-4">
             <h3 className="text-lg font-semibold text-green-900 mb-3">📊 Activity Information</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div>
-                <span className="text-sm text-green-700">Last Used:</span>
-                <p className="font-medium">
-                  {card.last_used_date ? formatDate(card.last_used_date) : '❌ Never Used'}
-                </p>
-              </div>
               <div>
                 <span className="text-sm text-green-700">Created:</span>
                 <p className="font-medium">{formatDate(card.created_at)}</p>
@@ -144,14 +117,6 @@ const CreditCardDetailModal = ({ card, isOpen, onClose, onEdit }) => {
               </div>
             </div>
           </div>
-
-          {/* Notes */}
-          {card.notes && (
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-gray-900 mb-3">📝 Notes</h3>
-              <p className="text-gray-700">{card.notes}</p>
-            </div>
-          )}
         </div>
 
         {/* Footer */}

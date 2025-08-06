@@ -9,21 +9,23 @@ const CreditCardTable = ({
   onViewCard,
   getInactivityBadge,
   getPromoExpiryBadge,
-  formatCurrency,
   formatDate,
   selectedCards = [],
   onCardSelect,
   selectAll,
   onSelectAll,
-  onBulkDelete,
 }) => {
   const getCardReminders = cardId => {
     return reminders.filter(r => r.card_id === cardId);
   };
 
+  const getPromoCount = currentPromos => {
+    return Array.isArray(currentPromos) ? currentPromos.length : 0;
+  };
+
   return (
     <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200 text-sm" style={{ minWidth: '800px' }}>
+      <table className="min-w-full divide-y divide-gray-200 text-sm" style={{ minWidth: '600px' }}>
         <thead className="bg-gray-50">
           <tr>
             <th className="w-[40px] text-center px-2 py-2">
@@ -37,25 +39,16 @@ const CreditCardTable = ({
               </div>
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              Card Holder
+              Card Name
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              Bank
+              Days Inactive
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              Type
+              Promo Count
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              Last 4
-            </th>
-            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              Amount Due
-            </th>
-            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              Promo Expiry
-            </th>
-            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
-              Last Used
+              New Promo Available
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
               Status
@@ -82,32 +75,31 @@ const CreditCardTable = ({
                 </div>
               </td>
               <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                {(card.card_holder || 'Unknown').split(' ')[0]}
-              </td>
-              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">{card.bank}</td>
-              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
-                {card.card_type}
+                {card.card_name || 'Unknown Card'}
               </td>
               <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
-                {card.card_last4 ? `••••${card.card_last4}` : '-'}
-              </td>
-              <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-red-600">
-                {formatCurrency(card.amount_due)}
+                {card.days_inactive || 0}
               </td>
               <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
-                {formatDate(card.promo_expiry_date)}
+                {getPromoCount(card.current_promos)}
               </td>
               <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
-                {card.last_used_date ? formatDate(card.last_used_date) : '❌ Never'}
+                {card.new_promo_available ? (
+                  <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-700">
+                    Yes
+                  </span>
+                ) : (
+                  <span className="text-gray-400">No</span>
+                )}
               </td>
               <td className="px-3 py-2 whitespace-nowrap text-sm">
                 <div className="flex gap-1">
-                  {getInactivityBadge(card.last_used_date) && (
+                  {getInactivityBadge(card.days_inactive, card.last_used_date) && (
                     <span className="inline-flex px-1 py-0.5 text-xs font-bold rounded bg-red-100 text-red-700">
                       ⚠️
                     </span>
                   )}
-                  {getPromoExpiryBadge(card.promo_expiry_date) && (
+                  {getPromoExpiryBadge(card.current_promos) && (
                     <span className="inline-flex px-1 py-0.5 text-xs font-bold rounded bg-yellow-100 text-yellow-700">
                       ⏳
                     </span>
@@ -124,16 +116,9 @@ const CreditCardTable = ({
                   <button
                     onClick={() => onViewCard(card)}
                     className="p-1 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded"
-                    title="View details"
+                    title="View promos"
                   >
                     👁️
-                  </button>
-                  <button
-                    onClick={() => onSetReminder(card)}
-                    className="p-1 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded"
-                    title="Set reminder"
-                  >
-                    🔔
                   </button>
                   <button
                     onClick={() => onEditCard(card)}
