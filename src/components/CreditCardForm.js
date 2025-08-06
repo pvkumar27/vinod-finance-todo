@@ -6,7 +6,6 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
     bank_name: '',
     last_four_digits: '',
     card_type: '',
-    card_name: '',
     last_used_date: '',
     new_promo_available: false,
     promo_used: false,
@@ -44,7 +43,6 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
         bank_name: card.bank_name || '',
         last_four_digits: card.last_four_digits || '',
         card_type: card.card_type || '',
-        card_name: card.card_name || '',
         last_used_date: card.last_used_date || '',
         new_promo_available: card.new_promo_available || false,
         promo_used: card.promo_used || false,
@@ -219,17 +217,6 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
                   onChange={e => handleChange('card_type', e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Freedom, Gold, Platinum, etc."
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Card Name *</label>
-                <input
-                  type="text"
-                  required
-                  value={formData.card_name}
-                  onChange={e => handleChange('card_name', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="Chase Freedom, Amex Gold, etc."
                 />
               </div>
             </div>
