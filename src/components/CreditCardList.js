@@ -47,7 +47,7 @@ const CreditCardList = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('credit_cards_simplified')
+        .from('credit_cards_manual')
         .select('*')
         .order('card_name', { ascending: true });
 
@@ -79,7 +79,7 @@ const CreditCardList = () => {
     if (!window.confirm(`Delete card ${card.card_name}?`)) return;
 
     try {
-      const { error } = await supabase.from('credit_cards_simplified').delete().eq('id', card.id);
+      const { error } = await supabase.from('credit_cards_manual').delete().eq('id', card.id);
 
       if (error) throw error;
 
@@ -123,10 +123,7 @@ const CreditCardList = () => {
     if (!window.confirm(`Delete ${selectedCards.length} selected cards?`)) return;
 
     try {
-      const { error } = await supabase
-        .from('credit_cards_simplified')
-        .delete()
-        .in('id', selectedCards);
+      const { error } = await supabase.from('credit_cards_manual').delete().in('id', selectedCards);
 
       if (error) throw error;
 

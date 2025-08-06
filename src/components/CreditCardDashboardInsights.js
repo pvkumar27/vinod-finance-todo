@@ -101,13 +101,6 @@ const CreditCardDashboardInsights = ({ cards = [] }) => {
     };
   };
 
-  const formatCurrency = amount => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
-
   return (
     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
       <div className="flex justify-between items-center mb-6">
