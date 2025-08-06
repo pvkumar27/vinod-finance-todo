@@ -496,7 +496,9 @@ const CreditCardList = () => {
                       />
                       <div>
                         <h3 className="font-semibold text-gray-900">
-                          {card.card_name || 'Unknown Card'}
+                          {card.bank_name && card.last_four_digits
+                            ? `${card.bank_name} ${card.last_four_digits}`
+                            : card.card_name || 'Unknown Card'}
                         </h3>
                         <p className="text-sm text-gray-600">
                           {card.days_inactive ? `${card.days_inactive} days inactive` : 'Active'}

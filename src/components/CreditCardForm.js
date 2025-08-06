@@ -3,12 +3,31 @@ import { supabase } from '../supabaseClient';
 
 const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
   const [formData, setFormData] = useState({
+    bank_name: '',
+    last_four_digits: '',
+    card_type: '',
     card_name: '',
     last_used_date: '',
     new_promo_available: false,
     promo_used: false,
     interest_after_promo: '',
   });
+
+  const bankOptions = [
+    'Amex',
+    'Apple Card',
+    'Bank of America',
+    'BMO',
+    'Capital One',
+    'Chase',
+    'Citizen',
+    'Citi',
+    'Discover',
+    'RBFCU',
+    'Synchrony',
+    'US Bank',
+    'Well Fargo',
+  ];
   const [currentPromos, setCurrentPromos] = useState([
     {
       promo_apr: '',
@@ -22,6 +41,9 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
   useEffect(() => {
     if (card) {
       setFormData({
+        bank_name: card.bank_name || '',
+        last_four_digits: card.last_four_digits || '',
+        card_type: card.card_type || '',
         card_name: card.card_name || '',
         last_used_date: card.last_used_date || '',
         new_promo_available: card.new_promo_available || false,
@@ -146,21 +168,70 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
             </div>
           )}
 
-          {/* Card Name Section */}
+          {/* Card Details Section */}
           <div className="bg-gray-50 rounded-lg p-5 border border-gray-200">
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               💳 Card Details
             </h3>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Card Name *</label>
-              <input
-                type="text"
-                required
-                value={formData.card_name}
-                onChange={e => handleChange('card_name', e.target.value)}
-                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Chase Freedom, Amex Gold, etc."
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Bank Name *</label>
+                <select
+                  required
+                  value={formData.bank_name}
+                  onChange={e => handleChange('bank_name', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value="">Select Bank</option>
+                  {bankOptions.map(bank => (
+                    <option key={bank} value={bank}>
+                      {bank}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Last 4 Digits *
+                </label>
+                <input
+                  type="text"
+                  required
+                  maxLength="4"
+                  pattern="[0-9]{4}"
+                  value={formData.last_four_digits}
+                  onChange={e =>
+                    handleChange('last_four_digits', e.target.value.replace(/\D/g, ''))
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="1234"
+                />
+              </div>
+            </div>
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Card Type (Optional)
+                </label>
+                <input
+                  type="text"
+                  value={formData.card_type}
+                  onChange={e => handleChange('card_type', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Freedom, Gold, Platinum, etc."
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Card Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={formData.card_name}
+                  onChange={e => handleChange('card_name', e.target.value)}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Chase Freedom, Amex Gold, etc."
+                />
+              </div>
             </div>
           </div>
 

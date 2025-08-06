@@ -43,7 +43,11 @@ const CreditCardDetailModal = ({ card, isOpen, onClose, onEdit }) => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <span className="text-sm text-blue-700">Card Name:</span>
-                <p className="font-medium">{card.card_name || 'Unknown Card'}</p>
+                <p className="font-medium">
+                  {card.bank_name && card.last_four_digits
+                    ? `${card.bank_name} ${card.last_four_digits}`
+                    : card.card_name || 'Unknown Card'}
+                </p>
               </div>
               <div>
                 <span className="text-sm text-blue-700">Days Inactive:</span>

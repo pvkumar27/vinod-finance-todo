@@ -75,7 +75,9 @@ const CreditCardTable = ({
                 </div>
               </td>
               <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                {card.card_name || 'Unknown Card'}
+                {card.bank_name && card.last_four_digits
+                  ? `${card.bank_name} ${card.last_four_digits}`
+                  : card.card_name || 'Unknown Card'}
               </td>
               <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
                 {card.days_inactive || 0}
