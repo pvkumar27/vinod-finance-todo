@@ -76,7 +76,7 @@ const CreditCardList = () => {
   };
 
   const handleDeleteCard = async card => {
-    if (!window.confirm(`Delete card ${card.card_name}?`)) return;
+    if (!window.confirm(`Delete card ${card.bank_name} ${card.last4}?`)) return;
 
     try {
       const { error } = await supabase.from('credit_cards_simplified').delete().eq('id', card.id);
@@ -227,15 +227,19 @@ const CreditCardList = () => {
     if (!currentPromos || !Array.isArray(currentPromos)) return false;
     return currentPromos.some(promo => {
       if (!promo.promo_expiry_date) return false;
-      const daysUntil = Math.floor(
-        (new Date(promo.promo_expiry_date) - new Date()) / (1000 * 60 * 60 * 24)
-      );
+      const expiryDate = new Date(promo.promo_expiry_date);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      expiryDate.setHours(0, 0, 0, 0);
+      const daysUntil = Math.floor((expiryDate - today) / (1000 * 60 * 60 * 24));
       return daysUntil <= 30 && daysUntil >= 0;
     });
   };
 
   const filteredCards = cards.filter(card => {
-    const matchesSearch = card.card_name?.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesSearch = (card.bank_name + ' ' + card.last4)
+      ?.toLowerCase()
+      .includes(searchTerm.toLowerCase());
 
     if (activeTab === 'promo') {
       return matchesSearch && getPromoExpiryBadge(card.current_promos);
@@ -248,24 +252,28 @@ const CreditCardList = () => {
 
   const sortedCards = [...filteredCards].sort((a, b) => {
     if (sortBy === 'card_name') {
-      return (a.card_name || '').localeCompare(b.card_name || '');
+      return ((a.bank_name || '') + ' ' + (a.last4 || '')).localeCompare(
+        (b.bank_name || '') + ' ' + (b.last4 || '')
+      );
     }
     if (sortBy === 'days_inactive') {
       return (b.days_inactive || 0) - (a.days_inactive || 0);
     }
     if (sortBy === 'promo_count') {
-      const aCount = Array.isArray(a.current_promos) ? a.current_promos.length : 0;
-      const bCount = Array.isArray(b.current_promos) ? b.current_promos.length : 0;
+      const aCount = a.promo_end_date ? 1 : 0;
+      const bCount = b.promo_end_date ? 1 : 0;
       return bCount - aCount;
     }
     if (sortBy === 'last_used_newest') {
       return (
-        new Date(b.last_used_date || '1900-01-01') - new Date(a.last_used_date || '1900-01-01')
+        new Date(b.last_transaction_date || '1900-01-01') -
+        new Date(a.last_transaction_date || '1900-01-01')
       );
     }
     if (sortBy === 'last_used_oldest') {
       return (
-        new Date(a.last_used_date || '9999-12-31') - new Date(b.last_used_date || '9999-12-31')
+        new Date(a.last_transaction_date || '9999-12-31') -
+        new Date(b.last_transaction_date || '9999-12-31')
       );
     }
     return 0;
@@ -498,7 +506,7 @@ const CreditCardList = () => {
                         <h3 className="font-semibold text-gray-900">
                           {card.bank_name && card.last_four_digits
                             ? `${card.bank_name} ${card.last_four_digits}`
-                            : card.card_name || 'Unknown Card'}
+                            : 'Unknown Card'}
                         </h3>
                         <p className="text-sm text-gray-600">
                           {card.days_inactive ? `${card.days_inactive} days inactive` : 'Active'}
@@ -509,9 +517,7 @@ const CreditCardList = () => {
                             : '❌ Never Used'}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {Array.isArray(card.current_promos)
-                            ? `${card.current_promos.length} active promos`
-                            : '0 active promos'}
+                          {card.promo_end_date ? '1 active promo' : '0 active promos'}
                         </p>
                       </div>
                     </div>
@@ -519,7 +525,7 @@ const CreditCardList = () => {
                       <div className="flex flex-col gap-1">
                         {getInactivityBadge(card.days_inactive, card.last_used_date) && (
                           <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full font-bold">
-                            ⚠️ {card.last_used_date ? 'Inactive' : 'Never Used'}
+                            ⚠️ {card.last_transaction_date ? 'Inactive' : 'Never Used'}
                           </span>
                         )}
                         {getPromoExpiryBadge(card.current_promos) && (
@@ -566,46 +572,31 @@ const CreditCardList = () => {
                       <span className="font-medium">{card.days_inactive || 0}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">New Promo Available:</span>
-                      <span className="font-medium">{card.new_promo_available ? 'Yes' : 'No'}</span>
+                      <span className="text-sm text-gray-600">Last Used:</span>
+                      <span className="font-medium">{formatDate(card.last_used_date)}</span>
                     </div>
-                    {card.interest_after_promo && (
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Promo APR:</span>
+                      <span className="font-medium">{card.promo_apr ? 'Yes' : 'No'}</span>
+                    </div>
+                    {card.purchase_apr && (
                       <div className="flex justify-between">
-                        <span className="text-sm text-gray-600">Interest After Promo:</span>
-                        <span className="font-medium">{card.interest_after_promo}%</span>
+                        <span className="text-sm text-gray-600">Purchase APR:</span>
+                        <span className="font-medium">{card.purchase_apr}%</span>
                       </div>
                     )}
                   </div>
 
                   {/* Current Promos */}
-                  {Array.isArray(card.current_promos) && card.current_promos.length > 0 && (
+                  {card.promo_end_date && (
                     <div className="bg-blue-50 rounded-lg p-3 mb-4">
-                      <h4 className="text-sm font-semibold text-blue-800 mb-2">
-                        🎯 Current Promos ({card.current_promos.length})
-                      </h4>
-                      {card.current_promos.map((promo, index) => (
-                        <div
-                          key={index}
-                          className="mb-2 last:mb-0 pb-2 last:pb-0 border-b last:border-b-0 border-blue-200"
-                        >
-                          <div className="flex justify-between text-sm">
-                            <span className="text-blue-700">APR:</span>
-                            <span className="font-medium text-blue-900">{promo.promo_apr}%</span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-blue-700">Amount:</span>
-                            <span className="font-medium text-blue-900">
-                              {formatCurrency(promo.promo_amount)}
-                            </span>
-                          </div>
-                          <div className="flex justify-between text-sm">
-                            <span className="text-blue-700">Expires:</span>
-                            <span className="font-medium text-blue-900">
-                              {formatDate(promo.promo_expiry_date)}
-                            </span>
-                          </div>
-                        </div>
-                      ))}
+                      <h4 className="text-sm font-semibold text-blue-800 mb-2">🎯 Current Promo</h4>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-blue-700">Expires:</span>
+                        <span className="font-medium text-blue-900">
+                          {formatDate(card.promo_end_date)}
+                        </span>
+                      </div>
                     </div>
                   )}
 

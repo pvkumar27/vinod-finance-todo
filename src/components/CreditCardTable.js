@@ -42,7 +42,13 @@ const CreditCardTable = ({
               Card Name
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+              Card Type
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
               Days Inactive
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+              Last Used
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
               Promo Count
@@ -51,7 +57,13 @@ const CreditCardTable = ({
               New Promo Available
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+              Interest After Promo
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
               Status
+            </th>
+            <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+              Notes
             </th>
             <th className="px-3 py-2 text-left text-xs font-medium text-gray-500 uppercase">
               Actions
@@ -74,13 +86,19 @@ const CreditCardTable = ({
                   />
                 </div>
               </td>
-              <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+              <td className="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900 text-left">
                 {card.bank_name && card.last_four_digits
                   ? `${card.bank_name} ${card.last_four_digits}`
                   : card.card_name || 'Unknown Card'}
               </td>
               <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                {card.card_type || '-'}
+              </td>
+              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
                 {card.days_inactive || 0}
+              </td>
+              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                {formatDate(card.last_used_date)}
               </td>
               <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
                 {getPromoCount(card.current_promos)}
@@ -93,6 +111,9 @@ const CreditCardTable = ({
                 ) : (
                   <span className="text-gray-400">No</span>
                 )}
+              </td>
+              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                {card.interest_after_promo ? `${card.interest_after_promo}%` : '-'}
               </td>
               <td className="px-3 py-2 whitespace-nowrap text-sm">
                 <div className="flex gap-1">
@@ -112,6 +133,9 @@ const CreditCardTable = ({
                     </span>
                   )}
                 </div>
+              </td>
+              <td className="px-3 py-2 whitespace-nowrap text-sm text-gray-500">
+                {card.notes || '-'}
               </td>
               <td className="px-3 py-2 whitespace-nowrap text-sm">
                 <div className="flex gap-1">

@@ -10,6 +10,7 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
     new_promo_available: false,
     promo_used: false,
     interest_after_promo: '',
+    notes: '',
   });
 
   const bankOptions = [
@@ -29,7 +30,7 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
   ];
   const [currentPromos, setCurrentPromos] = useState([
     {
-      promo_apr: '',
+      promo_apr: '0.00',
       promo_expiry_date: '',
       promo_amount: '',
     },
@@ -47,21 +48,45 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
         new_promo_available: card.new_promo_available || false,
         promo_used: card.promo_used || false,
         interest_after_promo: card.interest_after_promo || '',
+        notes: card.notes || '',
       });
       // Load existing current promos
-      if (card.current_promos && card.current_promos.length > 0) {
+      if (
+        card.current_promos &&
+        Array.isArray(card.current_promos) &&
+        card.current_promos.length > 0
+      ) {
         setCurrentPromos(card.current_promos);
       } else {
         setCurrentPromos([
           {
-            promo_apr: '',
+            promo_apr: '0.00',
             promo_expiry_date: '',
             promo_amount: '',
           },
         ]);
       }
+    } else {
+      // Reset form for new card
+      setFormData({
+        bank_name: '',
+        last_four_digits: '',
+        card_type: '',
+        last_used_date: '',
+        new_promo_available: false,
+        promo_used: false,
+        interest_after_promo: '',
+        notes: '',
+      });
+      setCurrentPromos([
+        {
+          promo_apr: '0.00',
+          promo_expiry_date: '',
+          promo_amount: '',
+        },
+      ]);
     }
-  }, [card]);
+  }, [card, isOpen]);
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -84,20 +109,26 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
       }
 
       const dataToSave = {
-        ...formData,
         user_id: user.id,
+        card_name: `${formData.bank_name} ${formData.last_four_digits}`,
+        bank_name: formData.bank_name,
+        card_type: formData.card_type,
+        last_four_digits: formData.last_four_digits,
+        last_used_date: formData.last_used_date || null,
         days_inactive: calculatedDaysInactive ? parseInt(calculatedDaysInactive) : null,
+        new_promo_available: formData.new_promo_available,
+        promo_used: formData.promo_used,
         interest_after_promo: formData.interest_after_promo
           ? parseFloat(formData.interest_after_promo)
           : null,
-        last_used_date: formData.last_used_date || null,
         current_promos: currentPromos.filter(
           promo => promo.promo_apr || promo.promo_expiry_date || promo.promo_amount
         ),
+        notes: formData.notes,
       };
 
       let result;
-      if (card) {
+      if (card && card.id) {
         // Update existing card
         result = await supabase
           .from('credit_cards_simplified')
@@ -133,7 +164,7 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
     setCurrentPromos(prev => [
       ...prev,
       {
-        promo_apr: '',
+        promo_apr: '0.00',
         promo_expiry_date: '',
         promo_amount: '',
       },
@@ -250,7 +281,7 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
               🏷️ New Promo Available
             </h3>
             <div className="bg-white rounded-lg p-4 border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center">
+              <label className="text-sm font-medium text-gray-700 mb-3 flex items-center">
                 Does this card have new promotional offers available?
               </label>
               <div className="flex gap-6">
@@ -284,7 +315,7 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
               🎯 Promo Used
             </h3>
             <div className="bg-white rounded-lg p-4 border border-gray-200">
-              <label className="block text-sm font-medium text-gray-700 mb-3 flex items-center">
+              <label className="text-sm font-medium text-gray-700 mb-3 flex items-center">
                 Are you currently using any promotional offers?
               </label>
               <div className="flex gap-6">
@@ -405,6 +436,23 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
                 onChange={e => handleChange('interest_after_promo', e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="29.99"
+              />
+            </div>
+          </div>
+
+          {/* Notes Section */}
+          <div className="bg-gray-50 rounded-lg p-5 border border-gray-200">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">📝 Notes</h3>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Additional Notes (Optional)
+              </label>
+              <textarea
+                value={formData.notes}
+                onChange={e => handleChange('notes', e.target.value)}
+                rows={3}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                placeholder="Add any additional notes about this card..."
               />
             </div>
           </div>

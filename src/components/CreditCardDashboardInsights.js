@@ -50,9 +50,11 @@ const CreditCardDashboardInsights = ({ cards = [] }) => {
         card.current_promos.forEach(promo => {
           if (promo.promo_expiry_date) {
             const expiryDate = new Date(promo.promo_expiry_date);
-            const daysUntilExpiry = Math.floor((expiryDate - now) / (1000 * 60 * 60 * 24));
+            const daysUntilExpiry = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
 
-            if (daysUntilExpiry < 30) expiringSoon++;
+            if (daysUntilExpiry < 0) {
+              // Already expired - don't count
+            } else if (daysUntilExpiry <= 30) expiringSoon++;
             else if (daysUntilExpiry <= 90) expiringMedium++;
             else expiringLater++;
           }
@@ -198,7 +200,7 @@ const CreditCardDashboardInsights = ({ cards = [] }) => {
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={insights.promoExpiry}>
                 <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                <YAxis />
+                <YAxis allowDecimals={false} />
                 <Tooltip />
                 <Bar dataKey="value" fill="#8884d8">
                   {insights.promoExpiry.map((entry, index) => (
