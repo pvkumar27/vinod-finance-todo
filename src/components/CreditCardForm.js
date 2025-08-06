@@ -4,7 +4,6 @@ import { supabase } from '../supabaseClient';
 const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
   const [formData, setFormData] = useState({
     card_name: '',
-    days_inactive: '',
     last_used_date: '',
     new_promo_available: false,
     interest_after_promo: '',
@@ -23,7 +22,6 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
     if (card) {
       setFormData({
         card_name: card.card_name || '',
-        days_inactive: card.days_inactive || '',
         last_used_date: card.last_used_date || '',
         new_promo_available: card.new_promo_available || false,
         interest_after_promo: card.interest_after_promo || '',
@@ -54,9 +52,9 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
       } = await supabase.auth.getUser();
       if (!user) throw new Error('User not authenticated');
 
-      // Calculate days_inactive if last_used_date is provided
-      let calculatedDaysInactive = formData.days_inactive;
-      if (formData.last_used_date && !formData.days_inactive) {
+      // Calculate days_inactive based on last_used_date
+      let calculatedDaysInactive = null;
+      if (formData.last_used_date) {
         const lastUsed = new Date(formData.last_used_date);
         const today = new Date();
         const diffTime = Math.abs(today - lastUsed);
@@ -169,35 +167,19 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
             <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
               📅 Inactivity Details
             </h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Days Inactive
-                </label>
-                <input
-                  type="number"
-                  value={formData.days_inactive}
-                  onChange={e => handleChange('days_inactive', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="30"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Last Used Date
-                </label>
-                <input
-                  type="date"
-                  value={formData.last_used_date}
-                  onChange={e => handleChange('last_used_date', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Last Used Date</label>
+              <input
+                type="date"
+                value={formData.last_used_date}
+                onChange={e => handleChange('last_used_date', e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
             </div>
             <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
               <p className="text-sm text-yellow-800 flex items-center">
-                ⚠️ Cards unused for 90+ days are marked inactive. Days will auto-calculate if Last
-                Used Date is provided.
+                ⚠️ Cards unused for 90+ days are marked inactive. Days inactive will be calculated
+                automatically from the last used date.
               </p>
             </div>
           </div>
