@@ -27,14 +27,16 @@ const CreditCardDashboardInsights = ({ cards = [] }) => {
 
   const computeInsights = cards => {
     const totalCards = cards.length;
-    const totalAmountDue = cards.reduce((sum, card) => sum + (card.amount_due || 0), 0);
+    const totalPromos = cards.reduce((sum, card) => {
+      return sum + (Array.isArray(card.current_promos) ? card.current_promos.length : 0);
+    }, 0);
 
-    // Promo usage breakdown
-    const promoUsed = cards.filter(card => card.promo_used).length;
-    const promoNotUsed = totalCards - promoUsed;
+    // New promo availability breakdown
+    const newPromoAvailable = cards.filter(card => card.new_promo_available).length;
+    const noNewPromo = totalCards - newPromoAvailable;
     const promoUsage = [
-      { name: 'Using Promo', value: promoUsed, color: '#10B981' },
-      { name: 'Not Using Promo', value: promoNotUsed, color: '#6B7280' },
+      { name: 'New Promo Available', value: newPromoAvailable, color: '#10B981' },
+      { name: 'No New Promo', value: noNewPromo, color: '#6B7280' },
     ];
 
     // Promo expiry breakdown
@@ -44,13 +46,19 @@ const CreditCardDashboardInsights = ({ cards = [] }) => {
     let expiringLater = 0;
 
     cards.forEach(card => {
-      if (card.promo_used && card.promo_expiry_date) {
-        const expiryDate = new Date(card.promo_expiry_date);
-        const daysUntilExpiry = Math.floor((expiryDate - now) / (1000 * 60 * 60 * 24));
+      if (Array.isArray(card.current_promos)) {
+        card.current_promos.forEach(promo => {
+          if (promo.promo_expiry_date) {
+            const expiryDate = new Date(promo.promo_expiry_date);
+            const daysUntilExpiry = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
 
-        if (daysUntilExpiry < 30) expiringSoon++;
-        else if (daysUntilExpiry <= 90) expiringMedium++;
-        else expiringLater++;
+            if (daysUntilExpiry < 0) {
+              // Already expired - don't count
+            } else if (daysUntilExpiry <= 30) expiringSoon++;
+            else if (daysUntilExpiry <= 90) expiringMedium++;
+            else expiringLater++;
+          }
+        });
       }
     });
 
@@ -66,7 +74,10 @@ const CreditCardDashboardInsights = ({ cards = [] }) => {
     let neverUsed = 0;
 
     cards.forEach(card => {
-      if (!card.last_used_date) {
+      if (card.days_inactive) {
+        if (card.days_inactive >= 90) inactiveCards++;
+        else activeCards++;
+      } else if (!card.last_used_date) {
         neverUsed++;
       } else {
         const lastUsed = new Date(card.last_used_date);
@@ -85,68 +96,70 @@ const CreditCardDashboardInsights = ({ cards = [] }) => {
 
     return {
       totalCards,
-      totalAmountDue,
+      totalPromos,
       promoUsage,
       promoExpiry,
       inactivity,
     };
   };
 
-  const formatCurrency = amount => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
-
   return (
-    <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-gray-900">📊 Dashboard Insights</h2>
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-1">📊 Dashboard Insights</h2>
+          <p className="text-sm text-gray-600">Overview of your credit card portfolio</p>
+        </div>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-        <div className="bg-blue-50 rounded-lg p-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200">
           <div className="flex items-center">
-            <span className="text-2xl mr-3">💳</span>
+            <div className="bg-blue-500 rounded-lg p-2 mr-4">
+              <span className="text-xl text-white">💳</span>
+            </div>
             <div>
-              <p className="text-sm text-blue-600">Total Cards</p>
+              <p className="text-sm font-medium text-blue-700">Total Cards</p>
               <p className="text-2xl font-bold text-blue-900">{insights.totalCards}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-red-50 rounded-lg p-4">
+        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-5 border border-green-200">
           <div className="flex items-center">
-            <span className="text-2xl mr-3">💵</span>
+            <div className="bg-green-500 rounded-lg p-2 mr-4">
+              <span className="text-xl text-white">🎯</span>
+            </div>
             <div>
-              <p className="text-sm text-red-600">Total Amount Due</p>
-              <p className="text-xl font-bold text-red-900">
-                {formatCurrency(insights.totalAmountDue)}
+              <p className="text-sm font-medium text-green-700">Total Promos</p>
+              <p className="text-2xl font-bold text-green-900">{insights.totalPromos}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-5 border border-purple-200">
+          <div className="flex items-center">
+            <div className="bg-purple-500 rounded-lg p-2 mr-4">
+              <span className="text-xl text-white">🏷️</span>
+            </div>
+            <div>
+              <p className="text-sm font-medium text-purple-700">New Promos Available</p>
+              <p className="text-2xl font-bold text-purple-900">
+                {insights.promoUsage.find(p => p.name === 'New Promo Available')?.value || 0}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-green-50 rounded-lg p-4">
+        <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-5 border border-red-200">
           <div className="flex items-center">
-            <span className="text-2xl mr-3">🎯</span>
-            <div>
-              <p className="text-sm text-green-600">Using Promos</p>
-              <p className="text-2xl font-bold text-green-900">
-                {insights.promoUsage.find(p => p.name === 'Using Promo')?.value || 0}
-              </p>
+            <div className="bg-red-500 rounded-lg p-2 mr-4">
+              <span className="text-xl text-white">⚠️</span>
             </div>
-          </div>
-        </div>
-
-        <div className="bg-yellow-50 rounded-lg p-4">
-          <div className="flex items-center">
-            <span className="text-2xl mr-3">⚠️</span>
             <div>
-              <p className="text-sm text-yellow-600">Inactive Cards</p>
-              <p className="text-2xl font-bold text-yellow-900">
+              <p className="text-sm font-medium text-red-700">Inactive Cards</p>
+              <p className="text-2xl font-bold text-red-900">
                 {insights.inactivity.find(i => i.name === 'Inactive (≥90 days)')?.value || 0}
               </p>
             </div>
@@ -155,10 +168,10 @@ const CreditCardDashboardInsights = ({ cards = [] }) => {
       </div>
 
       {/* Charts */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {/* Promo Usage Chart */}
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">Promo Usage</h3>
+        <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+          <h3 className="text-base font-semibold text-gray-800 mb-4">New Promo Availability</h3>
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
               <Pie
@@ -193,12 +206,12 @@ const CreditCardDashboardInsights = ({ cards = [] }) => {
 
         {/* Promo Expiry Chart */}
         {insights.promoExpiry.length > 0 && (
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-sm font-semibold text-gray-700 mb-3">Promo Expiry</h3>
+          <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+            <h3 className="text-base font-semibold text-gray-800 mb-4">Promo Expiry</h3>
             <ResponsiveContainer width="100%" height={200}>
               <BarChart data={insights.promoExpiry}>
                 <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                <YAxis />
+                <YAxis allowDecimals={false} />
                 <Tooltip />
                 <Bar dataKey="value" fill="#8884d8">
                   {insights.promoExpiry.map((entry, index) => (
@@ -211,8 +224,8 @@ const CreditCardDashboardInsights = ({ cards = [] }) => {
         )}
 
         {/* Inactivity Chart */}
-        <div className="bg-gray-50 rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">Card Activity</h3>
+        <div className="bg-gray-50 rounded-xl p-6 border border-gray-200">
+          <h3 className="text-base font-semibold text-gray-800 mb-4">Card Activity</h3>
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
               <Pie

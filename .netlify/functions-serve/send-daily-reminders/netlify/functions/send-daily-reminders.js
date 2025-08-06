@@ -9922,16 +9922,18 @@ var require_errors = __commonJS({
     }
     exports2.isStorageError = isStorageError;
     var StorageApiError = class extends StorageError {
-      constructor(message, status) {
+      constructor(message, status, statusCode) {
         super(message);
         this.name = "StorageApiError";
         this.status = status;
+        this.statusCode = statusCode;
       }
       toJSON() {
         return {
           name: this.name,
           message: this.message,
-          status: this.status
+          status: this.status,
+          statusCode: this.statusCode
         };
       }
     };
@@ -10006,7 +10008,7 @@ var require_helpers = __commonJS({
       });
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.recursiveToCamel = exports2.resolveResponse = exports2.resolveFetch = void 0;
+    exports2.isPlainObject = exports2.recursiveToCamel = exports2.resolveResponse = exports2.resolveFetch = void 0;
     var resolveFetch = (customFetch) => {
       let _fetch;
       if (customFetch) {
@@ -10040,6 +10042,14 @@ var require_helpers = __commonJS({
       return result;
     };
     exports2.recursiveToCamel = recursiveToCamel;
+    var isPlainObject = (value) => {
+      if (typeof value !== "object" || value === null) {
+        return false;
+      }
+      const prototype = Object.getPrototypeOf(value);
+      return (prototype === null || prototype === Object.prototype || Object.getPrototypeOf(prototype) === null) && !(Symbol.toStringTag in value) && !(Symbol.iterator in value);
+    };
+    exports2.isPlainObject = isPlainObject;
   }
 });
 
@@ -10083,7 +10093,9 @@ var require_fetch = __commonJS({
       const Res = yield (0, helpers_1.resolveResponse)();
       if (error instanceof Res && !(options === null || options === void 0 ? void 0 : options.noResolveJson)) {
         error.json().then((err) => {
-          reject(new errors_1.StorageApiError(_getErrorMessage(err), error.status || 500));
+          const status = error.status || 500;
+          const statusCode = (err === null || err === void 0 ? void 0 : err.statusCode) || status + "";
+          reject(new errors_1.StorageApiError(_getErrorMessage(err), status, statusCode));
         }).catch((err) => {
           reject(new errors_1.StorageUnknownError(_getErrorMessage(err), err));
         });
@@ -10093,12 +10105,14 @@ var require_fetch = __commonJS({
     });
     var _getRequestParams = (method, options, parameters, body) => {
       const params = { method, headers: (options === null || options === void 0 ? void 0 : options.headers) || {} };
-      if (method === "GET") {
+      if (method === "GET" || !body) {
         return params;
       }
-      params.headers = Object.assign({ "Content-Type": "application/json" }, options === null || options === void 0 ? void 0 : options.headers);
-      if (body) {
+      if ((0, helpers_1.isPlainObject)(body)) {
+        params.headers = Object.assign({ "Content-Type": "application/json" }, options === null || options === void 0 ? void 0 : options.headers);
         params.body = JSON.stringify(body);
+      } else {
+        params.body = body;
       }
       return Object.assign(Object.assign({}, params), parameters);
     };
@@ -10243,17 +10257,11 @@ var require_StorageFileApi = __commonJS({
             }
             const cleanPath = this._removeEmptyFolders(path);
             const _path = this._getFinalPath(cleanPath);
-            const res = yield this.fetch(`${this.url}/object/${_path}`, Object.assign({ method, body, headers }, (options === null || options === void 0 ? void 0 : options.duplex) ? { duplex: options.duplex } : {}));
-            const data = yield res.json();
-            if (res.ok) {
-              return {
-                data: { path: cleanPath, id: data.Id, fullPath: data.Key },
-                error: null
-              };
-            } else {
-              const error = data;
-              return { data: null, error };
-            }
+            const data = yield (method == "PUT" ? fetch_1.put : fetch_1.post)(this.fetch, `${this.url}/object/${_path}`, body, Object.assign({ headers }, (options === null || options === void 0 ? void 0 : options.duplex) ? { duplex: options.duplex } : {}));
+            return {
+              data: { path: cleanPath, id: data.Id, fullPath: data.Key },
+              error: null
+            };
           } catch (error) {
             if ((0, errors_1.isStorageError)(error)) {
               return { data: null, error };
@@ -10301,21 +10309,11 @@ var require_StorageFileApi = __commonJS({
               headers["cache-control"] = `max-age=${options.cacheControl}`;
               headers["content-type"] = options.contentType;
             }
-            const res = yield this.fetch(url.toString(), {
-              method: "PUT",
-              body,
-              headers
-            });
-            const data = yield res.json();
-            if (res.ok) {
-              return {
-                data: { path: cleanPath, fullPath: data.Key },
-                error: null
-              };
-            } else {
-              const error = data;
-              return { data: null, error };
-            }
+            const data = yield (0, fetch_1.put)(this.fetch, url.toString(), body, { headers });
+            return {
+              data: { path: cleanPath, fullPath: data.Key },
+              error: null
+            };
           } catch (error) {
             if ((0, errors_1.isStorageError)(error)) {
               return { data: null, error };
@@ -10644,6 +10642,7 @@ var require_StorageFileApi = __commonJS({
       /**
        * Lists all the files within a bucket.
        * @param path The folder path.
+       * @param options Search options including limit (defaults to 100), offset, sortBy, and search
        */
       list(path, options, parameters) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -10669,7 +10668,7 @@ var require_StorageFileApi = __commonJS({
         return btoa(data);
       }
       _getFinalPath(path) {
-        return `${this.bucketId}/${path}`;
+        return `${this.bucketId}/${path.replace(/^\/+/, "")}`;
       }
       _removeEmptyFolders(path) {
         return path.replace(/^\/|\/$/g, "").replace(/\/+/g, "/");
@@ -10704,7 +10703,7 @@ var require_version3 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.version = void 0;
-    exports2.version = "2.7.1";
+    exports2.version = "2.10.4";
   }
 });
 
@@ -10756,8 +10755,15 @@ var require_StorageBucketApi = __commonJS({
     var fetch_1 = require_fetch();
     var helpers_1 = require_helpers();
     var StorageBucketApi = class {
-      constructor(url, headers = {}, fetch2) {
-        this.url = url;
+      constructor(url, headers = {}, fetch2, opts) {
+        const baseUrl = new URL(url);
+        if (opts === null || opts === void 0 ? void 0 : opts.useNewHostname) {
+          const isSupabaseHost = /supabase\.(co|in|red)$/.test(baseUrl.hostname);
+          if (isSupabaseHost && !baseUrl.hostname.includes("storage.supabase.")) {
+            baseUrl.hostname = baseUrl.hostname.replace("supabase.", "storage.supabase.");
+          }
+        }
+        this.url = baseUrl.href;
         this.headers = Object.assign(Object.assign({}, constants_1.DEFAULT_HEADERS), headers);
         this.fetch = (0, helpers_1.resolveFetch)(fetch2);
       }
@@ -10807,6 +10813,8 @@ var require_StorageBucketApi = __commonJS({
        * The default value is null, which allows files with all mime types to be uploaded.
        * Each mime type specified can be a wildcard, e.g. image/*, or a specific mime type, e.g. image/png.
        * @returns newly created bucket id
+       * @param options.type (private-beta) specifies the bucket type. see `BucketType` for more details.
+       *   - default bucket type is `STANDARD`
        */
       createBucket(id, options = {
         public: false
@@ -10816,6 +10824,7 @@ var require_StorageBucketApi = __commonJS({
             const data = yield (0, fetch_1.post)(this.fetch, `${this.url}/bucket`, {
               id,
               name: id,
+              type: options.type,
               public: options.public,
               file_size_limit: options.fileSizeLimit,
               allowed_mime_types: options.allowedMimeTypes
@@ -10914,8 +10923,8 @@ var require_StorageClient = __commonJS({
     var StorageFileApi_1 = __importDefault(require_StorageFileApi());
     var StorageBucketApi_1 = __importDefault(require_StorageBucketApi());
     var StorageClient = class extends StorageBucketApi_1.default {
-      constructor(url, headers = {}, fetch2) {
-        super(url, headers, fetch2);
+      constructor(url, headers = {}, fetch2, opts) {
+        super(url, headers, fetch2, opts);
       }
       /**
        * Perform file operation in a bucket.
@@ -10975,7 +10984,7 @@ var require_version4 = __commonJS({
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.version = void 0;
-    exports2.version = "2.52.1";
+    exports2.version = "2.53.0";
   }
 });
 
@@ -11167,6 +11176,7 @@ var require_helpers2 = __commonJS({
         db: Object.assign(Object.assign({}, DEFAULT_DB_OPTIONS), dbOptions),
         auth: Object.assign(Object.assign({}, DEFAULT_AUTH_OPTIONS), authOptions),
         realtime: Object.assign(Object.assign({}, DEFAULT_REALTIME_OPTIONS), realtimeOptions),
+        storage: {},
         global: Object.assign(Object.assign(Object.assign({}, DEFAULT_GLOBAL_OPTIONS), globalOptions), { headers: Object.assign(Object.assign({}, (_a = DEFAULT_GLOBAL_OPTIONS === null || DEFAULT_GLOBAL_OPTIONS === void 0 ? void 0 : DEFAULT_GLOBAL_OPTIONS.headers) !== null && _a !== void 0 ? _a : {}), (_b = globalOptions === null || globalOptions === void 0 ? void 0 : globalOptions.headers) !== null && _b !== void 0 ? _b : {}) }),
         accessToken: () => __awaiter(this, void 0, void 0, function* () {
           return "";
@@ -14767,6 +14777,7 @@ var require_SupabaseClient = __commonJS({
        * @param options.auth.persistSession Set to "true" if you want to automatically save the user session into local storage.
        * @param options.auth.detectSessionInUrl Set to "true" if you want to automatically detects OAuth grants in the URL and signs in the user.
        * @param options.realtime Options passed along to realtime-js constructor.
+       * @param options.storage Options passed along to the storage-js constructor.
        * @param options.global.fetch A custom fetch implementation.
        * @param options.global.headers Any additional headers to send with each network request.
        */
@@ -14812,6 +14823,7 @@ var require_SupabaseClient = __commonJS({
           schema: settings.db.schema,
           fetch: this.fetch
         });
+        this.storage = new storage_js_1.StorageClient(this.storageUrl.href, this.headers, this.fetch, options === null || options === void 0 ? void 0 : options.storage);
         if (!settings.accessToken) {
           this._listenForAuthEvents();
         }
@@ -14824,12 +14836,6 @@ var require_SupabaseClient = __commonJS({
           headers: this.headers,
           customFetch: this.fetch
         });
-      }
-      /**
-       * Supabase Storage allows you to manage user-generated content, such as photos or videos.
-       */
-      get storage() {
-        return new storage_js_1.StorageClient(this.storageUrl.href, this.headers, this.fetch);
       }
       /**
        * Perform a query on a table or a view.
