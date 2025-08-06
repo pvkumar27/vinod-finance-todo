@@ -1,0 +1,38 @@
+{
+  "credentials": {
+    "email": "pvkumar27@yahoo.com",
+    "password": "Test1234"
+  },
+  "creditCards": [
+    {
+      "name": "Test Chase Card",
+      "bank": "Chase",
+      "last4": "1234",
+      "creditLimit": "5000",
+      "promoApr": "0.00",
+      "promoEndDate": "2024-12-31"
+    }
+  ],
+  "todos": [
+    {
+      "title": "Pay credit card bill",
+      "description": "Monthly payment due",
+      "priority": "high",
+      "dueDate": "2024-01-15"
+    }
+  ],
+  "aiQueries": [
+    {
+      "query": "When will my promo expire on Chase card?",
+      "expectedKeywords": ["promo", "expire", "Chase"]
+    },
+    {
+      "query": "Which card wasn't used recently?",
+      "expectedKeywords": ["card", "recent", "activity"]
+    },
+    {
+      "query": "Add pay rent task monthly",
+      "expectedKeywords": ["task", "added", "monthly"]
+    }
+  ]
+}

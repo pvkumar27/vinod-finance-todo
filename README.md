@@ -13,31 +13,33 @@ A Progressive Web App for managing finances and to-dos.
 
 ## 🧪 End-to-End Testing
 
-Automated E2E testing with Playwright ensures PWA functionality across devices:
+Automated E2E testing with Cypress ensures PWA functionality and AI features work across devices:
 
 ### Quick Start
 ```bash
 # Run all E2E tests (headless)
 npm run test:e2e
 
+# Open Cypress interactive UI
+npm run test:e2e:open
+
 # Run tests with browser UI
 npm run test:e2e:headed
 
-# Interactive test runner
-npm run test:e2e:ui
+# Run AI-specific tests
+npm run test:e2e:ai
 
-# Run specific test file
-npx playwright test tests/e2e/finances/my-finances.spec.js
+# Run credit card tests
+npm run test:e2e:credit
 
-# Run tests with cleanup
-./tests/run-tests.sh
+# Run todo tests
+npm run test:e2e:todos
 
-# Run ui in codespaces
-npx playwright test --ui-host=0.0.0.0 --ui-port=8080
+# Test mobile responsiveness
+npm run test:e2e:mobile
 
-# Run Playwright UI with automatic port selection
-npm run playwright
-
+# Test tablet responsiveness
+npm run test:e2e:tablet
 
 # Run only cleanup
 npm run test:e2e:cleanup
@@ -45,9 +47,10 @@ npm run test:e2e:cleanup
 
 ### Test Coverage
 - ✅ **Authentication**: Login flow and session management
-- ✅ **My Finances**: Owner/Sync Source dropdowns, defaults, persistence
-- ✅ **Plaid Integration**: Bank connection, synced badges, transaction import
-- ✅ **CRUD Operations**: Create, edit, delete for Cards/Finances/To-Dos
+- ✅ **Credit Cards AI**: Promo APR alerts, inactivity detection, utilization insights
+- ✅ **To-Dos AI**: Smart suggestions, auto-prioritization, natural language input
+- ✅ **AI Assistant**: Contextual queries, dynamic dashboards, NLP processing
+- ✅ **CRUD Operations**: Create, edit, delete for Cards and To-Dos
 - ✅ **Responsive Design**: Mobile (375px), Tablet (768px), Desktop (1280px)
 - ✅ **Navigation**: Tab switching, state management, error handling
 
@@ -61,10 +64,10 @@ npm run test:e2e:cleanup
 - Manual cleanup: `npm run test:e2e:cleanup`
 
 ### Configuration
-- **Base URL**: `http://localhost:3000` by default, configurable via BASE_URL env var
-- **Browsers**: Chromium (mobile/tablet/desktop viewports)
+- **Base URL**: `http://localhost:3000` by default, configurable via CYPRESS_BASE_URL env var
+- **Browsers**: Chrome, Firefox (mobile/tablet/desktop viewports)
 - **Screenshots**: On failure only
-- **Traces**: On first retry
+- **Videos**: Disabled by default for performance
 
 ### Local Testing in CI
 The CI pipeline automatically:
@@ -75,8 +78,9 @@ The CI pipeline automatically:
 
 ### Authentication
 For tests requiring authentication:
-1. Update credentials in `tests/fixtures/test-credentials.js` with valid login details
-2. All tests use the login helper function from `tests/helpers/test-helpers.js`
+1. Set environment variables: `CYPRESS_TEST_USER_EMAIL` and `CYPRESS_TEST_USER_PASSWORD`
+2. All tests use the `cy.login()` custom command
+3. Test data is automatically prefixed with `Test_E2E_` for safety
 
 ## 🚀 CI/CD & Release Process
 
