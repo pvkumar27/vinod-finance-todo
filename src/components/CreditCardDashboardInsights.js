@@ -27,14 +27,16 @@ const CreditCardDashboardInsights = ({ cards = [] }) => {
 
   const computeInsights = cards => {
     const totalCards = cards.length;
-    const totalAmountDue = cards.reduce((sum, card) => sum + (card.amount_due || 0), 0);
+    const totalPromos = cards.reduce((sum, card) => {
+      return sum + (Array.isArray(card.current_promos) ? card.current_promos.length : 0);
+    }, 0);
 
-    // Promo usage breakdown
-    const promoUsed = cards.filter(card => card.promo_used).length;
-    const promoNotUsed = totalCards - promoUsed;
+    // New promo availability breakdown
+    const newPromoAvailable = cards.filter(card => card.new_promo_available).length;
+    const noNewPromo = totalCards - newPromoAvailable;
     const promoUsage = [
-      { name: 'Using Promo', value: promoUsed, color: '#10B981' },
-      { name: 'Not Using Promo', value: promoNotUsed, color: '#6B7280' },
+      { name: 'New Promo Available', value: newPromoAvailable, color: '#10B981' },
+      { name: 'No New Promo', value: noNewPromo, color: '#6B7280' },
     ];
 
     // Promo expiry breakdown
@@ -44,13 +46,17 @@ const CreditCardDashboardInsights = ({ cards = [] }) => {
     let expiringLater = 0;
 
     cards.forEach(card => {
-      if (card.promo_used && card.promo_expiry_date) {
-        const expiryDate = new Date(card.promo_expiry_date);
-        const daysUntilExpiry = Math.floor((expiryDate - now) / (1000 * 60 * 60 * 24));
+      if (Array.isArray(card.current_promos)) {
+        card.current_promos.forEach(promo => {
+          if (promo.promo_expiry_date) {
+            const expiryDate = new Date(promo.promo_expiry_date);
+            const daysUntilExpiry = Math.floor((expiryDate - now) / (1000 * 60 * 60 * 24));
 
-        if (daysUntilExpiry < 30) expiringSoon++;
-        else if (daysUntilExpiry <= 90) expiringMedium++;
-        else expiringLater++;
+            if (daysUntilExpiry < 30) expiringSoon++;
+            else if (daysUntilExpiry <= 90) expiringMedium++;
+            else expiringLater++;
+          }
+        });
       }
     });
 
@@ -66,7 +72,10 @@ const CreditCardDashboardInsights = ({ cards = [] }) => {
     let neverUsed = 0;
 
     cards.forEach(card => {
-      if (!card.last_used_date) {
+      if (card.days_inactive) {
+        if (card.days_inactive >= 90) inactiveCards++;
+        else activeCards++;
+      } else if (!card.last_used_date) {
         neverUsed++;
       } else {
         const lastUsed = new Date(card.last_used_date);
@@ -85,7 +94,7 @@ const CreditCardDashboardInsights = ({ cards = [] }) => {
 
     return {
       totalCards,
-      totalAmountDue,
+      totalPromos,
       promoUsage,
       promoExpiry,
       inactivity,
@@ -117,25 +126,23 @@ const CreditCardDashboardInsights = ({ cards = [] }) => {
           </div>
         </div>
 
-        <div className="bg-red-50 rounded-lg p-4">
-          <div className="flex items-center">
-            <span className="text-2xl mr-3">💵</span>
-            <div>
-              <p className="text-sm text-red-600">Total Amount Due</p>
-              <p className="text-xl font-bold text-red-900">
-                {formatCurrency(insights.totalAmountDue)}
-              </p>
-            </div>
-          </div>
-        </div>
-
         <div className="bg-green-50 rounded-lg p-4">
           <div className="flex items-center">
             <span className="text-2xl mr-3">🎯</span>
             <div>
-              <p className="text-sm text-green-600">Using Promos</p>
-              <p className="text-2xl font-bold text-green-900">
-                {insights.promoUsage.find(p => p.name === 'Using Promo')?.value || 0}
+              <p className="text-sm text-green-600">Total Promos</p>
+              <p className="text-2xl font-bold text-green-900">{insights.totalPromos}</p>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-blue-50 rounded-lg p-4">
+          <div className="flex items-center">
+            <span className="text-2xl mr-3">🏷️</span>
+            <div>
+              <p className="text-sm text-blue-600">New Promos Available</p>
+              <p className="text-2xl font-bold text-blue-900">
+                {insights.promoUsage.find(p => p.name === 'New Promo Available')?.value || 0}
               </p>
             </div>
           </div>
@@ -158,7 +165,7 @@ const CreditCardDashboardInsights = ({ cards = [] }) => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Promo Usage Chart */}
         <div className="bg-gray-50 rounded-lg p-4">
-          <h3 className="text-sm font-semibold text-gray-700 mb-3">Promo Usage</h3>
+          <h3 className="text-sm font-semibold text-gray-700 mb-3">New Promo Availability</h3>
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
               <Pie
