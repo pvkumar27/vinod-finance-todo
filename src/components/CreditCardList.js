@@ -49,7 +49,7 @@ const CreditCardList = () => {
       const { data, error } = await supabase
         .from('credit_cards_simplified')
         .select('*')
-        .order('card_name', { ascending: true });
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       setCards(data || []);
