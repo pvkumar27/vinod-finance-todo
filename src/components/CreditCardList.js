@@ -13,7 +13,7 @@ const CreditCardList = () => {
   const [error, setError] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState('due_date');
+  const [sortBy, setSortBy] = useState('card_name');
   const [showForm, setShowForm] = useState(false);
   const [editingCard, setEditingCard] = useState(null);
   const [message, setMessage] = useState('');
@@ -47,9 +47,9 @@ const CreditCardList = () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('credit_cards_manual')
+        .from('credit_cards_simplified')
         .select('*')
-        .order('due_date', { ascending: true });
+        .order('card_name', { ascending: true });
 
       if (error) throw error;
       setCards(data || []);
@@ -76,10 +76,10 @@ const CreditCardList = () => {
   };
 
   const handleDeleteCard = async card => {
-    if (!window.confirm(`Delete card ending in ${card.card_last4}?`)) return;
+    if (!window.confirm(`Delete card ${card.card_name}?`)) return;
 
     try {
-      const { error } = await supabase.from('credit_cards_manual').delete().eq('id', card.id);
+      const { error } = await supabase.from('credit_cards_simplified').delete().eq('id', card.id);
 
       if (error) throw error;
 
@@ -123,7 +123,10 @@ const CreditCardList = () => {
     if (!window.confirm(`Delete ${selectedCards.length} selected cards?`)) return;
 
     try {
-      const { error } = await supabase.from('credit_cards_manual').delete().in('id', selectedCards);
+      const { error } = await supabase
+        .from('credit_cards_simplified')
+        .delete()
+        .in('id', selectedCards);
 
       if (error) throw error;
 
@@ -213,46 +216,47 @@ const CreditCardList = () => {
     localStorage.setItem('creditCardViewMode', mode);
   };
 
-  const getInactivityBadge = lastUsedDate => {
+  const getInactivityBadge = (daysInactive, lastUsedDate) => {
+    if (daysInactive) return daysInactive > 90;
     if (!lastUsedDate) return true;
     const daysSince = Math.floor((new Date() - new Date(lastUsedDate)) / (1000 * 60 * 60 * 24));
     return daysSince > 90;
   };
 
-  const getPromoExpiryBadge = promoExpiryDate => {
-    if (!promoExpiryDate) return false;
-    const daysUntil = Math.floor((new Date(promoExpiryDate) - new Date()) / (1000 * 60 * 60 * 24));
-    return daysUntil <= 30 && daysUntil >= 0;
+  const getPromoExpiryBadge = currentPromos => {
+    if (!currentPromos || !Array.isArray(currentPromos)) return false;
+    return currentPromos.some(promo => {
+      if (!promo.promo_expiry_date) return false;
+      const daysUntil = Math.floor(
+        (new Date(promo.promo_expiry_date) - new Date()) / (1000 * 60 * 60 * 24)
+      );
+      return daysUntil <= 30 && daysUntil >= 0;
+    });
   };
 
   const filteredCards = cards.filter(card => {
-    const matchesSearch =
-      card.card_holder?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      card.bank?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      card.card_type?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      card.card_last4?.includes(searchTerm);
+    const matchesSearch = card.card_name?.toLowerCase().includes(searchTerm.toLowerCase());
 
     if (activeTab === 'promo') {
-      return matchesSearch && getPromoExpiryBadge(card.promo_expiry_date);
+      return matchesSearch && getPromoExpiryBadge(card.current_promos);
     }
     if (activeTab === 'inactive') {
-      return matchesSearch && getInactivityBadge(card.last_used_date);
+      return matchesSearch && getInactivityBadge(card.days_inactive, card.last_used_date);
     }
     return matchesSearch;
   });
 
   const sortedCards = [...filteredCards].sort((a, b) => {
-    if (sortBy === 'due_date') {
-      return new Date(a.due_date || '9999-12-31') - new Date(b.due_date || '9999-12-31');
+    if (sortBy === 'card_name') {
+      return (a.card_name || '').localeCompare(b.card_name || '');
     }
-    if (sortBy === 'promo_expiry_date') {
-      return (
-        new Date(a.promo_expiry_date || '9999-12-31') -
-        new Date(b.promo_expiry_date || '9999-12-31')
-      );
+    if (sortBy === 'days_inactive') {
+      return (b.days_inactive || 0) - (a.days_inactive || 0);
     }
-    if (sortBy === 'amount_due') {
-      return (b.amount_due || 0) - (a.amount_due || 0);
+    if (sortBy === 'promo_count') {
+      const aCount = Array.isArray(a.current_promos) ? a.current_promos.length : 0;
+      const bCount = Array.isArray(b.current_promos) ? b.current_promos.length : 0;
+      return bCount - aCount;
     }
     if (sortBy === 'last_used_newest') {
       return (
@@ -263,13 +267,6 @@ const CreditCardList = () => {
       return (
         new Date(a.last_used_date || '9999-12-31') - new Date(b.last_used_date || '9999-12-31')
       );
-    }
-    if (sortBy === 'never_used') {
-      const aNeverUsed = !a.last_used_date;
-      const bNeverUsed = !b.last_used_date;
-      if (aNeverUsed && !bNeverUsed) return -1;
-      if (!aNeverUsed && bNeverUsed) return 1;
-      return 0;
     }
     return 0;
   });
@@ -358,7 +355,7 @@ const CreditCardList = () => {
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
-          ⏳ Promo Expiring ({cards.filter(c => getPromoExpiryBadge(c.promo_expiry_date)).length})
+          ⏳ Promo Expiring ({cards.filter(c => getPromoExpiryBadge(c.current_promos)).length})
         </button>
         <button
           onClick={() => setActiveTab('inactive')}
@@ -368,7 +365,8 @@ const CreditCardList = () => {
               : 'text-gray-600 hover:text-gray-900'
           }`}
         >
-          ⚠️ Inactive ({cards.filter(c => getInactivityBadge(c.last_used_date)).length})
+          ⚠️ Inactive (
+          {cards.filter(c => getInactivityBadge(c.days_inactive, c.last_used_date)).length})
         </button>
       </div>
 
@@ -377,7 +375,7 @@ const CreditCardList = () => {
         <div className="flex-1">
           <input
             type="text"
-            placeholder="Search by holder, bank, card type, or last 4..."
+            placeholder="Search by card name..."
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -389,12 +387,11 @@ const CreditCardList = () => {
             onChange={e => setSortBy(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           >
-            <option value="due_date">Sort by Due Date</option>
-            <option value="promo_expiry_date">Sort by Promo Expiry</option>
-            <option value="amount_due">Sort by Amount Due</option>
+            <option value="card_name">Sort by Card Name</option>
+            <option value="days_inactive">Sort by Days Inactive</option>
+            <option value="promo_count">Sort by Promo Count</option>
             <option value="last_used_newest">Last Used (Newest First)</option>
             <option value="last_used_oldest">Last Used (Oldest First)</option>
-            <option value="never_used">Never Used First</option>
           </select>
           <div className="flex bg-gray-100 rounded-lg p-1">
             <button
@@ -499,31 +496,38 @@ const CreditCardList = () => {
                       />
                       <div>
                         <h3 className="font-semibold text-gray-900">
-                          {card.card_holder || 'Unknown'}
+                          {card.card_name || 'Unknown Card'}
                         </h3>
                         <p className="text-sm text-gray-600">
-                          {card.bank} • {card.card_type}
+                          {card.days_inactive ? `${card.days_inactive} days inactive` : 'Active'}
                         </p>
-                        {card.card_last4 && (
-                          <p className="text-xs text-gray-500">•••• {card.card_last4}</p>
-                        )}
                         <p className="text-xs text-gray-500 mt-1">
                           {card.last_used_date
                             ? `Last used: ${formatDate(card.last_used_date)}`
                             : '❌ Never Used'}
                         </p>
+                        <p className="text-xs text-gray-500">
+                          {Array.isArray(card.current_promos)
+                            ? `${card.current_promos.length} active promos`
+                            : '0 active promos'}
+                        </p>
                       </div>
                     </div>
                     <div className="flex items-start gap-2">
                       <div className="flex flex-col gap-1">
-                        {getInactivityBadge(card.last_used_date) && (
+                        {getInactivityBadge(card.days_inactive, card.last_used_date) && (
                           <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full font-bold">
                             ⚠️ {card.last_used_date ? 'Inactive' : 'Never Used'}
                           </span>
                         )}
-                        {getPromoExpiryBadge(card.promo_expiry_date) && (
+                        {getPromoExpiryBadge(card.current_promos) && (
                           <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">
                             ⏳ Promo Soon
+                          </span>
+                        )}
+                        {card.new_promo_available && (
+                          <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+                            🏷️ New Promo
                           </span>
                         )}
                       </div>
@@ -553,47 +557,53 @@ const CreditCardList = () => {
                     </div>
                   </div>
 
-                  {/* Payment Info */}
+                  {/* Card Info */}
                   <div className="space-y-2 mb-4">
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Amount Due:</span>
-                      <span className="font-medium text-red-600">
-                        {formatCurrency(card.amount_due)}
-                      </span>
+                      <span className="text-sm text-gray-600">Days Inactive:</span>
+                      <span className="font-medium">{card.days_inactive || 0}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Min Payment:</span>
-                      <span className="font-medium">{formatCurrency(card.min_payment_due)}</span>
+                      <span className="text-sm text-gray-600">New Promo Available:</span>
+                      <span className="font-medium">{card.new_promo_available ? 'Yes' : 'No'}</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Due Date:</span>
-                      <span className="font-medium">{formatDate(card.due_date)}</span>
-                    </div>
+                    {card.interest_after_promo && (
+                      <div className="flex justify-between">
+                        <span className="text-sm text-gray-600">Interest After Promo:</span>
+                        <span className="font-medium">{card.interest_after_promo}%</span>
+                      </div>
+                    )}
                   </div>
 
-                  {/* Promo Info */}
-                  {card.promo_used && (
+                  {/* Current Promos */}
+                  {Array.isArray(card.current_promos) && card.current_promos.length > 0 && (
                     <div className="bg-blue-50 rounded-lg p-3 mb-4">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-blue-700">Promo Amount:</span>
-                        <span className="font-medium text-blue-900">
-                          {formatCurrency(card.promo_amount_due)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-blue-700">Promo APR:</span>
-                        <span className="font-medium text-blue-900">{card.promo_apr}%</span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-blue-700">Expires:</span>
-                        <span className="font-medium text-blue-900">
-                          {formatDate(card.promo_expiry_date)}
-                        </span>
-                      </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-blue-700">APR After:</span>
-                        <span className="font-medium text-blue-900">{card.apr_after}%</span>
-                      </div>
+                      <h4 className="text-sm font-semibold text-blue-800 mb-2">
+                        🎯 Current Promos ({card.current_promos.length})
+                      </h4>
+                      {card.current_promos.map((promo, index) => (
+                        <div
+                          key={index}
+                          className="mb-2 last:mb-0 pb-2 last:pb-0 border-b last:border-b-0 border-blue-200"
+                        >
+                          <div className="flex justify-between text-sm">
+                            <span className="text-blue-700">APR:</span>
+                            <span className="font-medium text-blue-900">{promo.promo_apr}%</span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-blue-700">Amount:</span>
+                            <span className="font-medium text-blue-900">
+                              {formatCurrency(promo.promo_amount)}
+                            </span>
+                          </div>
+                          <div className="flex justify-between text-sm">
+                            <span className="text-blue-700">Expires:</span>
+                            <span className="font-medium text-blue-900">
+                              {formatDate(promo.promo_expiry_date)}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
 
@@ -624,13 +634,6 @@ const CreditCardList = () => {
                           </button>
                         </div>
                       ))}
-                    </div>
-                  )}
-
-                  {/* Notes */}
-                  {card.notes && (
-                    <div className="text-sm text-gray-600 bg-gray-50 rounded p-2">
-                      <strong>Notes:</strong> {card.notes}
                     </div>
                   )}
                 </div>
