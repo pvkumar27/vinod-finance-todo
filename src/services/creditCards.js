@@ -9,13 +9,18 @@ const validateCardData = cardData => {
   const sanitized = {
     bank_name: (cardData.bank_name || '').trim().substring(0, 100),
     last_four_digits: (cardData.last_four_digits || '').replace(/\D/g, '').substring(0, 4),
-    days_inactive: parseInt(cardData.days_inactive) || 0,
+    card_type: (cardData.card_type || '').trim().substring(0, 100),
+    card_holder: (cardData.card_holder || '').trim().substring(0, 100),
+    days_inactive: parseInt(cardData.days_inactive) || null,
     last_used_date: cardData.last_used_date || null,
     promo_used: Boolean(cardData.promo_used),
     promo_end_date: cardData.promo_end_date || null,
-    interest_after_promo: parseFloat(cardData.interest_after_promo) || null,
+    interest_after_promo: cardData.interest_after_promo
+      ? parseFloat(cardData.interest_after_promo)
+      : null,
     new_promo_available: Boolean(cardData.new_promo_available),
     current_promos: Array.isArray(cardData.current_promos) ? cardData.current_promos : [],
+    notes: (cardData.notes || '').trim().substring(0, 1000),
   };
 
   // Validate required fields
@@ -32,10 +37,19 @@ const validateCardData = cardData => {
  */
 export const getCreditCards = async () => {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    console.log('DEBUG: Current user:', user?.id);
+    if (!user) throw new Error('Not authenticated');
+
     const { data, error } = await supabase
       .from('credit_cards_simplified')
       .select('*')
+      .eq('user_id', user.id)
       .order('created_at', { ascending: false });
+
+    console.log('DEBUG: Supabase query result:', { data, error });
 
     if (error) {
       throw new Error(`Failed to fetch credit cards: ${error.message}`);
@@ -55,7 +69,13 @@ export const getCreditCards = async () => {
  */
 export const addCreditCard = async cardData => {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
     const validatedData = validateCardData(cardData);
+    validatedData.user_id = user.id;
 
     const { data, error } = await supabase
       .from('credit_cards_simplified')
@@ -82,6 +102,11 @@ export const addCreditCard = async cardData => {
  */
 export const updateCreditCard = async (id, updates) => {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
     if (!id) {
       throw new Error('Credit card ID is required');
     }
@@ -92,6 +117,7 @@ export const updateCreditCard = async (id, updates) => {
       .from('credit_cards_simplified')
       .update(validatedUpdates)
       .eq('id', id)
+      .eq('user_id', user.id)
       .select()
       .single();
 
@@ -113,11 +139,20 @@ export const updateCreditCard = async (id, updates) => {
  */
 export const deleteCreditCard = async id => {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
     if (!id) {
       throw new Error('Credit card ID is required');
     }
 
-    const { error } = await supabase.from('credit_cards_simplified').delete().eq('id', id);
+    const { error } = await supabase
+      .from('credit_cards_simplified')
+      .delete()
+      .eq('id', id)
+      .eq('user_id', user.id);
 
     if (error) {
       throw new Error(`Failed to delete credit card: ${error.message}`);
@@ -157,6 +192,11 @@ export const isCardInactive = lastTransactionDate => {
  */
 export const getCreditCardById = async id => {
   try {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) throw new Error('Not authenticated');
+
     if (!id) {
       throw new Error('Credit card ID is required');
     }
@@ -165,6 +205,7 @@ export const getCreditCardById = async id => {
       .from('credit_cards_simplified')
       .select('*')
       .eq('id', id)
+      .eq('user_id', user.id)
       .single();
 
     if (error) {

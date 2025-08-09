@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { supabase } from '../supabaseClient';
+import { getCreditCards, deleteCreditCard } from '../services/creditCards';
 import CreditCardForm from './CreditCardForm';
 import ReminderForm from './ReminderForm';
 import CreditCardExport from './CreditCardExport';
@@ -46,15 +47,12 @@ const CreditCardList = () => {
   const fetchCards = useCallback(async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('credit_cards_simplified')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const data = await getCreditCards();
+      console.log('DEBUG: getCreditCards returned:', data);
       setCards(data || []);
       await fetchReminders();
     } catch (err) {
+      console.error('DEBUG: getCreditCards error:', err);
       setError(`Failed to fetch cards: ${err.message}`);
     } finally {
       setLoading(false);
@@ -98,10 +96,7 @@ const CreditCardList = () => {
     if (!window.confirm(`Delete card ${card.bank_name} ${card.last_four_digits}?`)) return;
 
     try {
-      const { error } = await supabase.from('credit_cards_simplified').delete().eq('id', card.id);
-
-      if (error) throw error;
-
+      await deleteCreditCard(card.id);
       setCards(prev => prev.filter(c => c.id !== card.id));
       setSelectedCards(prev => prev.filter(id => id !== card.id));
       setMessage('✅ Card deleted successfully');
@@ -142,13 +137,9 @@ const CreditCardList = () => {
     if (!window.confirm(`Delete ${selectedCards.length} selected cards?`)) return;
 
     try {
-      const { error } = await supabase
-        .from('credit_cards_simplified')
-        .delete()
-        .in('id', selectedCards);
-
-      if (error) throw error;
-
+      for (const cardId of selectedCards) {
+        await deleteCreditCard(cardId);
+      }
       setCards(prev => prev.filter(c => !selectedCards.includes(c.id)));
       setSelectedCards([]);
       setSelectAll(false);
