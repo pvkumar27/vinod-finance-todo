@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { getTodayDateString, formatDateString } from '../utils/dateUtils';
 import {
   DndContext,
@@ -31,7 +31,7 @@ const TaskManager = () => {
   // Configure sensors with no constraints for better mobile support
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
 
-  const loadTodos = async () => {
+  const loadTodos = useCallback(async () => {
     try {
       const data = await fetchTodos();
       setTodos(data || []);
@@ -42,9 +42,9 @@ const TaskManager = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const handleEdit = todo => {
+  const handleEdit = useCallback(todo => {
     setEditingTodo(todo);
     setNewTask(todo.task);
 
@@ -68,9 +68,7 @@ const TaskManager = () => {
         }
       }
     }, 300);
-  };
-
-
+  }, []);
 
   const handleAddTodo = async e => {
     e.preventDefault();
@@ -122,41 +120,50 @@ const TaskManager = () => {
     }
   };
 
-  const handleToggleComplete = async (id, completed) => {
-    try {
-      await updateTodo(id, { completed: !completed });
-      setMessage('✅ Task updated!');
-      setTimeout(() => setMessage(''), 4000);
-      loadTodos();
-    } catch (err) {
-      setMessage(`❌ Error: ${err.message}`);
-      setTimeout(() => setMessage(''), 4000);
-    }
-  };
+  const handleToggleComplete = useCallback(
+    async (id, completed) => {
+      try {
+        await updateTodo(id, { completed: !completed });
+        setMessage('✅ Task updated!');
+        setTimeout(() => setMessage(''), 4000);
+        loadTodos();
+      } catch (err) {
+        setMessage(`❌ Error: ${err.message}`);
+        setTimeout(() => setMessage(''), 4000);
+      }
+    },
+    [loadTodos]
+  );
 
-  const handleTogglePin = async (id, pinned) => {
-    try {
-      await updateTodo(id, { pinned: !pinned });
-      setMessage(pinned ? '📌 Task unpinned!' : '📌 Task pinned!');
-      setTimeout(() => setMessage(''), 4000);
-      loadTodos();
-    } catch (err) {
-      setMessage(`❌ Error: ${err.message}`);
-      setTimeout(() => setMessage(''), 4000);
-    }
-  };
+  const handleTogglePin = useCallback(
+    async (id, pinned) => {
+      try {
+        await updateTodo(id, { pinned: !pinned });
+        setMessage(pinned ? '📌 Task unpinned!' : '📌 Task pinned!');
+        setTimeout(() => setMessage(''), 4000);
+        loadTodos();
+      } catch (err) {
+        setMessage(`❌ Error: ${err.message}`);
+        setTimeout(() => setMessage(''), 4000);
+      }
+    },
+    [loadTodos]
+  );
 
-  const handleDelete = async id => {
-    try {
-      await deleteTodo(id);
-      setMessage('✅ Task deleted!');
-      setTimeout(() => setMessage(''), 4000);
-      loadTodos();
-    } catch (err) {
-      setMessage(`❌ Error: ${err.message}`);
-      setTimeout(() => setMessage(''), 4000);
-    }
-  };
+  const handleDelete = useCallback(
+    async id => {
+      try {
+        await deleteTodo(id);
+        setMessage('✅ Task deleted!');
+        setTimeout(() => setMessage(''), 4000);
+        loadTodos();
+      } catch (err) {
+        setMessage(`❌ Error: ${err.message}`);
+        setTimeout(() => setMessage(''), 4000);
+      }
+    },
+    [loadTodos]
+  );
 
   const handleDragStart = event => {
     setActiveId(event.active.id);
@@ -245,9 +252,9 @@ const TaskManager = () => {
     const handleTodoAdded = () => {
       loadTodos();
     };
-    
+
     // Listen for AI-triggered view switches
-    const handleViewSwitch = (event) => {
+    const handleViewSwitch = event => {
       const { viewMode } = event.detail;
       setViewMode(viewMode);
     };
@@ -277,22 +284,24 @@ const TaskManager = () => {
   }, []);
 
   // Separate pinned and unpinned todos with chronological sorting
-  const pendingTodos = React.useMemo(() => {
+  const pendingTodos = useMemo(() => {
     return todos
       .filter(t => !t.completed)
       .sort((a, b) => new Date(a.due_date || '9999-12-31') - new Date(b.due_date || '9999-12-31'));
   }, [todos]);
 
-  const pinnedTodos = React.useMemo(() => {
+  const pinnedTodos = useMemo(() => {
     return pendingTodos.filter(t => t.pinned);
   }, [pendingTodos]);
 
-  const unpinnedTodos = React.useMemo(() => {
+  const unpinnedTodos = useMemo(() => {
     return pendingTodos.filter(t => !t.pinned);
   }, [pendingTodos]);
 
   // Find the active task for the drag overlay
-  const activeTask = activeId ? todos.find(task => task.id === activeId) : null;
+  const activeTask = useMemo(() => {
+    return activeId ? todos.find(task => task.id === activeId) : null;
+  }, [activeId, todos]);
 
   if (loading) return <div className="p-4">Loading tasks...</div>;
 
@@ -404,7 +413,9 @@ const TaskManager = () => {
         </div>
         <p className="text-xs text-gray-500 mt-2 flex items-center">
           <span className="mr-1">💡</span>
-          <span>Use natural language or ask <strong>FinBot 🤖</strong> for voice input</span>
+          <span>
+            Use natural language or ask <strong>FinBot 🤖</strong> for voice input
+          </span>
         </p>
       </form>
 
@@ -747,4 +758,4 @@ const TaskManager = () => {
   );
 };
 
-export default TaskManager;
+export default React.memo(TaskManager);
