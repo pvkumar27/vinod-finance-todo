@@ -63,6 +63,25 @@ const CreditCardList = () => {
 
   useEffect(() => {
     fetchCards();
+    
+    // Listen for AI-triggered credit card updates
+    const handleCreditCardUpdate = (event) => {
+      const { detail } = event;
+      if (detail && detail.deleted && detail.cardId) {
+        // Remove deleted card from state directly (like todos)
+        setCards(prev => prev.filter(c => c.id !== detail.cardId));
+        setSelectedCards(prev => prev.filter(id => id !== detail.cardId));
+      } else {
+        // For add/update operations, refresh from database
+        fetchCards();
+      }
+    };
+    
+    window.addEventListener('creditCardAdded', handleCreditCardUpdate);
+    
+    return () => {
+      window.removeEventListener('creditCardAdded', handleCreditCardUpdate);
+    };
   }, [fetchCards]);
 
   const handleAddCard = () => {

@@ -23,7 +23,7 @@ const TaskManager = () => {
   // Default due date is today
   const [taskDate, setTaskDate] = useState(getTodayDateString());
   const [editingTodo, setEditingTodo] = useState(null);
-  const [isListening, setIsListening] = useState(false);
+
   const [showCompleted, setShowCompleted] = useState(false);
   const [activeId, setActiveId] = useState(null);
   const [viewMode, setViewMode] = useState('cards');
@@ -70,61 +70,7 @@ const TaskManager = () => {
     }, 300);
   };
 
-  const handleVoiceInput = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      setMessage('❌ Voice recognition not supported in this browser');
-      setTimeout(() => setMessage(''), 4000);
-      return;
-    }
 
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    const recognition = new SpeechRecognition();
-
-    recognition.continuous = false;
-    recognition.interimResults = false;
-    recognition.lang = 'en-US';
-
-    recognition.onstart = () => {
-      setIsListening(true);
-      setMessage('🎤 Listening... Speak your task');
-    };
-
-    recognition.onresult = async event => {
-      const transcript = event.results[0][0].transcript;
-
-      // Parse the voice input for natural language
-      const parsed = parseInput(transcript);
-
-      if (parsed.intent === 'add_todo') {
-        // Auto-submit the parsed task
-        try {
-          await addTodo(parsed.payload);
-          setMessage(`✅ Task added via voice: "${parsed.payload.task}"`);
-          setTimeout(() => setMessage(''), 4000);
-          loadTodos();
-        } catch (err) {
-          setMessage(`❌ Error: ${err.message}`);
-          setTimeout(() => setMessage(''), 4000);
-        }
-      } else {
-        // Just fill the input field for manual submission
-        setNewTask(transcript);
-        setMessage(`✅ Voice input captured: "${transcript}" - Click Add to submit`);
-        setTimeout(() => setMessage(''), 4000);
-      }
-    };
-
-    recognition.onerror = event => {
-      setMessage(`❌ Voice recognition error: ${event.error}`);
-      setTimeout(() => setMessage(''), 4000);
-    };
-
-    recognition.onend = () => {
-      setIsListening(false);
-    };
-
-    recognition.start();
-  };
 
   const handleAddTodo = async e => {
     e.preventDefault();
@@ -299,8 +245,15 @@ const TaskManager = () => {
     const handleTodoAdded = () => {
       loadTodos();
     };
+    
+    // Listen for AI-triggered view switches
+    const handleViewSwitch = (event) => {
+      const { viewMode } = event.detail;
+      setViewMode(viewMode);
+    };
 
     window.addEventListener('todoAdded', handleTodoAdded);
+    window.addEventListener('switchView', handleViewSwitch);
 
     // Add global styles for drag and drop
     const style = document.createElement('style');
@@ -318,6 +271,7 @@ const TaskManager = () => {
 
     return () => {
       window.removeEventListener('todoAdded', handleTodoAdded);
+      window.removeEventListener('switchView', handleViewSwitch);
       document.head.removeChild(style);
     };
   }, []);
@@ -396,29 +350,15 @@ const TaskManager = () => {
             >
               Task
             </label>
-            <div className="relative">
-              <input
-                id="task-input"
-                data-cy="task-input-field"
-                type="text"
-                placeholder={editingTodo ? 'Edit task...' : 'Add a new task...'}
-                value={newTask}
-                onChange={e => setNewTask(e.target.value)}
-                className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 pr-12 text-sm shadow-sm"
-              />
-              <button
-                type="button"
-                onClick={handleVoiceInput}
-                className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full transition-colors shadow-sm ${
-                  isListening
-                    ? 'bg-red-100 text-red-600'
-                    : 'bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600'
-                }`}
-                title="Voice input"
-              >
-                {isListening ? '🔴' : '🎤'}
-              </button>
-            </div>
+            <input
+              id="task-input"
+              data-cy="task-input-field"
+              type="text"
+              placeholder={editingTodo ? 'Edit task...' : 'Add a new task...'}
+              value={newTask}
+              onChange={e => setNewTask(e.target.value)}
+              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm shadow-sm"
+            />
           </div>
           <div className="flex flex-col w-full sm:w-auto">
             <label
@@ -427,24 +367,15 @@ const TaskManager = () => {
             >
               Due Date
             </label>
-            <div className="flex items-center gap-2">
-              <input
-                id="task-due-date"
-                data-cy="task-date-field"
-                type="date"
-                value={taskDate}
-                onChange={e => setTaskDate(e.target.value)}
-                className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-40 text-sm"
-                required
-              />
-              <button
-                type="button"
-                onClick={() => setTaskDate(getTodayDateString())}
-                className="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-medium rounded-lg transition-colors"
-              >
-                Today
-              </button>
-            </div>
+            <input
+              id="task-due-date"
+              data-cy="task-date-field"
+              type="date"
+              value={taskDate}
+              onChange={e => setTaskDate(e.target.value)}
+              className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-40 text-sm"
+              required
+            />
           </div>
           <div className="flex flex-col w-full sm:w-auto justify-end mt-4 sm:mt-0">
             <button
@@ -471,9 +402,9 @@ const TaskManager = () => {
             )}
           </div>
         </div>
-        <p className="text-xs text-gray-500 mt-1">
-          💡 Tip: You can use natural language like "Remind me to pay bills tomorrow" or "Create
-          task: fix sink"
+        <p className="text-xs text-gray-500 mt-2 flex items-center">
+          <span className="mr-1">💡</span>
+          <span>Use natural language or ask <strong>FinBot 🤖</strong> for voice input</span>
         </p>
       </form>
 
