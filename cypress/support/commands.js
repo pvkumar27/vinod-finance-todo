@@ -4,6 +4,11 @@ Cypress.Commands.add('login', (email, password) => {
   const testPassword = password || Cypress.env('TEST_USER_PASSWORD') || 'Test1234';
 
   cy.visit('/');
+
+  // Wait for window and document to be ready
+  cy.window().should('exist');
+  cy.window().should('have.property', 'document');
+
   cy.get('input[type="email"]', { timeout: 10000 }).clear().type(testEmail, { delay: 50 });
   cy.get('input[type="password"]').clear().type(testPassword, { delay: 50 });
   cy.get('button[type="submit"]').click();
