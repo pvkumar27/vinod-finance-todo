@@ -28,7 +28,7 @@ describe('Essential Application Tests', () => {
   it('should create and delete a todo', () => {
     cy.generateTestData('todo').then(testData => {
       // Create todo
-      cy.get('[data-cy="task-input-field"]').type(testData.title);
+      cy.get('[data-cy="task-input-field"]').clear().type(testData.title, { delay: 50 });
       cy.get('[data-cy="task-add-button"]').click();
 
       // Verify todo appears
@@ -52,7 +52,7 @@ describe('Essential Application Tests', () => {
 
       // Fill form - wait for form to load
       cy.contains('Bank Name').parent().find('select').select('Chase');
-      cy.get('input[maxlength="4"]').type(testData.lastFour);
+      cy.get('input[maxlength="4"]').clear().type(testData.lastFour, { delay: 50 });
       cy.contains('Card Holder').parent().find('select').select('Vinod');
 
       // Submit

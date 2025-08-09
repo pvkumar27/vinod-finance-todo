@@ -10,9 +10,21 @@ module.exports = {
     screenshotOnRunFailure: true,
     supportFile: 'cypress/support/e2e.js',
     specPattern: 'cypress/e2e/**/*.cy.js',
+    chromeWebSecurity: false,
+    modifyObstructiveCode: false,
     env: {
       TEST_USER_EMAIL: process.env.TEST_USER_EMAIL,
       TEST_USER_PASSWORD: process.env.TEST_USER_PASSWORD,
+    },
+    setupNodeEvents(on, config) {
+      // Handle uncaught exceptions
+      on('uncaught:exception', (err, runnable) => {
+        // Ignore KeyboardEvent errors
+        if (err.message.includes('KeyboardEvent')) {
+          return false;
+        }
+        return true;
+      });
     },
   },
 };

@@ -4,8 +4,8 @@ Cypress.Commands.add('login', (email, password) => {
   const testPassword = password || Cypress.env('TEST_USER_PASSWORD') || 'Test1234';
 
   cy.visit('/');
-  cy.get('input[type="email"]', { timeout: 10000 }).type(testEmail);
-  cy.get('input[type="password"]').type(testPassword);
+  cy.get('input[type="email"]', { timeout: 10000 }).clear().type(testEmail, { delay: 50 });
+  cy.get('input[type="password"]').clear().type(testPassword, { delay: 50 });
   cy.get('button[type="submit"]').click();
 
   // Wait for navigation to complete
