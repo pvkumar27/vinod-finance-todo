@@ -57,6 +57,7 @@ jobs:
     - name: Run Cypress E2E tests
       run: npm run test:e2e:essential
       env:
+        TERM: xterm
         CYPRESS_baseUrl: "http://localhost:3000"
         CYPRESS_TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
         CYPRESS_TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
