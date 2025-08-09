@@ -1,6 +1,4 @@
-const { defineConfig } = require('cypress');
-
-module.exports = defineConfig({
+module.exports = {
   e2e: {
     baseUrl: 'http://localhost:3000',
     viewportWidth: 1280,
@@ -14,7 +12,7 @@ module.exports = defineConfig({
     specPattern: 'cypress/e2e/**/*.cy.js',
     env: {
       TEST_USER_EMAIL: process.env.TEST_USER_EMAIL,
-      TEST_USER_PASSWORD: process.env.TEST_USER_PASSWORD
-    }
-  }
-});
+      TEST_USER_PASSWORD: process.env.TEST_USER_PASSWORD,
+    },
+  },
+};

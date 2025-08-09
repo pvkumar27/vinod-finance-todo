@@ -295,6 +295,13 @@ const TaskManager = () => {
   useEffect(() => {
     loadTodos();
 
+    // Listen for todos added by AI Assistant
+    const handleTodoAdded = () => {
+      loadTodos();
+    };
+
+    window.addEventListener('todoAdded', handleTodoAdded);
+
     // Add global styles for drag and drop
     const style = document.createElement('style');
     style.textContent = `
@@ -310,6 +317,7 @@ const TaskManager = () => {
     document.head.appendChild(style);
 
     return () => {
+      window.removeEventListener('todoAdded', handleTodoAdded);
       document.head.removeChild(style);
     };
   }, []);

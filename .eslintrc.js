@@ -1,18 +1,15 @@
 module.exports = {
-  extends: [
-    'react-app',
-    'react-app/jest'
-  ],
+  extends: ['react-app', 'react-app/jest'],
   overrides: [
     {
       files: ['cypress/**/*.js'],
-      plugins: ['cypress'],
-      env: {
-        'cypress/globals': true
+      globals: {
+        cy: 'readonly',
+        Cypress: 'readonly',
+        expect: 'readonly',
+        assert: 'readonly',
+        chai: 'readonly',
       },
-      extends: [
-        'plugin:cypress/recommended'
-      ]
-    }
-  ]
+    },
+  ],
 };

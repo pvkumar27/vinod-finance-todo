@@ -4,6 +4,7 @@ import { Navbar } from './layout';
 import { Home } from './pages';
 import { supabase } from './supabaseClient';
 import IOSInstallPrompt from './components/IOSInstallPrompt';
+import AIAssistant from './components/AIAssistant';
 import './App.css';
 import './styles/background.css';
 import './styles/typography.css';
@@ -68,6 +69,7 @@ function App() {
         <Home />
       </div>
       <IOSInstallPrompt />
+      <AIAssistant />
     </div>
   );
 }

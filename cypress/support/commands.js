@@ -1,45 +1,55 @@
 // Custom commands for authentication
 Cypress.Commands.add('login', (email, password) => {
-  const testEmail = email || Cypress.env('TEST_USER_EMAIL');
-  const testPassword = password || Cypress.env('TEST_USER_PASSWORD');
-  
+  const testEmail = email || Cypress.env('TEST_USER_EMAIL') || 'pvkumar27@yahoo.com';
+  const testPassword = password || Cypress.env('TEST_USER_PASSWORD') || 'Test1234';
+
   cy.visit('/');
-  cy.get('[data-cy="auth-email-input"]', { timeout: 10000 }).type(testEmail);
-  cy.get('[data-cy="auth-password-input"]').type(testPassword);
-  cy.get('[data-cy="auth-submit-button"]').click();
-  
+  cy.get('input[type="email"]', { timeout: 10000 }).type(testEmail);
+  cy.get('input[type="password"]').type(testPassword);
+  cy.get('button[type="submit"]').click();
+
   // Wait for navigation to complete
   cy.get('[data-cy="todo-manager-heading"]', { timeout: 15000 }).should('be.visible');
 });
 
 // Custom command for cleanup
 Cypress.Commands.add('cleanupTestData', () => {
-  // Clean up any test data with Test_E2E_ prefix
+  // Clean up test todos
   cy.get('body').then($body => {
-    if ($body.find('[data-cy*="Test_E2E_"]').length > 0) {
-      cy.get('[data-cy*="Test_E2E_"]').each($el => {
-        cy.wrap($el).parent().find('[data-cy*="delete"]').click({ force: true });
+    // Look for todos containing Test_E2E_
+    if ($body.find('span:contains("Test_E2E_")').length > 0) {
+      cy.get('span:contains("Test_E2E_")', { timeout: 5000 }).each($el => {
+        cy.wrap($el).parents('.group').find('button[aria-label*="Delete"]').click({ force: true });
+      });
+    }
+
+    // Clean up test credit cards containing Chase (from tests)
+    if ($body.find('h3:contains("Chase 1234")').length > 0) {
+      cy.get('h3:contains("Chase 1234")', { timeout: 5000 }).each($el => {
+        cy.wrap($el).parents('.rounded-lg').find('button').last().click({ force: true });
+        // Confirm deletion
+        cy.on('window:confirm', () => true);
       });
     }
   });
 });
 
 // Custom command for generating test data
-Cypress.Commands.add('generateTestData', (type) => {
+Cypress.Commands.add('generateTestData', type => {
   const timestamp = Date.now();
   const id = Math.floor(Math.random() * 10000);
-  
+
   const data = {
     todo: {
       title: `Test_E2E_Todo_${id}_${timestamp}`,
       description: 'Test todo item',
-      dueDate: new Date().toISOString().split('T')[0]
+      dueDate: new Date().toISOString().split('T')[0],
     },
     creditCard: {
       bankName: `Test_E2E_Bank_${id}`,
-      lastFour: '1234'
-    }
+      lastFour: '1234',
+    },
   };
-  
+
   return data[type] || { id: `Test_E2E_${id}` };
 });

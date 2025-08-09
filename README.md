@@ -35,6 +35,11 @@ npm run test:e2e:headed
 
 # Run tests in Chrome
 npm run test:e2e:chrome
+
+# AI Assistant & MCP Server
+npm run mcp:setup     # Setup MCP server
+npm run mcp:start     # Start MCP server
+npm run mcp:dev       # Start MCP server in dev mode
 ```
 
 ### Test Coverage
@@ -179,6 +184,51 @@ The app uses Plaid for bank account integration. For testing:
    - Any MFA code will work (e.g., `1234`)
 3. Select any bank account to connect
 4. Credit cards will be imported with the 🏦 Plaid Synced badge
+
+## 🤖 AI Assistant & MCP Server
+
+FinTask includes an AI-powered assistant that provides intelligent insights and natural language interaction with your financial data.
+
+### Features
+- **Natural Language Queries**: Ask questions like "Show me pending todos" or "Which cards are inactive?"
+- **Smart Insights**: AI-powered financial recommendations and alerts
+- **Todo Management**: Add and manage tasks through conversation
+- **Credit Card Analysis**: Get insights on utilization, inactivity, and promo expirations
+- **Spending Analysis**: Analyze patterns and get forecasting insights
+
+### MCP Server Setup
+```bash
+# Quick setup (recommended)
+npm run mcp:setup
+
+# Manual setup
+npm run mcp:install
+cp mcp-server/.env.example mcp-server/.env
+# Edit mcp-server/.env with your Supabase credentials
+```
+
+### Running the AI Assistant
+```bash
+# Start MCP server (in one terminal)
+npm run mcp:start
+
+# Start React app (in another terminal)
+npm start
+```
+
+### AI Assistant Usage
+- Click the chat bubble in the bottom-right corner
+- Use quick actions or type natural language queries
+- Examples:
+  - _"Show me all my incomplete todos"_
+  - _"Which credit cards haven't been used recently?"_
+  - _"Add a todo to pay rent next month"_
+  - _"Analyze my spending this quarter"_
+
+### MCP Server Architecture
+```
+AI Assistant (React) → MCP Client → MCP Server → Supabase Database
+```
 
 ## 🔔 Daily Notifications
 

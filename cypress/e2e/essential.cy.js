@@ -35,11 +35,7 @@ describe('Essential Application Tests', () => {
       cy.contains(testData.title).should('be.visible');
 
       // Delete todo
-      cy.contains(testData.title)
-        .parent()
-        .parent()
-        .find('button[title*="Delete"]')
-        .click();
+      cy.contains(testData.title).parent().parent().find('button[aria-label*="Delete"]').click();
 
       // Verify todo is gone
       cy.contains(testData.title).should('not.exist');
@@ -54,28 +50,29 @@ describe('Essential Application Tests', () => {
       // Create credit card
       cy.get('[data-cy="card-add-button"]').click();
 
-      // Fill form
-      cy.get('input[name="bank_name"]').type(testData.bankName);
-      cy.get('input[name="last_four_digits"]').type(testData.lastFour);
+      // Fill form - wait for form to load
+      cy.contains('Bank Name').parent().find('select').select('Chase');
+      cy.get('input[maxlength="4"]').type(testData.lastFour);
+      cy.contains('Card Holder').parent().find('select').select('Vinod');
 
       // Submit
       cy.get('button[type="submit"]').click();
 
       // Verify card appears
-      cy.contains(testData.bankName).should('be.visible');
+      cy.contains('Chase').should('be.visible');
 
       // Delete card
-      cy.contains(testData.bankName)
-        .parent()
-        .parent()
-        .find('button[title*="Delete"]')
-        .click();
+      cy.contains('Chase').parents('.rounded-lg').find('button').last().click();
 
       // Confirm deletion
       cy.on('window:confirm', () => true);
 
+      // Wait for deletion to process and reload
+      cy.wait(1000);
+      cy.reload();
+
       // Verify card is gone
-      cy.contains(testData.bankName).should('not.exist');
+      cy.contains('Chase 1234').should('not.exist');
     });
   });
 
