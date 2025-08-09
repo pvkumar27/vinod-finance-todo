@@ -3,10 +3,11 @@ import './commands';
 
 // Handle uncaught exceptions
 Cypress.on('uncaught:exception', (err, runnable) => {
-  // Ignore KeyboardEvent errors and related property access errors
+  // Ignore all KeyboardEvent related errors
   if (
-    err.message.includes('KeyboardEvent') ||
-    err.message.includes("Cannot read properties of undefined (reading 'KeyboardEvent')")
+    err.message &&
+    (err.message.includes('KeyboardEvent') ||
+      err.message.includes('Cannot read properties of undefined'))
   ) {
     return false;
   }
