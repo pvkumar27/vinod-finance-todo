@@ -64,9 +64,19 @@ jobs:
         echo "Server is responding at http://localhost:3000"
         sleep 5
     
-    # Run full login test
-    - name: Run full login test
-      run: npx playwright test tests/e2e/auth/login.spec.js --project=chromium-desktop
+    # Run essential tests
+    - name: Run essential E2E tests
+      run: npx playwright test tests/e2e/essential.spec.js --project=chromium-desktop
+      env:
+        BASE_URL: "http://localhost:3000"
+        TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+        TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+        REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
+        REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
+    
+    # Run core functionality tests
+    - name: Run core functionality tests
+      run: npx playwright test tests/e2e/core/ --project=chromium-desktop
       env:
         BASE_URL: "http://localhost:3000"
         TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
