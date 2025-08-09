@@ -13,70 +13,86 @@ A Progressive Web App for managing finances and to-dos.
 
 ## 🧪 End-to-End Testing
 
-Automated E2E testing with Playwright ensures PWA functionality across devices:
+Automated E2E testing with Cypress ensures PWA functionality across devices:
 
 ### Quick Start
 ```bash
+# Interactive test runner (recommended)
+npm run cypress:open
+
 # Run all E2E tests (headless)
 npm run test:e2e
 
-# Run tests with browser UI
+# Run essential tests only
+npm run test:e2e:essential
+
+# Run specific test suites
+npm run test:e2e:auth
+npm run test:e2e:nav
+
+# Run tests with browser visible
 npm run test:e2e:headed
 
-# Interactive test runner
-npm run test:e2e:ui
-
-# Run specific test file
-npx playwright test tests/e2e/finances/my-finances.spec.js
-
-# Run tests with cleanup
-./tests/run-tests.sh
-
-# Run ui in codespaces
-npx playwright test --ui-host=0.0.0.0 --ui-port=8080
-
-# Run Playwright UI with automatic port selection
-npm run playwright
-
-
-# Run only cleanup
-npm run test:e2e:cleanup
+# Run tests in Chrome
+npm run test:e2e:chrome
 ```
 
 ### Test Coverage
 - ✅ **Authentication**: Login flow and session management
-- ✅ **My Finances**: Owner/Sync Source dropdowns, defaults, persistence
-- ✅ **Plaid Integration**: Bank connection, synced badges, transaction import
-- ✅ **CRUD Operations**: Create, edit, delete for Cards/Finances/To-Dos
-- ✅ **Responsive Design**: Mobile (375px), Tablet (768px), Desktop (1280px)
-- ✅ **Navigation**: Tab switching, state management, error handling
+- ✅ **Navigation**: Tab switching between To-Dos and Credit Cards
+- ✅ **To-Dos**: Create, edit, delete tasks with view mode switching
+- ✅ **Credit Cards**: CRUD operations with search and filtering
+- ✅ **Data-Cy Selectors**: Robust, maintainable test selectors
+- ✅ **Responsive Design**: Mobile, tablet, desktop viewports
 
 ### Test Data Management & Safety
 - **🔒 SAFE**: All test entries use `Test_E2E_` prefix with unique IDs
-- **🔒 SAFE**: Multiple validation layers prevent touching real user data
-- **🔒 SAFE**: Form filling only occurs on empty fields or existing test data
-- **🔒 SAFE**: Deletion only targets items with strict test prefixes
-- **🔒 SAFE**: Real data pattern detection prevents accidental modifications
-- Automatic cleanup after each test run
-- Manual cleanup: `npm run test:e2e:cleanup`
+- **🔒 SAFE**: Custom commands prevent touching real user data
+- **🔒 SAFE**: Automatic cleanup after each test run
+- **🔒 SAFE**: Data-cy selectors ensure test stability
 
-### Configuration
-- **Base URL**: `http://localhost:3000` by default, configurable via BASE_URL env var
-- **Browsers**: Chromium (mobile/tablet/desktop viewports)
+### Cypress Configuration
+- **Base URL**: `http://localhost:3000`
+- **Viewport**: 1280x720 (configurable)
 - **Screenshots**: On failure only
-- **Traces**: On first retry
+- **Videos**: Disabled by default
+- **Environment Variables**: `CYPRESS_TEST_USER_EMAIL`, `CYPRESS_TEST_USER_PASSWORD`
 
-### Local Testing in CI
-The CI pipeline automatically:
-1. Builds the app
-2. Starts a local server
-3. Waits for the server to be ready
-4. Runs tests against the local server
+### Custom Commands
+```javascript
+// Login helper
+cy.login()
+
+// Generate test data
+cy.generateTestData('todo')
+cy.generateTestData('creditCard')
+
+// Cleanup test data
+cy.cleanupTestData()
+```
+
+### Data-Cy Selectors
+Tests use semantic data-cy attributes for reliability:
+```javascript
+// Navigation
+cy.get('[data-cy="nav-todos-tab"]')
+cy.get('[data-cy="nav-cards-tab"]')
+
+// To-Dos
+cy.get('[data-cy="task-input-field"]')
+cy.get('[data-cy="task-add-button"]')
+
+// Credit Cards
+cy.get('[data-cy="card-add-button"]')
+cy.get('[data-cy="card-search-input"]')
+```
 
 ### Authentication
-For tests requiring authentication:
-1. Update credentials in `tests/fixtures/test-credentials.js` with valid login details
-2. All tests use the login helper function from `tests/helpers/test-helpers.js`
+Set environment variables for test credentials:
+```bash
+CYPRESS_TEST_USER_EMAIL=your-test-email@example.com
+CYPRESS_TEST_USER_PASSWORD=your-test-password
+```
 
 ## 🚀 CI/CD & Release Process
 
@@ -187,16 +203,15 @@ The app uses Firebase Blaze Plan (staying within free tier limits) for daily not
 ├── functions/             # Firebase Cloud Functions
 │   ├── index.js           # Cloud Functions code
 │   └── package.json       # Functions dependencies
-├── tests/                 # Test files
-│   ├── e2e/               # End-to-end tests
-│   │   ├── auth/          # Authentication tests
-│   │   ├── credit-cards/  # Credit card tests
-│   │   ├── finances/      # Finance tests
-│   │   ├── todos/         # To-do tests
-│   │   └── utils/         # Utility tests
-│   ├── fixtures/          # Test fixtures
-│   ├── helpers/           # Test helpers
-│   └── config/            # Test configuration
+├── cypress/               # Cypress E2E tests
+│   ├── e2e/               # Test files
+│   │   ├── essential.cy.js      # Essential tests for CI/CD
+│   │   ├── authentication.cy.js # Authentication tests
+│   │   └── navigation.cy.js     # Navigation tests
+│   ├── fixtures/          # Test data
+│   └── support/           # Custom commands and configuration
+│       ├── commands.js    # Custom Cypress commands
+│       └── e2e.js         # Support file
 ├── scripts/               # Utility scripts
 │   ├── backup-supabase.js # Database backup script
 │   ├── restore-backup.js  # Database restore script
