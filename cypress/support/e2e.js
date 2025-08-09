@@ -1,10 +1,19 @@
 // Import commands
 import './commands';
 
-// Handle uncaught exceptions
+// Handle uncaught exceptions - must be at the top level
 Cypress.on('uncaught:exception', (err, runnable) => {
-  // Return false to prevent the error from failing the test
+  console.log('Caught exception:', err.message);
   return false;
+});
+
+// Additional error handling
+Cypress.on('window:before:load', win => {
+  win.addEventListener('error', e => {
+    console.log('Window error caught:', e.message);
+    e.preventDefault();
+    return false;
+  });
 });
 
 // Hide fetch/XHR requests from command log

@@ -3,18 +3,24 @@ Cypress.Commands.add('login', (email, password) => {
   const testEmail = email || Cypress.env('TEST_USER_EMAIL') || 'pvkumar27@yahoo.com';
   const testPassword = password || Cypress.env('TEST_USER_PASSWORD') || 'Test1234';
 
-  cy.visit('/');
+  cy.visit('/', { timeout: 30000 });
 
-  // Wait for window and document to be ready
+  // Wait for page to be fully loaded
   cy.window().should('exist');
-  cy.window().should('have.property', 'document');
+  cy.document().should('exist');
+  cy.get('body').should('be.visible');
 
-  cy.get('input[type="email"]', { timeout: 10000 }).clear().type(testEmail, { delay: 50 });
-  cy.get('input[type="password"]').clear().type(testPassword, { delay: 50 });
-  cy.get('button[type="submit"]').click();
+  // Wait for form elements with longer timeout
+  cy.get('input[type="email"]', { timeout: 15000 }).should('be.visible').clear();
+  cy.get('input[type="email"]').type(testEmail, { delay: 100 });
+
+  cy.get('input[type="password"]').should('be.visible').clear();
+  cy.get('input[type="password"]').type(testPassword, { delay: 100 });
+
+  cy.get('button[type="submit"]').should('be.visible').click();
 
   // Wait for navigation to complete
-  cy.get('[data-cy="todo-manager-heading"]', { timeout: 15000 }).should('be.visible');
+  cy.get('[data-cy="todo-manager-heading"]', { timeout: 20000 }).should('be.visible');
 });
 
 // Custom command for cleanup

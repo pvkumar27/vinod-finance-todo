@@ -17,7 +17,13 @@ module.exports = {
       TEST_USER_PASSWORD: process.env.TEST_USER_PASSWORD,
     },
     setupNodeEvents(on, config) {
-      // Node events setup (if needed)
+      on('before:browser:launch', (browser, launchOptions) => {
+        if (browser.name === 'electron') {
+          launchOptions.args.push('--disable-dev-shm-usage');
+          launchOptions.args.push('--no-sandbox');
+        }
+        return launchOptions;
+      });
     },
   },
 };
