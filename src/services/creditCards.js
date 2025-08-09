@@ -40,7 +40,7 @@ export const getCreditCards = async () => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
-    console.log('DEBUG: Current user:', user?.id);
+
     if (!user) throw new Error('Not authenticated');
 
     const { data, error } = await supabase
@@ -48,8 +48,6 @@ export const getCreditCards = async () => {
       .select('*')
       .eq('user_id', user.id)
       .order('created_at', { ascending: false });
-
-    console.log('DEBUG: Supabase query result:', { data, error });
 
     if (error) {
       throw new Error(`Failed to fetch credit cards: ${error.message}`);

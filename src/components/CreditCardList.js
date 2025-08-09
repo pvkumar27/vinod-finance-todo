@@ -48,11 +48,10 @@ const CreditCardList = () => {
     try {
       setLoading(true);
       const data = await getCreditCards();
-      console.log('DEBUG: getCreditCards returned:', data);
+
       setCards(data || []);
       await fetchReminders();
     } catch (err) {
-      console.error('DEBUG: getCreditCards error:', err);
       setError(`Failed to fetch cards: ${err.message}`);
     } finally {
       setLoading(false);
