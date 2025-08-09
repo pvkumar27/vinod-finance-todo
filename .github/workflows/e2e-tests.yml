@@ -72,17 +72,19 @@ jobs:
         CYPRESS_TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
         CYPRESS_TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
     
-    # Upload Cypress artifacts
+    # Upload Cypress artifacts only if they exist
     - uses: actions/upload-artifact@v4
-      if: always()
+      if: failure()
       with:
         name: cypress-screenshots
         path: cypress/screenshots/
         retention-days: 30
+        if-no-files-found: ignore
     
     - uses: actions/upload-artifact@v4
-      if: always()
+      if: failure()
       with:
         name: cypress-videos
         path: cypress/videos/
         retention-days: 30
+        if-no-files-found: ignore
