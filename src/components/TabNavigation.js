@@ -32,6 +32,7 @@ const TabNavigation = () => {
           {tabs.map(tab => (
             <button
               key={tab.id}
+              data-cy={`nav-${tab.id}-tab`}
               onClick={() => setActiveTab(tab.id)}
               className={`
                 flex items-center justify-center space-x-2 py-3 px-4 

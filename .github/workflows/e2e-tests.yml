@@ -23,11 +23,8 @@ jobs:
     - name: Install dependencies
       run: npm ci
     
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps chromium
-    
-    # Build the app
-    - name: Build app
+    # Build and start the app
+    - name: Build and start app
       run: |
         # Create .env file for build
         echo "REACT_APP_SUPABASE_URL=$REACT_APP_SUPABASE_URL" > .env
@@ -35,20 +32,9 @@ jobs:
         echo "REACT_APP_SITE_URL=http://localhost:3000" >> .env
         echo "REACT_APP_FIREBASE_API_KEY=${REACT_APP_FIREBASE_API_KEY:-dummy-key}" >> .env
         
-        # Build the app
+        # Build and start the app
         npm run build
-      env:
-        REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
-        REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
-        REACT_APP_SITE_URL: "http://localhost:3000"
-        REACT_APP_FIREBASE_API_KEY: ${{ secrets.REACT_APP_FIREBASE_API_KEY || 'dummy-key' }}
-    
-    # Start local server
-    - name: Start local server
-      run: |
-        echo "Starting server on port 3000"
-        npx serve -s build -l 3000 > server.log 2>&1 &
-        echo $! > server.pid
+        npx serve -s build -l 3000 &
         
         # Wait for server to start
         timeout=30
@@ -57,44 +43,48 @@ jobs:
             echo "Server failed to start"
             exit 1
           fi
-          echo "Waiting for server to start... ($timeout seconds left)"
+          echo "Waiting for server... ($timeout seconds left)"
           sleep 1
           timeout=$((timeout - 1))
         done
-        echo "Server is responding at http://localhost:3000"
-        sleep 5
-    
-    # Run full login test
-    - name: Run full login test
-      run: npx playwright test tests/e2e/auth/login.spec.js --project=chromium-desktop
+        echo "Server ready at http://localhost:3000"
       env:
-        BASE_URL: "http://localhost:3000"
-        TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
-        TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
         REACT_APP_SUPABASE_URL: ${{ secrets.REACT_APP_SUPABASE_URL }}
         REACT_APP_SUPABASE_ANON_KEY: ${{ secrets.REACT_APP_SUPABASE_ANON_KEY }}
+        REACT_APP_FIREBASE_API_KEY: ${{ secrets.REACT_APP_FIREBASE_API_KEY || 'dummy-key' }}
     
-    # Upload test reports
+    # Configure Git to eliminate warnings
+    - name: Configure Git
+      run: |
+        git config --global init.defaultBranch main
+        git config --global advice.detachedHead false
+    
+    # Update browser data
+    - name: Update browser data
+      run: npx update-browserslist-db@latest
+    
+    # Run Cypress tests
+    - name: Run E2E Tests
+      run: npm run test:e2e:essential
+      env:
+        TERM: xterm-256color
+        CYPRESS_baseUrl: http://localhost:3000
+        CYPRESS_TEST_USER_EMAIL: ${{ secrets.TEST_USER_EMAIL }}
+        CYPRESS_TEST_USER_PASSWORD: ${{ secrets.TEST_USER_PASSWORD }}
+    
+    # Upload Cypress artifacts
     - uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: playwright-report
-        path: tests/reports/
+        name: cypress-screenshots
+        path: cypress/screenshots/
         retention-days: 30
+        if-no-files-found: ignore
     
-    # Upload test videos
     - uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: test-videos
-        path: tests/test-results/**/video.webm
+        name: cypress-videos
+        path: cypress/videos/
         retention-days: 30
-    
-    # Upload server logs
-    - name: Upload server logs
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: server-logs
-        path: server.log
-        retention-days: 5
+        if-no-files-found: ignore

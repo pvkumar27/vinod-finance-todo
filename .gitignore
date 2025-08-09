@@ -3,6 +3,7 @@
 # dependencies
 /node_modules
 /netlify/functions/node_modules
+/mcp-server/node_modules
 /.pnp
 .pnp.js
 
@@ -50,6 +51,8 @@ videos/
 # Environment variables
 .env*
 !.env.example
+/mcp-server/.env
+!/mcp-server/.env.example
 
 # Debug logs
 debug.log
@@ -69,3 +72,32 @@ bin/
 
 # Local Netlify folder
 .netlify
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Package manager lock files (keep only one)
+package-lock.json
+yarn.lock
+
+# Cache directories
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+dist/
+tmp/
+temp/

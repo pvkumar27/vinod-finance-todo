@@ -308,7 +308,9 @@ const CreditCardList = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-1">💳 Credit Cards</h2>
+          <h2 data-cy="credit-cards-heading" className="text-2xl font-bold text-gray-900 mb-1">
+            💳 Credit Cards
+          </h2>
           <p className="text-sm text-gray-600">{sortedCards.length} cards total</p>
         </div>
         <div className="flex flex-wrap gap-3">
@@ -319,6 +321,7 @@ const CreditCardList = () => {
             onMessage={setMessage}
           />
           <button
+            data-cy="card-add-button"
             onClick={handleAddCard}
             className="px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-medium shadow-sm hover:shadow-md"
           >
@@ -384,6 +387,7 @@ const CreditCardList = () => {
         <div className="flex-1">
           <div className="relative">
             <input
+              data-cy="card-search-input"
               type="text"
               placeholder="Search by card name..."
               value={searchTerm}
@@ -409,6 +413,7 @@ const CreditCardList = () => {
           </select>
           <div className="flex bg-gray-100 rounded-lg p-1">
             <button
+              data-cy="view-cards-button"
               onClick={() => handleViewModeChange('cards')}
               className={`px-4 py-2 rounded text-sm font-medium transition-all duration-200 ${
                 viewMode === 'cards'
@@ -419,6 +424,7 @@ const CreditCardList = () => {
               📋 Cards
             </button>
             <button
+              data-cy="view-table-button"
               onClick={() => handleViewModeChange('table')}
               className={`px-4 py-2 rounded text-sm font-medium transition-all duration-200 ${
                 viewMode === 'table'
@@ -493,7 +499,10 @@ const CreditCardList = () => {
           </div>
         ) : (
           <div className="h-[600px] overflow-y-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+            <div
+              data-cy="card-grid"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6"
+            >
               {sortedCards.map(card => (
                 <div
                   key={card.id}
