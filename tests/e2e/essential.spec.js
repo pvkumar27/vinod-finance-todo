@@ -18,23 +18,23 @@ test.describe('Essential Application Tests', () => {
 
   test('should login and navigate between main tabs', async ({ page }) => {
     // Verify To-Dos tab (default)
-    await expect(page.locator('h2:has-text("To-Do Manager")')).toBeVisible();
+    await expect(page.locator('[data-cy="todo-manager-heading"]')).toBeVisible();
 
     // Navigate to Credit Cards
-    await page.click('button:has-text("Credit")');
-    await expect(page.locator('h2:has-text("Credit Cards")')).toBeVisible();
+    await page.click('[data-cy="nav-cards-tab"]');
+    await expect(page.locator('[data-cy="credit-cards-heading"]')).toBeVisible();
 
     // Navigate back to To-Dos
-    await page.click('button:has-text("To-Dos")');
-    await expect(page.locator('h2:has-text("To-Do Manager")')).toBeVisible();
+    await page.click('[data-cy="nav-todos-tab"]');
+    await expect(page.locator('[data-cy="todo-manager-heading"]')).toBeVisible();
   });
 
   test('should create and delete a todo', async ({ page }) => {
     const testData = generateTestData('todo');
 
     // Create todo
-    await page.fill('#task-input', testData.title);
-    await page.click('button:has-text("Add Task")');
+    await page.fill('[data-cy="task-input-field"]', testData.title);
+    await page.click('[data-cy="task-add-button"]');
     await page.waitForTimeout(1000);
 
     // Verify todo appears
@@ -55,10 +55,10 @@ test.describe('Essential Application Tests', () => {
     const testData = generateTestData('creditCard');
 
     // Navigate to Credit Cards
-    await page.click('button:has-text("Credit")');
+    await page.click('[data-cy="nav-cards-tab"]');
 
     // Create credit card
-    await page.click('button:has-text("Add Card")');
+    await page.click('[data-cy="card-add-button"]');
     await page.waitForTimeout(500);
 
     // Fill form (using more flexible selectors)
@@ -88,19 +88,19 @@ test.describe('Essential Application Tests', () => {
 
   test('should switch view modes', async ({ page }) => {
     // Test To-Dos view modes
-    await page.click('button:has-text("Table")');
+    await page.click('[data-cy="view-table-button"]');
     await expect(page.locator('table')).toBeVisible();
 
-    await page.click('button:has-text("Cards")');
-    await expect(page.locator('.task-container')).toBeVisible();
+    await page.click('[data-cy="view-cards-button"]');
+    await expect(page.locator('[data-cy="task-container"]')).toBeVisible();
 
     // Test Credit Cards view modes
-    await page.click('button:has-text("Credit")');
+    await page.click('[data-cy="nav-cards-tab"]');
 
-    await page.click('button:has-text("Table")');
+    await page.click('[data-cy="view-table-button"]');
     await expect(page.locator('table')).toBeVisible();
 
-    await page.click('button:has-text("Cards")');
-    await expect(page.locator('.grid')).toBeVisible();
+    await page.click('[data-cy="view-cards-button"]');
+    await expect(page.locator('[data-cy="card-grid"]')).toBeVisible();
   });
 });

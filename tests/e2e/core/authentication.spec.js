@@ -10,9 +10,9 @@ test.describe('Authentication', () => {
     await login(page);
 
     // Verify main app elements are visible
-    await expect(page.locator('h2:has-text("To-Do Manager")')).toBeVisible();
-    await expect(page.locator('button:has-text("To-Dos")')).toBeVisible();
-    await expect(page.locator('button:has-text("Credit")')).toBeVisible();
+    await expect(page.locator('[data-cy="todo-manager-heading"]')).toBeVisible();
+    await expect(page.locator('[data-cy="nav-todos-tab"]')).toBeVisible();
+    await expect(page.locator('[data-cy="nav-cards-tab"]')).toBeVisible();
   });
 
   test('should maintain session across page refreshes', async ({ page }) => {
@@ -22,7 +22,7 @@ test.describe('Authentication', () => {
     await page.reload();
 
     // Should still be logged in
-    await expect(page.locator('h2:has-text("To-Do Manager")')).toBeVisible();
+    await expect(page.locator('[data-cy="todo-manager-heading"]')).toBeVisible();
   });
 
   test('should logout successfully', async ({ page }) => {

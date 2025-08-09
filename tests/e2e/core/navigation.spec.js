@@ -12,17 +12,17 @@ test.describe('Navigation', () => {
 
   test('should navigate between tabs', async ({ page }) => {
     // Start on To-Dos tab (default)
-    await expect(page.locator('h2:has-text("To-Do Manager")')).toBeVisible();
+    await expect(page.locator('[data-cy="todo-manager-heading"]')).toBeVisible();
 
     // Navigate to Credit Cards
-    await page.click('button:has-text("Credit")');
+    await page.click('[data-cy="nav-cards-tab"]');
     await page.waitForTimeout(500);
-    await expect(page.locator('h2:has-text("Credit Cards")')).toBeVisible();
+    await expect(page.locator('[data-cy="credit-cards-heading"]')).toBeVisible();
 
     // Navigate back to To-Dos
-    await page.click('button:has-text("To-Dos")');
+    await page.click('[data-cy="nav-todos-tab"]');
     await page.waitForTimeout(500);
-    await expect(page.locator('h2:has-text("To-Do Manager")')).toBeVisible();
+    await expect(page.locator('[data-cy="todo-manager-heading"]')).toBeVisible();
   });
 
   test('should maintain active tab state', async ({ page }) => {
@@ -31,19 +31,19 @@ test.describe('Navigation', () => {
     await page.waitForTimeout(500);
 
     // Verify active tab styling
-    const activeTab = page.locator('button:has-text("Credit")');
+    const activeTab = page.locator('[data-cy="nav-cards-tab"]');
     await expect(activeTab).toHaveClass(/bg-gradient-to-r/);
   });
 
   test('should show correct content for each tab', async ({ page }) => {
     // To-Dos tab content
-    await page.click('button:has-text("To-Dos")');
-    await expect(page.locator('#task-input')).toBeVisible();
-    await expect(page.locator('button:has-text("Add Task")')).toBeVisible();
+    await page.click('[data-cy="nav-todos-tab"]');
+    await expect(page.locator('[data-cy="task-input-field"]')).toBeVisible();
+    await expect(page.locator('[data-cy="task-add-button"]')).toBeVisible();
 
     // Credit Cards tab content
-    await page.click('button:has-text("Credit")');
-    await expect(page.locator('button:has-text("Add Card")')).toBeVisible();
-    await expect(page.locator('input[placeholder*="Search"]')).toBeVisible();
+    await page.click('[data-cy="nav-cards-tab"]');
+    await expect(page.locator('[data-cy="card-add-button"]')).toBeVisible();
+    await expect(page.locator('[data-cy="card-search-input"]')).toBeVisible();
   });
 });

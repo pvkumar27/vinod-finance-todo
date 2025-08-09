@@ -337,12 +337,16 @@ const TaskManager = () => {
   return (
     <div className="p-4 md:p-6 bg-white rounded-lg shadow-lg max-w-3xl mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h2 className="text-2xl font-bold text-blue-700 flex items-center">
+        <h2
+          data-cy="todo-manager-heading"
+          className="text-2xl font-bold text-blue-700 flex items-center"
+        >
           <span className="mr-2">📝</span>
           To-Do Manager
         </h2>
         <div className="flex bg-gray-100 rounded-full p-1 w-full sm:w-auto shadow-inner">
           <button
+            data-cy="view-cards-button"
             onClick={() => setViewMode('cards')}
             className={`px-4 py-2 rounded-full text-sm transition-all flex-1 sm:flex-auto ${
               viewMode === 'cards'
@@ -353,6 +357,7 @@ const TaskManager = () => {
             📋 Cards
           </button>
           <button
+            data-cy="view-table-button"
             onClick={() => setViewMode('table')}
             className={`px-4 py-2 rounded-full text-sm transition-all flex-1 sm:flex-auto ${
               viewMode === 'table'
@@ -386,6 +391,7 @@ const TaskManager = () => {
             <div className="relative">
               <input
                 id="task-input"
+                data-cy="task-input-field"
                 type="text"
                 placeholder={editingTodo ? 'Edit task...' : 'Add a new task...'}
                 value={newTask}
@@ -416,6 +422,7 @@ const TaskManager = () => {
             <div className="flex items-center gap-2">
               <input
                 id="task-due-date"
+                data-cy="task-date-field"
                 type="date"
                 value={taskDate}
                 onChange={e => setTaskDate(e.target.value)}
@@ -434,6 +441,7 @@ const TaskManager = () => {
           <div className="flex flex-col w-full sm:w-auto justify-end mt-4 sm:mt-0">
             <button
               type="submit"
+              data-cy={editingTodo ? 'task-update-button' : 'task-add-button'}
               className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto text-sm font-medium shadow-md flex items-center justify-center"
             >
               <span className="mr-1">{editingTodo ? '✏️' : '➕'}</span>
@@ -470,7 +478,7 @@ const TaskManager = () => {
         {pendingTodos.length === 0 ? (
           <p className="text-gray-600 text-center py-8">No pending tasks. Great job! 🎉</p>
         ) : viewMode === 'cards' ? (
-          <div className="task-container">
+          <div data-cy="task-container" className="task-container">
             <DndContext
               sensors={sensors}
               collisionDetection={closestCenter}
