@@ -17,14 +17,7 @@ module.exports = {
       TEST_USER_PASSWORD: process.env.TEST_USER_PASSWORD,
     },
     setupNodeEvents(on, config) {
-      // Handle uncaught exceptions
-      on('uncaught:exception', (err, runnable) => {
-        // Ignore KeyboardEvent errors
-        if (err.message.includes('KeyboardEvent')) {
-          return false;
-        }
-        return true;
-      });
+      // Node events setup (if needed)
     },
   },
 };

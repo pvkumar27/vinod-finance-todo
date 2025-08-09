@@ -1,6 +1,15 @@
 // Import commands
 import './commands';
 
+// Handle uncaught exceptions
+Cypress.on('uncaught:exception', (err, runnable) => {
+  // Ignore KeyboardEvent errors
+  if (err.message.includes('KeyboardEvent')) {
+    return false;
+  }
+  return true;
+});
+
 // Hide fetch/XHR requests from command log
 const app = window.top;
 if (!app.document.head.querySelector('[data-hide-command-log-request]')) {
