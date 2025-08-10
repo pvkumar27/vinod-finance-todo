@@ -3,6 +3,19 @@
  */
 
 /**
+ * Shows a secure notification using custom event instead of alert()
+ * @param {string} title - Notification title
+ * @param {string} message - Notification message
+ */
+const showSecureNotification = (title, message) => {
+  // Dispatch custom event that can be handled by React components
+  const event = new CustomEvent('showPermissionNotification', {
+    detail: { title, message },
+  });
+  window.dispatchEvent(event);
+};
+
+/**
  * Opens browser settings for the specific browser
  * @returns {boolean} Whether the function was able to open settings
  */
@@ -21,17 +34,24 @@ export const openBrowserPermissionSettings = () => {
         window.open('edge://settings/content/notifications', '_blank');
         return true;
       case 'safari':
-        alert(
-          'For Safari: Go to Safari > Preferences > Websites > Notifications and allow this site.'
+        showSecureNotification(
+          'Safari Settings Required',
+          'Go to Safari > Preferences > Websites > Notifications and allow this site.'
         );
         return false;
       default:
-        alert('Please check your browser settings to enable notifications for this site.');
+        showSecureNotification(
+          'Browser Settings Required',
+          'Please check your browser settings to enable notifications for this site.'
+        );
         return false;
     }
   } catch (error) {
     console.error('Error opening browser settings:', error);
-    alert('Please manually open your browser settings and enable notifications for this site.');
+    showSecureNotification(
+      'Settings Error',
+      'Please manually open your browser settings and enable notifications for this site.'
+    );
     return false;
   }
 };
@@ -70,7 +90,6 @@ export const resetNotificationPermission = async () => {
       // 2. Unregister all service workers
       for (const registration of registrations) {
         await registration.unregister();
-        console.log('Service worker unregistered');
       }
 
       // 3. Clear site data (this requires user interaction)
@@ -79,7 +98,8 @@ export const resetNotificationPermission = async () => {
       if (browser === 'chrome' || browser === 'edge') {
         return openBrowserPermissionSettings();
       } else {
-        alert(
+        showSecureNotification(
+          'Permission Reset Required',
           'Please clear site data and cookies for this website to reset notification permissions.'
         );
         return false;

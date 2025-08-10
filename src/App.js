@@ -5,6 +5,7 @@ import { Home } from './pages';
 import { supabase } from './supabaseClient';
 import IOSInstallPrompt from './components/IOSInstallPrompt';
 import AIAssistant from './components/AIAssistant';
+import SecureNotification from './components/SecureNotification';
 import './App.css';
 import './styles/background.css';
 import './styles/typography.css';
@@ -70,6 +71,7 @@ function App() {
       </div>
       <IOSInstallPrompt />
       <AIAssistant />
+      <SecureNotification />
     </div>
   );
 }
