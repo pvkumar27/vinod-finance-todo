@@ -705,10 +705,11 @@ Key Parameters:
           task = query.replace(/add|create|todo|task|to|a/gi, '').trim();
         }
 
-        return api.addTodo({ task, priority: 'medium' }).then(todo => ({
+        const sanitizedTask = task.replace(/[<>"'&]/g, '').trim();
+        return api.addTodo({ task: sanitizedTask, priority: 'medium' }).then(todo => ({
           success: true,
           todo,
-          message: `Todo "${task}" added successfully`,
+          message: `Todo "${sanitizedTask}" added successfully`,
         }));
       } else {
         const filters = this.extractTodoFilters(lowerQuery);

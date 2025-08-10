@@ -115,16 +115,16 @@ class GeminiRouter {
       process.env.NODE_ENV === 'development' ||
       process.env.REACT_APP_ENABLE_AI_LOGGING === 'true'
     ) {
-      console.warn(
-        JSON.stringify({
-          event: 'model_switch',
-          from_model: from,
-          to_model: to,
-          reason,
-          request_id: requestId,
-          timestamp: new Date().toISOString(),
-        })
-      );
+      // Sanitize all logged data to prevent log injection
+      const sanitizedData = {
+        event: 'model_switch',
+        from_model: encodeURIComponent(String(from || 'unknown')),
+        to_model: encodeURIComponent(String(to || 'unknown')),
+        reason: encodeURIComponent(String(reason || 'unknown')),
+        request_id: encodeURIComponent(String(requestId || 'unknown')),
+        timestamp: new Date().toISOString(),
+      };
+      console.warn(JSON.stringify(sanitizedData));
     }
   }
 

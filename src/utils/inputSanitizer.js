@@ -42,6 +42,10 @@ export const validateTodoTask = task => {
  * @returns {string} - Sanitized card name
  */
 export const validateCardName = cardName => {
+  if (!cardName || typeof cardName !== 'string') {
+    return '';
+  }
+
   const sanitized = sanitizeInput(cardName);
 
   if (sanitized.length > 100) {
