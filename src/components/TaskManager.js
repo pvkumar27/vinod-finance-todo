@@ -11,7 +11,7 @@ import {
 } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { arrayMove } from '@dnd-kit/sortable';
-import { fetchTodos, addTodo, updateTodo, deleteTodo, updateTodoOrder } from '../services/todos';
+import { api } from '../services/api';
 import { parseInput } from '../utils/parseInput';
 import TaskList from './TaskList';
 
@@ -33,7 +33,7 @@ const TaskManager = () => {
 
   const loadTodos = async () => {
     try {
-      const data = await fetchTodos();
+      const data = await api.getTodos();
       setTodos(data || []);
     } catch (error) {
       console.error('Error loading todos:', error);
@@ -70,8 +70,6 @@ const TaskManager = () => {
     }, 300);
   };
 
-
-
   const handleAddTodo = async e => {
     e.preventDefault();
     if (!newTask.trim()) return;
@@ -79,7 +77,7 @@ const TaskManager = () => {
     try {
       if (editingTodo) {
         // When updating a task, use the date string directly
-        await updateTodo(editingTodo.id, {
+        await api.updateTodo(editingTodo.id, {
           task: newTask.trim(),
           due_date: taskDate, // YYYY-MM-DD format
         });
@@ -107,7 +105,7 @@ const TaskManager = () => {
           };
         }
 
-        await addTodo(todoData);
+        await api.addTodo(todoData);
         setMessage('✅ Task added successfully!');
         setTimeout(() => setMessage(''), 4000);
       }
@@ -124,7 +122,7 @@ const TaskManager = () => {
 
   const handleToggleComplete = async (id, completed) => {
     try {
-      await updateTodo(id, { completed: !completed });
+      await api.updateTodo(id, { completed: !completed });
       setMessage('✅ Task updated!');
       setTimeout(() => setMessage(''), 4000);
       loadTodos();
@@ -136,7 +134,7 @@ const TaskManager = () => {
 
   const handleTogglePin = async (id, pinned) => {
     try {
-      await updateTodo(id, { pinned: !pinned });
+      await api.updateTodo(id, { pinned: !pinned });
       setMessage(pinned ? '📌 Task unpinned!' : '📌 Task pinned!');
       setTimeout(() => setMessage(''), 4000);
       loadTodos();
@@ -148,7 +146,7 @@ const TaskManager = () => {
 
   const handleDelete = async id => {
     try {
-      await deleteTodo(id);
+      await api.deleteTodo(id);
       setMessage('✅ Task deleted!');
       setTimeout(() => setMessage(''), 4000);
       loadTodos();
@@ -224,7 +222,7 @@ const TaskManager = () => {
       setTodos(updatedTodos);
 
       // Update the order in the database
-      await updateTodoOrder(reorderedList);
+      await api.updateTodoOrder(reorderedList);
     } catch (err) {
       console.error('Error updating order:', err);
       setMessage(`❌ Error updating order: ${err?.message || 'Unknown error'}`);
@@ -245,9 +243,9 @@ const TaskManager = () => {
     const handleTodoAdded = () => {
       loadTodos();
     };
-    
+
     // Listen for AI-triggered view switches
-    const handleViewSwitch = (event) => {
+    const handleViewSwitch = event => {
       const { viewMode } = event.detail;
       setViewMode(viewMode);
     };
@@ -404,7 +402,9 @@ const TaskManager = () => {
         </div>
         <p className="text-xs text-gray-500 mt-2 flex items-center">
           <span className="mr-1">💡</span>
-          <span>Use natural language or ask <strong>FinBot 🤖</strong> for voice input</span>
+          <span>
+            Use natural language or ask <strong>FinBot 🤖</strong> for voice input
+          </span>
         </p>
       </form>
 

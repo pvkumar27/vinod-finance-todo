@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
+import { api } from '../services/api';
 import CreditCardForm from './CreditCardForm';
 import ReminderForm from './ReminderForm';
 import CreditCardExport from './CreditCardExport';
@@ -46,12 +47,7 @@ const CreditCardList = () => {
   const fetchCards = useCallback(async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('credit_cards_simplified')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const data = await api.getCreditCards();
       setCards(data || []);
       await fetchReminders();
     } catch (err) {
@@ -63,9 +59,9 @@ const CreditCardList = () => {
 
   useEffect(() => {
     fetchCards();
-    
+
     // Listen for AI-triggered credit card updates
-    const handleCreditCardUpdate = (event) => {
+    const handleCreditCardUpdate = event => {
       const { detail } = event;
       if (detail && detail.deleted && detail.cardId) {
         // Remove deleted card from state directly (like todos)
@@ -76,11 +72,39 @@ const CreditCardList = () => {
         fetchCards();
       }
     };
-    
+
+    // Listen for AI-triggered view switching
+    const handleViewSwitch = event => {
+      const { detail } = event;
+      if (detail && detail.viewMode && detail.source === 'ai') {
+        handleViewModeChange(detail.viewMode);
+      }
+    };
+
+    // Listen for AI-triggered sorting
+    const handleSortCards = event => {
+      const { detail } = event;
+      if (detail && detail.sortBy && detail.source === 'ai') {
+        const sortMapping = {
+          name: 'card_name',
+          days_inactive: 'days_inactive',
+          promo_count: 'promo_count',
+          last_used_newest: 'last_used_newest',
+          last_used_oldest: 'last_used_oldest',
+          last_used: 'last_used_newest',
+        };
+        setSortBy(sortMapping[detail.sortBy] || detail.sortBy);
+      }
+    };
+
     window.addEventListener('creditCardAdded', handleCreditCardUpdate);
-    
+    window.addEventListener('switchView', handleViewSwitch);
+    window.addEventListener('sortCards', handleSortCards);
+
     return () => {
       window.removeEventListener('creditCardAdded', handleCreditCardUpdate);
+      window.removeEventListener('switchView', handleViewSwitch);
+      window.removeEventListener('sortCards', handleSortCards);
     };
   }, [fetchCards]);
 
@@ -98,10 +122,7 @@ const CreditCardList = () => {
     if (!window.confirm(`Delete card ${card.bank_name} ${card.last_four_digits}?`)) return;
 
     try {
-      const { error } = await supabase.from('credit_cards_simplified').delete().eq('id', card.id);
-
-      if (error) throw error;
-
+      await api.deleteCreditCard(card.id);
       setCards(prev => prev.filter(c => c.id !== card.id));
       setSelectedCards(prev => prev.filter(id => id !== card.id));
       setMessage('✅ Card deleted successfully');
@@ -142,13 +163,7 @@ const CreditCardList = () => {
     if (!window.confirm(`Delete ${selectedCards.length} selected cards?`)) return;
 
     try {
-      const { error } = await supabase
-        .from('credit_cards_simplified')
-        .delete()
-        .in('id', selectedCards);
-
-      if (error) throw error;
-
+      await Promise.all(selectedCards.map(id => api.deleteCreditCard(id)));
       setCards(prev => prev.filter(c => !selectedCards.includes(c.id)));
       setSelectedCards([]);
       setSelectAll(false);

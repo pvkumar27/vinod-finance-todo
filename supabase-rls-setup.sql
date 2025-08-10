@@ -1,5 +1,5 @@
--- 1. Create credit_cards table (if it doesn't exist)
-CREATE TABLE IF NOT EXISTS credit_cards (
+-- 1. Create credit_cards_simplified table (if it doesn't exist)
+CREATE TABLE IF NOT EXISTS credit_cards_simplified (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
   card_name TEXT NOT NULL,
@@ -13,11 +13,11 @@ CREATE TABLE IF NOT EXISTS credit_cards (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
--- 2. Enable RLS on credit_cards table
-ALTER TABLE credit_cards ENABLE ROW LEVEL SECURITY;
+-- 2. Enable RLS on credit_cards_simplified table
+ALTER TABLE credit_cards_simplified ENABLE ROW LEVEL SECURITY;
 
 -- 3. Create policy for users to only access their own cards
-CREATE POLICY "Users can only access their own credit cards" ON credit_cards
+CREATE POLICY "Users can only access their own credit cards" ON credit_cards_simplified
   FOR ALL USING (auth.uid() = user_id);
 
 -- 4. Create function to automatically set user_id on insert
@@ -31,7 +31,7 @@ $$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- 5. Create trigger to automatically set user_id
 CREATE TRIGGER set_user_id_trigger
-  BEFORE INSERT ON credit_cards
+  BEFORE INSERT ON credit_cards_simplified
   FOR EACH ROW
   EXECUTE FUNCTION set_user_id();
 
@@ -45,7 +45,7 @@ END;
 $$ LANGUAGE plpgsql;
 
 -- 7. Create trigger for updated_at
-CREATE TRIGGER update_credit_cards_updated_at
-  BEFORE UPDATE ON credit_cards
+CREATE TRIGGER update_credit_cards_simplified_updated_at
+  BEFORE UPDATE ON credit_cards_simplified
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
