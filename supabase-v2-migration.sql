@@ -1,7 +1,7 @@
 -- v2.0.0 Migration: Add owner and sync_source fields, clear data
 
--- Add new columns to credit_cards table
-ALTER TABLE credit_cards 
+-- Add new columns to credit_cards_simplified table
+ALTER TABLE credit_cards_simplified 
 ADD COLUMN owner TEXT DEFAULT 'self',
 ADD COLUMN sync_source TEXT DEFAULT 'Manual';
 
@@ -11,7 +11,7 @@ ADD COLUMN owner TEXT DEFAULT 'self',
 ADD COLUMN sync_source TEXT DEFAULT 'Manual';
 
 -- Clear all existing data
-DELETE FROM credit_cards;
+DELETE FROM credit_cards_simplified;
 DELETE FROM expenses;
 
 -- Update RLS policies to ensure users only see their own data

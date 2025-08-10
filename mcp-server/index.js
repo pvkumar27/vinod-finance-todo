@@ -81,6 +81,10 @@ class FinTaskMCPServer {
             type: 'object',
             properties: {
               user_id: { type: 'string', description: 'User ID to filter cards' },
+              bank_name: {
+                type: 'string',
+                description: 'Filter by bank name (e.g., "Bank of America", "Chase")',
+              },
               inactive_only: {
                 type: 'boolean',
                 description: 'Show only inactive cards (90+ days)',
@@ -134,7 +138,11 @@ class FinTaskMCPServer {
       query = query.eq('priority', args.priority);
     }
 
-    query = query.order('created_at', { ascending: false });
+    // Use the same ordering as the common API
+    query = query
+      .order('pinned', { ascending: false })
+      .order('sort_order', { ascending: true, nullsLast: true })
+      .order('created_at', { ascending: false });
 
     const { data, error } = await query;
 
@@ -159,12 +167,26 @@ class FinTaskMCPServer {
   }
 
   async addTodo(args) {
+    // Get the highest sort_order value (same logic as common API)
+    const { data: maxOrderData } = await supabase
+      .from('todos')
+      .select('sort_order')
+      .order('sort_order', { ascending: false })
+      .limit(1);
+
+    const nextOrder =
+      maxOrderData && maxOrderData.length > 0 && maxOrderData[0].sort_order
+        ? maxOrderData[0].sort_order + 1
+        : 1;
+
     const todoData = {
       user_id: args.user_id,
       task: args.task,
       priority: args.priority || 'medium',
-      due_date: args.due_date || null,
+      due_date: args.due_date || new Date().toISOString().split('T')[0],
       completed: false,
+      sort_order: nextOrder,
+      pinned: false,
       created_at: new Date().toISOString(),
     };
 
@@ -191,7 +213,7 @@ class FinTaskMCPServer {
   }
 
   async getCreditCards(args) {
-    let query = supabase.from('credit_cards_manual').select('*');
+    let query = supabase.from('credit_cards_simplified').select('*');
 
     if (args.user_id) {
       query = query.eq('user_id', args.user_id);
@@ -203,14 +225,23 @@ class FinTaskMCPServer {
 
     let filteredData = data;
 
+    // Filter by bank name
+    if (args.bank_name) {
+      filteredData = filteredData.filter(card => {
+        const bankName = (card.bank_name || '').toLowerCase();
+        return bankName.includes(args.bank_name.toLowerCase());
+      });
+    }
+
     // Filter for inactive cards (90+ days)
     if (args.inactive_only) {
-      const ninetyDaysAgo = new Date();
-      ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-
-      filteredData = data.filter(card => {
-        if (!card.last_transaction_date) return true;
-        return new Date(card.last_transaction_date) < ninetyDaysAgo;
+      filteredData = filteredData.filter(card => {
+        if (card.days_inactive && card.days_inactive > 90) return true;
+        if (!card.last_used_date) return true;
+        const daysSince = Math.floor(
+          (new Date() - new Date(card.last_used_date)) / (1000 * 60 * 60 * 24)
+        );
+        return daysSince > 90;
       });
     }
 
@@ -219,9 +250,13 @@ class FinTaskMCPServer {
       const thirtyDaysFromNow = new Date();
       thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
 
-      filteredData = data.filter(card => {
-        if (!card.promo_end_date) return false;
-        return new Date(card.promo_end_date) <= thirtyDaysFromNow;
+      filteredData = filteredData.filter(card => {
+        if (!card.current_promos || !Array.isArray(card.current_promos)) return false;
+        return card.current_promos.some(promo => {
+          if (!promo.promo_expiry_date) return false;
+          const expiryDate = new Date(promo.promo_expiry_date);
+          return expiryDate <= thirtyDaysFromNow && expiryDate >= new Date();
+        });
       });
     }
 
@@ -233,7 +268,7 @@ class FinTaskMCPServer {
             {
               credit_cards: filteredData,
               count: filteredData.length,
-              summary: `Found ${filteredData.length} credit cards${args.inactive_only ? ' (inactive 90+ days)' : ''}${args.promo_expiring ? ' (promo expiring soon)' : ''}`,
+              summary: `Found ${filteredData.length} credit cards${args.bank_name ? ` from ${args.bank_name}` : ''}${args.inactive_only ? ' (inactive 90+ days)' : ''}${args.promo_expiring ? ' (promo expiring soon)' : ''}`,
             },
             null,
             2

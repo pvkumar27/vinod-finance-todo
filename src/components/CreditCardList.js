@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
-import { getCreditCards, deleteCreditCard } from '../services/creditCards';
+import { api } from '../services/api';
 import CreditCardForm from './CreditCardForm';
 import ReminderForm from './ReminderForm';
 import CreditCardExport from './CreditCardExport';
@@ -47,8 +47,7 @@ const CreditCardList = () => {
   const fetchCards = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await getCreditCards();
-
+      const data = await api.getCreditCards();
       setCards(data || []);
       await fetchReminders();
     } catch (err) {
@@ -74,10 +73,38 @@ const CreditCardList = () => {
       }
     };
 
+    // Listen for AI-triggered view switching
+    const handleViewSwitch = event => {
+      const { detail } = event;
+      if (detail && detail.viewMode && detail.source === 'ai') {
+        handleViewModeChange(detail.viewMode);
+      }
+    };
+
+    // Listen for AI-triggered sorting
+    const handleSortCards = event => {
+      const { detail } = event;
+      if (detail && detail.sortBy && detail.source === 'ai') {
+        const sortMapping = {
+          name: 'card_name',
+          days_inactive: 'days_inactive',
+          promo_count: 'promo_count',
+          last_used_newest: 'last_used_newest',
+          last_used_oldest: 'last_used_oldest',
+          last_used: 'last_used_newest',
+        };
+        setSortBy(sortMapping[detail.sortBy] || detail.sortBy);
+      }
+    };
+
     window.addEventListener('creditCardAdded', handleCreditCardUpdate);
+    window.addEventListener('switchView', handleViewSwitch);
+    window.addEventListener('sortCards', handleSortCards);
 
     return () => {
       window.removeEventListener('creditCardAdded', handleCreditCardUpdate);
+      window.removeEventListener('switchView', handleViewSwitch);
+      window.removeEventListener('sortCards', handleSortCards);
     };
   }, [fetchCards]);
 
@@ -95,7 +122,7 @@ const CreditCardList = () => {
     if (!window.confirm(`Delete card ${card.bank_name} ${card.last_four_digits}?`)) return;
 
     try {
-      await deleteCreditCard(card.id);
+      await api.deleteCreditCard(card.id);
       setCards(prev => prev.filter(c => c.id !== card.id));
       setSelectedCards(prev => prev.filter(id => id !== card.id));
       setMessage('✅ Card deleted successfully');
@@ -136,9 +163,7 @@ const CreditCardList = () => {
     if (!window.confirm(`Delete ${selectedCards.length} selected cards?`)) return;
 
     try {
-      for (const cardId of selectedCards) {
-        await deleteCreditCard(cardId);
-      }
+      await Promise.all(selectedCards.map(id => api.deleteCreditCard(id)));
       setCards(prev => prev.filter(c => !selectedCards.includes(c.id)));
       setSelectedCards([]);
       setSelectAll(false);
@@ -225,14 +250,14 @@ const CreditCardList = () => {
     localStorage.setItem('creditCardViewMode', mode);
   };
 
-  const getInactivityBadge = useCallback((daysInactive, lastUsedDate) => {
+  const getInactivityBadge = (daysInactive, lastUsedDate) => {
     if (daysInactive) return daysInactive > 90;
     if (!lastUsedDate) return true;
     const daysSince = Math.floor((new Date() - new Date(lastUsedDate)) / (1000 * 60 * 60 * 24));
     return daysSince > 90;
-  }, []);
+  };
 
-  const getPromoExpiryBadge = useCallback(currentPromos => {
+  const getPromoExpiryBadge = currentPromos => {
     if (!currentPromos || !Array.isArray(currentPromos)) return false;
     return currentPromos.some(promo => {
       if (!promo.promo_expiry_date) return false;
@@ -243,62 +268,58 @@ const CreditCardList = () => {
       const daysUntil = Math.floor((expiryDate - today) / (1000 * 60 * 60 * 24));
       return daysUntil <= 30 && daysUntil >= 0;
     });
-  }, []);
+  };
 
-  const filteredCards = useMemo(() => {
-    return cards.filter(card => {
-      const matchesSearch = (card.bank_name + ' ' + card.last_four_digits)
-        ?.toLowerCase()
-        .includes(searchTerm.toLowerCase());
+  const filteredCards = cards.filter(card => {
+    const matchesSearch = (card.bank_name + ' ' + card.last_four_digits)
+      ?.toLowerCase()
+      .includes(searchTerm.toLowerCase());
 
-      if (activeTab === 'promo') {
-        return matchesSearch && getPromoExpiryBadge(card.current_promos);
-      }
-      if (activeTab === 'inactive') {
-        return matchesSearch && getInactivityBadge(card.days_inactive, card.last_used_date);
-      }
-      return matchesSearch;
-    });
-  }, [cards, searchTerm, activeTab, getPromoExpiryBadge, getInactivityBadge]);
+    if (activeTab === 'promo') {
+      return matchesSearch && getPromoExpiryBadge(card.current_promos);
+    }
+    if (activeTab === 'inactive') {
+      return matchesSearch && getInactivityBadge(card.days_inactive, card.last_used_date);
+    }
+    return matchesSearch;
+  });
 
-  const sortedCards = useMemo(() => {
-    return [...filteredCards].sort((a, b) => {
-      if (sortBy === 'card_name') {
-        return ((a.bank_name || '') + ' ' + (a.last_four_digits || '')).localeCompare(
-          (b.bank_name || '') + ' ' + (b.last_four_digits || '')
-        );
-      }
-      if (sortBy === 'days_inactive') {
-        return (b.days_inactive || 0) - (a.days_inactive || 0);
-      }
-      if (sortBy === 'promo_count') {
-        const aCount = a.promo_end_date ? 1 : 0;
-        const bCount = b.promo_end_date ? 1 : 0;
-        return bCount - aCount;
-      }
-      if (sortBy === 'last_used_newest') {
-        return (
-          new Date(b.last_used_date || '1900-01-01') - new Date(a.last_used_date || '1900-01-01')
-        );
-      }
-      if (sortBy === 'last_used_oldest') {
-        return (
-          new Date(a.last_used_date || '9999-12-31') - new Date(b.last_used_date || '9999-12-31')
-        );
-      }
-      return 0;
-    });
-  }, [filteredCards, sortBy]);
+  const sortedCards = [...filteredCards].sort((a, b) => {
+    if (sortBy === 'card_name') {
+      return ((a.bank_name || '') + ' ' + (a.last_four_digits || '')).localeCompare(
+        (b.bank_name || '') + ' ' + (b.last_four_digits || '')
+      );
+    }
+    if (sortBy === 'days_inactive') {
+      return (b.days_inactive || 0) - (a.days_inactive || 0);
+    }
+    if (sortBy === 'promo_count') {
+      const aCount = a.promo_end_date ? 1 : 0;
+      const bCount = b.promo_end_date ? 1 : 0;
+      return bCount - aCount;
+    }
+    if (sortBy === 'last_used_newest') {
+      return (
+        new Date(b.last_used_date || '1900-01-01') - new Date(a.last_used_date || '1900-01-01')
+      );
+    }
+    if (sortBy === 'last_used_oldest') {
+      return (
+        new Date(a.last_used_date || '9999-12-31') - new Date(b.last_used_date || '9999-12-31')
+      );
+    }
+    return 0;
+  });
 
-  const formatCurrency = useCallback(amount => {
+  const formatCurrency = amount => {
     return amount ? `$${amount.toLocaleString()}` : '-';
-  }, []);
+  };
 
-  const formatDate = useCallback(date => {
+  const formatDate = date => {
     if (!date || date === '1970-01-01') return '-';
     const parsedDate = new Date(date);
     return isNaN(parsedDate.getTime()) ? '-' : parsedDate.toLocaleDateString();
-  }, []);
+  };
 
   if (loading) {
     return (
@@ -718,4 +739,4 @@ const CreditCardList = () => {
   );
 };
 
-export default React.memo(CreditCardList);
+export default CreditCardList;

@@ -4,7 +4,7 @@
 CREATE TABLE IF NOT EXISTS credit_card_reminders (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
-  card_id uuid NOT NULL REFERENCES credit_cards_manual(id) ON DELETE CASCADE,
+  card_id uuid NOT NULL REFERENCES credit_cards_simplified(id) ON DELETE CASCADE,
   type text NOT NULL CHECK (type IN ('Inactivity Warning', 'Promo Expiry', 'Payment Due')),
   date date NOT NULL,
   note text,
