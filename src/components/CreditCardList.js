@@ -40,7 +40,10 @@ const CreditCardList = () => {
       if (error) throw error;
       setReminders(data || []);
     } catch (err) {
-      console.error('Failed to fetch reminders:', err.message);
+      console.error(
+        'Failed to fetch reminders:',
+        encodeURIComponent(err.message || 'Unknown error')
+      );
     }
   }, []);
 

@@ -705,6 +705,9 @@ Key Parameters:
           task = query.replace(/add|create|todo|task|to|a/gi, '').trim();
         }
 
+        // Sanitize task to prevent XSS
+        task = task.replace(/[<>"'&]/g, '').trim();
+
         const sanitizedTask = task.replace(/[<>"'&]/g, '').trim();
         return api.addTodo({ task: sanitizedTask, priority: 'medium' }).then(todo => ({
           success: true,

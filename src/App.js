@@ -19,19 +19,31 @@ function App() {
 
   useEffect(() => {
     // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setLoading(false);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        setSession(session);
+        setLoading(false);
+      })
+      .catch(error => {
+        console.error('Auth session error:', encodeURIComponent(error.message || 'Unknown error'));
+        setLoading(false);
+      });
 
     // Listen for auth changes
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setLoading(false);
-
-      // User session established
+      try {
+        setSession(session);
+        setLoading(false);
+      } catch (error) {
+        console.error(
+          'Auth state change error:',
+          encodeURIComponent(error.message || 'Unknown error')
+        );
+        setLoading(false);
+      }
     });
 
     return () => subscription.unsubscribe();
