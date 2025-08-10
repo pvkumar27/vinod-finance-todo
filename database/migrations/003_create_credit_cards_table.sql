@@ -1,10 +1,10 @@
--- Migration: Create credit_cards table for v3.0.0
+-- Migration: Create credit_cards_simplified table for v3.0.0
 -- Description: Support both Plaid-synced and manual credit card entries
 -- Privacy: Only stores last 4 digits of card numbers
 -- Features: Owner tracking, autopay status, Plaid integration ready
 
--- Create credit_cards table
-create table if not exists credit_cards (
+-- Create credit_cards_simplified table
+create table if not exists credit_cards_simplified (
   id uuid primary key default uuid_generate_v4(),
   user_id uuid references auth.users(id),
   bank_name text,
@@ -35,21 +35,21 @@ create table if not exists credit_cards (
 );
 
 -- Enable Row Level Security
-alter table credit_cards enable row level security;
+alter table credit_cards_simplified enable row level security;
 
 -- RLS Policies for user isolation
 do $$ begin
-  if not exists (select 1 from pg_policies where tablename = 'credit_cards' and policyname = 'Select own cards') then
-    create policy "Select own cards" on credit_cards for select using (user_id = auth.uid());
+  if not exists (select 1 from pg_policies where tablename = 'credit_cards_simplified' and policyname = 'Select own cards') then
+    create policy "Select own cards" on credit_cards_simplified for select using (user_id = auth.uid());
   end if;
-  if not exists (select 1 from pg_policies where tablename = 'credit_cards' and policyname = 'Insert own cards') then
-    create policy "Insert own cards" on credit_cards for insert with check (user_id = auth.uid());
+  if not exists (select 1 from pg_policies where tablename = 'credit_cards_simplified' and policyname = 'Insert own cards') then
+    create policy "Insert own cards" on credit_cards_simplified for insert with check (user_id = auth.uid());
   end if;
-  if not exists (select 1 from pg_policies where tablename = 'credit_cards' and policyname = 'Update own cards') then
-    create policy "Update own cards" on credit_cards for update using (user_id = auth.uid());
+  if not exists (select 1 from pg_policies where tablename = 'credit_cards_simplified' and policyname = 'Update own cards') then
+    create policy "Update own cards" on credit_cards_simplified for update using (user_id = auth.uid());
   end if;
-  if not exists (select 1 from pg_policies where tablename = 'credit_cards' and policyname = 'Delete own cards') then
-    create policy "Delete own cards" on credit_cards for delete using (user_id = auth.uid());
+  if not exists (select 1 from pg_policies where tablename = 'credit_cards_simplified' and policyname = 'Delete own cards') then
+    create policy "Delete own cards" on credit_cards_simplified for delete using (user_id = auth.uid());
   end if;
 end $$;
 
@@ -62,12 +62,12 @@ begin
 end;
 $$ language plpgsql;
 
-drop trigger if exists update_credit_cards_updated_at on credit_cards;
-create trigger update_credit_cards_updated_at
-before update on credit_cards
+drop trigger if exists update_credit_cards_simplified_updated_at on credit_cards_simplified;
+create trigger update_credit_cards_simplified_updated_at
+before update on credit_cards_simplified
 for each row execute function update_updated_at_column();
 
 -- Add indexes for performance
-create index if not exists idx_credit_cards_user_id on credit_cards(user_id);
-create index if not exists idx_credit_cards_plaid_account_id on credit_cards(plaid_account_id);
-create index if not exists idx_credit_cards_sync_source on credit_cards(sync_source);
+create index if not exists idx_credit_cards_simplified_user_id on credit_cards_simplified(user_id);
+create index if not exists idx_credit_cards_simplified_plaid_account_id on credit_cards_simplified(plaid_account_id);
+create index if not exists idx_credit_cards_simplified_sync_source on credit_cards_simplified(sync_source);

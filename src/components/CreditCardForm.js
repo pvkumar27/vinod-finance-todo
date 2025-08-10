@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../supabaseClient';
+import { api } from '../services/api';
 
 const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
   const [formData, setFormData] = useState({
@@ -101,11 +101,6 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
     setError('');
 
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) throw new Error('User not authenticated');
-
       // Calculate days_inactive based on last_used_date
       let calculatedDaysInactive = null;
       if (formData.last_used_date) {
@@ -116,8 +111,6 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
       }
 
       const dataToSave = {
-        user_id: user.id,
-        card_name: `${formData.bank_name} ${formData.last_four_digits}`,
         bank_name: formData.bank_name,
         card_type: formData.card_type,
         card_holder: formData.card_holder,
@@ -138,19 +131,13 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
       let result;
       if (card && card.id) {
         // Update existing card
-        result = await supabase
-          .from('credit_cards_simplified')
-          .update(dataToSave)
-          .eq('id', card.id)
-          .select();
+        result = await api.updateCreditCard(card.id, dataToSave);
       } else {
         // Insert new card
-        result = await supabase.from('credit_cards_simplified').insert([dataToSave]).select();
+        result = await api.addCreditCard(dataToSave);
       }
 
-      if (result.error) throw result.error;
-
-      onSave(result.data[0]);
+      onSave(result);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -191,11 +178,20 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-2 sm:p-4 overflow-y-auto">
       <div className="bg-white rounded-xl max-w-3xl w-full my-4 max-h-[calc(100vh-2rem)] overflow-y-auto shadow-2xl">
         {/* Header */}
-        <div className="p-6 text-center border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
-          <h2 className="text-2xl font-bold text-gray-900 flex items-center justify-center">
-            {card ? '✏️ Edit Credit Card' : '💳 Add New Credit Card'}
-          </h2>
-          <p className="text-sm text-gray-600 mt-1">Enter your credit card details below</p>
+        <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+          <div className="text-center flex-1">
+            <h2 className="text-2xl font-bold text-gray-900 flex items-center justify-center">
+              {card ? '✏️ Edit Credit Card' : '💳 Add New Credit Card'}
+            </h2>
+            <p className="text-sm text-gray-600 mt-1">Enter your credit card details below</p>
+          </div>
+          <button
+            type="button"
+            onClick={onCancel}
+            className="text-gray-400 hover:text-gray-600 text-2xl p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+          >
+            ×
+          </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">

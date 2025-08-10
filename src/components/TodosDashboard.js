@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { fetchTodos } from '../services/todos';
+import { api } from '../services/api';
 import DashboardCard from './DashboardCard';
 
 const TodosDashboard = ({ onClose }) => {
@@ -12,7 +12,7 @@ const TodosDashboard = ({ onClose }) => {
 
   const loadTodos = async () => {
     try {
-      const data = await fetchTodos();
+      const data = await api.getTodos();
       setTodos(data || []);
     } catch (error) {
       console.error('Error loading todos:', error);
@@ -25,7 +25,10 @@ const TodosDashboard = ({ onClose }) => {
     totalTodos: todos.length,
     completedTodos: todos.filter(todo => todo.completed).length,
     pendingTodos: todos.filter(todo => !todo.completed).length,
-    completionRate: todos.length > 0 ? ((todos.filter(todo => todo.completed).length / todos.length) * 100).toFixed(1) : 0,
+    completionRate:
+      todos.length > 0
+        ? ((todos.filter(todo => todo.completed).length / todos.length) * 100).toFixed(1)
+        : 0,
   };
 
   const priorityTodos = todos.filter(todo => !todo.completed && todo.priority === 'high');
@@ -57,40 +60,33 @@ const TodosDashboard = ({ onClose }) => {
         <div className="p-6 border-b border-gray-200">
           <div className="flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-900">✅ To-Dos Dashboard</h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 text-2xl"
-            >
+            <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl">
               ×
             </button>
           </div>
         </div>
-        
+
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <DashboardCard
-              title="Total Tasks"
-              value={stats.totalTodos}
-              icon="📋"
-              color="primary"
-            />
+            <DashboardCard title="Total Tasks" value={stats.totalTodos} icon="📋" color="primary" />
             <DashboardCard
               title="Completed"
               value={stats.completedTodos}
               icon="✅"
               color="success"
             />
-            <DashboardCard
-              title="Pending"
-              value={stats.pendingTodos}
-              icon="⏳"
-              color="warning"
-            />
+            <DashboardCard title="Pending" value={stats.pendingTodos} icon="⏳" color="warning" />
             <DashboardCard
               title="Completion Rate"
               value={`${stats.completionRate}%`}
               icon="📊"
-              color={stats.completionRate >= 80 ? 'success' : stats.completionRate >= 50 ? 'warning' : 'danger'}
+              color={
+                stats.completionRate >= 80
+                  ? 'success'
+                  : stats.completionRate >= 50
+                    ? 'warning'
+                    : 'danger'
+              }
             />
           </div>
 
@@ -104,8 +100,11 @@ const TodosDashboard = ({ onClose }) => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {dueTodos.slice(0, 3).map((todo) => (
-                    <div key={todo.id} className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg">
+                  {dueTodos.slice(0, 3).map(todo => (
+                    <div
+                      key={todo.id}
+                      className="flex items-center justify-between p-3 bg-red-50 border border-red-200 rounded-lg"
+                    >
                       <div>
                         <p className="font-medium text-red-900">{todo.title}</p>
                         <p className="text-sm text-red-600">Overdue</p>
@@ -113,8 +112,11 @@ const TodosDashboard = ({ onClose }) => {
                       <span className="text-2xl">🚨</span>
                     </div>
                   ))}
-                  {priorityTodos.slice(0, 3).map((todo) => (
-                    <div key={todo.id} className="flex items-center justify-between p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                  {priorityTodos.slice(0, 3).map(todo => (
+                    <div
+                      key={todo.id}
+                      className="flex items-center justify-between p-3 bg-orange-50 border border-orange-200 rounded-lg"
+                    >
                       <div>
                         <p className="font-medium text-orange-900">{todo.title}</p>
                         <p className="text-sm text-orange-600">High Priority</p>
@@ -135,8 +137,11 @@ const TodosDashboard = ({ onClose }) => {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {recentCompleted.map((todo) => (
-                    <div key={todo.id} className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                  {recentCompleted.map(todo => (
+                    <div
+                      key={todo.id}
+                      className="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg"
+                    >
                       <div>
                         <p className="font-medium text-green-900">{todo.title}</p>
                         <p className="text-sm text-green-600">
@@ -155,10 +160,12 @@ const TodosDashboard = ({ onClose }) => {
           <div className="mt-6 p-4 bg-gray-50 rounded-lg">
             <div className="flex justify-between items-center mb-2">
               <span className="text-sm font-medium text-gray-700">Overall Progress</span>
-              <span className="text-sm text-gray-500">{stats.completedTodos} of {stats.totalTodos} completed</span>
+              <span className="text-sm text-gray-500">
+                {stats.completedTodos} of {stats.totalTodos} completed
+              </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-3">
-              <div 
+              <div
                 className="bg-green-500 h-3 rounded-full transition-all duration-300"
                 style={{ width: `${stats.completionRate}%` }}
               ></div>
