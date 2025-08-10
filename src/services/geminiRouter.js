@@ -110,16 +110,22 @@ class GeminiRouter {
   }
 
   logModelSwitch(from, to, reason, requestId) {
-    console.warn(
-      JSON.stringify({
-        event: 'model_switch',
-        from_model: from,
-        to_model: to,
-        reason,
-        request_id: requestId,
-        timestamp: new Date().toISOString(),
-      })
-    );
+    // Only log in development or when explicitly enabled
+    if (
+      process.env.NODE_ENV === 'development' ||
+      process.env.REACT_APP_ENABLE_AI_LOGGING === 'true'
+    ) {
+      console.warn(
+        JSON.stringify({
+          event: 'model_switch',
+          from_model: from,
+          to_model: to,
+          reason,
+          request_id: requestId,
+          timestamp: new Date().toISOString(),
+        })
+      );
+    }
   }
 
   async makeRequest(prompt, intentMeta = {}) {

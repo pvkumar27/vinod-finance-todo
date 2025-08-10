@@ -1,6 +1,7 @@
 import { api } from './api.js';
 import { geminiRouter } from './geminiRouter.js';
 import { features } from '../config/features.js';
+import { validateTodoTask, validateCardName } from '../utils/inputSanitizer.js';
 
 const GEMINI_API_KEY = process.env.REACT_APP_GEMINI_API_KEY;
 
@@ -219,7 +220,10 @@ Key Parameters:
 
       return result;
     } catch (error) {
-      console.log('Gemini failed, using fallback:', error.message || error);
+      // Log error for debugging (production should use proper logger)
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Gemini failed, using fallback:', error.message || error);
+      }
       const fallbackResult = await this.fallbackProcess(query);
       fallbackResult.processingMode = 'fallback';
       return fallbackResult;
@@ -269,9 +273,10 @@ Key Parameters:
         };
 
       case 'add_todo':
-        // Validate and clean params for todo creation
+        // Validate and sanitize params for todo creation
+        const sanitizedTask = validateTodoTask(params.task);
         const todoData = {
-          task: params.task,
+          task: sanitizedTask,
         };
 
         // Only add due_date if provided
@@ -279,9 +284,7 @@ Key Parameters:
           todoData.due_date = params.due_date;
         }
 
-        if (!todoData.task) {
-          throw new Error('Task text is required');
-        }
+        // Task is already validated by validateTodoTask
 
         const todo = await api.addTodo(todoData);
         return {
@@ -381,20 +384,7 @@ Key Parameters:
         } else {
           throw new Error('Todo ID or task name is required for updates');
         }
-
-        const updateData = {};
-        if (params.task) updateData.task = params.task;
-        if (params.priority) updateData.priority = params.priority;
-        if (params.completed !== undefined) updateData.completed = params.completed;
-        if (params.due_date) updateData.due_date = params.due_date;
-        if (params.pinned !== undefined) updateData.pinned = params.pinned;
-
-        const updatedTodo = await api.updateTodo(todoToUpdate.id, updateData);
-        return {
-          success: true,
-          todo: updatedTodo,
-          message: `Todo updated successfully`,
-        };
+        break;
 
       case 'delete_todos':
         const todosToDelete = await api.getTodos(params);
@@ -426,11 +416,17 @@ Key Parameters:
         };
 
       case 'add_credit_card':
-        const newCard = await api.addCreditCard(params);
+        // Sanitize card name if provided
+        const sanitizedParams = { ...params };
+        if (params.card_name) {
+          sanitizedParams.card_name = validateCardName(params.card_name);
+        }
+
+        const newCard = await api.addCreditCard(sanitizedParams);
         return {
           success: true,
           credit_card: newCard,
-          message: `Credit card "${params.card_name}" added successfully`,
+          message: `Credit card "${sanitizedParams.card_name || 'Card'}" added successfully`,
         };
 
       case 'update_credit_card':
