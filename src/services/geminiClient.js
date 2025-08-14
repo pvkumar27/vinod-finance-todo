@@ -524,7 +524,7 @@ Key Parameters:
           const daysSince = Math.floor(
             (new Date() - new Date(c.last_used_date)) / (1000 * 60 * 60 * 24)
           );
-          return daysSince > 90;
+          return daysSince >= 90;
         });
 
         if (inactiveCards.length > 0) {

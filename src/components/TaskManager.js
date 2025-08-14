@@ -299,7 +299,7 @@ const TaskManager = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h2
           data-cy="todo-manager-heading"
-          className="text-3xl font-bold text-white flex items-center"
+          className="text-3xl font-bold text-gray-800 flex items-center"
         >
           <span className="mr-3 text-4xl">📝</span>
           To-Do Manager
@@ -345,7 +345,7 @@ const TaskManager = () => {
             <div className="flex-1 relative">
               <label
                 htmlFor="task-input"
-                className="text-sm font-medium text-gray-300 mb-2 block text-left"
+                className="text-sm font-medium text-gray-700 mb-2 block text-left"
               >
                 Task
               </label>
@@ -362,7 +362,7 @@ const TaskManager = () => {
             <div className="flex flex-col w-full sm:w-auto">
               <label
                 htmlFor="task-due-date"
-                className="text-sm font-medium text-gray-300 mb-2 text-left block"
+                className="text-sm font-medium text-gray-700 mb-2 text-left block"
               >
                 Due Date
               </label>
@@ -400,10 +400,10 @@ const TaskManager = () => {
               )}
             </div>
           </div>
-          <p className="text-xs text-gray-400 mt-4 flex items-center">
+          <p className="text-xs text-gray-600 mt-4 flex items-center">
             <span className="mr-2">💡</span>
             <span>
-              Use natural language or ask <strong className="text-purple-400">FinBot 🤖</strong> for
+              Use natural language or ask <strong className="text-purple-600">FinBot 🤖</strong> for
               voice input
             </span>
           </p>
@@ -412,14 +412,14 @@ const TaskManager = () => {
 
       {/* Tasks */}
       <div className="mb-8">
-        <h3 className="text-xl font-bold text-white mb-6">
+        <h3 className="text-xl font-bold text-gray-800 mb-6">
           Tasks ({pendingTodos.length} pending, {todos.filter(t => t.completed).length} completed)
         </h3>
 
         {pendingTodos.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-6xl mb-4 cleo-animate-float">🎉</div>
-            <p className="text-xl text-gray-300">No pending tasks. Great job!</p>
+            <p className="text-xl text-gray-600">No pending tasks. Great job!</p>
           </div>
         ) : viewMode === 'cards' ? (
           <div data-cy="task-container" className="task-container">
@@ -434,7 +434,7 @@ const TaskManager = () => {
               {/* Pinned Tasks Section */}
               {pinnedTodos.length > 0 && (
                 <div className="mb-6">
-                  <h4 className="text-lg font-semibold text-yellow-400 mb-4 flex items-center">
+                  <h4 className="text-lg font-semibold text-yellow-600 mb-4 flex items-center">
                     <span className="mr-3">📌</span>
                     Pinned Tasks
                   </h4>
@@ -495,16 +495,16 @@ const TaskManager = () => {
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-white/5">
-                  <th className="border-b border-white/10 px-4 py-3 text-left text-sm font-semibold text-gray-300">
+                  <th className="border-b border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">
                     Status
                   </th>
-                  <th className="border-b border-white/10 px-4 py-3 text-left text-sm font-semibold text-gray-300">
+                  <th className="border-b border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">
                     Task
                   </th>
-                  <th className="border-b border-white/10 px-4 py-3 text-left text-sm font-semibold text-gray-300">
+                  <th className="border-b border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">
                     Due Date
                   </th>
-                  <th className="border-b border-white/10 px-4 py-3 text-left text-sm font-semibold text-gray-300">
+                  <th className="border-b border-gray-200 px-4 py-3 text-left text-sm font-semibold text-gray-700">
                     Actions
                   </th>
                 </tr>
@@ -683,11 +683,11 @@ const TaskManager = () => {
             onClick={() => setShowCompleted(!showCompleted)}
             className="cleo-card flex items-center justify-between w-full p-4 hover:transform hover:scale-[1.02] transition-all duration-300 mb-6"
           >
-            <h3 className="text-xl font-bold text-white">
+            <h3 className="text-xl font-bold text-gray-800">
               Completed Tasks ({todos.filter(t => t.completed).length})
             </h3>
             <svg
-              className={`w-6 h-6 text-gray-300 transition-transform ${showCompleted ? 'rotate-180' : ''}`}
+              className={`w-6 h-6 text-gray-600 transition-transform ${showCompleted ? 'rotate-180' : ''}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -718,8 +718,8 @@ const TaskManager = () => {
                         className="w-4 h-4 text-green-500 rounded"
                       />
                       <div className="flex flex-wrap sm:flex-nowrap items-center">
-                        <span className="line-through text-gray-300 text-sm">{todo.task}</span>
-                        <span className="text-xs text-gray-400 ml-2 whitespace-nowrap">
+                        <span className="line-through text-gray-600 text-sm">{todo.task}</span>
+                        <span className="text-xs text-gray-500 ml-2 whitespace-nowrap">
                           Completed: {formatDateString(todo.updated_at)}
                         </span>
                       </div>

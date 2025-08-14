@@ -170,10 +170,20 @@ const MainApp = () => {
   const generateProactiveAlerts = async () => {
     const alerts = [];
     try {
-      const inactiveCards = await mcpClient.callTool('get_credit_cards', { inactive_only: true });
-      if (inactiveCards.credit_cards && inactiveCards.credit_cards.length > 0) {
+      const allCards = await mcpClient.callTool('get_credit_cards', {});
+      const inactiveCards = allCards.credit_cards
+        ? allCards.credit_cards.filter(card => {
+            if (!card.last_used_date) return true;
+            const daysSince = Math.floor(
+              (new Date() - new Date(card.last_used_date)) / (1000 * 60 * 60 * 24)
+            );
+            return daysSince >= 90;
+          })
+        : [];
+
+      if (inactiveCards.length > 0) {
         alerts.push({
-          message: `${inactiveCards.credit_cards.length} credit card${inactiveCards.credit_cards.length > 1 ? "s haven't" : " hasn't"} been used in 90+ days`,
+          message: `${inactiveCards.length} credit card${inactiveCards.length > 1 ? "s haven't" : " hasn't"} been used in 90+ days`,
         });
       }
 
@@ -388,8 +398,10 @@ const MainApp = () => {
             <div className="flex space-x-8">
               <button
                 onClick={() => setActiveTab('chat')}
-                className={`flex flex-col items-center space-y-1 ${
-                  activeTab === 'chat' ? 'text-purple-600' : 'text-gray-400'
+                className={`flex flex-col items-center space-y-1 px-4 py-2 rounded-lg transition-all duration-200 ${
+                  activeTab === 'chat'
+                    ? 'text-purple-600 bg-purple-50'
+                    : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
                 <span className="text-xl">💬</span>
@@ -397,8 +409,10 @@ const MainApp = () => {
               </button>
               <button
                 onClick={() => setActiveTab('todos')}
-                className={`flex flex-col items-center space-y-1 ${
-                  activeTab === 'todos' ? 'text-purple-600' : 'text-gray-400'
+                className={`flex flex-col items-center space-y-1 px-4 py-2 rounded-lg transition-all duration-200 ${
+                  activeTab === 'todos'
+                    ? 'text-purple-600 bg-purple-50'
+                    : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
                 <span className="text-xl">✅</span>
@@ -406,8 +420,10 @@ const MainApp = () => {
               </button>
               <button
                 onClick={() => setActiveTab('cards')}
-                className={`flex flex-col items-center space-y-1 ${
-                  activeTab === 'cards' ? 'text-purple-600' : 'text-gray-400'
+                className={`flex flex-col items-center space-y-1 px-4 py-2 rounded-lg transition-all duration-200 ${
+                  activeTab === 'cards'
+                    ? 'text-purple-600 bg-purple-50'
+                    : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
                 <span className="text-xl">💳</span>
@@ -415,8 +431,10 @@ const MainApp = () => {
               </button>
               <button
                 onClick={() => setActiveTab('insights')}
-                className={`flex flex-col items-center space-y-1 ${
-                  activeTab === 'insights' ? 'text-purple-600' : 'text-gray-400'
+                className={`flex flex-col items-center space-y-1 px-4 py-2 rounded-lg transition-all duration-200 ${
+                  activeTab === 'insights'
+                    ? 'text-purple-600 bg-purple-50'
+                    : 'text-gray-500 hover:text-gray-700'
                 }`}
               >
                 <span className="text-xl">📊</span>
