@@ -521,9 +521,11 @@ Key Parameters:
         // Card insights
         const inactiveCards = allCards.filter(c => {
           if (!c.last_used_date) return true;
-          const daysSince = Math.floor(
-            (new Date() - new Date(c.last_used_date)) / (1000 * 60 * 60 * 24)
-          );
+          const lastUsedDate = new Date(c.last_used_date);
+          const today = new Date();
+          // Skip cards with future dates (data errors)
+          if (lastUsedDate > today) return false;
+          const daysSince = Math.floor((today - lastUsedDate) / (1000 * 60 * 60 * 24));
           return daysSince >= 90;
         });
 
