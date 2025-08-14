@@ -468,7 +468,7 @@ const AIAssistant = () => {
       return `✅ ${response.message}`;
     }
 
-    return response.summary || JSON.stringify(response, null, 2);
+    return response.message || response.summary || JSON.stringify(response, null, 2);
   };
 
   const quickActions = [
