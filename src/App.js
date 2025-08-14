@@ -1,10 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { AuthForm } from './components';
-import { Navbar } from './layout';
-import { Home } from './pages';
 import { supabase } from './supabaseClient';
 import IOSInstallPrompt from './components/IOSInstallPrompt';
-import AIAssistant from './components/AIAssistantEnhanced';
+import CleoApp from './components/CleoApp';
 import './App.css';
 import './styles/real-cleo-theme.css';
 
@@ -71,13 +69,8 @@ function App() {
           style={{ animationDelay: '2s' }}
         ></div>
       </div>
-      <div className="relative z-10 min-h-screen flex flex-col">
-        {/* Chat Interface - Full Screen */}
-        <div className="flex-1 pb-16">
-          <AIAssistant />
-        </div>
-        {/* Bottom Navigation */}
-        <Navbar session={session} />
+      <div className="relative z-10">
+        <CleoApp />
       </div>
       <IOSInstallPrompt />
     </div>

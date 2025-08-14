@@ -1,0 +1,75 @@
+import React, { useState } from 'react';
+import AIAssistant from './AIAssistantEnhanced';
+import TabNavigation from './TabNavigation';
+
+const CleoApp = () => {
+  const [activeTab, setActiveTab] = useState('chat');
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'chat':
+        return <AIAssistant />;
+      case 'cards':
+        return (
+          <div className="p-4">
+            <TabNavigation />
+          </div>
+        );
+      case 'insights':
+        return (
+          <div className="p-4 text-center">
+            <h2 className="text-2xl font-bold cleo-text-gradient mb-4">Coming Soon</h2>
+            <p className="text-gray-600">AI-powered insights will be available here</p>
+          </div>
+        );
+      default:
+        return <AIAssistant />;
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      {/* Main Content */}
+      <div className="flex-1 pb-16 overflow-auto">{renderContent()}</div>
+
+      {/* Bottom Navigation */}
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex justify-center items-center h-16">
+            <div className="flex space-x-8">
+              <button
+                onClick={() => setActiveTab('chat')}
+                className={`flex flex-col items-center space-y-1 ${
+                  activeTab === 'chat' ? 'text-purple-600' : 'text-gray-400'
+                }`}
+              >
+                <span className="text-xl">💬</span>
+                <span className="text-xs font-medium">Chat</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('cards')}
+                className={`flex flex-col items-center space-y-1 ${
+                  activeTab === 'cards' ? 'text-purple-600' : 'text-gray-400'
+                }`}
+              >
+                <span className="text-xl">💳</span>
+                <span className="text-xs font-medium">Cards</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('insights')}
+                className={`flex flex-col items-center space-y-1 ${
+                  activeTab === 'insights' ? 'text-purple-600' : 'text-gray-400'
+                }`}
+              >
+                <span className="text-xl">📊</span>
+                <span className="text-xs font-medium">Insights</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </div>
+  );
+};
+
+export default CleoApp;
