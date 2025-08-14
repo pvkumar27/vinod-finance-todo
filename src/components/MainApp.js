@@ -46,6 +46,8 @@ const MainApp = () => {
   }, [activeTab]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [queryHistory, setQueryHistory] = useState([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -68,6 +70,8 @@ const MainApp = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    setQueryHistory(prev => [inputValue, ...prev.slice(0, 49)]); // Keep last 50 queries
+    setHistoryIndex(-1);
     setInputValue('');
     setIsLoading(true);
 
@@ -345,7 +349,30 @@ const MainApp = () => {
                     <input
                       type="text"
                       value={inputValue}
-                      onChange={e => setInputValue(e.target.value)}
+                      onChange={e => {
+                        setInputValue(e.target.value);
+                        setHistoryIndex(-1);
+                      }}
+                      onKeyDown={e => {
+                        if (e.key === 'ArrowUp') {
+                          e.preventDefault();
+                          if (queryHistory.length > 0) {
+                            const newIndex = Math.min(historyIndex + 1, queryHistory.length - 1);
+                            setHistoryIndex(newIndex);
+                            setInputValue(queryHistory[newIndex]);
+                          }
+                        } else if (e.key === 'ArrowDown') {
+                          e.preventDefault();
+                          if (historyIndex > 0) {
+                            const newIndex = historyIndex - 1;
+                            setHistoryIndex(newIndex);
+                            setInputValue(queryHistory[newIndex]);
+                          } else if (historyIndex === 0) {
+                            setHistoryIndex(-1);
+                            setInputValue('');
+                          }
+                        }
+                      }}
                       placeholder="Message FinBot..."
                       className="flex-1 bg-gray-50 border-0 rounded-full px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all duration-200"
                       disabled={isLoading}
