@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { mcpClient } from '../services/mcpClient';
+import VisualInsights from './VisualInsights';
 
 const AIAssistant = () => {
   const [messages, setMessages] = useState([
@@ -7,13 +8,16 @@ const AIAssistant = () => {
       id: 1,
       type: 'assistant',
       content:
-        "Hi! I'm Finbot, your FinTask assistant. I can help you with your todos and credit cards!",
+        '👋 Hey there! I\'m Finbot, your AI-powered finance assistant. I\'m here to help you stay on top of your money and tasks!\n\n💡 Try asking me:\n• "What needs my attention today?"\n• "Show me inactive credit cards"\n• "Add a task to pay rent"\n• "Analyze my spending patterns"',
       timestamp: new Date(),
+      isWelcome: true,
     },
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [proactiveAlerts, setProactiveAlerts] = useState([]);
+  const [showInsights, setShowInsights] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);
@@ -41,6 +45,110 @@ const AIAssistant = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Proactive alerts check on component mount
+  useEffect(() => {
+    const checkProactiveAlerts = async () => {
+      try {
+        const alerts = await generateProactiveAlerts();
+        setProactiveAlerts(alerts);
+
+        // Add proactive message if there are alerts
+        if (alerts.length > 0) {
+          const alertMessage = {
+            id: Date.now() + 100,
+            type: 'assistant',
+            content: `🔔 I noticed ${alerts.length} thing${alerts.length > 1 ? 's' : ''} that might need your attention:\n\n${alerts.map(alert => `• ${alert.message}`).join('\n')}\n\nWould you like me to help you with any of these?`,
+            timestamp: new Date(),
+            isProactive: true,
+            alerts: alerts,
+          };
+
+          setTimeout(() => {
+            setMessages(prev => [...prev, alertMessage]);
+          }, 2000); // Show after 2 seconds
+        }
+      } catch (error) {
+        console.error('Error checking proactive alerts:', error);
+      }
+    };
+
+    if (isExpanded) {
+      checkProactiveAlerts();
+    }
+  }, [isExpanded]);
+
+  // Listen for AI queries from dashboard
+  useEffect(() => {
+    const handleAiQuery = async event => {
+      const { query } = event.detail;
+      if (!query) return;
+
+      // Expand AI assistant if not already expanded
+      if (!isExpanded) {
+        setIsExpanded(true);
+        // Wait for expansion animation
+        setTimeout(() => processQuery(query), 300);
+      } else {
+        processQuery(query);
+      }
+    };
+
+    const processQuery = async query => {
+      const userMessage = {
+        id: Date.now(),
+        type: 'user',
+        content: query,
+        timestamp: new Date(),
+      };
+
+      setMessages(prev => [...prev, userMessage]);
+      setIsLoading(true);
+
+      try {
+        const response = await mcpClient.processNaturalLanguageQuery(query);
+
+        const assistantMessage = {
+          id: Date.now() + 1,
+          type: 'assistant',
+          content: formatResponse(response),
+          timestamp: new Date(),
+          data: response,
+          processingMode: response.processingMode || 'fallback',
+        };
+
+        setMessages(prev => [...prev, assistantMessage]);
+
+        // Trigger refresh if needed
+        if (
+          response.success &&
+          (response.todo || response.credit_card || response.deletedCount || response.updatedCount)
+        ) {
+          window.dispatchEvent(new CustomEvent('todoAdded', { detail: response.todo || {} }));
+          if (response.credit_card || response.deletedCount) {
+            const eventDetail = response.deletedCard
+              ? { deleted: true, cardId: response.deletedCard.id }
+              : response.credit_card || {};
+            window.dispatchEvent(new CustomEvent('creditCardAdded', { detail: eventDetail }));
+          }
+        }
+      } catch (error) {
+        const errorMessage = {
+          id: Date.now() + 1,
+          type: 'assistant',
+          content: `Sorry, I encountered an error: ${error.message}`,
+          timestamp: new Date(),
+          isError: true,
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    window.addEventListener('aiQuery', handleAiQuery);
+    return () => window.removeEventListener('aiQuery', handleAiQuery);
+  }, [isExpanded]);
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -219,6 +327,67 @@ const AIAssistant = () => {
     recognition.start();
   };
 
+  // Generate proactive alerts based on user data
+  const generateProactiveAlerts = async () => {
+    const alerts = [];
+
+    try {
+      // Check for inactive credit cards
+      const inactiveCards = await mcpClient.callTool('get_credit_cards', { inactive_only: true });
+      if (inactiveCards.credit_cards && inactiveCards.credit_cards.length > 0) {
+        alerts.push({
+          type: 'credit_card_inactive',
+          message: `${inactiveCards.credit_cards.length} credit card${inactiveCards.credit_cards.length > 1 ? "s haven't" : " hasn't"} been used in 90+ days`,
+          priority: 'medium',
+          action: 'show inactive cards',
+        });
+      }
+
+      // Check for expiring promos
+      const expiringPromos = await mcpClient.callTool('get_credit_cards', { promo_expiring: true });
+      if (expiringPromos.credit_cards && expiringPromos.credit_cards.length > 0) {
+        alerts.push({
+          type: 'promo_expiring',
+          message: `${expiringPromos.credit_cards.length} credit card promo${expiringPromos.credit_cards.length > 1 ? 's are' : ' is'} expiring soon`,
+          priority: 'high',
+          action: 'show cards with expiring promos',
+        });
+      }
+
+      // Check for overdue todos
+      const overdueTodos = await mcpClient.callTool('get_todos', {
+        due_date_before: new Date().toISOString().split('T')[0],
+        completed: false,
+      });
+      if (overdueTodos.todos && overdueTodos.todos.length > 0) {
+        alerts.push({
+          type: 'todos_overdue',
+          message: `${overdueTodos.todos.length} task${overdueTodos.todos.length > 1 ? 's are' : ' is'} overdue`,
+          priority: 'high',
+          action: 'show overdue todos',
+        });
+      }
+
+      // Check for today's todos
+      const todayTodos = await mcpClient.callTool('get_todos', {
+        due_date: new Date().toISOString().split('T')[0],
+        completed: false,
+      });
+      if (todayTodos.todos && todayTodos.todos.length > 0) {
+        alerts.push({
+          type: 'todos_today',
+          message: `${todayTodos.todos.length} task${todayTodos.todos.length > 1 ? 's are' : ' is'} due today`,
+          priority: 'medium',
+          action: "show today's todos",
+        });
+      }
+    } catch (error) {
+      console.error('Error generating proactive alerts:', error);
+    }
+
+    return alerts;
+  };
+
   const formatResponse = response => {
     if (response.todos) {
       return `Found ${response.count} todos:\n${response.todos
@@ -260,6 +429,26 @@ const AIAssistant = () => {
       }`;
     }
 
+    if (response.urgentItems) {
+      return `🎯 Priority Items:\n${response.urgentItems.map(item => `• ${item}`).join('\n')}${
+        response.insights
+          ? `\n\n💡 Insights:\n${response.insights.map(insight => `• ${insight}`).join('\n')}`
+          : ''
+      }`;
+    }
+
+    if (response.alerts) {
+      return `🔔 Alerts:\n${response.alerts.map(alert => `• ${alert.message || alert}`).join('\n')}`;
+    }
+
+    if (response.suggestions) {
+      return `🚀 Optimization Suggestions:\n${response.suggestions.map(suggestion => `• ${suggestion}`).join('\n')}${
+        response.insights
+          ? `\n\n📊 Analysis:\n${response.insights.map(insight => `• ${insight}`).join('\n')}`
+          : ''
+      }`;
+    }
+
     if (response.success && response.todo) {
       return `✅ ${response.message}\nTask: ${response.todo.task}`;
     }
@@ -284,10 +473,16 @@ const AIAssistant = () => {
   };
 
   const quickActions = [
-    { label: 'Show pending todos', query: 'show me pending todos' },
-    { label: 'Show completed todos', query: 'show me completed todos' },
-    { label: 'Show credit cards', query: 'show me my credit cards' },
-    { label: 'Inactive cards', query: 'which cards are inactive?' },
+    {
+      label: '🎯 What needs attention?',
+      query: 'what needs my attention today?',
+      priority: 'high',
+    },
+    { label: '📊 Financial insights', query: 'give me financial insights', priority: 'high' },
+    { label: '📋 Show pending todos', query: 'show me pending todos' },
+    { label: '💳 Show credit cards', query: 'show me my credit cards' },
+    { label: '⚠️ Inactive cards', query: 'which cards are inactive?' },
+    { label: '🔔 Promo alerts', query: 'show cards with expiring promos' },
   ];
 
   if (!isExpanded) {
@@ -303,6 +498,11 @@ const AIAssistant = () => {
             <span className="text-2xl">🤖</span>
           </div>
           <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+          {proactiveAlerts.length > 0 && (
+            <div className="absolute -top-2 -left-2 w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold animate-bounce">
+              {proactiveAlerts.length}
+            </div>
+          )}
         </button>
       </div>
     );
@@ -386,12 +586,28 @@ const AIAssistant = () => {
                     ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-3xl rounded-bl-lg shadow-blue-200/50 text-sm font-medium'
                     : message.isError
                       ? 'bg-gradient-to-r from-red-50 to-red-100 text-red-700 border border-red-200/50 rounded-3xl rounded-bl-lg shadow-red-200/30 text-sm'
-                      : message.processingMode === 'gemini'
-                        ? 'bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 text-gray-800 border border-purple-200/50 rounded-3xl rounded-bl-lg italic shadow-purple-200/40 text-sm'
-                        : 'bg-white/90 text-gray-800 border border-gray-200/50 rounded-3xl rounded-bl-lg shadow-gray-200/40 text-sm'
+                      : message.isWelcome
+                        ? 'bg-gradient-to-r from-green-50 via-blue-50 to-purple-50 text-gray-800 border border-green-200/50 rounded-3xl rounded-bl-lg shadow-green-200/40 text-sm'
+                        : message.isProactive
+                          ? 'bg-gradient-to-r from-orange-50 via-yellow-50 to-amber-50 text-gray-800 border border-orange-200/50 rounded-3xl rounded-bl-lg shadow-orange-200/40 text-sm'
+                          : message.processingMode === 'gemini'
+                            ? 'bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 text-gray-800 border border-purple-200/50 rounded-3xl rounded-bl-lg italic shadow-purple-200/40 text-sm'
+                            : 'bg-white/90 text-gray-800 border border-gray-200/50 rounded-3xl rounded-bl-lg shadow-gray-200/40 text-sm'
                 }`}
               >
                 {message.content}
+
+                {/* Visual Insights for AI responses */}
+                {message.type === 'assistant' &&
+                  message.data &&
+                  (message.data.insights ||
+                    message.data.urgentItems ||
+                    message.data.suggestions) && (
+                    <div className="mt-3">
+                      <VisualInsights data={message.data} type="overview" />
+                    </div>
+                  )}
+
                 <div
                   className={`text-xs mt-1 opacity-60 flex justify-between items-center ${
                     message.type === 'user' ? 'text-white/70' : 'text-gray-500'
@@ -406,12 +622,22 @@ const AIAssistant = () => {
                   {message.type === 'assistant' && (
                     <span
                       className={`text-xs px-1.5 py-0.5 rounded-full ${
-                        message.processingMode === 'gemini'
-                          ? 'bg-purple-100 text-purple-600'
-                          : 'bg-gray-100 text-gray-600'
+                        message.isWelcome
+                          ? 'bg-green-100 text-green-600'
+                          : message.isProactive
+                            ? 'bg-orange-100 text-orange-600'
+                            : message.processingMode === 'gemini'
+                              ? 'bg-purple-100 text-purple-600'
+                              : 'bg-gray-100 text-gray-600'
                       }`}
                     >
-                      {message.processingMode === 'gemini' ? '🤖 AI' : '🔧 Rule'}
+                      {message.isWelcome
+                        ? '👋 Welcome'
+                        : message.isProactive
+                          ? '🔔 Alert'
+                          : message.processingMode === 'gemini'
+                            ? '🤖 AI'
+                            : '🔧 Rule'}
                     </span>
                   )}
                 </div>
@@ -447,7 +673,8 @@ const AIAssistant = () => {
 
       {/* Quick Actions */}
       {!isMinimized && showQuickActions && (
-        <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 animate-fadeIn">
+        <div className="px-4 py-3 bg-gradient-to-r from-gray-50 to-blue-50/30 border-t border-gray-100 animate-fadeIn">
+          <div className="text-xs text-gray-600 mb-2 font-medium">🚀 Quick Actions</div>
           <div className="flex flex-wrap gap-1.5">
             {quickActions.map((action, index) => (
               <button
@@ -495,7 +722,11 @@ const AIAssistant = () => {
                     setIsLoading(false);
                   }
                 }}
-                className="text-xs bg-white text-blue-700 px-2.5 py-1.5 rounded-full border border-blue-200 hover:bg-blue-50 transition-all duration-200 font-medium shadow-sm"
+                className={`text-xs px-2.5 py-1.5 rounded-full border transition-all duration-200 font-medium shadow-sm ${
+                  action.priority === 'high'
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-orange-300 hover:from-orange-600 hover:to-red-600'
+                    : 'bg-white text-blue-700 border-blue-200 hover:bg-blue-50'
+                }`}
                 data-cy={`quick-action-${index}`}
               >
                 {action.label}

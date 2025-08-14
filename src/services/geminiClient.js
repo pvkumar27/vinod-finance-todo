@@ -63,6 +63,14 @@ User Context: Active session with ${this.getQueryCount()} previous queries
 
 🎯 COMPREHENSIVE QUERY EXAMPLES:
 
+🤖 AI-FIRST QUERIES (NEW):
+- "what needs my attention today?" → get_priority_insights with focus: "today"
+- "give me financial insights" → get_insights with type: "comprehensive"
+- "analyze my spending patterns" → analyze_spending with period: "current_month"
+- "show me proactive alerts" → get_proactive_alerts
+- "what should I focus on?" → get_priority_insights with focus: "urgent"
+- "help me optimize my finances" → get_optimization_suggestions
+
 📝 TODO QUERIES:
 - "show me completed todos" → get_todos with completed: true
 - "show me pending todos" → get_todos with completed: false  
@@ -80,6 +88,8 @@ User Context: Active session with ${this.getQueryCount()} previous queries
 - "sort cards by days inactive" → get_credit_cards with sort_by: "days_inactive", sort_order: "desc"
 - "show inactive cards" → get_credit_cards with inactive_only: true
 - "show Chase cards" → get_credit_cards with bank_name: "Chase"
+- "show cards with expiring promos" → get_credit_cards with promo_expiring: true
+- "which cards need attention?" → get_card_alerts
 
 🔄 UI QUERIES:
 - "switch to cards view" → ui_operation with operation_type: "view_switch", view_mode: "cards"
@@ -97,6 +107,13 @@ User Context: Active session with ${this.getQueryCount()} previous queries
 - View switching (table/card views) - Direct user to UI controls
 - Navigation - Direct user to manual controls
 - Settings/preferences - Direct user to UI
+
+🎯 AI-FIRST OPERATIONS (NEW):
+- get_priority_insights: Analyze and surface most important items
+- get_proactive_alerts: Check for items needing attention
+- analyze_spending: Spending analysis and forecasting
+- get_optimization_suggestions: Financial optimization recommendations
+- get_card_alerts: Credit card specific insights and alerts
 
 📝 TODOS (Full CRUD):
 - ui_operation: For view switching, navigation, settings (return helpful message)
@@ -121,16 +138,24 @@ User Context: Active session with ${this.getQueryCount()} previous queries
 - set_reminder: Create reminders for cards
 - get_reminders: View upcoming reminders
 
-📊 INSIGHTS:
-- get_insights: Financial analysis and recommendations
+📊 INSIGHTS & ANALYSIS (ENHANCED):
+- get_insights: Comprehensive financial analysis and recommendations
+- get_priority_insights: Focus on urgent items needing attention
+- get_proactive_alerts: Check for inactive cards, expiring promos, overdue tasks
+- analyze_spending: Spending pattern analysis and forecasting
+- get_optimization_suggestions: AI-powered financial optimization tips
+- get_card_alerts: Credit card specific alerts and recommendations
 
-🎯 SMART FEATURES:
+🎯 SMART FEATURES (ENHANCED):
 - Context awareness: Consider user's recent queries and patterns
+- Proactive intelligence: Automatically surface urgent items and alerts
 - Date intelligence: "today" = "${new Date().toISOString().split('T')[0]}", "tomorrow" = "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]}"
 - Relative dates: "1 week old" = due_date_before: "${new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}"
 - Overdue patterns: "1 day overdue" = due_date: "${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]}"
 - Task extraction: "add task to clean bottle" → task: "clean bottle"
 - Smart defaults: Infer user intent from context (e.g., if asking about overdue, likely wants actionable items)
+- Priority detection: "what needs attention" → get_priority_insights
+- Financial focus: "analyze", "insights", "optimize" → financial analysis actions
 - Default behavior: Always set completed: false unless explicitly asking for completed items
 - Pinned queries: When asking for "pinned", don't set completed filter
 
