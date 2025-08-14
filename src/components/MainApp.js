@@ -5,7 +5,7 @@ import TabNavigation from './TabNavigation';
 const MainApp = () => {
   const [activeTab, setActiveTab] = useState('chat');
   const [messages, setMessages] = useState([]);
-  const [showQuickActions, setShowQuickActions] = useState(true);
+  const [showQuickActions] = useState(true);
 
   useEffect(() => {
     // Add welcome message and check for proactive alerts
@@ -136,6 +136,13 @@ const MainApp = () => {
         .join('\n')}`;
     }
 
+    if (response.transactions) {
+      const total = response.total_amount || 0;
+      return `Found ${response.count} transactions (Total: $${total.toFixed(2)}):\n${response.transactions
+        .map(t => `• ${t.description} - $${t.amount} (${t.date})`)
+        .join('\n')}`;
+    }
+
     if (response.insights) {
       return `Financial Insights:\n${response.insights.map(insight => `• ${insight}`).join('\n')}${
         response.recommendations
@@ -152,6 +159,18 @@ const MainApp = () => {
       }`;
     }
 
+    if (response.alerts) {
+      return `🔔 Alerts:\n${response.alerts.map(alert => `• ${alert.message || alert}`).join('\n')}`;
+    }
+
+    if (response.suggestions) {
+      return `🚀 Optimization Suggestions:\n${response.suggestions.map(suggestion => `• ${suggestion}`).join('\n')}${
+        response.insights
+          ? `\n\n📊 Analysis:\n${response.insights.map(insight => `• ${insight}`).join('\n')}`
+          : ''
+      }`;
+    }
+
     if (response.success && response.todo) {
       return `✅ ${response.message}\nTask: ${response.todo.task}`;
     }
@@ -162,6 +181,14 @@ const MainApp = () => {
 
     if (response.success && response.credit_card) {
       return `✅ ${response.message}\nCard: ${response.credit_card.card_name}`;
+    }
+
+    if (
+      response.ui_action ||
+      response.ui_guidance ||
+      (response.success === false && response.message && !response.message.includes('Error'))
+    ) {
+      return `✅ ${response.message}`;
     }
 
     return response.message || response.summary || JSON.stringify(response, null, 2);

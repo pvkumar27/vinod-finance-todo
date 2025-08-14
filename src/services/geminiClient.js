@@ -496,6 +496,137 @@ Key Parameters:
           message: `Successfully deleted ${deletedCardCount} credit card${deletedCardCount > 1 ? 's' : ''}`,
         };
 
+      case 'get_priority_insights':
+        const priorityTodos = await api.getTodos({});
+        const priorityCards = await api.getCreditCards({});
+
+        const urgentItems = [];
+        const priorityInsights = [];
+
+        // Check overdue todos
+        const overdueTodos = priorityTodos.filter(
+          t => !t.completed && t.due_date && new Date(t.due_date) < new Date()
+        );
+        if (overdueTodos.length > 0) {
+          urgentItems.push(
+            `${overdueTodos.length} overdue task${overdueTodos.length > 1 ? 's' : ''}`
+          );
+          priorityInsights.push('Focus on completing overdue tasks first');
+        }
+
+        // Check today's todos
+        const todayTodos = priorityTodos.filter(
+          t => !t.completed && t.due_date === new Date().toISOString().split('T')[0]
+        );
+        if (todayTodos.length > 0) {
+          urgentItems.push(
+            `${todayTodos.length} task${todayTodos.length > 1 ? 's are' : ' is'} due today`
+          );
+        }
+
+        // Check inactive cards
+        const priorityInactiveCards = priorityCards.filter(c => {
+          if (!c.last_used_date) return true;
+          const lastUsedDate = new Date(c.last_used_date);
+          const today = new Date();
+          if (lastUsedDate > today) return false;
+          const daysSince = Math.floor((today - lastUsedDate) / (1000 * 60 * 60 * 24));
+          return daysSince >= 90;
+        });
+        if (priorityInactiveCards.length > 0) {
+          urgentItems.push(
+            `${priorityInactiveCards.length} inactive credit card${priorityInactiveCards.length > 1 ? 's' : ''}`
+          );
+          priorityInsights.push('Consider using inactive cards or closing them');
+        }
+
+        return {
+          urgentItems,
+          insights: priorityInsights.length > 0 ? priorityInsights : ['Everything looks good!'],
+          summary:
+            urgentItems.length > 0
+              ? `${urgentItems.length} priority items found`
+              : 'No urgent items',
+        };
+
+      case 'get_proactive_alerts':
+        const alertTodos = await api.getTodos({});
+        const alertCards = await api.getCreditCards({});
+
+        const alerts = [];
+
+        // Check for overdue todos
+        const alertOverdueTodos = alertTodos.filter(
+          t => !t.completed && t.due_date && new Date(t.due_date) < new Date()
+        );
+        if (alertOverdueTodos.length > 0) {
+          alerts.push({
+            type: 'todos_overdue',
+            message: `${alertOverdueTodos.length} task${alertOverdueTodos.length > 1 ? 's are' : ' is'} overdue`,
+            priority: 'high',
+          });
+        }
+
+        // Check for inactive cards
+        const alertInactiveCards = alertCards.filter(c => {
+          if (!c.last_used_date) return true;
+          const lastUsedDate = new Date(c.last_used_date);
+          const today = new Date();
+          if (lastUsedDate > today) return false;
+          const daysSince = Math.floor((today - lastUsedDate) / (1000 * 60 * 60 * 24));
+          return daysSince >= 90;
+        });
+        if (alertInactiveCards.length > 0) {
+          alerts.push({
+            type: 'credit_card_inactive',
+            message: `${alertInactiveCards.length} credit card${alertInactiveCards.length > 1 ? "s haven't" : " hasn't"} been used in 90+ days`,
+            priority: 'medium',
+          });
+        }
+
+        return {
+          alerts,
+          summary: `Found ${alerts.length} alert${alerts.length > 1 ? 's' : ''}`,
+        };
+
+      case 'get_optimization_suggestions':
+        const optTodos = await api.getTodos({});
+        const optCards = await api.getCreditCards({});
+
+        const suggestions = [];
+        const optInsights = [];
+
+        // Analyze todo patterns
+        const incompleteTodos = optTodos.filter(t => !t.completed);
+        if (incompleteTodos.length > 10) {
+          suggestions.push('Consider breaking down large tasks into smaller, manageable steps');
+          optInsights.push(`You have ${incompleteTodos.length} pending tasks`);
+        }
+
+        // Analyze card usage
+        const activeCards = optCards.filter(c => {
+          if (!c.last_used_date) return false;
+          const lastUsedDate = new Date(c.last_used_date);
+          const today = new Date();
+          if (lastUsedDate > today) return false;
+          const daysSince = Math.floor((today - lastUsedDate) / (1000 * 60 * 60 * 24));
+          return daysSince < 90;
+        });
+
+        if (activeCards.length < optCards.length / 2) {
+          suggestions.push('Consider consolidating to fewer credit cards for better management');
+          optInsights.push(
+            `Only ${activeCards.length} of ${optCards.length} cards are actively used`
+          );
+        }
+
+        return {
+          suggestions:
+            suggestions.length > 0 ? suggestions : ['Your financial management looks good!'],
+          insights: optInsights,
+          summary: `Generated ${suggestions.length} optimization suggestion${suggestions.length > 1 ? 's' : ''}`,
+        };
+
       case 'get_insights':
         const allTodos = await api.getTodos({});
         const allCards = await api.getCreditCards({});
@@ -504,13 +635,13 @@ Key Parameters:
         const recommendations = [];
 
         // Todo insights
-        const overdueTodos = allTodos.filter(
+        const insightOverdueTodos = allTodos.filter(
           t => !t.completed && t.due_date && new Date(t.due_date) < new Date()
         );
         const completedTodos = allTodos.filter(t => t.completed);
 
-        if (overdueTodos.length > 0) {
-          insights.push(`${overdueTodos.length} overdue todos`);
+        if (insightOverdueTodos.length > 0) {
+          insights.push(`${insightOverdueTodos.length} overdue todos`);
           recommendations.push('Focus on completing overdue tasks first');
         }
 
