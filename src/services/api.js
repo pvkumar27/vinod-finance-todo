@@ -192,9 +192,11 @@ export const api = {
       filteredData = filteredData.filter(card => {
         if (card.days_inactive && card.days_inactive > 90) return true;
         if (!card.last_used_date) return true;
-        const daysSince = Math.floor(
-          (new Date() - new Date(card.last_used_date)) / (1000 * 60 * 60 * 24)
-        );
+        const lastUsedDate = new Date(card.last_used_date);
+        const today = new Date();
+        // Skip cards with future dates (data errors)
+        if (lastUsedDate > today) return false;
+        const daysSince = Math.floor((today - lastUsedDate) / (1000 * 60 * 60 * 24));
         return daysSince > 90;
       });
     }
