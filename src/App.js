@@ -71,12 +71,15 @@ function App() {
           style={{ animationDelay: '2s' }}
         ></div>
       </div>
-      <div className="relative z-10">
+      <div className="relative z-10 min-h-screen flex flex-col">
+        {/* Chat Interface - Full Screen */}
+        <div className="flex-1 pb-16">
+          <AIAssistant />
+        </div>
+        {/* Bottom Navigation */}
         <Navbar session={session} />
-        <Home />
       </div>
       <IOSInstallPrompt />
-      <AIAssistant />
     </div>
   );
 }
