@@ -832,7 +832,12 @@ Key Parameters:
       // Build filters
       const filters = {};
       if (bankName) filters.bank_name = bankName;
-      if (lowerQuery.includes('inactive')) filters.inactive_only = true;
+      if (
+        lowerQuery.includes('inactive') ||
+        lowerQuery.includes('not used') ||
+        lowerQuery.includes("haven't been used")
+      )
+        filters.inactive_only = true;
       if (lowerQuery.includes('promo') && lowerQuery.includes('expir'))
         filters.promo_expiring = true;
 
@@ -841,6 +846,52 @@ Key Parameters:
         count: cards.length,
         summary: `Found ${cards.length} credit cards${bankName ? ` from ${bankName}` : ''}${filters.inactive_only ? ' (inactive)' : ''}${filters.promo_expiring ? ' (promo expiring)' : ''}`,
       }));
+    }
+
+    // Handle priority/attention queries
+    if (lowerQuery.includes('what needs') && lowerQuery.includes('attention')) {
+      const allTodos = await api.getTodos({});
+      const allCards = await api.getCreditCards({});
+
+      const urgentItems = [];
+
+      // Check overdue todos
+      const overdueTodos = allTodos.filter(
+        t => !t.completed && t.due_date && new Date(t.due_date) < new Date()
+      );
+      if (overdueTodos.length > 0) {
+        urgentItems.push(
+          `${overdueTodos.length} overdue task${overdueTodos.length > 1 ? 's' : ''}`
+        );
+      }
+
+      // Check inactive cards
+      const inactiveCards = allCards.filter(c => {
+        if (!c.last_used_date) return true;
+        const lastUsedDate = new Date(c.last_used_date);
+        const today = new Date();
+        if (lastUsedDate > today) return false;
+        const daysSince = Math.floor((today - lastUsedDate) / (1000 * 60 * 60 * 24));
+        return daysSince >= 90;
+      });
+      if (inactiveCards.length > 0) {
+        urgentItems.push(
+          `${inactiveCards.length} inactive credit card${inactiveCards.length > 1 ? 's' : ''}`
+        );
+      }
+
+      return {
+        urgentItems,
+        insights:
+          urgentItems.length > 0
+            ? ['Focus on these priority items first']
+            : ['Everything looks good!'],
+        summary:
+          urgentItems.length > 0
+            ? `${urgentItems.length} items need attention`
+            : 'No urgent items found',
+        processingMode: 'fallback',
+      };
     }
 
     // Handle conversational responses
