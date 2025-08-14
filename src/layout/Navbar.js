@@ -18,13 +18,13 @@ const Navbar = ({ session }) => {
           {/* Logo and Brand */}
           <div className="flex items-center space-x-3">
             <div className="flex-shrink-0">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg">
-                <span className="text-white font-bold text-lg">F</span>
+              <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg cleo-bounce">
+                <span className="text-white font-bold text-xl">💰</span>
               </div>
             </div>
             <div>
-              <h1 className="text-xl font-bold cleo-text-gradient">FinTask</h1>
-              <p className="text-xs text-gray-400 -mt-1">AI Finance Assistant</p>
+              <h1 className="text-2xl font-bold cleo-text-gradient">FinTask</h1>
+              <p className="text-xs text-gray-500 -mt-1">AI Money Assistant</p>
             </div>
           </div>
 
@@ -32,8 +32,8 @@ const Navbar = ({ session }) => {
           <div className="hidden sm:flex items-center space-x-4">
             <div className="flex items-center space-x-3">
               <div className="text-right">
-                <p className="text-sm font-medium text-white">Welcome back!</p>
-                <p className="text-xs text-gray-400 capitalize">{displayName}</p>
+                <p className="text-sm font-medium text-gray-800">Welcome back!</p>
+                <p className="text-xs text-gray-500 capitalize">{displayName}</p>
               </div>
               <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
                 <span className="text-white text-sm font-bold">
@@ -41,10 +41,7 @@ const Navbar = ({ session }) => {
                 </span>
               </div>
             </div>
-            <button
-              onClick={handleSignOut}
-              className="cleo-button-secondary hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-400 transition-all duration-300"
-            >
+            <button onClick={handleSignOut} className="cleo-btn-secondary">
               Sign Out
             </button>
           </div>
@@ -53,7 +50,7 @@ const Navbar = ({ session }) => {
           <div className="sm:hidden flex items-center">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-300 hover:text-white focus:outline-none p-2 rounded-lg hover:bg-white/10 transition-all duration-200"
+              className="text-gray-600 hover:text-purple-600 focus:outline-none p-2 rounded-lg hover:bg-purple-100 transition-all duration-200"
             >
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 {isMenuOpen ? (
@@ -76,20 +73,17 @@ const Navbar = ({ session }) => {
           </div>
         </div>
         {isMenuOpen && (
-          <div className="sm:hidden py-4 border-t border-white/10">
+          <div className="sm:hidden py-4 border-t border-gray-200">
             <div className="flex items-center space-x-3 mb-4">
               <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-lg">
                 <span className="text-white font-bold">{displayName.charAt(0).toUpperCase()}</span>
               </div>
               <div>
-                <p className="font-medium text-white">Welcome back!</p>
-                <p className="text-sm text-gray-400 capitalize">{displayName}</p>
+                <p className="font-medium text-gray-800">Welcome back!</p>
+                <p className="text-sm text-gray-500 capitalize">{displayName}</p>
               </div>
             </div>
-            <button
-              onClick={handleSignOut}
-              className="w-full cleo-button-secondary hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-400 transition-all duration-300"
-            >
+            <button onClick={handleSignOut} className="w-full cleo-btn-secondary">
               Sign Out
             </button>
           </div>

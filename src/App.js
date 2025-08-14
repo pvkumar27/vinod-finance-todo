@@ -6,7 +6,7 @@ import { supabase } from './supabaseClient';
 import IOSInstallPrompt from './components/IOSInstallPrompt';
 import AIAssistant from './components/AIAssistantEnhanced';
 import './App.css';
-import './styles/cleo-theme.css';
+import './styles/real-cleo-theme.css';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -34,10 +34,10 @@ function App() {
 
   if (loading) {
     return (
-      <div className="cleo-app min-h-screen flex items-center justify-center">
+      <div className="cleo-app min-h-screen flex items-center justify-center bg-gray-50">
         <div className="cleo-card p-8">
-          <div className="cleo-animate-pulse text-xl font-semibold mb-4">FinTask</div>
-          <div className="text-sm text-gray-400">Loading your financial assistant...</div>
+          <div className="cleo-pulse text-2xl font-bold cleo-text-gradient mb-4">FinTask</div>
+          <div className="text-sm text-gray-600">Loading your AI money assistant...</div>
         </div>
       </div>
     );
@@ -45,15 +45,14 @@ function App() {
 
   if (!session) {
     return (
-      <div className="cleo-app relative overflow-hidden">
-        {/* Cleo-style background elements */}
+      <div className="cleo-app relative overflow-hidden bg-gray-50">
+        {/* Real Cleo-style background */}
         <div className="absolute inset-0">
-          <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-full blur-xl cleo-animate-float"></div>
+          <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-purple-400/30 to-pink-400/30 rounded-full blur-xl cleo-bounce"></div>
           <div
-            className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full blur-xl cleo-animate-float"
+            className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-full blur-xl cleo-bounce"
             style={{ animationDelay: '1s' }}
           ></div>
-          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-60 h-60 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-full blur-2xl"></div>
         </div>
         <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
           <AuthForm />
@@ -63,17 +62,13 @@ function App() {
   }
 
   return (
-    <div className="cleo-app relative overflow-hidden">
-      {/* Cleo-style background elements */}
+    <div className="cleo-app relative overflow-hidden bg-gray-50">
+      {/* Real Cleo-style background */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-full blur-3xl cleo-animate-float"></div>
+        <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-3xl cleo-bounce"></div>
         <div
-          className="absolute bottom-0 right-0 w-80 h-80 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-full blur-3xl cleo-animate-float"
+          className="absolute bottom-0 right-0 w-80 h-80 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-3xl cleo-bounce"
           style={{ animationDelay: '2s' }}
-        ></div>
-        <div
-          className="absolute top-1/3 right-1/4 w-64 h-64 bg-gradient-to-r from-indigo-500/5 to-purple-500/5 rounded-full blur-2xl cleo-animate-float"
-          style={{ animationDelay: '1s' }}
         ></div>
       </div>
       <div className="relative z-10">
