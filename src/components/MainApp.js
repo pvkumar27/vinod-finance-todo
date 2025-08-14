@@ -4,16 +4,46 @@ import TabNavigation from './TabNavigation';
 
 const MainApp = () => {
   const [activeTab, setActiveTab] = useState('chat');
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      type: 'assistant',
-      content:
-        '👋 Hey there! I\'m FinBot, your AI-powered finance assistant. I\'m here to help you stay on top of your money and tasks!\n\n💡 Try asking me:\n• "What needs my attention today?"\n• "Show me inactive credit cards"\n• "Add a task to pay rent"\n• "Analyze my spending patterns"',
-      timestamp: new Date(),
-      isWelcome: true,
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
+  const [showQuickActions, setShowQuickActions] = useState(true);
+
+  useEffect(() => {
+    // Add welcome message and check for proactive alerts
+    const initializeChat = async () => {
+      const welcomeMessage = {
+        id: 1,
+        type: 'assistant',
+        content:
+          "👋 Hey there! I'm FinBot, your AI-powered finance assistant. I'm here to help you stay on top of your money and tasks!",
+        timestamp: new Date(),
+        isWelcome: true,
+      };
+      setMessages([welcomeMessage]);
+
+      // Check for proactive alerts after 2 seconds
+      setTimeout(async () => {
+        try {
+          const alerts = await generateProactiveAlerts();
+          if (alerts.length > 0) {
+            const alertMessage = {
+              id: Date.now(),
+              type: 'assistant',
+              content: `🔔 I noticed ${alerts.length} thing${alerts.length > 1 ? 's' : ''} that might need your attention:\n\n${alerts.map(alert => `• ${alert.message}`).join('\n')}\n\nWould you like me to help you with any of these?`,
+              timestamp: new Date(),
+              isProactive: true,
+            };
+            setMessages(prev => [...prev, alertMessage]);
+          }
+        } catch (error) {
+          console.error('Error checking proactive alerts:', error);
+        }
+      }, 2000);
+    };
+
+    if (activeTab === 'chat') {
+      initializeChat();
+    }
+  }, [activeTab]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -137,6 +167,31 @@ const MainApp = () => {
     return response.message || response.summary || JSON.stringify(response, null, 2);
   };
 
+  const generateProactiveAlerts = async () => {
+    const alerts = [];
+    try {
+      const inactiveCards = await mcpClient.callTool('get_credit_cards', { inactive_only: true });
+      if (inactiveCards.credit_cards && inactiveCards.credit_cards.length > 0) {
+        alerts.push({
+          message: `${inactiveCards.credit_cards.length} credit card${inactiveCards.credit_cards.length > 1 ? "s haven't" : " hasn't"} been used in 90+ days`,
+        });
+      }
+
+      const overdueTodos = await mcpClient.callTool('get_todos', {
+        due_date_before: new Date().toISOString().split('T')[0],
+        completed: false,
+      });
+      if (overdueTodos.todos && overdueTodos.todos.length > 0) {
+        alerts.push({
+          message: `${overdueTodos.todos.length} task${overdueTodos.todos.length > 1 ? 's are' : ' is'} overdue`,
+        });
+      }
+    } catch (error) {
+      console.error('Error generating proactive alerts:', error);
+    }
+    return alerts;
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'chat':
@@ -156,52 +211,39 @@ const MainApp = () => {
                 <div className="flex-1 bg-white rounded-xl sm:rounded-2xl p-3 sm:p-6 mb-3 sm:mb-4 overflow-y-auto border border-gray-200 shadow-sm">
                   <div className="space-y-3 sm:space-y-4">
                     {messages.map(message => (
-                      <div key={message.id} className="flex justify-start">
+                      <div
+                        key={message.id}
+                        className={`flex animate-fadeIn ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+                      >
+                        {message.type === 'assistant' && (
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0 mt-1 shadow-lg border-2 bg-gradient-to-br from-purple-500 to-pink-500 border-white/30">
+                            <span className="text-white text-xs sm:text-sm">🤖</span>
+                          </div>
+                        )}
                         <div
-                          className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0 mt-1 shadow-lg border-2 ${
-                            message.type === 'assistant'
-                              ? 'bg-gradient-to-br from-purple-500 to-pink-500 border-white/30'
-                              : 'bg-gradient-to-br from-gray-400 to-gray-500 border-white/30'
-                          }`}
-                        >
-                          <span className="text-white text-xs sm:text-sm">
-                            {message.type === 'assistant' ? '🤖' : '👤'}
-                          </span>
-                        </div>
-                        <div
-                          className={`max-w-[75%] px-3 sm:px-6 py-2 sm:py-4 whitespace-pre-line shadow-xl backdrop-blur-sm border transition-all duration-300 hover:shadow-2xl text-xs sm:text-sm ${
+                          className={`max-w-[75%] px-3 sm:px-4 py-2 sm:py-3 whitespace-pre-line shadow-lg transition-all duration-300 text-xs sm:text-sm ${
                             message.type === 'user'
-                              ? 'bg-gradient-to-br from-purple-500 to-pink-500 text-white rounded-[20px] sm:rounded-[28px] rounded-bl-xl shadow-purple-300/40 font-medium border-white/20'
+                              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl rounded-br-md ml-auto'
                               : message.isWelcome
-                                ? 'bg-gradient-to-br from-emerald-50 via-blue-50 to-purple-50 text-gray-800 border-emerald-200/60 rounded-[20px] sm:rounded-[28px] rounded-bl-xl shadow-emerald-200/50'
-                                : 'bg-gradient-to-br from-white to-gray-50/80 text-gray-800 border-gray-200/60 rounded-[20px] sm:rounded-[28px] rounded-bl-xl shadow-gray-200/50'
+                                ? 'bg-gradient-to-br from-blue-50 to-purple-50 text-gray-800 border border-purple-200/60 rounded-2xl rounded-bl-md'
+                                : 'bg-white text-gray-800 border border-gray-200 rounded-2xl rounded-bl-md'
                           }`}
                         >
                           {message.content}
                           <div
-                            className={`text-xs mt-1 sm:mt-2 opacity-70 flex justify-between items-center ${
-                              message.type === 'user' ? 'text-white/80' : 'text-gray-600'
-                            }`}
+                            className={`text-xs mt-2 opacity-70 ${message.type === 'user' ? 'text-purple-100' : 'text-gray-500'}`}
                           >
-                            <span className="font-medium">
-                              {new Date(message.timestamp).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </span>
-                            {message.type === 'assistant' && (
-                              <span
-                                className={`text-xs px-2 py-1 rounded-full font-medium ${
-                                  message.isWelcome
-                                    ? 'bg-emerald-100 text-emerald-700'
-                                    : 'bg-gray-100 text-gray-700'
-                                }`}
-                              >
-                                {message.isWelcome ? '👋 Welcome' : '🤖 AI'}
-                              </span>
-                            )}
+                            {new Date(message.timestamp).toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
                           </div>
                         </div>
+                        {message.type === 'user' && (
+                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center ml-2 sm:ml-3 flex-shrink-0 mt-1 shadow-lg border-2 bg-gradient-to-br from-gray-400 to-gray-500 border-white/30">
+                            <span className="text-white text-xs sm:text-sm">👤</span>
+                          </div>
+                        )}
                       </div>
                     ))}
                     {isLoading && (
@@ -225,45 +267,93 @@ const MainApp = () => {
                   </div>
                 </div>
 
+                {/* Quick Actions */}
+                {showQuickActions && (
+                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 mb-4 border border-purple-200">
+                    <div className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                      <span className="mr-2">🚀</span>
+                      Quick Actions
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        {
+                          label: '🎯 What needs attention?',
+                          query: 'what needs my attention today?',
+                        },
+                        { label: '📊 Financial insights', query: 'give me financial insights' },
+                        { label: '📋 Show todos', query: 'show me pending todos' },
+                        { label: '💳 Show cards', query: 'show me my credit cards' },
+                      ].map((action, index) => (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            setInputValue(action.query);
+                            setShowQuickActions(false);
+                          }}
+                          className="text-xs px-3 py-2 rounded-full bg-white border border-purple-200 text-purple-700 hover:bg-purple-50 transition-all duration-200 shadow-sm"
+                        >
+                          {action.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
                 {/* Chat Input */}
-                <form
-                  onSubmit={handleSubmit}
-                  className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 border border-gray-200 shadow-sm"
-                >
-                  <div className="flex space-x-2 sm:space-x-3">
+                <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
+                  <form onSubmit={handleSubmit} className="flex space-x-3">
                     <input
                       type="text"
                       value={inputValue}
                       onChange={e => setInputValue(e.target.value)}
-                      placeholder="Ask me anything about your finances..."
-                      className="flex-1 input text-sm sm:text-base"
+                      placeholder="Message FinBot..."
+                      className="flex-1 bg-gray-50 border-0 rounded-full px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all duration-200"
                       disabled={isLoading}
                     />
                     <button
                       type="submit"
                       disabled={!inputValue.trim() || isLoading}
-                      className="btn-primary px-4 sm:px-6 text-sm sm:text-base disabled:opacity-50"
+                      className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full hover:shadow-lg disabled:opacity-50 transition-all duration-200 flex items-center justify-center"
                     >
-                      Send
+                      <svg
+                        className="w-5 h-5"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                        />
+                      </svg>
                     </button>
-                  </div>
-                </form>
+                  </form>
+                </div>
               </div>
             </div>
           </div>
         );
       case 'todos':
         return (
-          <div className="h-full overflow-auto p-4">
-            <TabNavigation />
+          <div className="h-full overflow-auto">
+            <div className="p-4">
+              <div className="mb-4">
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">✅ To-Dos</h2>
+              </div>
+              <TabNavigation />
+            </div>
           </div>
         );
       case 'cards':
         return (
-          <div className="h-full overflow-auto p-4">
-            <div className="text-center py-8">
-              <h2 className="text-2xl font-bold text-gradient mb-4">Credit Cards</h2>
-              <p className="text-gray-600">Credit card management coming soon</p>
+          <div className="h-full overflow-auto">
+            <div className="p-4">
+              <div className="mb-4">
+                <h2 className="text-2xl font-bold text-gray-800 mb-2">💳 Credit Cards</h2>
+              </div>
+              <TabNavigation />
             </div>
           </div>
         );
