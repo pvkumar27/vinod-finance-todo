@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import AIAssistant from './AIAssistantEnhanced';
 import TabNavigation from './TabNavigation';
 
-const CleoApp = () => {
+const MainApp = () => {
   const [activeTab, setActiveTab] = useState('chat');
 
   const renderContent = () => {
@@ -14,8 +14,31 @@ const CleoApp = () => {
               <h1 className="text-2xl font-bold text-gradient text-center">FinTask AI</h1>
               <p className="text-sm text-gray-500 text-center">Your AI money assistant</p>
             </div>
-            <div className="flex-1">
-              <AIAssistant />
+            <div className="flex-1 p-4">
+              <div className="max-w-4xl mx-auto h-full flex flex-col">
+                {/* Chat Messages Area */}
+                <div className="flex-1 bg-white rounded-2xl p-6 mb-4 overflow-y-auto border border-gray-200 shadow-sm">
+                  <div className="text-center text-gray-500 py-8">
+                    <div className="text-6xl mb-4">💬</div>
+                    <h3 className="text-xl font-semibold mb-2">Start a conversation</h3>
+                    <p className="text-gray-400">
+                      Ask me about your finances, todos, or credit cards!
+                    </p>
+                  </div>
+                </div>
+
+                {/* Chat Input */}
+                <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
+                  <div className="flex space-x-3">
+                    <input
+                      type="text"
+                      placeholder="Ask me anything about your finances..."
+                      className="flex-1 input"
+                    />
+                    <button className="btn-primary px-6">Send</button>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         );
@@ -82,4 +105,4 @@ const CleoApp = () => {
   );
 };
 
-export default CleoApp;
+export default MainApp;

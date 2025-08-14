@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { AuthForm } from './components';
 import { supabase } from './supabaseClient';
 import IOSInstallPrompt from './components/IOSInstallPrompt';
-import CleoApp from './components/CleoApp';
+import MainApp from './components/MainApp';
 import './App.css';
 import './styles/fintech-theme.css';
 
@@ -70,7 +70,7 @@ function App() {
         ></div>
       </div>
       <div className="relative z-10">
-        <CleoApp />
+        <MainApp />
       </div>
       <IOSInstallPrompt />
       {/* Remove duplicate AI Assistant - it's now in CleoApp */}
