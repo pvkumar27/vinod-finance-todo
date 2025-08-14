@@ -16,32 +16,40 @@ const Dashboard = () => {
     <div className="max-w-7xl mx-auto py-6 px-4 space-y-6">
       {/* AI-First Header */}
       <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent mb-2">
-          FinTask AI Dashboard
-        </h1>
-        <p className="text-gray-600">Your AI-powered finance assistant is here to help</p>
+        <h1 className="text-5xl font-bold cleo-text-gradient mb-4">FinTask AI Dashboard</h1>
+        <p className="text-gray-300 text-lg">Your AI-powered finance assistant is here to help</p>
+        <div className="flex justify-center items-center space-x-2 mt-3">
+          <div className="w-2 h-2 bg-green-500 rounded-full cleo-animate-pulse"></div>
+          <span className="text-sm text-gray-400">AI Assistant Active</span>
+        </div>
       </div>
 
       {/* Proactive Insights - Main Feature */}
-      <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-        <div className="bg-gradient-to-r from-blue-500 via-purple-500 to-indigo-500 text-white p-6">
-          <h2 className="text-2xl font-bold flex items-center">
+      <div className="cleo-card overflow-hidden">
+        <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-indigo-500 text-white p-6">
+          <h2 className="text-3xl font-bold flex items-center">
             🤖 AI Insights
-            <span className="ml-3 text-sm bg-white/20 px-3 py-1 rounded-full">Live</span>
+            <span className="ml-3 text-sm bg-white/20 px-3 py-1 rounded-full cleo-animate-pulse">
+              Live
+            </span>
           </h2>
-          <p className="text-blue-100 mt-1">Personalized recommendations based on your data</p>
+          <p className="text-purple-100 mt-2 text-lg">
+            Personalized recommendations based on your data
+          </p>
         </div>
         <ProactiveDashboard onActionClick={handleProactiveAction} />
       </div>
 
       {/* Visual Analytics */}
-      <div className="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
-        <div className="bg-gradient-to-r from-green-500 via-teal-500 to-cyan-500 text-white p-6">
-          <h2 className="text-2xl font-bold flex items-center">
+      <div className="cleo-card overflow-hidden">
+        <div className="bg-gradient-to-r from-green-500 via-emerald-500 to-teal-500 text-white p-6">
+          <h2 className="text-3xl font-bold flex items-center">
             📊 Visual Analytics
-            <span className="ml-3 text-sm bg-white/20 px-3 py-1 rounded-full">AI Generated</span>
+            <span className="ml-3 text-sm bg-white/20 px-3 py-1 rounded-full cleo-animate-pulse">
+              AI Generated
+            </span>
           </h2>
-          <p className="text-green-100 mt-1">
+          <p className="text-green-100 mt-2 text-lg">
             Dynamic charts and insights from your financial data
           </p>
         </div>
@@ -52,51 +60,55 @@ const Dashboard = () => {
 
       {/* Quick Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-100 p-6 rounded-2xl border border-blue-200 hover:shadow-lg transition-all duration-200">
-          <div className="flex items-center justify-between">
+        <div className="cleo-card p-6 hover:transform hover:scale-105 transition-all duration-300">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-1">AI Assistant</h3>
-              <p className="text-sm text-gray-600">Ready to help</p>
+              <h3 className="text-xl font-bold text-white mb-2">AI Assistant</h3>
+              <p className="text-gray-300">Ready to help</p>
             </div>
-            <div className="text-3xl">🤖</div>
+            <div className="text-4xl cleo-animate-float">🤖</div>
           </div>
           <button
             onClick={() =>
               window.dispatchEvent(new CustomEvent('aiQuery', { detail: { query: 'Hi FinBot!' } }))
             }
-            className="mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded-xl hover:bg-blue-600 transition-colors font-medium"
+            className="cleo-button-primary w-full"
           >
             Ask FinBot
           </button>
         </div>
 
-        <div className="bg-gradient-to-br from-green-50 to-emerald-100 p-6 rounded-2xl border border-green-200 hover:shadow-lg transition-all duration-200">
-          <div className="flex items-center justify-between">
+        <div className="cleo-card p-6 hover:transform hover:scale-105 transition-all duration-300">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-1">Smart Insights</h3>
-              <p className="text-sm text-gray-600">AI-powered analysis</p>
+              <h3 className="text-xl font-bold text-white mb-2">Smart Insights</h3>
+              <p className="text-gray-300">AI-powered analysis</p>
             </div>
-            <div className="text-3xl">💡</div>
+            <div className="text-4xl cleo-animate-float" style={{ animationDelay: '0.5s' }}>
+              💡
+            </div>
           </div>
           <button
             onClick={() => handleProactiveAction('give me financial insights')}
-            className="mt-4 w-full bg-green-500 text-white py-2 px-4 rounded-xl hover:bg-green-600 transition-colors font-medium"
+            className="cleo-button-primary w-full"
           >
             Get Insights
           </button>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-50 to-violet-100 p-6 rounded-2xl border border-purple-200 hover:shadow-lg transition-all duration-200">
-          <div className="flex items-center justify-between">
+        <div className="cleo-card p-6 hover:transform hover:scale-105 transition-all duration-300">
+          <div className="flex items-center justify-between mb-4">
             <div>
-              <h3 className="text-lg font-semibold text-gray-800 mb-1">Priority Focus</h3>
-              <p className="text-sm text-gray-600">What needs attention</p>
+              <h3 className="text-xl font-bold text-white mb-2">Priority Focus</h3>
+              <p className="text-gray-300">What needs attention</p>
             </div>
-            <div className="text-3xl">🎯</div>
+            <div className="text-4xl cleo-animate-float" style={{ animationDelay: '1s' }}>
+              🎯
+            </div>
           </div>
           <button
             onClick={() => handleProactiveAction('what needs my attention today?')}
-            className="mt-4 w-full bg-purple-500 text-white py-2 px-4 rounded-xl hover:bg-purple-600 transition-colors font-medium"
+            className="cleo-button-primary w-full"
           >
             Check Priority
           </button>

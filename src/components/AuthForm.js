@@ -40,175 +40,144 @@ const AuthForm = () => {
     }
   };
   return (
-    <div className="min-h-screen flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
-      <div className="max-w-md w-full space-y-8 auth-container relative z-10">
+    <div className="min-h-screen flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 relative z-10">
         {/* Logo and Header */}
         <div className="text-center">
           <div className="flex justify-center mb-6">
-            <div className="auth-logo">
-              <img
-                src="/icons/official-logo.png"
-                alt="FinTask Logo"
-                className="h-16 w-auto"
-                onError={e => {
-                  e.target.onerror = null;
-                  e.target.src =
-                    'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="64" height="64"><path fill="%233B82F6" d="M19 5v2h-4V5h4M9 5v6H5V5h4m10 8v6h-4v-6h4M9 17v2H5v-2h4M21 3h-8v6h8V3zM11 3H3v10h8V3zm10 8h-8v10h8V11zm-10 4H3v6h8v-6z"/></svg>';
-                }}
-              />
+            <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-3xl flex items-center justify-center shadow-2xl cleo-animate-float">
+              <span className="text-white font-bold text-3xl">F</span>
             </div>
           </div>
-          <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-2 font-['Segoe UI',system-ui,sans-serif]">
-            FinTask
-          </h2>
-          <p className="text-base sm:text-lg text-gray-600 font-['Segoe UI',system-ui,sans-serif]">
-            Your personal finance companion
-          </p>
-          <p className="mt-2 text-sm text-gray-500">
-            Sign in to manage your cards, expenses, and tasks
-          </p>
+          <h2 className="text-4xl sm:text-5xl font-bold cleo-text-gradient mb-4">FinTask</h2>
+          <p className="text-lg text-gray-300 mb-2">Your AI-powered finance companion</p>
+          <p className="text-sm text-gray-400">Sign in to unlock intelligent financial insights</p>
         </div>
 
         {/* Auth Form */}
-        <div className="gradient-border">
-          <div className="card-fancy py-8 px-6 sm:px-8 rounded-xl auth-form-container">
-            {authState.error && (
-              <div className="auth-error">
-                <span className="auth-error-icon">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="12"></line>
-                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                  </svg>
-                </span>
-                {authState.error}
-              </div>
-            )}
+        <div className="cleo-card p-8">
+          {authState.error && (
+            <div className="bg-red-500/20 border border-red-500/50 text-red-400 p-4 rounded-xl mb-6 flex items-center space-x-2">
+              <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span className="text-sm">{authState.error}</span>
+            </div>
+          )}
 
-            {authState.success && (
-              <div className="auth-success">
-                <span className="auth-success-icon">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                  </svg>
-                </span>
-                {authState.success}
-              </div>
-            )}
+          {authState.success && (
+            <div className="bg-green-500/20 border border-green-500/50 text-green-400 p-4 rounded-xl mb-6 flex items-center space-x-2">
+              <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              <span className="text-sm">{authState.success}</span>
+            </div>
+          )}
 
-            <Auth
-              supabaseClient={supabase}
-              onError={error => {
-                setAuthState({
-                  loading: false,
-                  error: error.message,
-                  success: null,
-                });
-              }}
-              onAuthStateChange={handleAuthStateChange}
-              appearance={{
-                theme: ThemeSupa,
-                style: {
-                  button: {
-                    background: 'linear-gradient(to right, #3b82f6, #4f46e5)',
-                    border: 'none',
-                    borderRadius: '0.75rem',
-                    padding: '0.75rem 1.5rem',
-                    fontSize: '1rem',
-                    fontWeight: '600',
-                    transition: 'all 0.3s',
-                    fontFamily: 'Segoe UI, system-ui, sans-serif',
-                    cursor: 'pointer',
-                    className: 'auth-button',
+          <Auth
+            supabaseClient={supabase}
+            onError={error => {
+              setAuthState({
+                loading: false,
+                error: error.message,
+                success: null,
+              });
+            }}
+            onAuthStateChange={handleAuthStateChange}
+            appearance={{
+              theme: ThemeSupa,
+              style: {
+                button: {
+                  background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%)',
+                  border: 'none',
+                  borderRadius: '1rem',
+                  padding: '0.875rem 2rem',
+                  fontSize: '1rem',
+                  fontWeight: '600',
+                  transition: 'all 0.3s',
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(99, 102, 241, 0.3)',
+                },
+                input: {
+                  borderRadius: '1rem',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  padding: '0.875rem 1rem',
+                  fontSize: '1rem',
+                  transition: 'all 0.3s',
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  color: 'white',
+                },
+                label: {
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: '#a1a1aa',
+                  marginBottom: '0.5rem',
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                },
+                message: {
+                  borderRadius: '1rem',
+                  padding: '0.875rem',
+                  fontSize: '0.875rem',
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                  '&.supabase-auth-ui-message-error': {
+                    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+                    border: '1px solid rgba(239, 68, 68, 0.5)',
+                    color: '#fca5a5',
                   },
-                  input: {
-                    borderRadius: '0.75rem',
-                    border: '1px solid #e5e7eb',
-                    padding: '0.75rem 1rem',
-                    fontSize: '1rem',
-                    transition: 'all 0.2s',
-                    fontFamily: 'Segoe UI, system-ui, sans-serif',
-                    boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
-                  },
-                  label: {
-                    fontSize: '0.875rem',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '0.5rem',
-                    fontFamily: 'Segoe UI, system-ui, sans-serif',
-                  },
-                  message: {
-                    borderRadius: '0.5rem',
-                    padding: '0.75rem',
-                    fontSize: '0.875rem',
-                    fontFamily: 'Segoe UI, system-ui, sans-serif',
-                    '&.supabase-auth-ui-message-error': {
-                      backgroundColor: '#fee2e2',
-                      borderLeft: '4px solid #ef4444',
-                      color: '#b91c1c',
-                    },
-                    '&.supabase-auth-ui-message-success': {
-                      backgroundColor: '#dcfce7',
-                      borderLeft: '4px solid #22c55e',
-                      color: '#15803d',
-                    },
-                  },
-                  container: {
-                    gap: '1rem',
-                  },
-                  anchor: {
-                    color: '#3b82f6',
-                    fontWeight: '500',
-                    textDecoration: 'none',
-                    fontFamily: 'Segoe UI, system-ui, sans-serif',
-                  },
-                  loader: {
-                    className: 'auth-loading',
+                  '&.supabase-auth-ui-message-success': {
+                    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                    border: '1px solid rgba(16, 185, 129, 0.5)',
+                    color: '#6ee7b7',
                   },
                 },
-                // Add validation icons
-                classNames: {
-                  input: 'auth-input-wrapper',
-                  message: 'auth-message',
-                  button: 'auth-button',
+                container: {
+                  gap: '1rem',
                 },
-              }}
-              providers={[]}
-              redirectTo={window.location.origin}
-            />
+                anchor: {
+                  color: '#a78bfa',
+                  fontWeight: '500',
+                  textDecoration: 'none',
+                  fontFamily: 'Inter, system-ui, sans-serif',
+                },
+                loader: {
+                  className: 'auth-loading',
+                },
+              },
+              // Add validation icons
+              classNames: {
+                input: 'auth-input-wrapper',
+                message: 'auth-message',
+                button: 'auth-button',
+              },
+            }}
+            providers={[]}
+            redirectTo={window.location.origin}
+          />
 
-            {authState.loading && (
-              <div className="flex justify-center items-center py-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
-              </div>
-            )}
-          </div>
+          {authState.loading && (
+            <div className="flex justify-center items-center py-4">
+              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-purple-500"></div>
+            </div>
+          )}
         </div>
 
         {/* Footer */}
         <div className="text-center">
-          <p className="text-xs text-gray-400">Secure authentication powered by Supabase</p>
+          <p className="text-xs text-gray-500">Secure authentication powered by Supabase</p>
+          <div className="flex justify-center items-center space-x-2 mt-2">
+            <div className="w-2 h-2 bg-green-500 rounded-full cleo-animate-pulse"></div>
+            <span className="text-xs text-gray-400">AI Assistant Ready</span>
+          </div>
         </div>
       </div>
     </div>

@@ -324,14 +324,18 @@ const CreditCardList = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        <span className="ml-2 text-gray-600">Loading cards...</span>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+        <span className="ml-2 text-gray-300">Loading cards...</span>
       </div>
     );
   }
 
   if (error) {
-    return <div className="p-4 bg-red-100 text-red-700 rounded-lg">{error}</div>;
+    return (
+      <div className="cleo-card p-4 bg-red-500/20 border border-red-500/50 text-red-400">
+        {error}
+      </div>
+    );
   }
 
   return (
@@ -342,10 +346,10 @@ const CreditCardList = () => {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
-          <h2 data-cy="credit-cards-heading" className="text-2xl font-bold text-gray-900 mb-1">
+          <h2 data-cy="credit-cards-heading" className="text-3xl font-bold text-white mb-2">
             💳 Credit Cards
           </h2>
-          <p className="text-sm text-gray-600">{sortedCards.length} cards total</p>
+          <p className="text-gray-300">{sortedCards.length} cards total</p>
         </div>
         <div className="flex flex-wrap gap-3">
           <CreditCardExport
@@ -354,17 +358,10 @@ const CreditCardList = () => {
             activeTab={activeTab}
             onMessage={setMessage}
           />
-          <button
-            data-cy="card-add-button"
-            onClick={handleAddCard}
-            className="px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 text-sm font-medium shadow-sm hover:shadow-md"
-          >
+          <button data-cy="card-add-button" onClick={handleAddCard} className="cleo-button-primary">
             ➕ Add Card
           </button>
-          <button
-            onClick={fetchCards}
-            className="px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 text-sm font-medium shadow-sm hover:shadow-md"
-          >
+          <button onClick={fetchCards} className="cleo-button-secondary">
             🔄 Refresh
           </button>
         </div>
@@ -373,8 +370,10 @@ const CreditCardList = () => {
       {/* Message */}
       {message && (
         <div
-          className={`p-3 rounded-lg text-sm ${
-            message.includes('❌') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'
+          className={`p-4 rounded-xl text-sm border ${
+            message.includes('❌')
+              ? 'bg-red-500/20 border-red-500/50 text-red-400'
+              : 'bg-green-500/20 border-green-500/50 text-green-400'
           }`}
         >
           {message}
@@ -382,33 +381,27 @@ const CreditCardList = () => {
       )}
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-1 bg-gray-100 p-1 rounded-lg mb-6">
+      <div className="cleo-card p-2 flex flex-wrap gap-2 mb-6">
         <button
           onClick={() => setActiveTab('all')}
-          className={`px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-200 ${
-            activeTab === 'all'
-              ? 'bg-white text-blue-600 shadow-sm border border-blue-200'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+          className={`cleo-tab px-6 py-3 text-sm font-medium ${
+            activeTab === 'all' ? 'active' : ''
           }`}
         >
           All Cards ({cards.length})
         </button>
         <button
           onClick={() => setActiveTab('promo')}
-          className={`px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-200 ${
-            activeTab === 'promo'
-              ? 'bg-white text-orange-600 shadow-sm border border-orange-200'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+          className={`cleo-tab px-6 py-3 text-sm font-medium ${
+            activeTab === 'promo' ? 'active' : ''
           }`}
         >
           ⏳ Promo Expiring ({cards.filter(c => getPromoExpiryBadge(c.current_promos)).length})
         </button>
         <button
           onClick={() => setActiveTab('inactive')}
-          className={`px-4 py-2.5 rounded-md text-sm font-medium transition-all duration-200 ${
-            activeTab === 'inactive'
-              ? 'bg-white text-red-600 shadow-sm border border-red-200'
-              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+          className={`cleo-tab px-6 py-3 text-sm font-medium ${
+            activeTab === 'inactive' ? 'active' : ''
           }`}
         >
           ⚠️ Inactive (
@@ -426,7 +419,7 @@ const CreditCardList = () => {
               placeholder="Search by card name..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-3 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+              className="cleo-input w-full pl-10"
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <span className="text-gray-400">🔍</span>
@@ -434,25 +427,19 @@ const CreditCardList = () => {
           </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
-          <select
-            value={sortBy}
-            onChange={e => setSortBy(e.target.value)}
-            className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 bg-white"
-          >
+          <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="cleo-input">
             <option value="card_name">Sort by Card Name</option>
             <option value="days_inactive">Sort by Days Inactive</option>
             <option value="promo_count">Sort by Promo Count</option>
             <option value="last_used_newest">Last Used (Newest First)</option>
             <option value="last_used_oldest">Last Used (Oldest First)</option>
           </select>
-          <div className="flex bg-gray-100 rounded-lg p-1">
+          <div className="cleo-card p-1 flex">
             <button
               data-cy="view-cards-button"
               onClick={() => handleViewModeChange('cards')}
-              className={`px-4 py-2 rounded text-sm font-medium transition-all duration-200 ${
-                viewMode === 'cards'
-                  ? 'bg-white text-blue-600 shadow-sm border border-blue-200'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              className={`cleo-tab px-4 py-2 text-sm font-medium ${
+                viewMode === 'cards' ? 'active' : ''
               }`}
             >
               📋 Cards
@@ -460,10 +447,8 @@ const CreditCardList = () => {
             <button
               data-cy="view-table-button"
               onClick={() => handleViewModeChange('table')}
-              className={`px-4 py-2 rounded text-sm font-medium transition-all duration-200 ${
-                viewMode === 'table'
-                  ? 'bg-white text-blue-600 shadow-sm border border-blue-200'
-                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              className={`cleo-tab px-4 py-2 text-sm font-medium ${
+                viewMode === 'table' ? 'active' : ''
               }`}
             >
               📊 Table
@@ -479,21 +464,21 @@ const CreditCardList = () => {
             selectedCards.length > 0 ? 'max-h-20 opacity-100 mb-6' : 'max-h-0 opacity-0 mb-0'
           }`}
         >
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 flex items-center justify-between shadow-sm">
+          <div className="cleo-card p-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <span className="text-sm font-medium text-blue-800">
+              <span className="text-sm font-medium text-white">
                 ✅ {selectedCards.length} card{selectedCards.length !== 1 ? 's' : ''} selected
               </span>
               <button
                 onClick={handleDeselectAll}
-                className="text-sm text-blue-700 hover:text-blue-900 underline font-medium transition-colors duration-200"
+                className="text-sm text-purple-400 hover:text-purple-300 underline font-medium transition-colors duration-200"
               >
                 Deselect All
               </button>
             </div>
             <button
               onClick={handleBulkDelete}
-              className="px-4 py-2 text-red-600 border border-red-300 rounded-lg hover:border-red-500 hover:bg-red-50 text-sm font-medium transition-all duration-200 flex items-center gap-2 shadow-sm hover:shadow-md"
+              className="cleo-button-secondary hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-400 transition-all duration-300"
               title="Delete selected cards"
             >
               🗑️ Delete Selected
@@ -505,12 +490,12 @@ const CreditCardList = () => {
       {/* Content View */}
       <div className="min-h-[600px]">
         {sortedCards.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            <div className="text-4xl mb-2">💳</div>
-            <p>No cards found matching your criteria</p>
+          <div className="text-center py-12 text-gray-300">
+            <div className="text-6xl mb-4 cleo-animate-float">💳</div>
+            <p className="text-xl">No cards found matching your criteria</p>
           </div>
         ) : viewMode === 'table' ? (
-          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+          <div className="cleo-card overflow-hidden">
             <div className="max-h-[600px] overflow-y-auto">
               <CreditCardTable
                 cards={sortedCards}
@@ -540,13 +525,13 @@ const CreditCardList = () => {
               {sortedCards.map(card => (
                 <div
                   key={card.id}
-                  className={`rounded-lg shadow-sm border p-6 transition-all duration-200 ease-in-out hover:shadow-md relative ${
+                  className={`cleo-card p-6 transition-all duration-300 ease-in-out hover:transform hover:scale-105 relative ${
                     selectedCards.includes(card.id)
-                      ? 'border-blue-500 bg-blue-100 shadow-md'
+                      ? 'cleo-glow border-purple-500/50'
                       : getInactivityBadge(card.days_inactive, card.last_used_date) ||
                           getPromoExpiryBadge(card.current_promos)
-                        ? 'border-red-300 bg-red-50 hover:border-red-400'
-                        : 'bg-blue-50 border-blue-200 hover:border-blue-300 hover:bg-blue-100'
+                        ? 'border-red-500/50 bg-red-500/10'
+                        : ''
                   }`}
                 >
                   {/* Attention indicator */}
@@ -566,21 +551,21 @@ const CreditCardList = () => {
                         className="mt-1 h-4 w-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
                       />
                       <div>
-                        <h3 className="font-semibold text-gray-900 text-lg mb-1">
+                        <h3 className="font-bold text-white text-xl mb-2">
                           {card.bank_name && card.last_four_digits
                             ? `${card.bank_name} ${card.last_four_digits}`
                             : 'Unknown Card'}
                         </h3>
                         <div className="space-y-1">
-                          <p className="text-sm text-gray-600">
+                          <p className="text-sm text-gray-300">
                             {card.days_inactive ? `${card.days_inactive} days inactive` : 'Active'}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-400">
                             {card.last_used_date
                               ? `Last used: ${formatDate(card.last_used_date)}`
                               : '❌ Never Used'}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-xs text-gray-400">
                             {Array.isArray(card.current_promos) ? card.current_promos.length : 0}{' '}
                             active promos
                           </p>
@@ -590,17 +575,17 @@ const CreditCardList = () => {
                     <div className="flex items-start gap-2">
                       <div className="flex flex-col gap-1">
                         {getInactivityBadge(card.days_inactive, card.last_used_date) && (
-                          <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full font-bold">
+                          <span className="px-3 py-1 bg-red-500/20 border border-red-500/50 text-red-400 text-xs rounded-full font-bold">
                             ⚠️ {card.last_used_date ? 'Inactive' : 'Never Used'}
                           </span>
                         )}
                         {getPromoExpiryBadge(card.current_promos) && (
-                          <span className="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full">
+                          <span className="px-3 py-1 bg-yellow-500/20 border border-yellow-500/50 text-yellow-400 text-xs rounded-full">
                             ⏳ Promo Soon
                           </span>
                         )}
                         {card.new_promo_available && (
-                          <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full">
+                          <span className="px-3 py-1 bg-green-500/20 border border-green-500/50 text-green-400 text-xs rounded-full">
                             🏷️ New Promo
                           </span>
                         )}
@@ -608,21 +593,21 @@ const CreditCardList = () => {
                       <div className="flex gap-1">
                         <button
                           onClick={() => handleSetReminder(card)}
-                          className="p-2 text-gray-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-all duration-200"
+                          className="p-2 text-gray-400 hover:text-yellow-400 hover:bg-yellow-500/20 rounded-lg transition-all duration-200"
                           title="Set reminder"
                         >
                           🔔
                         </button>
                         <button
                           onClick={() => handleEditCard(card)}
-                          className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                          className="p-2 text-gray-400 hover:text-purple-400 hover:bg-purple-500/20 rounded-lg transition-all duration-200"
                           title="Edit card"
                         >
                           ✏️
                         </button>
                         <button
                           onClick={() => handleDeleteCard(card)}
-                          className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+                          className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/20 rounded-lg transition-all duration-200"
                           title="Delete card"
                         >
                           🗑️
@@ -632,22 +617,22 @@ const CreditCardList = () => {
                   </div>
 
                   {/* Card Info */}
-                  <div className="bg-white bg-opacity-70 rounded-lg p-4 space-y-3 mb-5">
+                  <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 space-y-3 mb-5 border border-white/10">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Days Inactive:</span>
-                      <span className="font-semibold text-gray-900">{card.days_inactive || 0}</span>
+                      <span className="text-sm text-gray-300">Days Inactive:</span>
+                      <span className="font-semibold text-white">{card.days_inactive || 0}</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Last Used:</span>
-                      <span className="font-semibold text-gray-900">
+                      <span className="text-sm text-gray-300">Last Used:</span>
+                      <span className="font-semibold text-white">
                         {formatDate(card.last_used_date)}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Promo Used:</span>
+                      <span className="text-sm text-gray-300">Promo Used:</span>
                       <span
                         className={`font-semibold ${
-                          card.promo_used ? 'text-green-600' : 'text-gray-500'
+                          card.promo_used ? 'text-green-400' : 'text-gray-400'
                         }`}
                       >
                         {card.promo_used ? 'Yes' : 'No'}
@@ -655,8 +640,8 @@ const CreditCardList = () => {
                     </div>
                     {card.interest_after_promo && (
                       <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Interest After Promo:</span>
-                        <span className="font-semibold text-gray-900">
+                        <span className="text-sm text-gray-300">Interest After Promo:</span>
+                        <span className="font-semibold text-white">
                           {card.interest_after_promo}%
                         </span>
                       </div>
@@ -665,11 +650,13 @@ const CreditCardList = () => {
 
                   {/* Current Promos */}
                   {card.promo_end_date && (
-                    <div className="bg-blue-50 rounded-lg p-3 mb-4">
-                      <h4 className="text-sm font-semibold text-blue-800 mb-2">🎯 Current Promo</h4>
+                    <div className="bg-purple-500/20 border border-purple-500/50 rounded-xl p-4 mb-4">
+                      <h4 className="text-sm font-semibold text-purple-300 mb-2">
+                        🎯 Current Promo
+                      </h4>
                       <div className="flex justify-between text-sm">
-                        <span className="text-blue-700">Expires:</span>
-                        <span className="font-medium text-blue-900">
+                        <span className="text-purple-400">Expires:</span>
+                        <span className="font-medium text-white">
                           {formatDate(card.promo_end_date)}
                         </span>
                       </div>
@@ -678,8 +665,8 @@ const CreditCardList = () => {
 
                   {/* Reminders */}
                   {getCardReminders(card.id).length > 0 && (
-                    <div className="bg-yellow-50 rounded-lg p-3 mb-4">
-                      <h4 className="text-sm font-semibold text-yellow-800 mb-2">
+                    <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-xl p-4 mb-4">
+                      <h4 className="text-sm font-semibold text-yellow-300 mb-2">
                         🔔 Active Reminders
                       </h4>
                       {getCardReminders(card.id).map(reminder => (
@@ -688,15 +675,15 @@ const CreditCardList = () => {
                           className="flex justify-between items-start text-sm mb-2 last:mb-0"
                         >
                           <div>
-                            <span className="font-medium text-yellow-900">{reminder.type}</span>
-                            <span className="text-yellow-700"> – {formatDate(reminder.date)}</span>
+                            <span className="font-medium text-white">{reminder.type}</span>
+                            <span className="text-yellow-400"> – {formatDate(reminder.date)}</span>
                             {reminder.note && (
-                              <p className="text-xs text-yellow-600 mt-1">{reminder.note}</p>
+                              <p className="text-xs text-yellow-300 mt-1">{reminder.note}</p>
                             )}
                           </div>
                           <button
                             onClick={() => handleDeleteReminder(reminder.id)}
-                            className="text-yellow-400 hover:text-red-600 ml-2"
+                            className="text-yellow-400 hover:text-red-400 ml-2 transition-colors duration-200"
                             title="Delete reminder"
                           >
                             ×

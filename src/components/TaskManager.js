@@ -292,26 +292,24 @@ const TaskManager = () => {
   // Find the active task for the drag overlay
   const activeTask = activeId ? todos.find(task => task.id === activeId) : null;
 
-  if (loading) return <div className="p-4">Loading tasks...</div>;
+  if (loading) return <div className="p-4 text-gray-300">Loading tasks...</div>;
 
   return (
-    <div className="p-4 md:p-6 bg-white rounded-lg shadow-lg max-w-3xl mx-auto">
+    <div className="p-6 max-w-4xl mx-auto">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h2
           data-cy="todo-manager-heading"
-          className="text-2xl font-bold text-blue-700 flex items-center"
+          className="text-3xl font-bold text-white flex items-center"
         >
-          <span className="mr-2">📝</span>
+          <span className="mr-3 text-4xl">📝</span>
           To-Do Manager
         </h2>
-        <div className="flex bg-gray-100 rounded-full p-1 w-full sm:w-auto shadow-inner">
+        <div className="cleo-card p-1 flex w-full sm:w-auto">
           <button
             data-cy="view-cards-button"
             onClick={() => setViewMode('cards')}
-            className={`px-4 py-2 rounded-full text-sm transition-all flex-1 sm:flex-auto ${
-              viewMode === 'cards'
-                ? 'bg-white shadow-md text-blue-600 font-medium'
-                : 'text-gray-600 hover:text-gray-900'
+            className={`cleo-tab px-6 py-3 text-sm font-medium flex-1 sm:flex-auto ${
+              viewMode === 'cards' ? 'active' : ''
             }`}
           >
             📋 Cards
@@ -319,10 +317,8 @@ const TaskManager = () => {
           <button
             data-cy="view-table-button"
             onClick={() => setViewMode('table')}
-            className={`px-4 py-2 rounded-full text-sm transition-all flex-1 sm:flex-auto ${
-              viewMode === 'table'
-                ? 'bg-white shadow-md text-blue-600 font-medium'
-                : 'text-gray-600 hover:text-gray-900'
+            className={`cleo-tab px-6 py-3 text-sm font-medium flex-1 sm:flex-auto ${
+              viewMode === 'table' ? 'active' : ''
             }`}
           >
             📊 Table
@@ -332,90 +328,99 @@ const TaskManager = () => {
 
       {message && (
         <div
-          className={`p-3 rounded mb-4 ${message.includes('❌') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}
+          className={`p-4 rounded-xl mb-6 border ${
+            message.includes('❌')
+              ? 'bg-red-500/20 border-red-500/50 text-red-400'
+              : 'bg-green-500/20 border-green-500/50 text-green-400'
+          }`}
         >
           {message}
         </div>
       )}
 
       {/* Add Todo Form */}
-      <form onSubmit={handleAddTodo} className="mb-8">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1 relative">
-            <label
-              htmlFor="task-input"
-              className="text-xs font-medium text-gray-700 mb-1 block text-left"
-            >
-              Task
-            </label>
-            <input
-              id="task-input"
-              data-cy="task-input-field"
-              type="text"
-              placeholder={editingTodo ? 'Edit task...' : 'Add a new task...'}
-              value={newTask}
-              onChange={e => setNewTask(e.target.value)}
-              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm shadow-sm"
-            />
-          </div>
-          <div className="flex flex-col w-full sm:w-auto">
-            <label
-              htmlFor="task-due-date"
-              className="text-xs font-medium text-gray-700 mb-1 text-left block"
-            >
-              Due Date
-            </label>
-            <input
-              id="task-due-date"
-              data-cy="task-date-field"
-              type="date"
-              value={taskDate}
-              onChange={e => setTaskDate(e.target.value)}
-              className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-40 text-sm"
-              required
-            />
-          </div>
-          <div className="flex flex-col w-full sm:w-auto justify-end mt-4 sm:mt-0">
-            <button
-              type="submit"
-              data-cy={editingTodo ? 'task-update-button' : 'task-add-button'}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto text-sm font-medium shadow-md flex items-center justify-center"
-            >
-              <span className="mr-1">{editingTodo ? '✏️' : '➕'}</span>
-              {editingTodo ? 'Update' : 'Add Task'}
-            </button>
-            {editingTodo && (
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingTodo(null);
-                  setNewTask('');
-                  // Reset to today's date when canceling
-                  setTaskDate(getTodayDateString());
-                }}
-                className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors w-full sm:w-auto text-sm mt-2 sm:mt-2 font-medium shadow-md"
+      <div className="cleo-card p-6 mb-8">
+        <form onSubmit={handleAddTodo}>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1 relative">
+              <label
+                htmlFor="task-input"
+                className="text-sm font-medium text-gray-300 mb-2 block text-left"
               >
-                Cancel
+                Task
+              </label>
+              <input
+                id="task-input"
+                data-cy="task-input-field"
+                type="text"
+                placeholder={editingTodo ? 'Edit task...' : 'Add a new task...'}
+                value={newTask}
+                onChange={e => setNewTask(e.target.value)}
+                className="cleo-input w-full"
+              />
+            </div>
+            <div className="flex flex-col w-full sm:w-auto">
+              <label
+                htmlFor="task-due-date"
+                className="text-sm font-medium text-gray-300 mb-2 text-left block"
+              >
+                Due Date
+              </label>
+              <input
+                id="task-due-date"
+                data-cy="task-date-field"
+                type="date"
+                value={taskDate}
+                onChange={e => setTaskDate(e.target.value)}
+                className="cleo-input sm:w-40"
+                required
+              />
+            </div>
+            <div className="flex flex-col w-full sm:w-auto justify-end mt-4 sm:mt-0">
+              <button
+                type="submit"
+                data-cy={editingTodo ? 'task-update-button' : 'task-add-button'}
+                className="cleo-button-primary w-full sm:w-auto flex items-center justify-center"
+              >
+                <span className="mr-2">{editingTodo ? '✏️' : '➕'}</span>
+                {editingTodo ? 'Update' : 'Add Task'}
               </button>
-            )}
+              {editingTodo && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingTodo(null);
+                    setNewTask('');
+                    setTaskDate(getTodayDateString());
+                  }}
+                  className="cleo-button-secondary w-full sm:w-auto mt-3"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-        <p className="text-xs text-gray-500 mt-2 flex items-center">
-          <span className="mr-1">💡</span>
-          <span>
-            Use natural language or ask <strong>FinBot 🤖</strong> for voice input
-          </span>
-        </p>
-      </form>
+          <p className="text-xs text-gray-400 mt-4 flex items-center">
+            <span className="mr-2">💡</span>
+            <span>
+              Use natural language or ask <strong className="text-purple-400">FinBot 🤖</strong> for
+              voice input
+            </span>
+          </p>
+        </form>
+      </div>
 
       {/* Tasks */}
       <div className="mb-8">
-        <h3 className="text-lg font-semibold mb-4">
+        <h3 className="text-xl font-bold text-white mb-6">
           Tasks ({pendingTodos.length} pending, {todos.filter(t => t.completed).length} completed)
         </h3>
 
         {pendingTodos.length === 0 ? (
-          <p className="text-gray-600 text-center py-8">No pending tasks. Great job! 🎉</p>
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4 cleo-animate-float">🎉</div>
+            <p className="text-xl text-gray-300">No pending tasks. Great job!</p>
+          </div>
         ) : viewMode === 'cards' ? (
           <div data-cy="task-container" className="task-container">
             <DndContext
@@ -429,8 +434,8 @@ const TaskManager = () => {
               {/* Pinned Tasks Section */}
               {pinnedTodos.length > 0 && (
                 <div className="mb-6">
-                  <h4 className="text-md font-medium text-yellow-700 mb-3 flex items-center">
-                    <span className="mr-2">📌</span>
+                  <h4 className="text-lg font-semibold text-yellow-400 mb-4 flex items-center">
+                    <span className="mr-3">📌</span>
                     Pinned Tasks
                   </h4>
                   <TaskList
@@ -486,20 +491,20 @@ const TaskManager = () => {
             </DndContext>
           </div>
         ) : (
-          <div>
-            <table className="w-full border-collapse border border-gray-300">
+          <div className="cleo-card overflow-hidden">
+            <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-gray-50">
-                  <th className="border border-gray-300 px-4 py-2 text-left text-xs font-medium">
+                <tr className="bg-white/5">
+                  <th className="border-b border-white/10 px-4 py-3 text-left text-sm font-semibold text-gray-300">
                     Status
                   </th>
-                  <th className="border border-gray-300 px-4 py-2 text-left text-xs font-medium">
+                  <th className="border-b border-white/10 px-4 py-3 text-left text-sm font-semibold text-gray-300">
                     Task
                   </th>
-                  <th className="border border-gray-300 px-4 py-2 text-left text-xs font-medium">
+                  <th className="border-b border-white/10 px-4 py-3 text-left text-sm font-semibold text-gray-300">
                     Due Date
                   </th>
-                  <th className="border border-gray-300 px-4 py-2 text-left text-xs font-medium">
+                  <th className="border-b border-white/10 px-4 py-3 text-left text-sm font-semibold text-gray-300">
                     Actions
                   </th>
                 </tr>
@@ -676,13 +681,13 @@ const TaskManager = () => {
         <div>
           <button
             onClick={() => setShowCompleted(!showCompleted)}
-            className="flex items-center justify-between w-full p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors mb-4"
+            className="cleo-card flex items-center justify-between w-full p-4 hover:transform hover:scale-[1.02] transition-all duration-300 mb-6"
           >
-            <h3 className="text-lg font-semibold text-gray-700">
+            <h3 className="text-xl font-bold text-white">
               Completed Tasks ({todos.filter(t => t.completed).length})
             </h3>
             <svg
-              className={`w-5 h-5 text-gray-500 transition-transform ${showCompleted ? 'rotate-180' : ''}`}
+              className={`w-6 h-6 text-gray-300 transition-transform ${showCompleted ? 'rotate-180' : ''}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -697,31 +702,31 @@ const TaskManager = () => {
           </button>
 
           {showCompleted && (
-            <div className="space-y-1">
+            <div className="space-y-2">
               {todos
                 .filter(t => t.completed)
                 .map(todo => (
                   <div
                     key={todo.id}
-                    className="flex items-center justify-between p-2 bg-green-50 rounded-lg mb-1"
+                    className="cleo-card flex items-center justify-between p-4 bg-green-500/10 border-green-500/30"
                   >
                     <div className="flex items-center space-x-3">
                       <input
                         type="checkbox"
                         checked={true}
                         onChange={() => handleToggleComplete(todo.id, todo.completed)}
-                        className="w-4 h-4 text-green-600 rounded"
+                        className="w-4 h-4 text-green-500 rounded"
                       />
                       <div className="flex flex-wrap sm:flex-nowrap items-center">
-                        <span className="line-through text-gray-600 text-sm">{todo.task}</span>
-                        <span className="text-xs text-gray-500 ml-2 whitespace-nowrap">
+                        <span className="line-through text-gray-300 text-sm">{todo.task}</span>
+                        <span className="text-xs text-gray-400 ml-2 whitespace-nowrap">
                           Completed: {formatDateString(todo.updated_at)}
                         </span>
                       </div>
                     </div>
                     <button
                       onClick={() => handleDelete(todo.id)}
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded transition-colors"
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/20 p-2 rounded-lg transition-all duration-200"
                     >
                       <svg
                         className="w-4 h-4"
