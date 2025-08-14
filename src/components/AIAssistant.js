@@ -17,7 +17,6 @@ const AIAssistant = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [proactiveAlerts, setProactiveAlerts] = useState([]);
-  const [showInsights, setShowInsights] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);

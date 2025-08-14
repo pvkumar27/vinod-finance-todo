@@ -1,14 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import ProactiveDashboard from '../components/ProactiveDashboard';
 import VisualInsights from '../components/VisualInsights';
 import AIAssistant from '../components/AIAssistant';
 
 const Dashboard = () => {
-  const [aiExpanded, setAiExpanded] = useState(false);
-
   const handleProactiveAction = action => {
     // Trigger AI assistant with the action
-    setAiExpanded(true);
     // Dispatch custom event to trigger AI query
     setTimeout(() => {
       window.dispatchEvent(new CustomEvent('aiQuery', { detail: { query: action } }));
@@ -64,7 +61,9 @@ const Dashboard = () => {
             <div className="text-3xl">🤖</div>
           </div>
           <button
-            onClick={() => setAiExpanded(true)}
+            onClick={() =>
+              window.dispatchEvent(new CustomEvent('aiQuery', { detail: { query: 'Hi FinBot!' } }))
+            }
             className="mt-4 w-full bg-blue-500 text-white py-2 px-4 rounded-xl hover:bg-blue-600 transition-colors font-medium"
           >
             Ask FinBot

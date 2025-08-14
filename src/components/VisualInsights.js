@@ -7,7 +7,7 @@ const VisualInsights = ({ data, type = 'overview' }) => {
 
   useEffect(() => {
     generateVisualInsights();
-  }, [data, type]);
+  }, [data, type]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const generateVisualInsights = async () => {
     setLoading(true);
