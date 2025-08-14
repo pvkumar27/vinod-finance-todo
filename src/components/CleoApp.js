@@ -8,7 +8,17 @@ const CleoApp = () => {
   const renderContent = () => {
     switch (activeTab) {
       case 'chat':
-        return <AIAssistant />;
+        return (
+          <div className="h-full flex flex-col bg-gray-50">
+            <div className="bg-white border-b border-gray-200 p-4">
+              <h1 className="text-2xl font-bold text-gradient text-center">FinTask AI</h1>
+              <p className="text-sm text-gray-500 text-center">Your AI money assistant</p>
+            </div>
+            <div className="flex-1">
+              <AIAssistant />
+            </div>
+          </div>
+        );
       case 'cards':
         return (
           <div className="p-4">
@@ -18,7 +28,7 @@ const CleoApp = () => {
       case 'insights':
         return (
           <div className="p-4 text-center">
-            <h2 className="text-2xl font-bold cleo-text-gradient mb-4">Coming Soon</h2>
+            <h2 className="text-2xl font-bold text-gradient mb-4">Coming Soon</h2>
             <p className="text-gray-600">AI-powered insights will be available here</p>
           </div>
         );
@@ -30,7 +40,7 @@ const CleoApp = () => {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Main Content */}
-      <div className="flex-1 pb-16 overflow-auto">{renderContent()}</div>
+      <div className="flex-1 pb-16">{renderContent()}</div>
 
       {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white">
