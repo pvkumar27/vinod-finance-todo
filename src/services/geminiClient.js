@@ -841,6 +841,21 @@ Key Parameters:
       }));
     }
 
+    // Handle conversational responses
+    if (
+      lowerQuery.includes('thank') ||
+      lowerQuery.includes('thanks') ||
+      lowerQuery === 'ok' ||
+      lowerQuery === 'okay'
+    ) {
+      return {
+        success: true,
+        message:
+          "You're welcome! I'm here whenever you need help with your finances. Try asking me 'what needs my attention today?' for insights.",
+        processingMode: 'fallback',
+      };
+    }
+
     // Handle common update patterns that might not be caught
     if (lowerQuery.includes('mark') || lowerQuery.includes('complete')) {
       return {
