@@ -1,7 +1,7 @@
 import React from 'react';
 import ProactiveDashboard from '../components/ProactiveDashboard';
 import VisualInsights from '../components/VisualInsights';
-import AIAssistant from '../components/AIAssistant';
+import AIAssistant from '../components/AIAssistantEnhanced';
 
 const Dashboard = () => {
   const handleProactiveAction = action => {
