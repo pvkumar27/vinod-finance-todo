@@ -860,7 +860,7 @@ Key Parameters:
     }
 
     throw new Error(
-      'I can help with todos and credit cards. Try: "show my todos" or "show my credit cards"'
+      'I can help with todos, credit cards, and financial insights. Try: "what needs my attention today?" or "give me financial insights"'
     );
   }
 
