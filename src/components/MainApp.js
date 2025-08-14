@@ -46,11 +46,26 @@ const MainApp = () => {
       const assistantMessage = {
         id: Date.now() + 1,
         type: 'assistant',
-        content: response.message || 'I processed your request!',
+        content: formatResponse(response),
         timestamp: new Date(),
+        data: response,
       };
 
       setMessages(prev => [...prev, assistantMessage]);
+
+      // Trigger refresh if needed
+      if (
+        response.success &&
+        (response.todo || response.credit_card || response.deletedCount || response.updatedCount)
+      ) {
+        window.dispatchEvent(new CustomEvent('todoAdded', { detail: response.todo || {} }));
+        if (response.credit_card || response.deletedCount) {
+          const eventDetail = response.deletedCard
+            ? { deleted: true, cardId: response.deletedCard.id }
+            : response.credit_card || {};
+          window.dispatchEvent(new CustomEvent('creditCardAdded', { detail: eventDetail }));
+        }
+      }
     } catch (error) {
       const errorMessage = {
         id: Date.now() + 1,
@@ -62,6 +77,63 @@ const MainApp = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const formatResponse = response => {
+    if (response.todos) {
+      return `Found ${response.count} todos:\n${response.todos
+        .map(
+          todo =>
+            `• ${todo.task} ${todo.completed ? '✅' : '⏳'} ${todo.priority ? `(${todo.priority})` : ''}`
+        )
+        .join('\n')}`;
+    }
+
+    if (response.credit_cards) {
+      return `Found ${response.count} credit cards:\n${response.credit_cards
+        .map(card => {
+          const cardName =
+            card.bank_name && card.last_four_digits
+              ? `${card.bank_name} ${card.last_four_digits}`
+              : card.card_name || 'Card';
+          const cardType = card.card_type || 'free';
+          const lastUsed = card.last_used_date
+            ? `(Last used: ${new Date(card.last_used_date).toLocaleDateString()})`
+            : '(Never used)';
+          return `• ${cardName} - ${cardType} ${lastUsed}`;
+        })
+        .join('\n')}`;
+    }
+
+    if (response.insights) {
+      return `Financial Insights:\n${response.insights.map(insight => `• ${insight}`).join('\n')}${
+        response.recommendations
+          ? `\n\nRecommendations:\n${response.recommendations.map(rec => `• ${rec}`).join('\n')}`
+          : ''
+      }`;
+    }
+
+    if (response.urgentItems) {
+      return `🎯 Priority Items:\n${response.urgentItems.map(item => `• ${item}`).join('\n')}${
+        response.insights
+          ? `\n\n💡 Insights:\n${response.insights.map(insight => `• ${insight}`).join('\n')}`
+          : ''
+      }`;
+    }
+
+    if (response.success && response.todo) {
+      return `✅ ${response.message}\nTask: ${response.todo.task}`;
+    }
+
+    if (response.success && (response.deletedCount || response.updatedCount)) {
+      return `✅ ${response.message}`;
+    }
+
+    if (response.success && response.credit_card) {
+      return `✅ ${response.message}\nCard: ${response.credit_card.card_name}`;
+    }
+
+    return response.message || response.summary || JSON.stringify(response, null, 2);
   };
 
   const renderContent = () => {
