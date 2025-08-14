@@ -298,7 +298,6 @@ const MainApp = () => {
                           key={index}
                           onClick={() => {
                             setInputValue(action.query);
-                            setShowQuickActions(false);
                           }}
                           className="text-xs px-3 py-2 rounded-full bg-white border border-purple-200 text-purple-700 hover:bg-purple-50 transition-all duration-200 shadow-sm"
                         >
