@@ -11,6 +11,7 @@ const MainApp = () => {
   const [activeTab, setActiveTab] = useState('chat');
   const [messages, setMessages] = useState([]);
   const [initialized, setInitialized] = useState(false);
+  const [isChatCollapsed, setIsChatCollapsed] = useState(false);
 
   useEffect(() => {
     if (activeTab !== 'chat' || initialized) return;
@@ -424,23 +425,38 @@ const MainApp = () => {
       case 'chat':
         return (
           <div className="fixed inset-0 bg-white z-30 flex flex-col">
-            <ChatHeader onClose={() => setActiveTab('todos')} />
-            <div className="flex-1 bg-gradient-to-b from-[#FDF3EE] to-[#FCE7E2] pb-40">
-              <ChatContainer
-                messages={messages}
-                isLoading={isLoading}
-                messagesEndRef={messagesEndRef}
-                onRoast={handleRoast}
-                onHype={handleHype}
-              />
-            </div>
-            <BottomPanel
-              inputValue={inputValue}
-              setInputValue={setInputValue}
-              onSubmit={handleSubmit}
-              onVoiceInput={handleVoiceInput}
-              isLoading={isLoading}
+            <ChatHeader
+              isCollapsed={isChatCollapsed}
+              onToggleCollapse={() => setIsChatCollapsed(!isChatCollapsed)}
             />
+            {!isChatCollapsed && (
+              <>
+                <div className="flex-1 bg-gradient-to-b from-[#FDF3EE] to-[#FCE7E2] pb-40 transition-all duration-300">
+                  <ChatContainer
+                    messages={messages}
+                    isLoading={isLoading}
+                    messagesEndRef={messagesEndRef}
+                    onRoast={handleRoast}
+                    onHype={handleHype}
+                  />
+                </div>
+                <BottomPanel
+                  inputValue={inputValue}
+                  setInputValue={setInputValue}
+                  onSubmit={handleSubmit}
+                  onVoiceInput={handleVoiceInput}
+                  isLoading={isLoading}
+                />
+              </>
+            )}
+            {isChatCollapsed && (
+              <div className="flex-1 bg-gradient-to-b from-[#FDF3EE] to-[#FCE7E2] flex items-center justify-center transition-all duration-300">
+                <div className="text-center">
+                  <span className="text-4xl mb-2 block">👋</span>
+                  <p className="text-[#6F3D32] font-medium">Chat with FinBot</p>
+                </div>
+              </div>
+            )}
           </div>
         );
       case 'todos':
