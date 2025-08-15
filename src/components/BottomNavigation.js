@@ -2,10 +2,10 @@ import React from 'react';
 
 const BottomNavigation = ({ activeTab, setActiveTab }) => {
   const navItems = [
-    { id: 'spend', label: 'Spend', icon: '➡️' },
-    { id: 'chat', label: 'Ask FinBot', icon: '🧠' },
-    { id: 'save', label: 'Save', icon: '💾' },
-    { id: 'request', label: 'Request', icon: '💲' },
+    { id: 'chat', label: 'Chat', icon: '💬' },
+    { id: 'todos', label: 'Todos', icon: '✅' },
+    { id: 'cards', label: 'Cards', icon: '💳' },
+    { id: 'insights', label: 'Insights', icon: '📊' },
   ];
 
   return (

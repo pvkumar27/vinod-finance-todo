@@ -422,7 +422,7 @@ const MainApp = () => {
       case 'chat':
         return (
           <div className="fixed inset-0 bg-white z-30 flex flex-col">
-            <ChatHeader onClose={() => setActiveTab('spend')} />
+            <ChatHeader onClose={() => setActiveTab('todos')} />
             <div className="flex-1 bg-gradient-to-b from-[#FDF3EE] to-[#FCE7E2] pb-40">
               <ChatContainer
                 messages={messages}
