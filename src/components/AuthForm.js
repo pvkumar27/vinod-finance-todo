@@ -45,8 +45,12 @@ const AuthForm = () => {
         {/* Logo and Header */}
         <div className="text-center">
           <div className="flex justify-center mb-6">
-            <div className="w-20 h-20 bg-[#632D1F] rounded-3xl flex items-center justify-center shadow-2xl">
-              <span className="text-white text-4xl">💰</span>
+            <div className="w-20 h-20 rounded-3xl flex items-center justify-center shadow-2xl">
+              <img
+                src="/icons/official-logo.png"
+                alt="FinTask Logo"
+                className="w-20 h-20 rounded-3xl"
+              />
             </div>
           </div>
           <h2 className="text-4xl sm:text-5xl font-bold text-[#632D1F] mb-4">FinTask</h2>
