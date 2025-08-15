@@ -445,9 +445,7 @@ Key Parameters:
         };
 
       case 'get_credit_cards':
-        console.log('get_credit_cards params:', params);
         const cards = await api.getCreditCards(params);
-        console.log('get_credit_cards result:', cards.length, 'cards');
         return {
           credit_cards: cards,
           count: cards.length,
