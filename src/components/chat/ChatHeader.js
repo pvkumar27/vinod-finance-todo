@@ -2,7 +2,7 @@ import React from 'react';
 
 const ChatHeader = ({ onClose }) => {
   return (
-    <div className="bg-gradient-to-r from-slate-700 to-slate-800 text-white p-4 flex items-center justify-between shadow-lg">
+    <div className="bg-gradient-to-r from-[#7300FF] to-[#D100FF] text-white p-4 flex items-center justify-between shadow-lg">
       <div className="flex items-center space-x-3">
         <div className="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center shadow-lg border-2 border-white/30">
           <span className="text-3xl">🤖</span>
