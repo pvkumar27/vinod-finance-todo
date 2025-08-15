@@ -42,7 +42,7 @@ const MessageBubble = ({ message, isLast, onRoast, onHype }) => {
   };
 
   return (
-    <div className={`flex animate-slide-up-fade ${isBot ? 'justify-start' : 'justify-end'}`}>
+    <div className={`flex animate-fade-in ${isBot ? 'justify-start' : 'justify-end'}`}>
       <div className={`max-w-[85%] ${isBot ? 'mr-auto' : 'ml-auto'}`}>
         {/* Avatar for bot messages */}
         {isBot && (
@@ -52,13 +52,13 @@ const MessageBubble = ({ message, isLast, onRoast, onHype }) => {
             </div>
             <div className="flex-1">
               <div
-                className={`px-5 py-4 rounded-3xl shadow-lg ${
+                className={`p-4 max-w-[80%] rounded-3xl shadow-md ${
                   message.isWelcome
                     ? 'bg-gradient-to-r from-[#7300FF] to-[#4F46E5] text-white'
                     : message.isProactive
                       ? 'bg-gradient-to-r from-[#FF6A00] to-[#FF3C3C] text-white'
                       : message.isRoast
-                        ? 'bg-gradient-to-r from-red-500 to-orange-500 text-white'
+                        ? 'bg-gradient-to-r from-red-500 to-orange-400 text-white'
                         : message.isHype
                           ? 'bg-gradient-to-r from-purple-600 to-blue-500 text-white'
                           : 'bg-gradient-to-r from-[#7300FF] to-[#4F46E5] text-white'

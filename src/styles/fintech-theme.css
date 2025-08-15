@@ -206,13 +206,17 @@
 
 @keyframes slide-up-fade {
   0% { 
-    transform: translateY(12px); 
+    transform: translateY(10px); 
     opacity: 0; 
   }
   100% { 
     transform: translateY(0); 
     opacity: 1; 
   }
+}
+
+.animate-fade-in {
+  animation: slide-up-fade 0.3s ease-out both;
 }
 
 .animate-slide-up-fade {
