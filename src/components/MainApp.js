@@ -442,7 +442,7 @@ const MainApp = () => {
             />
             {!isChatCollapsed && (
               <>
-                <div className="flex-1 bg-gradient-to-b from-[#FDF3EE] to-[#FCE7E2] pb-40 transition-all duration-300">
+                <div className="flex-1 fin-gradient-bg pb-40 transition-all duration-300">
                   <ChatContainer
                     messages={messages}
                     isLoading={isLoading}
@@ -461,10 +461,10 @@ const MainApp = () => {
               </>
             )}
             {isChatCollapsed && (
-              <div className="flex-1 bg-gradient-to-b from-[#FDF3EE] to-[#FCE7E2] flex items-center justify-center transition-all duration-300">
+              <div className="flex-1 fin-gradient-bg flex items-center justify-center transition-all duration-300">
                 <div className="text-center">
                   <span className="text-4xl mb-2 block">👋</span>
-                  <p className="text-[#6F3D32] font-medium">Chat with FinBot</p>
+                  <p className="text-[#632D1F] font-medium">Chat with FinBot</p>
                 </div>
               </div>
             )}
@@ -472,10 +472,14 @@ const MainApp = () => {
         );
       case 'todos':
         return (
-          <div className="h-full overflow-auto">
+          <div className="h-full overflow-auto fin-gradient-bg">
             <div className="p-4">
-              <div className="mb-4">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">✅ To-Dos</h2>
+              <div className="fin-card mb-4">
+                <div className="bg-[#632D1F] text-white rounded-xl p-3 mb-4 flex items-center space-x-2">
+                  <span className="text-xl">✅</span>
+                  <h2 className="text-lg font-bold">To-Dos</h2>
+                </div>
+                <p className="text-gray-600">Manage your tasks and stay productive</p>
               </div>
               <TabNavigation activeTab="todos" />
             </div>
@@ -483,10 +487,14 @@ const MainApp = () => {
         );
       case 'cards':
         return (
-          <div className="h-full overflow-auto">
+          <div className="h-full overflow-auto fin-gradient-bg">
             <div className="p-4">
-              <div className="mb-4">
-                <h2 className="text-2xl font-bold text-gray-800 mb-2">💳 Credit Cards</h2>
+              <div className="fin-card mb-4">
+                <div className="bg-[#632D1F] text-white rounded-xl p-3 mb-4 flex items-center space-x-2">
+                  <span className="text-xl">💳</span>
+                  <h2 className="text-lg font-bold">Credit Cards</h2>
+                </div>
+                <p className="text-gray-600">Track your cards and spending habits</p>
               </div>
               <TabNavigation activeTab="cards" />
             </div>
@@ -494,17 +502,35 @@ const MainApp = () => {
         );
       case 'insights':
         return (
-          <div className="p-4 text-center h-full flex flex-col justify-center">
-            <h2 className="text-2xl font-bold text-gradient mb-4">Coming Soon</h2>
-            <p className="text-gray-600">AI-powered insights will be available here</p>
+          <div className="h-full overflow-auto fin-gradient-bg">
+            <div className="p-4">
+              <div className="fin-card mb-4">
+                <div className="bg-[#632D1F] text-white rounded-xl p-3 mb-4 flex items-center space-x-2">
+                  <span className="text-xl">📊</span>
+                  <h2 className="text-lg font-bold">Insights</h2>
+                </div>
+                <div className="text-center py-8">
+                  <span className="text-4xl mb-4 block">🕰️</span>
+                  <h3 className="text-xl font-bold text-[#632D1F] mb-2">Coming Soon</h3>
+                  <p className="text-gray-600">
+                    AI-powered financial insights will be available here
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         );
       default:
         return (
-          <div className="h-full flex flex-col bg-gray-50">
-            <div className="bg-white border-b border-gray-200 p-4">
-              <h1 className="text-2xl font-bold text-gradient text-center">FinTask AI</h1>
-              <p className="text-sm text-gray-500 text-center">Your AI money assistant</p>
+          <div className="h-full flex flex-col fin-gradient-bg">
+            <div className="p-4">
+              <div className="fin-card text-center">
+                <div className="bg-[#632D1F] text-white rounded-xl p-3 mb-4 flex items-center justify-center space-x-2">
+                  <span className="text-xl">🤖</span>
+                  <h1 className="text-lg font-bold">FinTask AI</h1>
+                </div>
+                <p className="text-gray-600">Your AI money assistant</p>
+              </div>
             </div>
           </div>
         );
@@ -512,7 +538,7 @@ const MainApp = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50">
+    <div className="min-h-screen flex flex-col fin-gradient-bg">
       {/* Main Content */}
       <div className="flex-1 pb-16">{renderContent()}</div>
 
