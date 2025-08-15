@@ -4,6 +4,8 @@ import TabNavigation from './TabNavigation';
 import ChatContainer from './chat/ChatContainer';
 import ChatInputBar from './chat/ChatInputBar';
 import ChatHeader from './chat/ChatHeader';
+import BottomPanel from './BottomPanel';
+import BottomNavigation from './BottomNavigation';
 import useToneMode from '../hooks/useToneMode';
 
 const MainApp = () => {
@@ -420,8 +422,8 @@ const MainApp = () => {
       case 'chat':
         return (
           <div className="fixed inset-0 bg-white z-30 flex flex-col">
-            <ChatHeader onClose={() => setActiveTab('todos')} />
-            <div className="flex-1 bg-gradient-to-b from-[#FDF3EE] to-[#FCE7E2] pb-32">
+            <ChatHeader onClose={() => setActiveTab('spend')} />
+            <div className="flex-1 bg-gradient-to-b from-[#FDF3EE] to-[#FCE7E2] pb-40">
               <ChatContainer
                 messages={messages}
                 isLoading={isLoading}
@@ -430,33 +432,12 @@ const MainApp = () => {
                 onHype={handleHype}
               />
             </div>
-            <ChatInputBar
+            <BottomPanel
               inputValue={inputValue}
               setInputValue={setInputValue}
               onSubmit={handleSubmit}
               onVoiceInput={handleVoiceInput}
               isLoading={isLoading}
-              isListening={isListening}
-              onKeyDown={e => {
-                if (e.key === 'ArrowUp') {
-                  e.preventDefault();
-                  if (queryHistory.length > 0) {
-                    const newIndex = Math.min(historyIndex + 1, queryHistory.length - 1);
-                    setHistoryIndex(newIndex);
-                    setInputValue(queryHistory[newIndex]);
-                  }
-                } else if (e.key === 'ArrowDown') {
-                  e.preventDefault();
-                  if (historyIndex > 0) {
-                    const newIndex = historyIndex - 1;
-                    setHistoryIndex(newIndex);
-                    setInputValue(queryHistory[newIndex]);
-                  } else if (historyIndex === 0) {
-                    setHistoryIndex(-1);
-                    setInputValue('');
-                  }
-                }
-              }}
             />
           </div>
         );
@@ -507,58 +488,7 @@ const MainApp = () => {
       <div className="flex-1 pb-16">{renderContent()}</div>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#EAD2C6] bg-gradient-to-t from-[#FCE7E2] to-[#FDF3EE] shadow-sm">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex justify-center items-center h-16">
-            <div className="flex space-x-8">
-              <button
-                onClick={() => setActiveTab('chat')}
-                className={`flex flex-col items-center space-y-1 px-4 py-2 rounded-lg transition-all duration-200 ${
-                  activeTab === 'chat'
-                    ? 'text-[#5C2E27] bg-white shadow-sm scale-105'
-                    : 'text-[#A78A7F] hover:text-[#6F3D32]'
-                }`}
-              >
-                <span className="text-xl">💬</span>
-                <span className="text-xs font-medium">Chat</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('todos')}
-                className={`flex flex-col items-center space-y-1 px-4 py-2 rounded-lg transition-all duration-200 ${
-                  activeTab === 'todos'
-                    ? 'text-[#5C2E27] bg-white shadow-sm scale-105'
-                    : 'text-[#A78A7F] hover:text-[#6F3D32]'
-                }`}
-              >
-                <span className="text-xl">✅</span>
-                <span className="text-xs font-medium">Todos</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('cards')}
-                className={`flex flex-col items-center space-y-1 px-4 py-2 rounded-lg transition-all duration-200 ${
-                  activeTab === 'cards'
-                    ? 'text-[#5C2E27] bg-white shadow-sm scale-105'
-                    : 'text-[#A78A7F] hover:text-[#6F3D32]'
-                }`}
-              >
-                <span className="text-xl">💳</span>
-                <span className="text-xs font-medium">Cards</span>
-              </button>
-              <button
-                onClick={() => setActiveTab('insights')}
-                className={`flex flex-col items-center space-y-1 px-4 py-2 rounded-lg transition-all duration-200 ${
-                  activeTab === 'insights'
-                    ? 'text-[#5C2E27] bg-white shadow-sm scale-105'
-                    : 'text-[#A78A7F] hover:text-[#6F3D32]'
-                }`}
-              >
-                <span className="text-xl">📊</span>
-                <span className="text-xs font-medium">Insights</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <BottomNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
     </div>
   );
 };
