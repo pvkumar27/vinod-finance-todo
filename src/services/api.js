@@ -189,35 +189,14 @@ export const api = {
     }
 
     if (filters.inactive_only) {
-      console.log(
-        'Applying inactive_only filter to cards:',
-        filteredData.map(c => ({ name: c.bank_name, lastUsed: c.last_used_date }))
-      );
       filteredData = filteredData.filter(card => {
-        if (!card.last_used_date) {
-          console.log(`${card.bank_name}: No last used date - INACTIVE`);
-          return true;
-        }
+        if (!card.last_used_date) return true;
         const lastUsedDate = new Date(card.last_used_date);
         const today = new Date();
-        console.log(
-          `${card.bank_name}: Last used ${card.last_used_date}, today is ${today.toISOString().split('T')[0]}`
-        );
-        // Skip cards with future dates (data errors)
-        if (lastUsedDate > today) {
-          console.log(`${card.bank_name}: Future date - SKIPPING`);
-          return false;
-        }
+        if (lastUsedDate > today) return false;
         const daysSince = Math.floor((today - lastUsedDate) / (1000 * 60 * 60 * 24));
-        console.log(
-          `${card.bank_name}: ${daysSince} days since last use - ${daysSince >= 90 ? 'INACTIVE' : 'ACTIVE'}`
-        );
         return daysSince >= 90;
       });
-      console.log(
-        'Filtered inactive cards:',
-        filteredData.map(c => c.bank_name)
-      );
     }
 
     if (filters.promo_expiring) {
