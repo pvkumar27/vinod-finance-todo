@@ -18,7 +18,7 @@ const QuickReplyButtons = ({ replies, onReply }) => {
         <button
           key={index}
           onClick={() => onReply(reply.query)}
-          className={`px-4 py-2 rounded-2xl text-white text-sm font-bold shadow-md transform transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#D9B6A9] focus:ring-offset-2 ${getButtonColor(index)}`}
+          className={`px-4 py-2 rounded-2xl text-[#331B18] text-sm font-bold shadow-md transform transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#D9B6A9] focus:ring-offset-2 ${getButtonColor(index)}`}
         >
           {reply.text}
         </button>
