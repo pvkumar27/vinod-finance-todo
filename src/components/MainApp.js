@@ -66,7 +66,7 @@ const MainApp = () => {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef(null);
-  const { toneMode, getRoastReply, getHypeReply } = useToneMode();
+  const { getRoastReply, getHypeReply } = useToneMode();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
