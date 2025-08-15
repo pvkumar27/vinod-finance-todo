@@ -87,6 +87,8 @@ User Context: Active session with ${this.getQueryCount()} previous queries
 - "sort cards by name" → get_credit_cards with sort_by: "name", sort_order: "asc"
 - "sort cards by days inactive" → get_credit_cards with sort_by: "days_inactive", sort_order: "desc"
 - "show inactive cards" → get_credit_cards with inactive_only: true
+- "cards that haven't been used for 90+days" → get_credit_cards with inactive_only: true
+- "cards not used for 90 days" → get_credit_cards with inactive_only: true
 - "show Chase cards" → get_credit_cards with bank_name: "Chase"
 - "show cards with expiring promos" → get_credit_cards with promo_expiring: true
 - "which cards need attention?" → get_card_alerts
