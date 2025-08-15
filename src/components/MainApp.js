@@ -8,7 +8,6 @@ import ChatHeader from './chat/ChatHeader';
 const MainApp = () => {
   const [activeTab, setActiveTab] = useState('chat');
   const [messages, setMessages] = useState([]);
-  const [showQuickActions] = useState(true);
 
   useEffect(() => {
     // Add welcome message and check for proactive alerts
