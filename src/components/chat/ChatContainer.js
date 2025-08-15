@@ -6,7 +6,7 @@ const ChatContainer = ({ messages, isLoading, messagesEndRef }) => {
   return (
     <div
       className="flex-1 overflow-y-auto px-4 py-6 space-y-4"
-      style={{ height: 'calc(100vh - 160px)' }}
+      style={{ height: 'calc(100vh - 200px)', paddingBottom: '2rem' }}
     >
       {messages.map((message, index) => (
         <MessageBubble key={message.id} message={message} isLast={index === messages.length - 1} />
