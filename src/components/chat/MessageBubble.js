@@ -56,7 +56,7 @@ const MessageBubble = ({ message, isLast, onRoast, onHype }) => {
                   message.isWelcome
                     ? 'bg-white text-[#331B18]'
                     : message.isProactive
-                      ? 'bg-[#5C2E27] text-white'
+                      ? 'bg-[#C47A65] text-white'
                       : message.isRoast
                         ? 'bg-[#5C2E27] text-white'
                         : message.isHype
