@@ -427,7 +427,14 @@ const MainApp = () => {
           <div className="fixed inset-0 bg-white z-30 flex flex-col">
             <ChatHeader
               isCollapsed={isChatCollapsed}
-              onToggleCollapse={() => setIsChatCollapsed(!isChatCollapsed)}
+              onToggleCollapse={() => {
+                setIsChatCollapsed(!isChatCollapsed);
+                if (!isChatCollapsed) {
+                  setTimeout(() => {
+                    setActiveTab('todos');
+                  }, 2000);
+                }
+              }}
             />
             {!isChatCollapsed && (
               <>
