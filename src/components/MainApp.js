@@ -411,7 +411,7 @@ const MainApp = () => {
         return (
           <div className="fixed inset-0 bg-white z-30 flex flex-col">
             <ChatHeader onClose={() => setActiveTab('todos')} />
-            <div className="flex-1 bg-[#F7F7F8] pb-32">
+            <div className="flex-1 bg-gradient-to-b from-[#FDF3EE] to-[#FCE7E2] pb-32">
               <ChatContainer
                 messages={messages}
                 isLoading={isLoading}
@@ -497,7 +497,7 @@ const MainApp = () => {
       <div className="flex-1 pb-16">{renderContent()}</div>
 
       {/* Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-200 bg-white">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-[#EAD2C6] bg-gradient-to-t from-[#FCE7E2] to-[#FDF3EE] shadow-sm">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex justify-center items-center h-16">
             <div className="flex space-x-8">
@@ -505,8 +505,8 @@ const MainApp = () => {
                 onClick={() => setActiveTab('chat')}
                 className={`flex flex-col items-center space-y-1 px-4 py-2 rounded-lg transition-all duration-200 ${
                   activeTab === 'chat'
-                    ? 'text-purple-600 bg-purple-50'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'text-[#5C2E27] bg-white shadow-sm scale-105'
+                    : 'text-[#A78A7F] hover:text-[#6F3D32]'
                 }`}
               >
                 <span className="text-xl">💬</span>
@@ -516,8 +516,8 @@ const MainApp = () => {
                 onClick={() => setActiveTab('todos')}
                 className={`flex flex-col items-center space-y-1 px-4 py-2 rounded-lg transition-all duration-200 ${
                   activeTab === 'todos'
-                    ? 'text-purple-600 bg-purple-50'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'text-[#5C2E27] bg-white shadow-sm scale-105'
+                    : 'text-[#A78A7F] hover:text-[#6F3D32]'
                 }`}
               >
                 <span className="text-xl">✅</span>
@@ -527,8 +527,8 @@ const MainApp = () => {
                 onClick={() => setActiveTab('cards')}
                 className={`flex flex-col items-center space-y-1 px-4 py-2 rounded-lg transition-all duration-200 ${
                   activeTab === 'cards'
-                    ? 'text-purple-600 bg-purple-50'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'text-[#5C2E27] bg-white shadow-sm scale-105'
+                    : 'text-[#A78A7F] hover:text-[#6F3D32]'
                 }`}
               >
                 <span className="text-xl">💳</span>
@@ -538,8 +538,8 @@ const MainApp = () => {
                 onClick={() => setActiveTab('insights')}
                 className={`flex flex-col items-center space-y-1 px-4 py-2 rounded-lg transition-all duration-200 ${
                   activeTab === 'insights'
-                    ? 'text-purple-600 bg-purple-50'
-                    : 'text-gray-500 hover:text-gray-700'
+                    ? 'text-[#5C2E27] bg-white shadow-sm scale-105'
+                    : 'text-[#A78A7F] hover:text-[#6F3D32]'
                 }`}
               >
                 <span className="text-xl">📊</span>

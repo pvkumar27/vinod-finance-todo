@@ -10,7 +10,7 @@ const ChatInputBar = ({
   onKeyDown,
 }) => {
   return (
-    <div className="fixed bottom-16 left-0 right-0 bg-white border-t border-gray-200 p-4 z-50">
+    <div className="fixed bottom-16 left-0 right-0 bg-gradient-to-t from-[#FCE7E2] to-[#FDF3EE] border-t border-[#EAD2C6] p-4 z-50 shadow-sm">
       <div className="max-w-4xl mx-auto">
         <form onSubmit={onSubmit} className="flex items-center space-x-3">
           <div className="flex-1 relative">
@@ -20,7 +20,7 @@ const ChatInputBar = ({
               onChange={e => setInputValue(e.target.value)}
               onKeyDown={onKeyDown}
               placeholder="Message FinBot..."
-              className="w-full bg-white border border-gray-200 rounded-full px-6 py-4 text-base focus:outline-none focus:ring-2 focus:ring-[#7300FF] focus:bg-white transition-all duration-200 pr-16 text-[#222222] placeholder-gray-400"
+              className="w-full bg-white border border-[#F4D9CE] rounded-lg px-6 py-4 text-base focus:outline-none focus:ring-2 focus:ring-[#D9B6A9] focus:bg-white transition-all duration-200 pr-16 text-[#331B18] placeholder-[#A78A7F] antialiased shadow-sm"
               disabled={isLoading}
             />
             <button
@@ -40,7 +40,7 @@ const ChatInputBar = ({
           <button
             type="submit"
             disabled={!inputValue.trim() || isLoading || isListening}
-            className="w-14 h-14 bg-gradient-to-r from-[#7300FF] to-[#D100FF] text-white rounded-full hover:shadow-xl disabled:opacity-50 transition-all duration-200 flex items-center justify-center transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2"
+            className="w-12 h-12 bg-[#5C2E27] text-white rounded-full hover:bg-[#4A241F] disabled:opacity-50 transition-all duration-200 flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-[#D9B6A9] shadow-sm"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
