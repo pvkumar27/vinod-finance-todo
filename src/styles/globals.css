@@ -1,0 +1,59 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --fin-peach-bg: #FFEFE9;
+    --fin-brown: #632D1F;
+    --fin-light-brown: #C4715B;
+    --fin-white: #FFFFFF;
+    --fin-yellow: #FBBF24;
+    --fin-green: #22C55E;
+    --fin-orange: #F97316;
+    --fin-blue: #3B82F6;
+    --fin-shadow: rgba(0, 0, 0, 0.1);
+  }
+}
+
+@layer components {
+  .fin-card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6;
+  }
+  
+  .fin-button {
+    @apply px-6 py-3 rounded-full font-semibold text-sm transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+  
+  .fin-button-primary {
+    @apply fin-button bg-[#632D1F] text-white hover:bg-[#4A1F14] focus:ring-[#632D1F];
+  }
+  
+  .fin-button-success {
+    @apply fin-button bg-[#22C55E] text-white hover:bg-[#16A34A] focus:ring-[#22C55E];
+  }
+  
+  .fin-button-warning {
+    @apply fin-button bg-[#F97316] text-white hover:bg-[#EA580C] focus:ring-[#F97316];
+  }
+  
+  .fin-button-info {
+    @apply fin-button bg-[#3B82F6] text-white hover:bg-[#2563EB] focus:ring-[#3B82F6];
+  }
+  
+  .fin-input {
+    @apply w-full bg-white border border-gray-200 rounded-full px-6 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#632D1F] focus:border-transparent placeholder-gray-500;
+  }
+  
+  .fin-alert {
+    @apply bg-[#C4715B] text-white rounded-2xl p-4 shadow-sm;
+  }
+  
+  .fin-badge {
+    @apply bg-[#FBBF24] text-[#632D1F] px-3 py-1 rounded-full text-xs font-semibold;
+  }
+  
+  .fin-gradient-bg {
+    @apply bg-gradient-to-br from-[#FFEFE9] to-[#FDF3EE];
+  }
+}

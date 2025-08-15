@@ -4,6 +4,7 @@ import { supabase } from './supabaseClient';
 import IOSInstallPrompt from './components/IOSInstallPrompt';
 import MainApp from './components/MainApp';
 import './App.css';
+import './styles/globals.css';
 import './styles/fintech-theme.css';
 
 function App() {

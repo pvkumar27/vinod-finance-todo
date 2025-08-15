@@ -2,21 +2,21 @@ import React from 'react';
 
 const ChatHeader = ({ isCollapsed, onToggleCollapse }) => {
   return (
-    <div className="bg-gradient-to-b from-[#FDF3EE] to-[#FCE7E2] text-[#331B18] p-4 flex items-center justify-between shadow-sm border-b border-[#EAD2C6]">
+    <div className="fin-gradient-bg text-[#632D1F] p-4 flex items-center justify-between shadow-sm border-b border-gray-200">
       <div className="flex items-center space-x-3">
-        <div className="w-12 h-12 rounded-full bg-[#5C2E27] flex items-center justify-center shadow-sm">
+        <div className="w-12 h-12 rounded-full bg-[#632D1F] flex items-center justify-center shadow-sm">
           <span className="text-2xl">🤖</span>
         </div>
         <div>
-          <h1 className="text-xl font-extrabold text-[#331B18] tracking-tight antialiased">
+          <h1 className="text-xl font-extrabold text-[#632D1F] tracking-tight antialiased">
             FinBot
           </h1>
-          <p className="text-sm text-[#6F3D32] font-medium antialiased">Your Money Coach</p>
+          <p className="text-sm text-gray-600 font-medium antialiased">Your Money Coach</p>
         </div>
       </div>
       <button
         onClick={onToggleCollapse}
-        className="w-8 h-8 rounded-full bg-white/50 hover:bg-[#F4D9CE] flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#D9B6A9] text-[#6F3D32]"
+        className="w-8 h-8 rounded-full bg-white/50 hover:bg-gray-100 flex items-center justify-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#632D1F] text-[#632D1F]"
         aria-label={isCollapsed ? 'Expand chat' : 'Collapse chat'}
       >
         <svg
