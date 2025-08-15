@@ -6,21 +6,21 @@ const useToneMode = () => {
   const [hypeIndex, setHypeIndex] = useState(0);
 
   const roastReplies = [
-    "You bought avocado toast again, didn't you? 🥑💸",
-    'Your budget has abandonment issues 😅',
-    'Savings? Never heard of her 👻',
-    'You treat budgets like suggestions 🙄',
-    'Your money ghosted your savings account 💸',
-    'That impulse buy was really necessary, right? 🛍️😏',
+    "You bought avocado toast again, didn't you? 🥑✨",
+    'Your budget has abandonment issues 💎',
+    'Savings? Never heard of her 🌙',
+    'You treat budgets like suggestions 🌸',
+    'Your money ghosted your savings account 💋',
+    'That impulse buy was really necessary, right? 🎀👀',
   ];
 
   const hypeReplies = [
-    "You're a financial genius in the making 🧠✨",
-    "Your bank account's blushing from that smart move! 😊💰",
-    'One step closer to money mastery 🔥💪',
-    "You're killing it 🤑",
-    'Look at you, budget boss 💪',
-    'Financial goals are shaking in their boots! 🎯✨',
+    "You're a financial genius in the making 🎆✨",
+    "Your bank account's blushing from that smart move! 🌸💰",
+    'One step closer to money mastery 🌟💎',
+    "You're killing it 🎉",
+    'Look at you, budget boss 👑',
+    'Financial goals are shaking in their boots! 🎆✨',
   ];
 
   const getRoastReply = () => {
