@@ -5,6 +5,7 @@ import ChatContainer from './chat/ChatContainer';
 import ChatHeader from './chat/ChatHeader';
 import BottomPanel from './BottomPanel';
 import BottomNavigation from './BottomNavigation';
+import TopBar from './shared/TopBar';
 import useToneMode from '../hooks/useToneMode';
 
 const MainApp = () => {
@@ -473,13 +474,7 @@ const MainApp = () => {
       case 'todos':
         return (
           <div className="h-full overflow-auto fin-gradient-bg">
-            <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <span className="text-2xl">💰</span>
-                <h1 className="text-xl font-bold text-[#632D1F]">FinTask</h1>
-              </div>
-              <button className="fin-button-primary text-xs px-4 py-2">Sign Out</button>
-            </div>
+            <TopBar />
             <div className="p-4">
               <TabNavigation activeTab="todos" />
             </div>
@@ -488,13 +483,7 @@ const MainApp = () => {
       case 'cards':
         return (
           <div className="h-full overflow-auto fin-gradient-bg">
-            <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <span className="text-2xl">💰</span>
-                <h1 className="text-xl font-bold text-[#632D1F]">FinTask</h1>
-              </div>
-              <button className="fin-button-primary text-xs px-4 py-2">Sign Out</button>
-            </div>
+            <TopBar />
             <div className="p-4">
               <TabNavigation activeTab="cards" />
             </div>
@@ -503,13 +492,7 @@ const MainApp = () => {
       case 'insights':
         return (
           <div className="h-full overflow-auto fin-gradient-bg">
-            <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <span className="text-2xl">💰</span>
-                <h1 className="text-xl font-bold text-[#632D1F]">FinTask</h1>
-              </div>
-              <button className="fin-button-primary text-xs px-4 py-2">Sign Out</button>
-            </div>
+            <TopBar />
             <div className="p-4">
               <div className="fin-card mb-4">
                 <div className="bg-[#632D1F] text-white rounded-xl p-3 mb-4 flex items-center space-x-2">
