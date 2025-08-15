@@ -8,8 +8,7 @@ const MessageBubble = ({ message, isLast }) => {
   const isBot = message.type === 'assistant';
   const hasInsights =
     message.data?.insights || message.data?.urgentItems || message.data?.suggestions;
-  const hasQuickReplies =
-    isBot && isLast && (message.isWelcome || message.isProactive || hasInsights);
+  const hasQuickReplies = isBot && isLast;
 
   const getQuickReplies = () => {
     if (message.isWelcome) {
@@ -33,7 +32,12 @@ const MessageBubble = ({ message, isLast }) => {
         { text: 'Show me trends 📈', query: 'show me spending trends and patterns' },
       ];
     }
-    return [];
+    // Default quick replies for any bot response
+    return [
+      { text: 'Tell me more 💬', query: 'tell me more about this' },
+      { text: 'What else? 🤔', query: 'what else can you help me with' },
+      { text: 'Show summary 📋', query: 'give me a summary of my finances' },
+    ];
   };
 
   return (
