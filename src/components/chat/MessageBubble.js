@@ -52,11 +52,11 @@ const MessageBubble = ({ message, isLast, onRoast, onHype }) => {
             </div>
             <div className="flex-1">
               <div
-                className={`p-4 max-w-[80%] rounded-lg shadow-sm border border-[#EAD2C6] ${
+                className={`px-4 py-3 max-w-[80%] rounded-xl shadow-sm border border-[#EAD2C6] ${
                   message.isWelcome
                     ? 'bg-white text-[#331B18]'
                     : message.isProactive
-                      ? 'bg-[#C47A65] text-white'
+                      ? 'bg-[#A15B49] text-white'
                       : message.isRoast
                         ? 'bg-[#5C2E27] text-white'
                         : message.isHype
@@ -64,24 +64,24 @@ const MessageBubble = ({ message, isLast, onRoast, onHype }) => {
                           : 'bg-white text-[#331B18]'
                 }`}
               >
-                <div className="whitespace-pre-line text-base font-medium leading-relaxed antialiased">
+                <div className="whitespace-pre-line text-base font-normal leading-relaxed antialiased">
                   {message.content}
                 </div>
-                <div className="flex justify-between items-center mt-2 text-xs opacity-80">
-                  <span>
-                    {new Date(message.timestamp).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </span>
+                <div className="flex justify-between items-center mt-2 text-xs opacity-70">
                   <span className="px-2 py-1 bg-white/20 rounded-full text-xs">
                     {message.isWelcome
                       ? '👋 Welcome'
                       : message.isProactive
-                        ? '🔔 Alert'
+                        ? 'Spotted ⚠️'
                         : message.processingMode === 'gemini'
                           ? '🤖 AI'
                           : '🔧 Rule'}
+                  </span>
+                  <span className="text-[#AAA] text-xs">
+                    {new Date(message.timestamp).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
                   </span>
                 </div>
               </div>

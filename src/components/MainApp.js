@@ -33,11 +33,21 @@ const MainApp = () => {
           const alertMessage = {
             id: Date.now(),
             type: 'assistant',
-            content: `🚨 Uh oh! I spotted ${alerts.length} thing${alerts.length > 1 ? 's' : ''} that need some TLC:\n\n${alerts.map(alert => `• ${alert.message}`).join('\n')}\n\nDon't worry, I've got your back! Want me to help fix these? 💪`,
+            content: `🚨 Heads up! I spotted ${alerts.length} thing${alerts.length > 1 ? 's' : ''} that need some TLC:\n\n${alerts.map(alert => `• ${alert.message}`).join('\n')}\n\nDon't worry, I've got your back! Want me to help fix these? 💪`,
             timestamp: new Date(),
             isProactive: true,
           };
           setMessages(prev => [...prev, alertMessage]);
+        } else {
+          const positiveMessage = {
+            id: Date.now(),
+            type: 'assistant',
+            content:
+              "You're crushing it today 💰 — zero overdue tasks and all cards active! Want a 🍪?",
+            timestamp: new Date(),
+            isPositive: true,
+          };
+          setMessages(prev => [...prev, positiveMessage]);
         }
       } catch (error) {
         console.error('Error checking proactive alerts:', error);
