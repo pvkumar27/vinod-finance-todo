@@ -172,10 +172,17 @@ const MainApp = () => {
     };
 
     recognition.onerror = event => {
+      let errorContent;
+      if (event.error === 'not-allowed') {
+        errorContent =
+          '🎤 Microphone access denied. Please allow microphone permissions and try again.';
+      } else {
+        errorContent = `❌ Voice recognition error: ${event.error}`;
+      }
       const errorMessage = {
         id: Date.now(),
         type: 'assistant',
-        content: `❌ Voice recognition error: ${event.error}`,
+        content: errorContent,
         timestamp: new Date(),
         isError: true,
       };
