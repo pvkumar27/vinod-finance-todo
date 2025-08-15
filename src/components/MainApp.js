@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { mcpClient } from '../services/mcpClient';
 import TabNavigation from './TabNavigation';
+import ChatContainer from './chat/ChatContainer';
+import ChatInputBar from './chat/ChatInputBar';
+import ChatHeader from './chat/ChatHeader';
 
 const MainApp = () => {
   const [activeTab, setActiveTab] = useState('chat');
@@ -14,13 +17,13 @@ const MainApp = () => {
         id: 1,
         type: 'assistant',
         content:
-          "👋 Hey there! I'm FinBot, your AI-powered finance assistant. I'm here to help you stay on top of your money and tasks!",
+          "👋 Hey! I'm FinBot, your sassy money coach! 💸\n\nI'm here to help you crush your financial goals, roast your spending habits (lovingly), and keep your tasks in check. What's on your mind today? 🤔",
         timestamp: new Date(),
         isWelcome: true,
       };
       setMessages([welcomeMessage]);
 
-      // Check for proactive alerts after 2 seconds
+      // Check for proactive alerts after 3 seconds
       setTimeout(async () => {
         try {
           const alerts = await generateProactiveAlerts();
@@ -28,7 +31,7 @@ const MainApp = () => {
             const alertMessage = {
               id: Date.now(),
               type: 'assistant',
-              content: `🔔 I noticed ${alerts.length} thing${alerts.length > 1 ? 's' : ''} that might need your attention:\n\n${alerts.map(alert => `• ${alert.message}`).join('\n')}\n\nWould you like me to help you with any of these?`,
+              content: `🚨 Uh oh! I spotted ${alerts.length} thing${alerts.length > 1 ? 's' : ''} that need some TLC:\n\n${alerts.map(alert => `• ${alert.message}`).join('\n')}\n\nDon't worry, I've got your back! Want me to help fix these? 💪`,
               timestamp: new Date(),
               isProactive: true,
             };
@@ -37,12 +40,24 @@ const MainApp = () => {
         } catch (error) {
           console.error('Error checking proactive alerts:', error);
         }
-      }, 2000);
+      }, 3000);
     };
 
     if (activeTab === 'chat') {
       initializeChat();
     }
+
+    // Listen for quick reply events
+    const handleQuickReply = event => {
+      setInputValue(event.detail);
+      setTimeout(() => {
+        const form = document.querySelector('form');
+        if (form) form.requestSubmit();
+      }, 100);
+    };
+
+    window.addEventListener('quickReply', handleQuickReply);
+    return () => window.removeEventListener('quickReply', handleQuickReply);
   }, [activeTab]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -227,75 +242,95 @@ const MainApp = () => {
 
   const formatResponse = response => {
     if (response.todos) {
-      return `Found ${response.count} todos:\n${response.todos
+      const completedCount = response.todos.filter(t => t.completed).length;
+      const pendingCount = response.count - completedCount;
+      let intro =
+        pendingCount === 0
+          ? `🎉 Look at you, task master! All ${response.count} todos are done!`
+          : `📋 Here's what's on your plate (${pendingCount} still need some love):`;
+
+      return `${intro}\n\n${response.todos
         .map(
           todo =>
-            `• ${todo.task} ${todo.completed ? '✅' : '⏳'} ${todo.priority ? `(${todo.priority})` : ''}`
+            `${todo.completed ? '✅' : '⏳'} ${todo.task} ${todo.priority ? `(${todo.priority} priority)` : ''}`
         )
         .join('\n')}`;
     }
 
     if (response.credit_cards) {
-      return `Found ${response.count} credit cards:\n${response.credit_cards
+      const inactiveCount = response.credit_cards.filter(card => {
+        if (!card.last_used_date) return true;
+        const daysSince = Math.floor(
+          (new Date() - new Date(card.last_used_date)) / (1000 * 60 * 60 * 24)
+        );
+        return daysSince >= 90;
+      }).length;
+
+      let intro =
+        inactiveCount > 0
+          ? `💳 Your card collection! But ${inactiveCount} are gathering dust... 🕸️`
+          : `💳 Your ${response.count} cards are all active and ready to spend! 💪`;
+
+      return `${intro}\n\n${response.credit_cards
         .map(card => {
           const cardName =
             card.bank_name && card.last_four_digits
-              ? `${card.bank_name} ${card.last_four_digits}`
-              : card.card_name || 'Card';
-          const cardType = card.card_type || 'free';
+              ? `${card.bank_name} ••${card.last_four_digits}`
+              : card.card_name || 'Mystery Card';
           const lastUsed = card.last_used_date
-            ? `(Last used: ${new Date(card.last_used_date).toLocaleDateString()})`
-            : '(Never used)';
-          return `• ${cardName} - ${cardType} ${lastUsed}`;
+            ? `Last used: ${new Date(card.last_used_date).toLocaleDateString()}`
+            : 'Never used (ouch! 😬)';
+          return `💳 ${cardName}\n   ${lastUsed}`;
         })
-        .join('\n')}`;
+        .join('\n\n')}`;
     }
 
     if (response.transactions) {
       const total = response.total_amount || 0;
-      return `Found ${response.count} transactions (Total: $${total.toFixed(2)}):\n${response.transactions
+      const emoji = total > 500 ? '💸' : total > 100 ? '💰' : '🪙';
+      return `${emoji} Found ${response.count} transactions totaling $${total.toFixed(2)}\n\n${response.transactions
         .map(t => `• ${t.description} - $${t.amount} (${t.date})`)
         .join('\n')}`;
     }
 
     if (response.insights) {
-      return `Financial Insights:\n${response.insights.map(insight => `• ${insight}`).join('\n')}${
+      return `💡 Here's what I'm seeing in your finances:\n\n${response.insights.map(insight => `• ${insight}`).join('\n')}${
         response.recommendations
-          ? `\n\nRecommendations:\n${response.recommendations.map(rec => `• ${rec}`).join('\n')}`
+          ? `\n\n🎯 My recommendations (trust me, I'm good at this):\n${response.recommendations.map(rec => `• ${rec}`).join('\n')}`
           : ''
       }`;
     }
 
     if (response.urgentItems) {
-      return `🎯 Priority Items:\n${response.urgentItems.map(item => `• ${item}`).join('\n')}${
+      return `🚨 Okay, let's talk priorities! These need your attention ASAP:\n\n${response.urgentItems.map(item => `🎯 ${item}`).join('\n')}${
         response.insights
-          ? `\n\n💡 Insights:\n${response.insights.map(insight => `• ${insight}`).join('\n')}`
+          ? `\n\n💭 Here's the tea:\n${response.insights.map(insight => `• ${insight}`).join('\n')}`
           : ''
       }`;
     }
 
     if (response.alerts) {
-      return `🔔 Alerts:\n${response.alerts.map(alert => `• ${alert.message || alert}`).join('\n')}`;
+      return `🔔 Alert alert! I found some things that need a look:\n\n${response.alerts.map(alert => `• ${alert.message || alert}`).join('\n')}`;
     }
 
     if (response.suggestions) {
-      return `🚀 Optimization Suggestions:\n${response.suggestions.map(suggestion => `• ${suggestion}`).join('\n')}${
+      return `🚀 Time for some financial glow-up! Here are my suggestions:\n\n${response.suggestions.map(suggestion => `✨ ${suggestion}`).join('\n')}${
         response.insights
-          ? `\n\n📊 Analysis:\n${response.insights.map(insight => `• ${insight}`).join('\n')}`
+          ? `\n\n📊 The breakdown:\n${response.insights.map(insight => `• ${insight}`).join('\n')}`
           : ''
       }`;
     }
 
     if (response.success && response.todo) {
-      return `✅ ${response.message}\nTask: ${response.todo.task}`;
+      return `✅ Boom! Task added like a boss!\n\n📝 "${response.todo.task}"\n\nWhat's next on the agenda? 😎`;
     }
 
     if (response.success && (response.deletedCount || response.updatedCount)) {
-      return `✅ ${response.message}`;
+      return `✅ ${response.message} 🎉\n\nFeeling productive yet? 😏`;
     }
 
     if (response.success && response.credit_card) {
-      return `✅ ${response.message}\nCard: ${response.credit_card.card_name}`;
+      return `✅ ${response.message}\n\n💳 ${response.credit_card.card_name} is now in your wallet! 🎉`;
     }
 
     if (
@@ -306,7 +341,7 @@ const MainApp = () => {
       return `✅ ${response.message}`;
     }
 
-    return response.message || response.summary || JSON.stringify(response, null, 2);
+    return response.message || response.summary || "Hmm, I'm not sure what happened there... 🤔";
   };
 
   const generateProactiveAlerts = async () => {
@@ -348,209 +383,43 @@ const MainApp = () => {
     switch (activeTab) {
       case 'chat':
         return (
-          <div className="h-full flex flex-col bg-gray-50">
-            <div className="bg-white border-b border-gray-200 p-3 sm:p-4">
-              <h1 className="text-xl sm:text-2xl font-bold text-gradient text-center">
-                FinTask AI
-              </h1>
-              <p className="text-xs sm:text-sm text-gray-500 text-center">
-                Your AI money assistant
-              </p>
+          <div className="fixed inset-0 bg-white z-50 flex flex-col">
+            <ChatHeader onClose={() => setActiveTab('todos')} />
+            <div className="flex-1 bg-gray-50 pb-24">
+              <ChatContainer
+                messages={messages}
+                isLoading={isLoading}
+                messagesEndRef={messagesEndRef}
+              />
             </div>
-            <div className="flex-1 p-2 sm:p-4">
-              <div className="max-w-4xl mx-auto h-full flex flex-col">
-                {/* Chat Messages */}
-                <div className="flex-1 bg-white rounded-xl sm:rounded-2xl p-3 sm:p-6 mb-3 sm:mb-4 overflow-y-auto border border-gray-200 shadow-sm">
-                  <div className="space-y-3 sm:space-y-4">
-                    {messages.map(message => (
-                      <div
-                        key={message.id}
-                        className={`flex animate-fadeIn ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
-                      >
-                        {message.type === 'assistant' && (
-                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center mr-2 sm:mr-3 flex-shrink-0 mt-1 shadow-lg border-2 bg-gradient-to-br from-purple-500 to-pink-500 border-white/30">
-                            <span className="text-white text-xs sm:text-sm">🤖</span>
-                          </div>
-                        )}
-                        <div
-                          className={`max-w-[75%] px-3 sm:px-4 py-2 sm:py-3 whitespace-pre-line shadow-lg transition-all duration-300 text-xs sm:text-sm ${
-                            message.type === 'user'
-                              ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-2xl rounded-br-md ml-auto'
-                              : message.isWelcome
-                                ? 'bg-gradient-to-br from-blue-50 to-purple-50 text-gray-800 border border-purple-200/60 rounded-2xl rounded-bl-md'
-                                : 'bg-white text-gray-800 border border-gray-200 rounded-2xl rounded-bl-md'
-                          }`}
-                        >
-                          {message.content}
-                          <div
-                            className={`text-xs mt-2 opacity-70 flex justify-between items-center ${message.type === 'user' ? 'text-purple-100' : 'text-gray-500'}`}
-                          >
-                            <span>
-                              {new Date(message.timestamp).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </span>
-                            {message.type === 'assistant' && (
-                              <span
-                                className={`text-xs px-1.5 py-0.5 rounded-full ${
-                                  message.isWelcome
-                                    ? 'bg-green-100 text-green-600'
-                                    : message.isProactive
-                                      ? 'bg-orange-100 text-orange-600'
-                                      : message.processingMode === 'gemini'
-                                        ? 'bg-purple-100 text-purple-600'
-                                        : 'bg-gray-100 text-gray-600'
-                                }`}
-                              >
-                                {message.isWelcome
-                                  ? '👋 Welcome'
-                                  : message.isProactive
-                                    ? '🔔 Alert'
-                                    : message.processingMode === 'gemini'
-                                      ? '🤖 AI'
-                                      : '🔧 Rule'}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        {message.type === 'user' && (
-                          <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center ml-2 sm:ml-3 flex-shrink-0 mt-1 shadow-lg border-2 bg-gradient-to-br from-gray-400 to-gray-500 border-white/30">
-                            <span className="text-white text-xs sm:text-sm">👤</span>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                    {isLoading && (
-                      <div className="flex justify-start">
-                        <div className="bg-gray-100 text-gray-800 px-4 py-3 rounded-2xl">
-                          <div className="flex items-center space-x-2">
-                            <div className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"></div>
-                            <div
-                              className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
-                              style={{ animationDelay: '0.1s' }}
-                            ></div>
-                            <div
-                              className="w-2 h-2 bg-purple-500 rounded-full animate-bounce"
-                              style={{ animationDelay: '0.2s' }}
-                            ></div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                    <div ref={messagesEndRef} />
-                  </div>
-                </div>
-
-                {/* Quick Actions */}
-                {showQuickActions && (
-                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl p-4 mb-4 border border-purple-200">
-                    <div className="text-sm font-semibold text-gray-700 mb-3 flex items-center">
-                      <span className="mr-2">🚀</span>
-                      Quick Actions
-                    </div>
-                    <div className="flex flex-wrap gap-2">
-                      {[
-                        {
-                          label: '🎯 What needs attention?',
-                          query: 'what needs my attention today?',
-                        },
-                        { label: '📊 Financial insights', query: 'give me financial insights' },
-                        { label: '📋 Show todos', query: 'show me pending todos' },
-                        { label: '💳 Show cards', query: 'show me my credit cards' },
-                      ].map((action, index) => (
-                        <button
-                          key={index}
-                          onClick={() => {
-                            setInputValue(action.query);
-                            setTimeout(() => {
-                              const form = document.querySelector('form');
-                              if (form) form.requestSubmit();
-                            }, 100);
-                          }}
-                          className={`text-xs px-3 py-2 rounded-full border transition-all duration-200 shadow-sm ${
-                            action.label.includes('attention') || action.label.includes('insights')
-                              ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-orange-300 hover:from-orange-600 hover:to-red-600'
-                              : 'bg-white text-purple-700 border-purple-200 hover:bg-purple-50'
-                          }`}
-                        >
-                          {action.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Chat Input */}
-                <div className="bg-white rounded-2xl p-4 border border-gray-200 shadow-sm">
-                  <form onSubmit={handleSubmit} className="flex space-x-3">
-                    <input
-                      type="text"
-                      value={inputValue}
-                      onChange={e => {
-                        setInputValue(e.target.value);
-                        setHistoryIndex(-1);
-                      }}
-                      onKeyDown={e => {
-                        if (e.key === 'ArrowUp') {
-                          e.preventDefault();
-                          if (queryHistory.length > 0) {
-                            const newIndex = Math.min(historyIndex + 1, queryHistory.length - 1);
-                            setHistoryIndex(newIndex);
-                            setInputValue(queryHistory[newIndex]);
-                          }
-                        } else if (e.key === 'ArrowDown') {
-                          e.preventDefault();
-                          if (historyIndex > 0) {
-                            const newIndex = historyIndex - 1;
-                            setHistoryIndex(newIndex);
-                            setInputValue(queryHistory[newIndex]);
-                          } else if (historyIndex === 0) {
-                            setHistoryIndex(-1);
-                            setInputValue('');
-                          }
-                        }
-                      }}
-                      placeholder="Message FinBot..."
-                      className="flex-1 bg-gray-50 border-0 rounded-full px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all duration-200"
-                      disabled={isLoading}
-                    />
-                    <button
-                      type="button"
-                      onClick={handleVoiceInput}
-                      disabled={isLoading}
-                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 mr-2 ${
-                        isListening
-                          ? 'bg-red-500 text-white shadow-lg scale-110'
-                          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                      }`}
-                      title="Voice input"
-                    >
-                      {isListening ? '🔴' : '🎤'}
-                    </button>
-                    <button
-                      type="submit"
-                      disabled={!inputValue.trim() || isLoading || isListening}
-                      className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full hover:shadow-lg disabled:opacity-50 transition-all duration-200 flex items-center justify-center"
-                    >
-                      <svg
-                        className="w-5 h-5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                        />
-                      </svg>
-                    </button>
-                  </form>
-                </div>
-              </div>
-            </div>
+            <ChatInputBar
+              inputValue={inputValue}
+              setInputValue={setInputValue}
+              onSubmit={handleSubmit}
+              onVoiceInput={handleVoiceInput}
+              isLoading={isLoading}
+              isListening={isListening}
+              onKeyDown={e => {
+                if (e.key === 'ArrowUp') {
+                  e.preventDefault();
+                  if (queryHistory.length > 0) {
+                    const newIndex = Math.min(historyIndex + 1, queryHistory.length - 1);
+                    setHistoryIndex(newIndex);
+                    setInputValue(queryHistory[newIndex]);
+                  }
+                } else if (e.key === 'ArrowDown') {
+                  e.preventDefault();
+                  if (historyIndex > 0) {
+                    const newIndex = historyIndex - 1;
+                    setHistoryIndex(newIndex);
+                    setInputValue(queryHistory[newIndex]);
+                  } else if (historyIndex === 0) {
+                    setHistoryIndex(-1);
+                    setInputValue('');
+                  }
+                }
+              }}
+            />
           </div>
         );
       case 'todos':
