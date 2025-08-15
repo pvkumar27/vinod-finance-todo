@@ -5,8 +5,8 @@ import TypingIndicator from './TypingIndicator';
 const ChatContainer = ({ messages, isLoading, messagesEndRef, onRoast, onHype }) => {
   return (
     <div
-      className="flex-1 overflow-y-auto px-4 py-6 space-y-3"
-      style={{ height: 'calc(100vh - 200px)', paddingBottom: '2rem' }}
+      className="flex-1 overflow-y-auto px-3 py-3 space-y-1 sm:px-4 sm:py-4 sm:space-y-2"
+      style={{ marginRight: '-8px', paddingRight: '8px' }}
     >
       {messages.map((message, index) => (
         <MessageBubble

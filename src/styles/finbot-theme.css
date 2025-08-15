@@ -49,18 +49,25 @@
 }
 
 .finbot-card {
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(253, 243, 238, 0.95);
   border-radius: var(--finbot-radius-lg);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.06);
-  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px rgba(99, 45, 31, 0.1), 0 2px 4px rgba(99, 45, 31, 0.06);
+  border: 1px solid rgba(99, 45, 31, 0.12);
   backdrop-filter: blur(10px);
   transition: all 0.3s ease;
 }
 
+.finbot-inner {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: var(--finbot-radius-md);
+  border: 1px solid rgba(99, 45, 31, 0.08);
+  backdrop-filter: blur(5px);
+}
+
 .finbot-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08);
-  border-color: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 8px 24px rgba(99, 45, 31, 0.15), 0 4px 8px rgba(99, 45, 31, 0.1);
+  border-color: rgba(99, 45, 31, 0.18);
 }
 
 .finbot-button-primary {
@@ -182,6 +189,61 @@
   animation: finbot-float 3s ease-in-out infinite;
 }
 
+/* Chat bubble animations */
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes bounce-subtle {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-2px); }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
+}
+
+/* Heading Styles */
+.finbot-heading-xl {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #632D1F;
+}
+
+.finbot-heading-lg {
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: #632D1F;
+}
+
+.finbot-heading-md {
+  font-size: 1rem;
+  font-weight: 500;
+  color: #8B4513;
+}
+
+/* Responsive utilities */
+@media (max-width: 640px) {
+  .finbot-responsive-text {
+    font-size: 0.875rem;
+  }
+  .finbot-responsive-heading {
+    font-size: 1.125rem;
+    font-weight: 500;
+  }
+}
+
 /* Backwards compatibility - map old classes to new ones */
 .cleo-card { @apply finbot-card; }
 .cleo-button-primary { @apply finbot-button-primary; }
@@ -221,4 +283,53 @@
     padding: 10px 20px;
     font-size: 13px;
   }
+}
+/* iOS-specific improvements */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari specific styles */
+  .finbot-input {
+    -webkit-appearance: none;
+    border-radius: 12px;
+  }
+  
+  .finbot-button-primary,
+  .finbot-button-secondary {
+    -webkit-appearance: none;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+}
+
+/* Improve touch targets for mobile */
+@media (max-width: 768px) {
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  input[type="checkbox"] {
+    min-height: 20px;
+    min-width: 20px;
+  }
+}
+
+/* Prevent zoom on input focus for iOS */
+@media screen and (max-width: 768px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="date"],
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }

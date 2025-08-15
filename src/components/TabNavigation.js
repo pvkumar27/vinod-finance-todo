@@ -8,20 +8,29 @@ const TabNavigation = ({ activeTab }) => {
     switch (activeTab) {
       case 'todos':
         return (
-          <div className="fin-card p-6">
-            <ToDoTest />
+          <div className="finbot-card p-6" style={{ height: 'calc(100vh - 220px)' }}>
+            <div
+              className="finbot-inner p-6 overflow-y-auto"
+              style={{ height: 'calc(100vh - 280px)' }}
+            >
+              <ToDoTest />
+            </div>
           </div>
         );
       case 'cards':
         return (
-          <div className="fin-card p-6">
-            <CreditCardManager />
+          <div className="finbot-card p-6">
+            <div className="finbot-inner p-6">
+              <CreditCardManager />
+            </div>
           </div>
         );
       case 'insights':
         return (
-          <div className="fin-card p-6">
-            <InsightsTab />
+          <div className="finbot-card p-6">
+            <div className="finbot-inner p-6">
+              <InsightsTab />
+            </div>
           </div>
         );
       default:
@@ -33,7 +42,11 @@ const TabNavigation = ({ activeTab }) => {
     }
   };
 
-  return <div className="w-full">{renderContent()}</div>;
+  return (
+    <div className="w-full" style={{ height: 'calc(100vh - 180px)' }}>
+      {renderContent()}
+    </div>
+  );
 };
 
 export default TabNavigation;

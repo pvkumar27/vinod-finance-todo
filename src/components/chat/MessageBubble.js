@@ -42,32 +42,32 @@ const MessageBubble = ({ message, isLast, onRoast, onHype }) => {
   };
 
   return (
-    <div className={`flex animate-fade-in ${isBot ? 'justify-start' : 'justify-end'}`}>
-      <div className={`max-w-[85%] ${isBot ? 'mr-auto' : 'ml-auto'}`}>
+    <div className={`flex animate-slide-up ${isBot ? 'justify-start' : 'justify-end'} mb-1`}>
+      <div className={`max-w-[90%] sm:max-w-[85%] ${isBot ? 'mr-auto' : 'ml-auto'}`}>
         {/* Avatar for bot messages */}
         {isBot && (
-          <div className="flex items-start space-x-3">
-            <div className="w-10 h-10 rounded-full bg-[#5C2E27] flex items-center justify-center shadow-sm flex-shrink-0">
-              <span className="text-white text-lg">🤖</span>
+          <div className="flex items-end space-x-2 justify-start">
+            <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-[#632D1F] to-[#5C2E27] flex items-center justify-center shadow-lg flex-shrink-0 animate-bounce-subtle">
+              <span className="text-white text-xs sm:text-base">🤖</span>
             </div>
-            <div className="flex-1">
+            <div className="max-w-[85%]">
               <div
-                className={`px-4 py-3 max-w-[80%] rounded-xl shadow-sm border border-[#EAD2C6] ${
+                className={`px-3 py-2 sm:px-4 sm:py-2.5 rounded-2xl rounded-bl-md shadow-lg transform hover:scale-[1.02] transition-all duration-200 ${
                   message.isWelcome
-                    ? 'bg-white text-[#331B18]'
+                    ? 'bg-gradient-to-r from-white to-[#FDF3EE] text-[#331B18] border border-[#EAD2C6]'
                     : message.isProactive
-                      ? 'bg-[#A15B49] text-white'
+                      ? 'bg-gradient-to-r from-[#A15B49] to-[#8B4513] text-white shadow-[#A15B49]/30'
                       : message.isRoast
-                        ? 'bg-[#5C2E27] text-white'
+                        ? 'bg-gradient-to-r from-[#5C2E27] to-[#632D1F] text-white shadow-[#5C2E27]/30'
                         : message.isHype
-                          ? 'bg-[#5C2E27] text-white'
-                          : 'bg-white text-[#331B18]'
+                          ? 'bg-gradient-to-r from-[#5C2E27] to-[#632D1F] text-white shadow-[#5C2E27]/30'
+                          : 'bg-gradient-to-r from-white to-[#FDF3EE] text-[#331B18] border border-[#EAD2C6]'
                 }`}
               >
-                <div className="whitespace-pre-line text-base font-normal leading-relaxed antialiased">
+                <div className="whitespace-pre-line text-sm sm:text-base font-normal leading-snug sm:leading-relaxed antialiased">
                   {message.content}
                 </div>
-                <div className="flex justify-between items-center mt-2 text-xs opacity-70">
+                <div className="flex justify-between items-center mt-1 text-xs opacity-70">
                   <span className="px-2 py-1 bg-white/20 rounded-full text-xs">
                     {message.isWelcome
                       ? '👋 Welcome'
@@ -75,7 +75,13 @@ const MessageBubble = ({ message, isLast, onRoast, onHype }) => {
                         ? 'Spotted ⚠️'
                         : message.processingMode === 'gemini'
                           ? '🤖 AI'
-                          : '🔧 Rule'}
+                          : message.processingMode === 'learned-pattern'
+                            ? '🧠 Learned'
+                            : message.processingMode === 'similar-pattern'
+                              ? '🔍 Similar'
+                              : message.processingMode === 'enhanced-fallback'
+                                ? '⚡ Smart'
+                                : '🔧 Rule'}
                   </span>
                   <span className="text-[#AAA] text-xs">
                     {new Date(message.timestamp).toLocaleTimeString([], {
@@ -116,20 +122,20 @@ const MessageBubble = ({ message, isLast, onRoast, onHype }) => {
 
         {/* User message */}
         {!isBot && (
-          <div className="flex items-start space-x-3 justify-end">
-            <div className="bg-[#FFFFFF] text-[#331B18] px-4 py-3 rounded-lg shadow-sm max-w-xs border border-[#F4D9CE]">
-              <div className="whitespace-pre-line text-base font-normal leading-relaxed antialiased">
+          <div className="flex items-end space-x-2 justify-end ml-auto">
+            <div className="bg-gradient-to-r from-[#632D1F] to-[#8B4513] text-white px-3 py-2 sm:px-4 sm:py-2.5 rounded-2xl rounded-br-md shadow-lg max-w-[85%] transform hover:scale-[1.02] transition-all duration-200">
+              <div className="whitespace-pre-line text-sm sm:text-base font-normal leading-snug sm:leading-relaxed antialiased">
                 {message.content}
               </div>
-              <div className="text-xs text-[#A78A7F] mt-2 text-right">
+              <div className="text-xs text-white/70 mt-1 text-right">
                 {new Date(message.timestamp).toLocaleTimeString([], {
                   hour: '2-digit',
                   minute: '2-digit',
                 })}
               </div>
             </div>
-            <div className="w-10 h-10 rounded-full bg-[#6F3D32] flex items-center justify-center shadow-sm flex-shrink-0">
-              <span className="text-white text-lg">👤</span>
+            <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full bg-gradient-to-br from-[#8B4513] to-[#632D1F] flex items-center justify-center shadow-lg flex-shrink-0">
+              <span className="text-white text-xs sm:text-base">👤</span>
             </div>
           </div>
         )}

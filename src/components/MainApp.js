@@ -431,30 +431,46 @@ const MainApp = () => {
     switch (activeTab) {
       case 'chat':
         return (
-          <div className="fixed inset-0 bg-white z-30 flex flex-col">
-            <TopBar />
-            <ChatHeader
-              isCollapsed={isChatCollapsed}
-              onToggleCollapse={() => {
-                setIsChatCollapsed(!isChatCollapsed);
-                if (!isChatCollapsed) {
-                  setTimeout(() => {
-                    setActiveTab('todos');
-                  }, 2000);
-                }
-              }}
-            />
-            {!isChatCollapsed && (
-              <>
-                <div className="flex-1 fin-gradient-bg pb-40 transition-all duration-300">
-                  <ChatContainer
-                    messages={messages}
-                    isLoading={isLoading}
-                    messagesEndRef={messagesEndRef}
-                    onRoast={handleRoast}
-                    onHype={handleHype}
-                  />
+          <>
+            <div className="fixed inset-0 bg-white z-30 flex flex-col">
+              <TopBar />
+              <ChatHeader
+                isCollapsed={isChatCollapsed}
+                onToggleCollapse={() => {
+                  setIsChatCollapsed(!isChatCollapsed);
+                  if (!isChatCollapsed) {
+                    setTimeout(() => {
+                      setActiveTab('todos');
+                    }, 2000);
+                  }
+                }}
+              />
+              {!isChatCollapsed && (
+                <div className="flex-1 fin-gradient-bg transition-all duration-300 p-4 overflow-hidden pb-36">
+                  <div className="finbot-card p-4 h-full">
+                    <div className="finbot-inner p-4 h-full flex flex-col">
+                      <ChatContainer
+                        messages={messages}
+                        isLoading={isLoading}
+                        messagesEndRef={messagesEndRef}
+                        onRoast={handleRoast}
+                        onHype={handleHype}
+                      />
+                    </div>
+                  </div>
                 </div>
+              )}
+              {isChatCollapsed && (
+                <div className="flex-1 fin-gradient-bg flex items-center justify-center transition-all duration-300">
+                  <div className="text-center">
+                    <span className="text-4xl mb-2 block">👋</span>
+                    <p className="text-[#632D1F] font-medium">Chat with FinBot</p>
+                  </div>
+                </div>
+              )}
+            </div>
+            {!isChatCollapsed && (
+              <div className="fixed bottom-16 left-0 right-0 z-50">
                 <BottomPanel
                   inputValue={inputValue}
                   setInputValue={setInputValue}
@@ -462,23 +478,15 @@ const MainApp = () => {
                   onVoiceInput={handleVoiceInput}
                   isLoading={isLoading}
                 />
-              </>
-            )}
-            {isChatCollapsed && (
-              <div className="flex-1 fin-gradient-bg flex items-center justify-center transition-all duration-300">
-                <div className="text-center">
-                  <span className="text-4xl mb-2 block">👋</span>
-                  <p className="text-[#632D1F] font-medium">Chat with FinBot</p>
-                </div>
               </div>
             )}
-          </div>
+          </>
         );
       case 'todos':
         return (
-          <div className="h-full overflow-auto fin-gradient-bg">
+          <div className="h-full fin-gradient-bg">
             <TopBar />
-            <div className="p-4">
+            <div className="p-4" style={{ height: 'calc(100vh - 140px)' }}>
               <TabNavigation activeTab="todos" />
             </div>
           </div>
@@ -520,9 +528,15 @@ const MainApp = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col fin-gradient-bg">
+    <div
+      className="min-h-screen flex flex-col fin-gradient-bg"
+      style={{
+        paddingTop: 'env(safe-area-inset-top)',
+        paddingBottom: 'env(safe-area-inset-bottom)',
+      }}
+    >
       {/* Main Content */}
-      <div className="flex-1 pb-20">{renderContent()}</div>
+      <div className="flex-1 pb-16">{renderContent()}</div>
 
       {/* Footer */}
       <div className="fixed bottom-16 left-0 right-0 bg-white/80 backdrop-blur-sm border-t border-gray-200 px-4 py-2 z-40">

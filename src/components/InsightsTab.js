@@ -61,14 +61,14 @@ const InsightsTab = () => {
       <div className="bg-[#632D1F] text-white rounded-xl p-4 flex items-center space-x-3">
         <span className="text-2xl">📊</span>
         <div>
-          <h2 className="text-xl font-bold">Financial Insights</h2>
+          <h2 className="finbot-heading-lg text-white">Financial Insights</h2>
           <p className="text-sm opacity-90">Your complete financial overview</p>
         </div>
       </div>
 
       {/* Credit Card Insights */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-[#632D1F] flex items-center space-x-2">
+        <h3 className="finbot-heading-md flex items-center space-x-2">
           <span>💳</span>
           <span>Credit Card Portfolio</span>
         </h3>
@@ -77,14 +77,14 @@ const InsightsTab = () => {
 
       {/* Todo Insights */}
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold text-[#632D1F] flex items-center space-x-2">
+        <h3 className="finbot-heading-md flex items-center space-x-2">
           <span>✅</span>
           <span>Task Management</span>
         </h3>
 
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
           {/* Summary Cards */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
               <div className="flex items-center">
                 <div className="bg-blue-500 rounded-lg p-2 mr-3">
@@ -171,11 +171,11 @@ const InsightsTab = () => {
 
       {/* Quick Actions */}
       <div className="bg-gradient-to-r from-[#FDF3EE] to-[#FCE7E2] rounded-xl p-6 border border-[#632D1F]/20">
-        <h3 className="text-lg font-semibold text-[#632D1F] mb-4 flex items-center space-x-2">
+        <h3 className="finbot-heading-md mb-4 flex items-center space-x-2">
           <span>🚀</span>
           <span>Quick Actions</span>
         </h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="bg-white/70 rounded-lg p-4 border border-[#632D1F]/10">
             <h4 className="font-medium text-[#632D1F] mb-2">💳 Credit Cards</h4>
             <ul className="text-sm text-gray-600 space-y-1">

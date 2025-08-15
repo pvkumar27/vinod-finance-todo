@@ -71,15 +71,17 @@ const InsightCard = ({ data }) => {
   if (cards.length === 0) return null;
 
   return (
-    <div className="flex space-x-3 overflow-x-auto pb-2 animate-fade-in">
+    <div className="flex space-x-2 sm:space-x-3 overflow-x-auto pb-2 animate-fade-in scrollbar-hide">
       {cards.map((card, index) => (
         <div
           key={index}
-          className={`flex-shrink-0 w-48 p-4 rounded-3xl shadow-lg bg-gradient-to-br ${card.color} text-white transform transition-all duration-300 hover:scale-105`}
+          className={`flex-shrink-0 w-40 sm:w-48 p-3 sm:p-4 rounded-2xl sm:rounded-3xl shadow-lg bg-gradient-to-br ${card.color} text-white transform transition-all duration-300 hover:scale-105`}
         >
-          <h3 className="text-lg font-bold mb-2">{card.title}</h3>
-          <div className="text-2xl font-extrabold mb-1">{card.value}</div>
-          <p className="text-sm opacity-90 leading-relaxed">{card.message}</p>
+          <h3 className="text-sm sm:text-lg font-bold mb-1 sm:mb-2 leading-tight">{card.title}</h3>
+          <div className="text-lg sm:text-2xl font-extrabold mb-1">{card.value}</div>
+          <p className="text-xs sm:text-sm opacity-90 leading-snug sm:leading-relaxed">
+            {card.message}
+          </p>
         </div>
       ))}
     </div>

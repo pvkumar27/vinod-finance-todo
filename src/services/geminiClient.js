@@ -7,10 +7,46 @@ const GEMINI_API_KEY = process.env.REACT_APP_GEMINI_API_KEY;
 export class GeminiClient {
   constructor() {
     this.lastCallTime = 0;
-    this.minInterval = 2000; // 2 seconds between calls
+    this.minInterval = 1000; // 1 second between calls (optimized)
     this.learnedQueries = this.loadLearnedQueries();
     this.queryCount = 0;
     this.recentQueries = [];
+    this.dailyQuotaUsed = this.loadDailyQuota();
+    this.quotaResetTime = this.getNextMidnight();
+  }
+
+  getNextMidnight() {
+    const now = new Date();
+    const midnight = new Date(now);
+    midnight.setHours(24, 0, 0, 0);
+    return midnight.getTime();
+  }
+
+  loadDailyQuota() {
+    try {
+      const stored = localStorage.getItem('gemini_daily_quota');
+      if (!stored) return { requests: 0, date: new Date().toDateString() };
+      const quota = JSON.parse(stored);
+      // Reset if it's a new day
+      if (quota.date !== new Date().toDateString()) {
+        return { requests: 0, date: new Date().toDateString() };
+      }
+      return quota;
+    } catch {
+      return { requests: 0, date: new Date().toDateString() };
+    }
+  }
+
+  saveDailyQuota() {
+    localStorage.setItem('gemini_daily_quota', JSON.stringify(this.dailyQuotaUsed));
+  }
+
+  isQuotaAvailable() {
+    // Gemini free tier: 15 requests/minute, 1500 requests/day
+    const now = Date.now();
+    if (now - this.lastCallTime < this.minInterval) return false;
+    if (this.dailyQuotaUsed.requests >= 1400) return false; // Leave buffer
+    return true;
   }
 
   getQueryCount() {
@@ -46,12 +82,13 @@ export class GeminiClient {
       return await this.fallbackProcess(query);
     }
 
-    // Rate limiting protection
-    const now = Date.now();
-    if (now - this.lastCallTime < this.minInterval) {
+    if (!this.isQuotaAvailable()) {
       return await this.fallbackProcess(query);
     }
-    this.lastCallTime = now;
+
+    this.lastCallTime = Date.now();
+    this.dailyQuotaUsed.requests++;
+    this.saveDailyQuota();
 
     try {
       const prompt = `
@@ -239,14 +276,12 @@ Key Parameters:
       const result = await this.executeAction(parsed);
       result.processingMode = 'gemini';
 
-      // Learn successful queries - CRITICAL for fallback improvement
-      if (result.success) {
+      if (result.success !== false) {
         this.saveLearnedQuery(query, parsed.action, parsed.params);
       }
 
       return result;
     } catch (error) {
-      console.log('Gemini failed, using fallback:', error.message || error);
       const fallbackResult = await this.fallbackProcess(query);
       fallbackResult.processingMode = 'fallback';
       return fallbackResult;
@@ -681,13 +716,34 @@ Key Parameters:
   async fallbackProcess(query) {
     const lowerQuery = query.toLowerCase();
 
-    // Check learned queries first
     const learned = this.learnedQueries[lowerQuery.trim()];
     if (learned) {
       try {
-        return await this.executeAction({ action: learned.action, params: learned.params });
+        const result = await this.executeAction({ action: learned.action, params: learned.params });
+        result.processingMode = 'learned-pattern';
+        return result;
       } catch (error) {
-        // If learned query fails, continue with regular fallback
+        // Continue with rule-based fallback
+      }
+    }
+
+    const similarQueries = Object.keys(this.learnedQueries).filter(learnedQuery => {
+      const similarity = this.calculateSimilarity(lowerQuery, learnedQuery);
+      return similarity > 0.7;
+    });
+
+    if (similarQueries.length > 0) {
+      try {
+        const bestMatch = similarQueries[0];
+        const learnedPattern = this.learnedQueries[bestMatch];
+        const result = await this.executeAction({
+          action: learnedPattern.action,
+          params: learnedPattern.params,
+        });
+        result.processingMode = 'similar-pattern';
+        return result;
+      } catch (error) {
+        // Continue with rule-based fallback
       }
     }
 
@@ -1063,9 +1119,94 @@ Key Parameters:
       };
     }
 
-    throw new Error(
-      'I can help with todos, credit cards, and financial insights. Try: "what needs my attention today?" or "give me financial insights"'
-    );
+    // Enhanced default fallback with better pattern recognition
+    if (
+      lowerQuery.includes('pending') ||
+      lowerQuery.includes('incomplete') ||
+      lowerQuery.includes('unfinished')
+    ) {
+      return api.getTodos({ completed: false }).then(todos => ({
+        todos,
+        count: todos.length,
+        summary: `Found ${todos.length} pending todos`,
+        processingMode: 'enhanced-fallback',
+      }));
+    }
+
+    if (
+      lowerQuery.includes('completed') ||
+      lowerQuery.includes('finished') ||
+      lowerQuery.includes('done')
+    ) {
+      return api.getTodos({ completed: true }).then(todos => ({
+        todos,
+        count: todos.length,
+        summary: `Found ${todos.length} completed todos`,
+        processingMode: 'enhanced-fallback',
+      }));
+    }
+
+    if (
+      lowerQuery.includes('all') &&
+      (lowerQuery.includes('todo') || lowerQuery.includes('task'))
+    ) {
+      return api.getTodos({}).then(todos => ({
+        todos,
+        count: todos.length,
+        summary: `Found ${todos.length} total todos`,
+        processingMode: 'enhanced-fallback',
+      }));
+    }
+
+    if (lowerQuery.includes('card') && !lowerQuery.includes('todo')) {
+      return api.getCreditCards({}).then(cards => ({
+        credit_cards: cards,
+        count: cards.length,
+        summary: `Found ${cards.length} credit cards`,
+        processingMode: 'enhanced-fallback',
+      }));
+    }
+
+    // Generic fallback response
+    return {
+      success: false,
+      message:
+        'I can help with todos, credit cards, and financial insights. Try: "show me pending todos" or "what needs my attention today?"',
+      processingMode: 'enhanced-fallback',
+    };
+  }
+
+  calculateSimilarity(str1, str2) {
+    const longer = str1.length > str2.length ? str1 : str2;
+    const shorter = str1.length > str2.length ? str2 : str1;
+    if (longer.length === 0) return 1.0;
+
+    const editDistance = this.levenshteinDistance(longer, shorter);
+    return (longer.length - editDistance) / longer.length;
+  }
+
+  levenshteinDistance(str1, str2) {
+    const matrix = [];
+    for (let i = 0; i <= str2.length; i++) {
+      matrix[i] = [i];
+    }
+    for (let j = 0; j <= str1.length; j++) {
+      matrix[0][j] = j;
+    }
+    for (let i = 1; i <= str2.length; i++) {
+      for (let j = 1; j <= str1.length; j++) {
+        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
+        }
+      }
+    }
+    return matrix[str2.length][str1.length];
   }
 
   extractTodoFilters(query) {
