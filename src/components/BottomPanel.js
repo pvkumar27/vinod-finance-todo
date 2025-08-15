@@ -24,7 +24,7 @@ const BottomPanel = ({ inputValue, setInputValue, onSubmit, onVoiceInput, isLoad
               title="Voice input"
               aria-label="Voice input"
             >
-              <span className="text-lg">✨</span>
+              <span className="text-lg">🎤</span>
             </button>
           </div>
         </form>
