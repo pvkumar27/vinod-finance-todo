@@ -20,7 +20,7 @@ const ChatInputBar = ({
               onChange={e => setInputValue(e.target.value)}
               onKeyDown={onKeyDown}
               placeholder="Message FinBot..."
-              className="w-full bg-gray-100 border-0 rounded-full px-6 py-4 text-base focus:outline-none focus:ring-2 focus:ring-purple-500 focus:bg-white transition-all duration-200 pr-16"
+              className="w-full bg-slate-100 border-0 rounded-full px-6 py-4 text-base focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all duration-200 pr-16 text-slate-700 placeholder-slate-400"
               disabled={isLoading}
             />
             <button
@@ -40,7 +40,7 @@ const ChatInputBar = ({
           <button
             type="submit"
             disabled={!inputValue.trim() || isLoading || isListening}
-            className="w-14 h-14 bg-gradient-to-r from-purple-600 to-indigo-500 text-white rounded-full hover:shadow-xl disabled:opacity-50 transition-all duration-200 flex items-center justify-center transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2"
+            className="w-14 h-14 bg-gradient-to-r from-indigo-500 to-purple-600 text-white rounded-full hover:shadow-xl disabled:opacity-50 transition-all duration-200 flex items-center justify-center transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path

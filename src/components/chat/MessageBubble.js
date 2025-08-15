@@ -47,17 +47,21 @@ const MessageBubble = ({ message, isLast, onRoast, onHype }) => {
         {/* Avatar for bot messages */}
         {isBot && (
           <div className="flex items-start space-x-3">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-600 to-indigo-500 flex items-center justify-center shadow-lg flex-shrink-0">
-              <span className="text-white text-lg">🤖</span>
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center shadow-lg flex-shrink-0 border-2 border-white/20">
+              <span className="text-white text-xl">🤖</span>
             </div>
             <div className="flex-1">
               <div
-                className={`px-4 py-3 rounded-3xl shadow-lg ${
+                className={`px-5 py-4 rounded-3xl shadow-md ${
                   message.isWelcome
-                    ? 'bg-gradient-to-r from-purple-600 to-indigo-500 text-white'
+                    ? 'bg-gradient-to-r from-slate-700 to-slate-800 text-white'
                     : message.isProactive
-                      ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white'
-                      : 'bg-gradient-to-r from-purple-600 to-blue-500 text-white'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white'
+                      : message.isRoast
+                        ? 'bg-gradient-to-r from-slate-600 to-slate-700 text-white'
+                        : message.isHype
+                          ? 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white'
+                          : 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white'
                 }`}
               >
                 <div className="whitespace-pre-line text-sm leading-relaxed">{message.content}</div>
@@ -111,7 +115,7 @@ const MessageBubble = ({ message, isLast, onRoast, onHype }) => {
         {/* User message */}
         {!isBot && (
           <div className="flex items-start space-x-3 justify-end">
-            <div className="bg-gray-100 text-gray-800 px-4 py-3 rounded-3xl shadow-lg max-w-xs">
+            <div className="bg-slate-100 text-slate-800 px-5 py-4 rounded-3xl shadow-md max-w-xs border border-slate-200">
               <div className="whitespace-pre-line text-sm leading-relaxed">{message.content}</div>
               <div className="text-xs text-gray-500 mt-2 text-right">
                 {new Date(message.timestamp).toLocaleTimeString([], {
@@ -120,8 +124,8 @@ const MessageBubble = ({ message, isLast, onRoast, onHype }) => {
                 })}
               </div>
             </div>
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-gray-400 to-gray-600 flex items-center justify-center shadow-lg flex-shrink-0">
-              <span className="text-white text-lg">👤</span>
+            <div className="w-12 h-12 rounded-full bg-gradient-to-br from-slate-400 to-slate-500 flex items-center justify-center shadow-lg flex-shrink-0 border-2 border-white/20">
+              <span className="text-white text-xl">👤</span>
             </div>
           </div>
         )}
