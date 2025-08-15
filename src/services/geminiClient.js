@@ -963,6 +963,19 @@ Key Parameters:
       // Build filters
       const filters = {};
       if (bankName) filters.bank_name = bankName;
+
+      console.log('Query:', lowerQuery);
+      console.log('Checking inactive conditions:');
+      console.log('- inactive:', lowerQuery.includes('inactive'));
+      console.log('- not used:', lowerQuery.includes('not used'));
+      console.log("- haven't been used:", lowerQuery.includes("haven't been used"));
+      console.log('- 90:', lowerQuery.includes('90'));
+      console.log(
+        "- days + not/haven't:",
+        lowerQuery.includes('days') &&
+          (lowerQuery.includes('not') || lowerQuery.includes("haven't"))
+      );
+
       if (
         lowerQuery.includes('inactive') ||
         lowerQuery.includes('not used') ||
@@ -975,6 +988,7 @@ Key Parameters:
       if (lowerQuery.includes('promo') && lowerQuery.includes('expir'))
         filters.promo_expiring = true;
 
+      console.log('Final filters:', filters);
       return api.getCreditCards(filters).then(cards => ({
         credit_cards: cards,
         count: cards.length,
