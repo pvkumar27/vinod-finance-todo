@@ -175,7 +175,7 @@ const MainApp = () => {
       let errorContent;
       if (event.error === 'not-allowed') {
         errorContent =
-          '🎤 Microphone access denied. Please allow microphone permissions and try again.';
+          '🎤 Microphone access denied. Please allow microphone permissions in your browser settings and try again.';
       } else {
         errorContent = `❌ Voice recognition error: ${event.error}`;
       }
