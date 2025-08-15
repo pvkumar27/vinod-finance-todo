@@ -80,7 +80,6 @@ const MainApp = () => {
   }, []);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef(null);
   const { getRoastReply, getHypeReply } = useToneMode();
 
@@ -113,7 +112,6 @@ const MainApp = () => {
     recognition.lang = 'en-US';
 
     recognition.onstart = () => {
-      setIsListening(true);
       const listeningMessage = {
         id: Date.now(),
         type: 'assistant',
@@ -197,7 +195,7 @@ const MainApp = () => {
     };
 
     recognition.onend = () => {
-      setIsListening(false);
+      // Voice recognition ended
     };
 
     recognition.start();
