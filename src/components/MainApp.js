@@ -457,7 +457,7 @@ const MainApp = () => {
               <div className="mb-4">
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">✅ To-Dos</h2>
               </div>
-              <TabNavigation />
+              <TabNavigation activeTab="todos" />
             </div>
           </div>
         );
@@ -468,7 +468,7 @@ const MainApp = () => {
               <div className="mb-4">
                 <h2 className="text-2xl font-bold text-gray-800 mb-2">💳 Credit Cards</h2>
               </div>
-              <TabNavigation />
+              <TabNavigation activeTab="cards" />
             </div>
           </div>
         );
