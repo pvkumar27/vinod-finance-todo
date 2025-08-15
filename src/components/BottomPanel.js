@@ -4,13 +4,6 @@ const BottomPanel = ({ inputValue, setInputValue, onSubmit, onVoiceInput, isLoad
   return (
     <div className="fixed bottom-20 left-0 right-0 bg-gradient-to-t from-[#FCE7E2] to-[#FDF3EE] border-t border-[#EAD2C6] px-4 py-3 z-40">
       <div className="max-w-screen-sm mx-auto">
-        {/* Suggestion bubble */}
-        <div className="flex justify-end mb-2">
-          <div className="bg-white/80 text-[#6F3D32] text-xs font-medium px-3 py-1 rounded-full shadow-sm border border-[#F4D9CE]">
-            dig into my spending, Cleo
-          </div>
-        </div>
-
         {/* Input field */}
         <form onSubmit={onSubmit} className="flex items-center space-x-3">
           <div className="flex-1 relative">

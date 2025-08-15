@@ -3,9 +3,9 @@ import React from 'react';
 const BottomNavigation = ({ activeTab, setActiveTab }) => {
   const navItems = [
     { id: 'chat', label: 'Ask FinBot', icon: '🧠' },
-    { id: 'todos', label: 'Save', icon: '💾' },
-    { id: 'cards', label: 'Spend', icon: '➡️' },
-    { id: 'insights', label: 'Request', icon: '💲' },
+    { id: 'cards', label: 'Credit Cards', icon: '💳' },
+    { id: 'todos', label: 'Todos', icon: '✅' },
+    { id: 'insights', label: 'Insights', icon: '📊' },
   ];
 
   return (
