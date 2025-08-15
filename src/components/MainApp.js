@@ -14,6 +14,12 @@ const MainApp = () => {
   const [isChatCollapsed, setIsChatCollapsed] = useState(false);
 
   useEffect(() => {
+    if (activeTab === 'chat') {
+      setIsChatCollapsed(false);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
     if (activeTab !== 'chat' || initialized) return;
 
     setInitialized(true);
