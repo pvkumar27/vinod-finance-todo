@@ -228,7 +228,9 @@ const MainApp = () => {
       const errorMessage = {
         id: Date.now() + 1,
         type: 'assistant',
-        content: `Sorry, I encountered an error: ${error.message}`,
+        content: error.message.includes('I can help with')
+          ? error.message
+          : `Sorry, I encountered an error: ${error.message}`,
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, errorMessage]);
