@@ -385,7 +385,7 @@ const MainApp = () => {
         return (
           <div className="fixed inset-0 bg-white z-30 flex flex-col">
             <ChatHeader onClose={() => setActiveTab('todos')} />
-            <div className="flex-1 bg-gray-50 pb-24">
+            <div className="flex-1 bg-gray-50 pb-32">
               <ChatContainer
                 messages={messages}
                 isLoading={isLoading}
