@@ -48,6 +48,7 @@ const MainApp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [queryHistory, setQueryHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
@@ -57,6 +58,110 @@ const MainApp = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  const handleVoiceInput = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      const errorMessage = {
+        id: Date.now(),
+        type: 'assistant',
+        content: '❌ Voice recognition not supported in this browser',
+        timestamp: new Date(),
+        isError: true,
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      const listeningMessage = {
+        id: Date.now(),
+        type: 'assistant',
+        content: '🎤 Listening... Speak your command',
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, listeningMessage]);
+    };
+
+    recognition.onresult = async event => {
+      const transcript = event.results[0][0].transcript;
+      setInputValue(transcript);
+
+      // Auto-submit the voice command
+      try {
+        const response = await mcpClient.processNaturalLanguageQuery(transcript);
+
+        const assistantMessage = {
+          id: Date.now() + 1,
+          type: 'assistant',
+          content: formatResponse(response),
+          timestamp: new Date(),
+          data: response,
+          processingMode: response.processingMode || 'fallback',
+        };
+
+        setMessages(prev => [...prev, assistantMessage]);
+
+        // Trigger refresh if needed
+        if (
+          response.success &&
+          (response.todo || response.credit_card || response.deletedCount || response.updatedCount)
+        ) {
+          window.dispatchEvent(new CustomEvent('todoAdded', { detail: response.todo || {} }));
+          if (response.credit_card || response.deletedCount) {
+            const eventDetail = response.deletedCard
+              ? { deleted: true, cardId: response.deletedCard.id }
+              : response.credit_card || {};
+            window.dispatchEvent(new CustomEvent('creditCardAdded', { detail: eventDetail }));
+          }
+        }
+
+        // Handle UI actions
+        if (response.ui_action === 'switch_view') {
+          window.dispatchEvent(
+            new CustomEvent('switchView', {
+              detail: { viewMode: response.view_mode, source: 'ai' },
+            })
+          );
+        }
+      } catch (error) {
+        const errorMessage = {
+          id: Date.now() + 1,
+          type: 'assistant',
+          content: `Sorry, I encountered an error: ${error.message}`,
+          timestamp: new Date(),
+          isError: true,
+        };
+        setMessages(prev => [...prev, errorMessage]);
+      }
+
+      setInputValue('');
+    };
+
+    recognition.onerror = event => {
+      const errorMessage = {
+        id: Date.now(),
+        type: 'assistant',
+        content: `❌ Voice recognition error: ${event.error}`,
+        timestamp: new Date(),
+        isError: true,
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -84,6 +189,7 @@ const MainApp = () => {
         content: formatResponse(response),
         timestamp: new Date(),
         data: response,
+        processingMode: response.processingMode || 'fallback',
       };
 
       setMessages(prev => [...prev, assistantMessage]);
@@ -111,6 +217,11 @@ const MainApp = () => {
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
+      // Restore focus to input field
+      setTimeout(() => {
+        const input = document.querySelector('input[placeholder="Message FinBot..."]');
+        if (input) input.focus();
+      }, 100);
     }
   };
 
@@ -272,12 +383,35 @@ const MainApp = () => {
                         >
                           {message.content}
                           <div
-                            className={`text-xs mt-2 opacity-70 ${message.type === 'user' ? 'text-purple-100' : 'text-gray-500'}`}
+                            className={`text-xs mt-2 opacity-70 flex justify-between items-center ${message.type === 'user' ? 'text-purple-100' : 'text-gray-500'}`}
                           >
-                            {new Date(message.timestamp).toLocaleTimeString([], {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
+                            <span>
+                              {new Date(message.timestamp).toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </span>
+                            {message.type === 'assistant' && (
+                              <span
+                                className={`text-xs px-1.5 py-0.5 rounded-full ${
+                                  message.isWelcome
+                                    ? 'bg-green-100 text-green-600'
+                                    : message.isProactive
+                                      ? 'bg-orange-100 text-orange-600'
+                                      : message.processingMode === 'gemini'
+                                        ? 'bg-purple-100 text-purple-600'
+                                        : 'bg-gray-100 text-gray-600'
+                                }`}
+                              >
+                                {message.isWelcome
+                                  ? '👋 Welcome'
+                                  : message.isProactive
+                                    ? '🔔 Alert'
+                                    : message.processingMode === 'gemini'
+                                      ? '🤖 AI'
+                                      : '🔧 Rule'}
+                              </span>
+                            )}
                           </div>
                         </div>
                         {message.type === 'user' && (
@@ -334,7 +468,11 @@ const MainApp = () => {
                               if (form) form.requestSubmit();
                             }, 100);
                           }}
-                          className="text-xs px-3 py-2 rounded-full bg-white border border-purple-200 text-purple-700 hover:bg-purple-50 transition-all duration-200 shadow-sm"
+                          className={`text-xs px-3 py-2 rounded-full border transition-all duration-200 shadow-sm ${
+                            action.label.includes('attention') || action.label.includes('insights')
+                              ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-orange-300 hover:from-orange-600 hover:to-red-600'
+                              : 'bg-white text-purple-700 border-purple-200 hover:bg-purple-50'
+                          }`
                         >
                           {action.label}
                         </button>
@@ -378,8 +516,21 @@ const MainApp = () => {
                       disabled={isLoading}
                     />
                     <button
+                      type="button"
+                      onClick={handleVoiceInput}
+                      disabled={isLoading}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 mr-2 ${
+                        isListening
+                          ? 'bg-red-500 text-white shadow-lg scale-110'
+                          : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                      }`}
+                      title="Voice input"
+                    >
+                      {isListening ? '🔴' : '🎤'}
+                    </button>
+                    <button
                       type="submit"
-                      disabled={!inputValue.trim() || isLoading}
+                      disabled={!inputValue.trim() || isLoading || isListening}
                       className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 text-white rounded-full hover:shadow-lg disabled:opacity-50 transition-all duration-200 flex items-center justify-center"
                     >
                       <svg
