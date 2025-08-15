@@ -8,11 +8,13 @@ import ChatHeader from './chat/ChatHeader';
 const MainApp = () => {
   const [activeTab, setActiveTab] = useState('chat');
   const [messages, setMessages] = useState([]);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
     // Add welcome message and check for proactive alerts
     const initializeChat = async () => {
-      if (messages.length > 0) return; // Prevent re-initialization
+      if (initialized) return;
+      setInitialized(true);
 
       const welcomeMessage = {
         id: 1,
@@ -59,7 +61,7 @@ const MainApp = () => {
 
     window.addEventListener('quickReply', handleQuickReply);
     return () => window.removeEventListener('quickReply', handleQuickReply);
-  }, [activeTab, messages.length]);
+  }, [activeTab, initialized]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [queryHistory, setQueryHistory] = useState([]);
