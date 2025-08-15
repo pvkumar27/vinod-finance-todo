@@ -4,6 +4,7 @@ import TabNavigation from './TabNavigation';
 import ChatContainer from './chat/ChatContainer';
 import ChatInputBar from './chat/ChatInputBar';
 import ChatHeader from './chat/ChatHeader';
+import useToneMode from '../hooks/useToneMode';
 
 const MainApp = () => {
   const [activeTab, setActiveTab] = useState('chat');
@@ -65,6 +66,7 @@ const MainApp = () => {
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef(null);
+  const { toneMode, getRoastReply, getHypeReply } = useToneMode();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -379,6 +381,28 @@ const MainApp = () => {
     return alerts;
   };
 
+  const handleRoast = () => {
+    const roastMessage = {
+      id: Date.now(),
+      type: 'assistant',
+      content: getRoastReply(),
+      timestamp: new Date(),
+      isRoast: true,
+    };
+    setMessages(prev => [...prev, roastMessage]);
+  };
+
+  const handleHype = () => {
+    const hypeMessage = {
+      id: Date.now(),
+      type: 'assistant',
+      content: getHypeReply(),
+      timestamp: new Date(),
+      isHype: true,
+    };
+    setMessages(prev => [...prev, hypeMessage]);
+  };
+
   const renderContent = () => {
     switch (activeTab) {
       case 'chat':
@@ -390,6 +414,8 @@ const MainApp = () => {
                 messages={messages}
                 isLoading={isLoading}
                 messagesEndRef={messagesEndRef}
+                onRoast={handleRoast}
+                onHype={handleHype}
               />
             </div>
             <ChatInputBar

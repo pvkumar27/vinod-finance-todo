@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import QuickReplyButtons from './QuickReplyButtons';
 import InsightCard from './InsightCard';
+import RoastOrHypeButtons from './RoastOrHypeButtons';
 
-const MessageBubble = ({ message, isLast }) => {
+const MessageBubble = ({ message, isLast, onRoast, onHype }) => {
   const [showQuickReplies, setShowQuickReplies] = useState(true);
 
   const isBot = message.type === 'assistant';
@@ -41,7 +42,7 @@ const MessageBubble = ({ message, isLast }) => {
   };
 
   return (
-    <div className={`flex animate-fade-in ${isBot ? 'justify-start' : 'justify-end'}`}>
+    <div className={`flex animate-slide-up-fade ${isBot ? 'justify-start' : 'justify-end'}`}>
       <div className={`max-w-[85%] ${isBot ? 'mr-auto' : 'ml-auto'}`}>
         {/* Avatar for bot messages */}
         {isBot && (
@@ -84,6 +85,11 @@ const MessageBubble = ({ message, isLast }) => {
                 <div className="mt-3">
                   <InsightCard data={message.data} />
                 </div>
+              )}
+
+              {/* Roast or Hype Buttons for Welcome Messages */}
+              {message.isWelcome && isLast && (
+                <RoastOrHypeButtons onRoast={onRoast} onHype={onHype} />
               )}
 
               {/* Quick Reply Buttons */}
