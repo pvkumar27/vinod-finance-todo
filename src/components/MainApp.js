@@ -11,46 +11,42 @@ const MainApp = () => {
   const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    // Add welcome message and check for proactive alerts
-    const initializeChat = async () => {
-      if (initialized) return;
-      setInitialized(true);
+    if (activeTab !== 'chat' || initialized) return;
 
-      const welcomeMessage = {
-        id: 1,
-        type: 'assistant',
-        content:
-          "👋 Hey! I'm FinBot, your sassy money coach! 💸\n\nI'm here to help you crush your financial goals, roast your spending habits (lovingly), and keep your tasks in check. What's on your mind today? 🤔",
-        timestamp: new Date(),
-        isWelcome: true,
-      };
-      setMessages([welcomeMessage]);
+    setInitialized(true);
 
-      // Check for proactive alerts after 3 seconds
-      setTimeout(async () => {
-        try {
-          const alerts = await generateProactiveAlerts();
-          if (alerts.length > 0) {
-            const alertMessage = {
-              id: Date.now(),
-              type: 'assistant',
-              content: `🚨 Uh oh! I spotted ${alerts.length} thing${alerts.length > 1 ? 's' : ''} that need some TLC:\n\n${alerts.map(alert => `• ${alert.message}`).join('\n')}\n\nDon't worry, I've got your back! Want me to help fix these? 💪`,
-              timestamp: new Date(),
-              isProactive: true,
-            };
-            setMessages(prev => [...prev, alertMessage]);
-          }
-        } catch (error) {
-          console.error('Error checking proactive alerts:', error);
-        }
-      }, 3000);
+    const welcomeMessage = {
+      id: 1,
+      type: 'assistant',
+      content:
+        "👋 Hey! I'm FinBot, your sassy money coach! 💸\n\nI'm here to help you crush your financial goals, roast your spending habits (lovingly), and keep your tasks in check. What's on your mind today? 🤔",
+      timestamp: new Date(),
+      isWelcome: true,
     };
+    setMessages([welcomeMessage]);
 
-    if (activeTab === 'chat') {
-      initializeChat();
-    }
+    const timeoutId = setTimeout(async () => {
+      try {
+        const alerts = await generateProactiveAlerts();
+        if (alerts.length > 0) {
+          const alertMessage = {
+            id: Date.now(),
+            type: 'assistant',
+            content: `🚨 Uh oh! I spotted ${alerts.length} thing${alerts.length > 1 ? 's' : ''} that need some TLC:\n\n${alerts.map(alert => `• ${alert.message}`).join('\n')}\n\nDon't worry, I've got your back! Want me to help fix these? 💪`,
+            timestamp: new Date(),
+            isProactive: true,
+          };
+          setMessages(prev => [...prev, alertMessage]);
+        }
+      } catch (error) {
+        console.error('Error checking proactive alerts:', error);
+      }
+    }, 3000);
 
-    // Listen for quick reply events
+    return () => clearTimeout(timeoutId);
+  }, []);
+
+  useEffect(() => {
     const handleQuickReply = event => {
       setInputValue(event.detail);
       setTimeout(() => {
@@ -61,7 +57,7 @@ const MainApp = () => {
 
     window.addEventListener('quickReply', handleQuickReply);
     return () => window.removeEventListener('quickReply', handleQuickReply);
-  }, [activeTab, initialized]);
+  }, []);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [queryHistory, setQueryHistory] = useState([]);
