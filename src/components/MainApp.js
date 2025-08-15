@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect } from 'react';
 import { mcpClient } from '../services/mcpClient';
 import TabNavigation from './TabNavigation';
 import ChatContainer from './chat/ChatContainer';
-import ChatInputBar from './chat/ChatInputBar';
 import ChatHeader from './chat/ChatHeader';
 import BottomPanel from './BottomPanel';
 import BottomNavigation from './BottomNavigation';
@@ -74,8 +73,6 @@ const MainApp = () => {
   }, []);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [queryHistory, setQueryHistory] = useState([]);
-  const [historyIndex, setHistoryIndex] = useState(-1);
   const [isListening, setIsListening] = useState(false);
   const messagesEndRef = useRef(null);
   const { getRoastReply, getHypeReply } = useToneMode();
@@ -204,8 +201,6 @@ const MainApp = () => {
     };
 
     setMessages(prev => [...prev, userMessage]);
-    setQueryHistory(prev => [inputValue, ...prev.slice(0, 49)]); // Keep last 50 queries
-    setHistoryIndex(-1);
     setInputValue('');
     setIsLoading(true);
 
