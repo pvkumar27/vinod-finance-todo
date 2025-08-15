@@ -284,9 +284,10 @@ const MainApp = () => {
     if (response.credit_cards) {
       const inactiveCount = response.credit_cards.filter(card => {
         if (!card.last_used_date) return true;
-        const daysSince = Math.floor(
-          (new Date() - new Date(card.last_used_date)) / (1000 * 60 * 60 * 24)
-        );
+        const lastUsedDate = new Date(card.last_used_date);
+        const today = new Date();
+        if (lastUsedDate > today) return false;
+        const daysSince = Math.floor((today - lastUsedDate) / (1000 * 60 * 60 * 24));
         return daysSince >= 90;
       }).length;
 
