@@ -88,9 +88,7 @@ const MessageBubble = ({ message, isLast, onRoast, onHype }) => {
               )}
 
               {/* Roast or Hype Buttons for Welcome Messages */}
-              {message.isWelcome && isLast && (
-                <RoastOrHypeButtons onRoast={onRoast} onHype={onHype} />
-              )}
+              {message.isWelcome && <RoastOrHypeButtons onRoast={onRoast} onHype={onHype} />}
 
               {/* Quick Reply Buttons */}
               {hasQuickReplies && showQuickReplies && (
