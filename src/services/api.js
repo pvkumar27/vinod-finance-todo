@@ -56,6 +56,7 @@ export const api = {
     const { data: maxOrderData } = await supabase
       .from('todos')
       .select('sort_order')
+      .eq('user_id', user.id)
       .order('sort_order', { ascending: false })
       .limit(1);
 
@@ -112,7 +113,7 @@ export const api = {
 
     const { data, error } = await supabase
       .from('credit_cards_simplified')
-      .insert({ ...cardData, user_id: user.id })
+      .insert({ user_id: user.id, ...cardData })
       .select();
     if (error) throw error;
     return data[0];
