@@ -383,7 +383,7 @@ const MainApp = () => {
     switch (activeTab) {
       case 'chat':
         return (
-          <div className="fixed inset-0 bg-white z-50 flex flex-col">
+          <div className="fixed inset-0 bg-white z-30 flex flex-col">
             <ChatHeader onClose={() => setActiveTab('todos')} />
             <div className="flex-1 bg-gray-50 pb-24">
               <ChatContainer
