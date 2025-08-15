@@ -966,7 +966,10 @@ Key Parameters:
       if (
         lowerQuery.includes('inactive') ||
         lowerQuery.includes('not used') ||
-        lowerQuery.includes("haven't been used")
+        lowerQuery.includes("haven't been used") ||
+        lowerQuery.includes('90') ||
+        (lowerQuery.includes('days') &&
+          (lowerQuery.includes('not') || lowerQuery.includes("haven't")))
       )
         filters.inactive_only = true;
       if (lowerQuery.includes('promo') && lowerQuery.includes('expir'))
