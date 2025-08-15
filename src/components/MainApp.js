@@ -12,6 +12,8 @@ const MainApp = () => {
   useEffect(() => {
     // Add welcome message and check for proactive alerts
     const initializeChat = async () => {
+      if (messages.length > 0) return; // Prevent re-initialization
+
       const welcomeMessage = {
         id: 1,
         type: 'assistant',
@@ -57,7 +59,7 @@ const MainApp = () => {
 
     window.addEventListener('quickReply', handleQuickReply);
     return () => window.removeEventListener('quickReply', handleQuickReply);
-  }, [activeTab]);
+  }, [activeTab, messages.length]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [queryHistory, setQueryHistory] = useState([]);
