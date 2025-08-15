@@ -473,14 +473,14 @@ const MainApp = () => {
       case 'todos':
         return (
           <div className="h-full overflow-auto fin-gradient-bg">
-            <div className="p-4">
-              <div className="fin-card mb-4">
-                <div className="bg-[#632D1F] text-white rounded-xl p-3 mb-4 flex items-center space-x-2">
-                  <span className="text-xl">✅</span>
-                  <h2 className="text-lg font-bold">To-Dos</h2>
-                </div>
-                <p className="text-gray-600">Manage your tasks and stay productive</p>
+            <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl">💰</span>
+                <h1 className="text-xl font-bold text-[#632D1F]">FinTask</h1>
               </div>
+              <button className="fin-button-primary text-xs px-4 py-2">Sign Out</button>
+            </div>
+            <div className="p-4">
               <TabNavigation activeTab="todos" />
             </div>
           </div>
@@ -488,14 +488,14 @@ const MainApp = () => {
       case 'cards':
         return (
           <div className="h-full overflow-auto fin-gradient-bg">
-            <div className="p-4">
-              <div className="fin-card mb-4">
-                <div className="bg-[#632D1F] text-white rounded-xl p-3 mb-4 flex items-center space-x-2">
-                  <span className="text-xl">💳</span>
-                  <h2 className="text-lg font-bold">Credit Cards</h2>
-                </div>
-                <p className="text-gray-600">Track your cards and spending habits</p>
+            <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl">💰</span>
+                <h1 className="text-xl font-bold text-[#632D1F]">FinTask</h1>
               </div>
+              <button className="fin-button-primary text-xs px-4 py-2">Sign Out</button>
+            </div>
+            <div className="p-4">
               <TabNavigation activeTab="cards" />
             </div>
           </div>
@@ -503,6 +503,13 @@ const MainApp = () => {
       case 'insights':
         return (
           <div className="h-full overflow-auto fin-gradient-bg">
+            <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
+              <div className="flex items-center space-x-3">
+                <span className="text-2xl">💰</span>
+                <h1 className="text-xl font-bold text-[#632D1F]">FinTask</h1>
+              </div>
+              <button className="fin-button-primary text-xs px-4 py-2">Sign Out</button>
+            </div>
             <div className="p-4">
               <div className="fin-card mb-4">
                 <div className="bg-[#632D1F] text-white rounded-xl p-3 mb-4 flex items-center space-x-2">
