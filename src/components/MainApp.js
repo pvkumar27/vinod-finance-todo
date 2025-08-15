@@ -472,7 +472,7 @@ const MainApp = () => {
                             action.label.includes('attention') || action.label.includes('insights')
                               ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-orange-300 hover:from-orange-600 hover:to-red-600'
                               : 'bg-white text-purple-700 border-purple-200 hover:bg-purple-50'
-                          }`
+                          }`}
                         >
                           {action.label}
                         </button>
