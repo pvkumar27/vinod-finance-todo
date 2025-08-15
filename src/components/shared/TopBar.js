@@ -10,7 +10,7 @@ const TopBar = () => {
     <div className="bg-white border-b border-gray-200 p-4 flex items-center justify-between">
       <div className="flex items-center space-x-3">
         <div className="w-8 h-8 bg-[#632D1F] rounded-lg flex items-center justify-center">
-          <span className="text-white font-bold text-sm">F</span>
+          <span className="text-white font-bold text-xs">💰</span>
         </div>
         <h1 className="text-xl font-bold text-[#632D1F]">FinTask</h1>
       </div>

@@ -40,22 +40,22 @@ const AuthForm = () => {
     }
   };
   return (
-    <div className="min-h-screen flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen fin-gradient-bg flex items-center justify-center py-8 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 relative z-10">
         {/* Logo and Header */}
         <div className="text-center">
           <div className="flex justify-center mb-6">
-            <div className="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-3xl flex items-center justify-center shadow-2xl cleo-animate-float">
-              <span className="text-white font-bold text-3xl">F</span>
+            <div className="w-20 h-20 bg-[#632D1F] rounded-3xl flex items-center justify-center shadow-2xl">
+              <span className="text-white text-4xl">💰</span>
             </div>
           </div>
-          <h2 className="text-4xl sm:text-5xl font-bold cleo-text-gradient mb-4">FinTask</h2>
+          <h2 className="text-4xl sm:text-5xl font-bold text-[#632D1F] mb-4">FinTask</h2>
           <p className="text-lg text-gray-300 mb-2">Your AI-powered finance companion</p>
           <p className="text-sm text-gray-400">Sign in to unlock intelligent financial insights</p>
         </div>
 
         {/* Auth Form */}
-        <div className="cleo-card p-8">
+        <div className="fin-card p-8">
           {authState.error && (
             <div className="bg-red-500/20 border border-red-500/50 text-red-400 p-4 rounded-xl mb-6 flex items-center space-x-2">
               <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
