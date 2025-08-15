@@ -73,6 +73,17 @@ const BottomPanel = ({ inputValue, setInputValue, onSubmit, onVoiceInput, isLoad
               <span className="text-lg">🎤</span>
             </button>
           </div>
+          <button
+            type="submit"
+            disabled={isLoading || !inputValue.trim()}
+            className="fin-button-primary px-4 py-2 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            title="Send message"
+          >
+            <span className="text-sm">{isLoading ? '⏳' : '🚀'}</span>
+            <span className="hidden sm:inline text-sm font-medium">
+              {isLoading ? 'Sending...' : 'Send'}
+            </span>
+          </button>
         </form>
       </div>
     </div>

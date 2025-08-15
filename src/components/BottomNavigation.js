@@ -3,8 +3,8 @@ import React from 'react';
 const BottomNavigation = ({ activeTab, setActiveTab }) => {
   const navItems = [
     { id: 'chat', label: 'Ask FinBot', icon: '🧠' },
-    { id: 'cards', label: 'Credit Cards', icon: '💳' },
     { id: 'todos', label: 'Todos', icon: '✅' },
+    { id: 'cards', label: 'Credit Cards', icon: '💳' },
     { id: 'insights', label: 'Insights', icon: '📊' },
   ];
 

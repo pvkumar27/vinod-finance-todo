@@ -5,7 +5,7 @@ import IOSInstallPrompt from './components/IOSInstallPrompt';
 import MainApp from './components/MainApp';
 import './App.css';
 import './styles/globals.css';
-import './styles/fintech-theme.css';
+import './styles/finbot-theme.css';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -45,7 +45,7 @@ function App() {
   if (!session) {
     return (
       <div className="app relative overflow-hidden bg-gray-50">
-        {/* Real Cleo-style background */}
+        {/* FinBot-style background */}
         <div className="absolute inset-0">
           <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-purple-400/30 to-pink-400/30 rounded-full blur-xl bounce"></div>
           <div
@@ -62,7 +62,7 @@ function App() {
 
   return (
     <div className="app relative overflow-hidden bg-gray-50">
-      {/* Real Cleo-style background */}
+      {/* FinBot-style background */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-3xl bounce"></div>
         <div
@@ -74,7 +74,7 @@ function App() {
         <MainApp />
       </div>
       <IOSInstallPrompt />
-      {/* Remove duplicate AI Assistant - it's now in CleoApp */}
+      {/* Remove duplicate AI Assistant - it's now in FinBot App */}
     </div>
   );
 }

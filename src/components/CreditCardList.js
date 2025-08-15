@@ -332,7 +332,7 @@ const CreditCardList = () => {
 
   if (error) {
     return (
-      <div className="cleo-card p-4 bg-red-500/20 border border-red-500/50 text-red-400">
+      <div className="finbot-card p-4 bg-red-500/20 border border-red-500/50 text-red-400">
         {error}
       </div>
     );
@@ -340,9 +340,6 @@ const CreditCardList = () => {
 
   return (
     <div className="space-y-6">
-      {/* Dashboard Insights */}
-      <CreditCardDashboardInsights cards={cards} />
-
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div>
@@ -358,10 +355,14 @@ const CreditCardList = () => {
             activeTab={activeTab}
             onMessage={setMessage}
           />
-          <button data-cy="card-add-button" onClick={handleAddCard} className="cleo-button-primary">
+          <button
+            data-cy="card-add-button"
+            onClick={handleAddCard}
+            className="finbot-button-primary"
+          >
             ➕ Add Card
           </button>
-          <button onClick={fetchCards} className="cleo-button-secondary">
+          <button onClick={fetchCards} className="finbot-button-secondary">
             🔄 Refresh
           </button>
         </div>
@@ -381,10 +382,10 @@ const CreditCardList = () => {
       )}
 
       {/* Tabs */}
-      <div className="cleo-card p-2 flex flex-wrap gap-2 mb-6">
+      <div className="finbot-card p-2 flex flex-wrap gap-2 mb-6">
         <button
           onClick={() => setActiveTab('all')}
-          className={`cleo-tab px-6 py-3 text-sm font-medium ${
+          className={`finbot-tab px-6 py-3 text-sm font-medium ${
             activeTab === 'all' ? 'active' : ''
           }`}
         >
@@ -392,7 +393,7 @@ const CreditCardList = () => {
         </button>
         <button
           onClick={() => setActiveTab('promo')}
-          className={`cleo-tab px-6 py-3 text-sm font-medium ${
+          className={`finbot-tab px-6 py-3 text-sm font-medium ${
             activeTab === 'promo' ? 'active' : ''
           }`}
         >
@@ -400,7 +401,7 @@ const CreditCardList = () => {
         </button>
         <button
           onClick={() => setActiveTab('inactive')}
-          className={`cleo-tab px-6 py-3 text-sm font-medium ${
+          className={`finbot-tab px-6 py-3 text-sm font-medium ${
             activeTab === 'inactive' ? 'active' : ''
           }`}
         >
@@ -419,7 +420,7 @@ const CreditCardList = () => {
               placeholder="Search by card name..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="cleo-input w-full pl-10"
+              className="finbot-input w-full pl-10"
             />
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               <span className="text-gray-400">🔍</span>
@@ -427,18 +428,18 @@ const CreditCardList = () => {
           </div>
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
-          <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="cleo-input">
+          <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="finbot-input">
             <option value="card_name">Sort by Card Name</option>
             <option value="days_inactive">Sort by Days Inactive</option>
             <option value="promo_count">Sort by Promo Count</option>
             <option value="last_used_newest">Last Used (Newest First)</option>
             <option value="last_used_oldest">Last Used (Oldest First)</option>
           </select>
-          <div className="cleo-card p-1 flex">
+          <div className="finbot-card p-1 flex">
             <button
               data-cy="view-cards-button"
               onClick={() => handleViewModeChange('cards')}
-              className={`cleo-tab px-4 py-2 text-sm font-medium ${
+              className={`finbot-tab px-4 py-2 text-sm font-medium ${
                 viewMode === 'cards' ? 'active' : ''
               }`}
             >
@@ -447,7 +448,7 @@ const CreditCardList = () => {
             <button
               data-cy="view-table-button"
               onClick={() => handleViewModeChange('table')}
-              className={`cleo-tab px-4 py-2 text-sm font-medium ${
+              className={`finbot-tab px-4 py-2 text-sm font-medium ${
                 viewMode === 'table' ? 'active' : ''
               }`}
             >
@@ -464,7 +465,7 @@ const CreditCardList = () => {
             selectedCards.length > 0 ? 'max-h-20 opacity-100 mb-6' : 'max-h-0 opacity-0 mb-0'
           }`}
         >
-          <div className="cleo-card p-4 flex items-center justify-between">
+          <div className="finbot-card p-4 flex items-center justify-between">
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium text-gray-800">
                 ✅ {selectedCards.length} card{selectedCards.length !== 1 ? 's' : ''} selected
@@ -478,7 +479,7 @@ const CreditCardList = () => {
             </div>
             <button
               onClick={handleBulkDelete}
-              className="cleo-button-secondary hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-400 transition-all duration-300"
+              className="finbot-button-secondary hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-400 transition-all duration-300"
               title="Delete selected cards"
             >
               🗑️ Delete Selected
@@ -491,11 +492,11 @@ const CreditCardList = () => {
       <div className="min-h-[600px]">
         {sortedCards.length === 0 ? (
           <div className="text-center py-12 text-gray-600">
-            <div className="text-6xl mb-4 cleo-animate-float">💳</div>
+            <div className="text-6xl mb-4 finbot-animate-float">💳</div>
             <p className="text-xl">No cards found matching your criteria</p>
           </div>
         ) : viewMode === 'table' ? (
-          <div className="cleo-card overflow-hidden">
+          <div className="finbot-card overflow-hidden">
             <div className="max-h-[600px] overflow-y-auto">
               <CreditCardTable
                 cards={sortedCards}
@@ -525,9 +526,9 @@ const CreditCardList = () => {
               {sortedCards.map(card => (
                 <div
                   key={card.id}
-                  className={`cleo-card p-6 transition-all duration-300 ease-in-out hover:transform hover:scale-105 relative ${
+                  className={`finbot-card p-6 transition-all duration-300 ease-in-out hover:transform hover:scale-105 relative ${
                     selectedCards.includes(card.id)
-                      ? 'cleo-glow border-purple-500/50'
+                      ? 'finbot-glow border-purple-500/50'
                       : getInactivityBadge(card.days_inactive, card.last_used_date) ||
                           getPromoExpiryBadge(card.current_promos)
                         ? 'border-red-500/50 bg-red-500/10'

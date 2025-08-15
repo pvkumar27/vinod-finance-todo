@@ -304,11 +304,11 @@ const TaskManager = () => {
           <span className="mr-3 text-4xl">📝</span>
           To-Do Manager
         </h2>
-        <div className="cleo-card p-1 flex w-full sm:w-auto">
+        <div className="finbot-card p-1 flex w-full sm:w-auto">
           <button
             data-cy="view-cards-button"
             onClick={() => setViewMode('cards')}
-            className={`cleo-tab px-6 py-3 text-sm font-medium flex-1 sm:flex-auto ${
+            className={`finbot-tab px-6 py-3 text-sm font-medium flex-1 sm:flex-auto ${
               viewMode === 'cards' ? 'active' : ''
             }`}
           >
@@ -317,7 +317,7 @@ const TaskManager = () => {
           <button
             data-cy="view-table-button"
             onClick={() => setViewMode('table')}
-            className={`cleo-tab px-6 py-3 text-sm font-medium flex-1 sm:flex-auto ${
+            className={`finbot-tab px-6 py-3 text-sm font-medium flex-1 sm:flex-auto ${
               viewMode === 'table' ? 'active' : ''
             }`}
           >
@@ -339,7 +339,7 @@ const TaskManager = () => {
       )}
 
       {/* Add Todo Form */}
-      <div className="cleo-card p-6 mb-8">
+      <div className="finbot-card p-6 mb-8">
         <form onSubmit={handleAddTodo}>
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
@@ -356,7 +356,7 @@ const TaskManager = () => {
                 placeholder={editingTodo ? 'Edit task...' : 'Add a new task...'}
                 value={newTask}
                 onChange={e => setNewTask(e.target.value)}
-                className="cleo-input w-full"
+                className="finbot-input w-full"
               />
             </div>
             <div className="flex flex-col w-full sm:w-auto">
@@ -372,7 +372,7 @@ const TaskManager = () => {
                 type="date"
                 value={taskDate}
                 onChange={e => setTaskDate(e.target.value)}
-                className="cleo-input sm:w-40"
+                className="finbot-input sm:w-40"
                 required
               />
             </div>
@@ -380,7 +380,7 @@ const TaskManager = () => {
               <button
                 type="submit"
                 data-cy={editingTodo ? 'task-update-button' : 'task-add-button'}
-                className="cleo-button-primary w-full sm:w-auto flex items-center justify-center"
+                className="finbot-button-primary w-full sm:w-auto flex items-center justify-center"
               >
                 <span className="mr-2">{editingTodo ? '✏️' : '➕'}</span>
                 {editingTodo ? 'Update' : 'Add Task'}
@@ -393,7 +393,7 @@ const TaskManager = () => {
                     setNewTask('');
                     setTaskDate(getTodayDateString());
                   }}
-                  className="cleo-button-secondary w-full sm:w-auto mt-3"
+                  className="finbot-button-secondary w-full sm:w-auto mt-3"
                 >
                   Cancel
                 </button>
@@ -418,7 +418,7 @@ const TaskManager = () => {
 
         {pendingTodos.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-6xl mb-4 cleo-animate-float">🎉</div>
+            <div className="text-6xl mb-4 finbot-animate-float">🎉</div>
             <p className="text-xl text-gray-600">No pending tasks. Great job!</p>
           </div>
         ) : viewMode === 'cards' ? (
@@ -491,7 +491,7 @@ const TaskManager = () => {
             </DndContext>
           </div>
         ) : (
-          <div className="cleo-card overflow-hidden">
+          <div className="finbot-card overflow-hidden">
             <table className="w-full border-collapse">
               <thead>
                 <tr className="bg-white/5">
@@ -681,7 +681,7 @@ const TaskManager = () => {
         <div>
           <button
             onClick={() => setShowCompleted(!showCompleted)}
-            className="cleo-card flex items-center justify-between w-full p-4 hover:transform hover:scale-[1.02] transition-all duration-300 mb-6"
+            className="finbot-card flex items-center justify-between w-full p-4 hover:transform hover:scale-[1.02] transition-all duration-300 mb-6"
           >
             <h3 className="text-xl font-bold text-gray-800">
               Completed Tasks ({todos.filter(t => t.completed).length})
@@ -708,7 +708,7 @@ const TaskManager = () => {
                 .map(todo => (
                   <div
                     key={todo.id}
-                    className="cleo-card flex items-center justify-between p-4 bg-green-500/10 border-green-500/30"
+                    className="finbot-card flex items-center justify-between p-4 bg-green-500/10 border-green-500/30"
                   >
                     <div className="flex items-center space-x-3">
                       <input

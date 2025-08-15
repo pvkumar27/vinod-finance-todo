@@ -35,7 +35,7 @@ const Home = () => {
       <div className="max-w-6xl mx-auto pt-8 pb-8 px-4 sm:px-6 lg:px-8">
         {/* Welcome Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold cleo-text-gradient mb-4">Welcome to FinTask</h1>
+          <h1 className="text-4xl font-bold finbot-text-gradient mb-4">Welcome to FinTask</h1>
           <p className="text-lg text-gray-300">Your AI-powered financial companion</p>
         </div>
 
@@ -50,8 +50,8 @@ const Home = () => {
 
         {/* Version Footer */}
         <div className="text-center">
-          <div className="cleo-card inline-flex items-center px-6 py-3">
-            <p className="text-sm cleo-text-gradient font-medium">
+          <div className="finbot-card inline-flex items-center px-6 py-3">
+            <p className="text-sm finbot-text-gradient font-medium">
               FinTask {APP_VERSION} • Built with React & Supabase
             </p>
           </div>

@@ -7,6 +7,7 @@ import BottomPanel from './BottomPanel';
 import BottomNavigation from './BottomNavigation';
 import TopBar from './shared/TopBar';
 import useToneMode from '../hooks/useToneMode';
+import { APP_VERSION } from '../constants/version';
 
 const MainApp = () => {
   const [activeTab, setActiveTab] = useState('chat');
@@ -431,6 +432,7 @@ const MainApp = () => {
       case 'chat':
         return (
           <div className="fixed inset-0 bg-white z-30 flex flex-col">
+            <TopBar />
             <ChatHeader
               isCollapsed={isChatCollapsed}
               onToggleCollapse={() => {
@@ -495,25 +497,14 @@ const MainApp = () => {
           <div className="h-full overflow-auto fin-gradient-bg">
             <TopBar />
             <div className="p-4">
-              <div className="fin-card mb-4">
-                <div className="bg-[#632D1F] text-white rounded-xl p-3 mb-4 flex items-center space-x-2">
-                  <span className="text-xl">📊</span>
-                  <h2 className="text-lg font-bold">Insights</h2>
-                </div>
-                <div className="text-center py-8">
-                  <span className="text-4xl mb-4 block">🕰️</span>
-                  <h3 className="text-xl font-bold text-[#632D1F] mb-2">Coming Soon</h3>
-                  <p className="text-gray-600">
-                    AI-powered financial insights will be available here
-                  </p>
-                </div>
-              </div>
+              <TabNavigation activeTab="insights" />
             </div>
           </div>
         );
       default:
         return (
           <div className="h-full flex flex-col fin-gradient-bg">
+            <TopBar />
             <div className="p-4">
               <div className="fin-card text-center">
                 <div className="bg-[#632D1F] text-white rounded-xl p-3 mb-4 flex items-center justify-center space-x-2">
@@ -531,7 +522,16 @@ const MainApp = () => {
   return (
     <div className="min-h-screen flex flex-col fin-gradient-bg">
       {/* Main Content */}
-      <div className="flex-1 pb-16">{renderContent()}</div>
+      <div className="flex-1 pb-20">{renderContent()}</div>
+
+      {/* Footer */}
+      <div className="fixed bottom-16 left-0 right-0 bg-white/80 backdrop-blur-sm border-t border-gray-200 px-4 py-2 z-40">
+        <div className="max-w-screen-sm mx-auto text-center">
+          <p className="text-xs text-gray-500">
+            FinTask {APP_VERSION} • Your AI-powered finance assistant
+          </p>
+        </div>
+      </div>
 
       {/* Bottom Navigation */}
       <BottomNavigation activeTab={activeTab} setActiveTab={setActiveTab} />

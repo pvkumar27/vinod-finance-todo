@@ -180,7 +180,7 @@ const AuthForm = () => {
         <div className="text-center">
           <p className="text-xs text-gray-500">Secure authentication powered by Supabase</p>
           <div className="flex justify-center items-center space-x-2 mt-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full cleo-animate-pulse"></div>
+            <div className="w-2 h-2 bg-green-500 rounded-full finbot-animate-pulse"></div>
             <span className="text-xs text-gray-400">AI Assistant Ready</span>
           </div>
         </div>
