@@ -87,10 +87,11 @@ const MainApp = () => {
       try {
         const alerts = await generateProactiveAlerts();
         if (alerts.length > 0) {
+          const alertList = alerts.map(alert => `• ${alert.message}`).join('\n');
           const alertMessage = {
             id: Date.now(),
             type: 'assistant',
-            content: `🚨 Heads up! I spotted ${alerts.length} thing${alerts.length > 1 ? 's' : ''} that need some TLC:\n\n${alerts.map(alert => `• ${alert.message}`).join('\n')}\n\nDon't worry, I've got your back! Want me to help fix these? 💪`,
+            content: `🚨 Heads up! I spotted ${alerts.length} thing${alerts.length > 1 ? 's' : ''} that need some TLC:\n\n${alertList}\n\nDon't worry, I've got your back! Want me to help fix these? 💪`,
             timestamp: new Date(),
             isProactive: true,
           };
@@ -128,16 +129,65 @@ const MainApp = () => {
     return () => window.removeEventListener('quickReply', handleQuickReply);
   }, []);
 
+  const createMessage = (type, content, extra = {}) => ({
+    id: Date.now() + (type === 'assistant' ? 1 : 0),
+    type,
+    content,
+    timestamp: new Date(),
+    ...extra,
+  });
+
+  const addMessage = (type, content, extra = {}) => {
+    setMessages(prev => [...prev, createMessage(type, content, extra)]);
+  };
+
+  const triggerDataRefresh = response => {
+    if (!response.success) return;
+    if (!(response.todo || response.credit_card || response.deletedCount || response.updatedCount))
+      return;
+
+    window.dispatchEvent(new CustomEvent('todoAdded', { detail: response.todo || {} }));
+    if (response.credit_card || response.deletedCount) {
+      const eventDetail = response.deletedCard
+        ? { deleted: true, cardId: response.deletedCard.id }
+        : response.credit_card || {};
+      window.dispatchEvent(new CustomEvent('creditCardAdded', { detail: eventDetail }));
+    }
+    if (response.ui_action === 'switch_view') {
+      window.dispatchEvent(
+        new CustomEvent('switchView', {
+          detail: { viewMode: response.view_mode, source: 'ai' },
+        })
+      );
+    }
+  };
+
+  const processQuery = async (query, addUserMsg = true) => {
+    if (addUserMsg) addMessage('user', query);
+    setIsLoading(true);
+
+    try {
+      const response = await mcpClient.processNaturalLanguageQuery(query);
+      addMessage('assistant', formatResponse(response), {
+        data: response,
+        processingMode: response.processingMode || 'fallback',
+      });
+      triggerDataRefresh(response);
+    } catch (error) {
+      const content = error.message.includes('I can help with')
+        ? error.message
+        : `Sorry, I encountered an error: ${error.message}`;
+      addMessage('assistant', content, { isError: true });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleVoiceInput = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      const errorMessage = {
-        id: Date.now(),
-        type: 'assistant',
-        content: '❌ Voice recognition not supported in this browser',
-        timestamp: new Date(),
+      addMessage('assistant', '❌ Voice recognition not supported in this browser', {
         isError: true,
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      });
       return;
     }
 
@@ -149,86 +199,21 @@ const MainApp = () => {
     recognition.lang = 'en-US';
 
     recognition.onstart = () => {
-      const listeningMessage = {
-        id: Date.now(),
-        type: 'assistant',
-        content: '🎤 Listening... Speak your command',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, listeningMessage]);
+      addMessage('assistant', '🎤 Listening... Speak your command');
     };
 
     recognition.onresult = async event => {
       const transcript = event.results[0][0].transcript;
-      setInputValue(transcript);
-
-      // Auto-submit the voice command
-      try {
-        const response = await mcpClient.processNaturalLanguageQuery(transcript);
-
-        const assistantMessage = {
-          id: Date.now() + 1,
-          type: 'assistant',
-          content: formatResponse(response),
-          timestamp: new Date(),
-          data: response,
-          processingMode: response.processingMode || 'fallback',
-        };
-
-        setMessages(prev => [...prev, assistantMessage]);
-
-        // Trigger refresh if needed
-        if (
-          response.success &&
-          (response.todo || response.credit_card || response.deletedCount || response.updatedCount)
-        ) {
-          window.dispatchEvent(new CustomEvent('todoAdded', { detail: response.todo || {} }));
-          if (response.credit_card || response.deletedCount) {
-            const eventDetail = response.deletedCard
-              ? { deleted: true, cardId: response.deletedCard.id }
-              : response.credit_card || {};
-            window.dispatchEvent(new CustomEvent('creditCardAdded', { detail: eventDetail }));
-          }
-        }
-
-        // Handle UI actions
-        if (response.ui_action === 'switch_view') {
-          window.dispatchEvent(
-            new CustomEvent('switchView', {
-              detail: { viewMode: response.view_mode, source: 'ai' },
-            })
-          );
-        }
-      } catch (error) {
-        const errorMessage = {
-          id: Date.now() + 1,
-          type: 'assistant',
-          content: `Sorry, I encountered an error: ${error.message}`,
-          timestamp: new Date(),
-          isError: true,
-        };
-        setMessages(prev => [...prev, errorMessage]);
-      }
-
+      await processQuery(transcript);
       setInputValue('');
     };
 
     recognition.onerror = event => {
-      let errorContent;
-      if (event.error === 'not-allowed') {
-        errorContent =
-          "🎤 Microphone access denied. Click the microphone icon in your browser's address bar or go to Settings > Privacy & Security > Site Settings > Microphone to allow access.";
-      } else {
-        errorContent = `❌ Voice recognition error: ${event.error}`;
-      }
-      const errorMessage = {
-        id: Date.now(),
-        type: 'assistant',
-        content: errorContent,
-        timestamp: new Date(),
-        isError: true,
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      const errorContent =
+        event.error === 'not-allowed'
+          ? "🎤 Microphone access denied. Click the microphone icon in your browser's address bar or go to Settings > Privacy & Security > Site Settings > Microphone to allow access."
+          : `❌ Voice recognition error: ${event.error}`;
+      addMessage('assistant', errorContent, { isError: true });
     };
 
     recognition.onend = () => {
@@ -242,189 +227,144 @@ const MainApp = () => {
     e.preventDefault();
     if (!inputValue.trim() || isLoading) return;
 
-    const userMessage = {
-      id: Date.now(),
-      type: 'user',
-      content: inputValue,
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
+    const query = inputValue;
     setInputValue('');
-    setIsLoading(true);
+    await processQuery(query);
 
-    try {
-      const response = await mcpClient.processNaturalLanguageQuery(inputValue);
+    // Restore focus to input field
+    setTimeout(() => {
+      const input = document.querySelector('input[placeholder="Message FinBot..."]');
+      if (input) input.focus();
+    }, 100);
+  };
 
-      const assistantMessage = {
-        id: Date.now() + 1,
-        type: 'assistant',
-        content: formatResponse(response),
-        timestamp: new Date(),
-        data: response,
-        processingMode: response.processingMode || 'fallback',
-      };
+  const formatTodos = response => {
+    const completedCount = response.todos.filter(t => t.completed).length;
+    const pendingCount = response.count - completedCount;
+    const intro =
+      pendingCount === 0
+        ? `🎉 Look at you, task master! All ${response.count} todos are done!`
+        : `📋 Here's what's on your plate (${pendingCount} still need some love):`;
+    const todoList = response.todos
+      .map(todo => {
+        const status = todo.completed ? '✅' : '⏳';
+        const priority = todo.priority ? `(${todo.priority} priority)` : '';
+        return `${status} ${todo.task} ${priority}`;
+      })
+      .join('\n');
+    return `${intro}\n\n${todoList}`;
+  };
 
-      setMessages(prev => [...prev, assistantMessage]);
+  const formatCreditCards = response => {
+    const inactiveCount = response.credit_cards.filter(card => {
+      if (!card.last_used_date) return true;
+      const daysSince = Math.floor(
+        (new Date() - new Date(card.last_used_date)) / (1000 * 60 * 60 * 24)
+      );
+      return daysSince >= 90;
+    }).length;
+    const intro =
+      inactiveCount > 0
+        ? `💳 Your card collection! But ${inactiveCount} are gathering dust... 🕸️`
+        : `💳 Your ${response.count} cards are all active and ready to spend! 💪`;
+    const cardList = response.credit_cards
+      .map(card => {
+        const cardName =
+          card.bank_name && card.last_four_digits
+            ? card.bank_name + ' ••' + card.last_four_digits
+            : card.card_name || 'Mystery Card';
+        const lastUsed = card.last_used_date
+          ? 'Last used: ' + new Date(card.last_used_date).toLocaleDateString()
+          : 'Never used (ouch! 😬)';
+        return '💳 ' + cardName + '\n   ' + lastUsed;
+      })
+      .join('\n\n');
+    return `${intro}\n\n${cardList}`;
+  };
 
-      // Trigger refresh if needed
-      if (
-        response.success &&
-        (response.todo || response.credit_card || response.deletedCount || response.updatedCount)
-      ) {
-        window.dispatchEvent(new CustomEvent('todoAdded', { detail: response.todo || {} }));
-        if (response.credit_card || response.deletedCount) {
-          const eventDetail = response.deletedCard
-            ? { deleted: true, cardId: response.deletedCard.id }
-            : response.credit_card || {};
-          window.dispatchEvent(new CustomEvent('creditCardAdded', { detail: eventDetail }));
-        }
-      }
-    } catch (error) {
-      const errorMessage = {
-        id: Date.now() + 1,
-        type: 'assistant',
-        content: error.message.includes('I can help with')
-          ? error.message
-          : `Sorry, I encountered an error: ${error.message}`,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-      // Restore focus to input field
-      setTimeout(() => {
-        const input = document.querySelector('input[placeholder="Message FinBot..."]');
-        if (input) input.focus();
-      }, 100);
-    }
+  const formatTransactions = response => {
+    const total = response.total_amount || 0;
+    let emoji = '🪙';
+    if (total > 500) emoji = '💸';
+    else if (total > 100) emoji = '💰';
+    const transactionList = response.transactions
+      .map(t => '• ' + t.description + ' - $' + t.amount + ' (' + t.date + ')')
+      .join('\n');
+    return (
+      emoji +
+      ' Found ' +
+      response.count +
+      ' transactions totaling $' +
+      total.toFixed(2) +
+      '\n\n' +
+      transactionList
+    );
+  };
+
+  const formatInsights = response => {
+    const insightsList = response.insights.map(insight => '• ' + insight).join('\n');
+    const recommendations = response.recommendations
+      ? "\n\n🎯 My recommendations (trust me, I'm good at this):\n" +
+        response.recommendations.map(rec => '• ' + rec).join('\n')
+      : '';
+    return "💡 Here's what I'm seeing in your finances:\n\n" + insightsList + recommendations;
+  };
+
+  const formatUrgentItems = response => {
+    const urgentList = response.urgentItems.map(item => '🎯 ' + item).join('\n');
+    const insights = response.insights
+      ? "\n\n💭 Here's the tea:\n" + response.insights.map(insight => '• ' + insight).join('\n')
+      : '';
+    return (
+      "🚨 Okay, let's talk priorities! These need your attention ASAP:\n\n" + urgentList + insights
+    );
+  };
+
+  const formatSuggestions = response => {
+    const suggestionsList = response.suggestions.map(suggestion => '✨ ' + suggestion).join('\n');
+    const insights = response.insights
+      ? '\n\n📊 The breakdown:\n' + response.insights.map(insight => '• ' + insight).join('\n')
+      : '';
+    return (
+      '🚀 Time for some financial glow-up! Here are my suggestions:\n\n' +
+      suggestionsList +
+      insights
+    );
   };
 
   const formatResponse = response => {
-    if (response.todos) {
-      const completedCount = response.todos.filter(t => t.completed).length;
-      const pendingCount = response.count - completedCount;
-      let intro =
-        pendingCount === 0
-          ? `🎉 Look at you, task master! All ${response.count} todos are done!`
-          : `📋 Here's what's on your plate (${pendingCount} still need some love):`;
-
-      return `${intro}\n\n${response.todos
-        .map(
-          todo =>
-            `${todo.completed ? '✅' : '⏳'} ${todo.task} ${todo.priority ? `(${todo.priority} priority)` : ''}`
-        )
-        .join('\n')}`;
-    }
-
-    if (response.credit_cards) {
-      const inactiveCount = response.credit_cards.filter(card => {
-        if (!card.last_used_date) return true;
-        const lastUsedDate = new Date(card.last_used_date);
-        const today = new Date();
-        if (lastUsedDate > today) return false;
-        const daysSince = Math.floor((today - lastUsedDate) / (1000 * 60 * 60 * 24));
-        return daysSince >= 90;
-      }).length;
-
-      let intro =
-        inactiveCount > 0
-          ? `💳 Your card collection! But ${inactiveCount} are gathering dust... 🕸️`
-          : `💳 Your ${response.count} cards are all active and ready to spend! 💪`;
-
-      return `${intro}\n\n${response.credit_cards
-        .map(card => {
-          const cardName =
-            card.bank_name && card.last_four_digits
-              ? `${card.bank_name} ••${card.last_four_digits}`
-              : card.card_name || 'Mystery Card';
-          const lastUsed = card.last_used_date
-            ? `Last used: ${new Date(card.last_used_date).toLocaleDateString()}`
-            : 'Never used (ouch! 😬)';
-          return `💳 ${cardName}\n   ${lastUsed}`;
-        })
-        .join('\n\n')}`;
-    }
-
-    if (response.transactions) {
-      const total = response.total_amount || 0;
-      const emoji = total > 500 ? '💸' : total > 100 ? '💰' : '🪙';
-      return `${emoji} Found ${response.count} transactions totaling $${total.toFixed(2)}\n\n${response.transactions
-        .map(t => `• ${t.description} - $${t.amount} (${t.date})`)
-        .join('\n')}`;
-    }
-
-    if (response.insights) {
-      return `💡 Here's what I'm seeing in your finances:\n\n${response.insights.map(insight => `• ${insight}`).join('\n')}${
-        response.recommendations
-          ? `\n\n🎯 My recommendations (trust me, I'm good at this):\n${response.recommendations.map(rec => `• ${rec}`).join('\n')}`
-          : ''
-      }`;
-    }
-
-    if (response.urgentItems) {
-      return `🚨 Okay, let's talk priorities! These need your attention ASAP:\n\n${response.urgentItems.map(item => `🎯 ${item}`).join('\n')}${
-        response.insights
-          ? `\n\n💭 Here's the tea:\n${response.insights.map(insight => `• ${insight}`).join('\n')}`
-          : ''
-      }`;
-    }
-
-    if (response.alerts) {
-      return `🔔 Alert alert! I found some things that need a look:\n\n${response.alerts.map(alert => `• ${alert.message || alert}`).join('\n')}`;
-    }
-
-    if (response.suggestions) {
-      return `🚀 Time for some financial glow-up! Here are my suggestions:\n\n${response.suggestions.map(suggestion => `✨ ${suggestion}`).join('\n')}${
-        response.insights
-          ? `\n\n📊 The breakdown:\n${response.insights.map(insight => `• ${insight}`).join('\n')}`
-          : ''
-      }`;
-    }
-
-    if (response.success && response.todo) {
+    if (response.todos) return formatTodos(response);
+    if (response.credit_cards) return formatCreditCards(response);
+    if (response.transactions) return formatTransactions(response);
+    if (response.insights) return formatInsights(response);
+    if (response.urgentItems) return formatUrgentItems(response);
+    if (response.alerts)
+      return (
+        '🔔 Alert alert! I found some things that need a look:\n\n' +
+        response.alerts.map(alert => '• ' + (alert.message || alert)).join('\n')
+      );
+    if (response.suggestions) return formatSuggestions(response);
+    if (response.success && response.todo)
       return `✅ Boom! Task added like a boss!\n\n📝 "${response.todo.task}"\n\nWhat's next on the agenda? 😎`;
-    }
-
-    if (response.success && (response.deletedCount || response.updatedCount)) {
+    if (response.success && (response.deletedCount || response.updatedCount))
       return `✅ ${response.message} 🎉\n\nFeeling productive yet? 😏`;
-    }
-
-    if (response.success && response.credit_card) {
+    if (response.success && response.credit_card)
       return `✅ ${response.message}\n\n💳 ${response.credit_card.card_name} is now in your wallet! 🎉`;
-    }
-
     if (
       response.ui_action ||
       response.ui_guidance ||
       (response.success === false && response.message && !response.message.includes('Error'))
-    ) {
+    )
       return `✅ ${response.message}`;
-    }
-
     return response.message || response.summary || "Hmm, I'm not sure what happened there... 🤔";
   };
 
   const handleRoast = () => {
-    const roastMessage = {
-      id: Date.now(),
-      type: 'assistant',
-      content: getRoastReply(),
-      timestamp: new Date(),
-      isRoast: true,
-    };
-    setMessages(prev => [...prev, roastMessage]);
+    addMessage('assistant', getRoastReply(), { isRoast: true });
   };
 
   const handleHype = () => {
-    const hypeMessage = {
-      id: Date.now(),
-      type: 'assistant',
-      content: getHypeReply(),
-      timestamp: new Date(),
-      isHype: true,
-    };
-    setMessages(prev => [...prev, hypeMessage]);
+    addMessage('assistant', getHypeReply(), { isHype: true });
   };
 
   const renderContent = () => {

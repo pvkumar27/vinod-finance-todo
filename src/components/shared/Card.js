@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 
 const Card = ({
   children,
@@ -8,10 +9,13 @@ const Card = ({
   headerColor = 'bg-[#632D1F]',
   onClick,
 }) => {
+  const CardElement = onClick ? 'button' : 'div';
+
   return (
-    <div
+    <CardElement
       className={`fin-card ${className} ${onClick ? 'cursor-pointer hover:shadow-md' : ''}`}
       onClick={onClick}
+      type={onClick ? 'button' : undefined}
     >
       {(emoji || title) && (
         <div
@@ -22,8 +26,17 @@ const Card = ({
         </div>
       )}
       {children}
-    </div>
+    </CardElement>
   );
+};
+
+Card.propTypes = {
+  children: PropTypes.node,
+  emoji: PropTypes.string,
+  title: PropTypes.string,
+  className: PropTypes.string,
+  headerColor: PropTypes.string,
+  onClick: PropTypes.func,
 };
 
 export default Card;

@@ -45,76 +45,77 @@ const AIAssistant = () => {
     scrollToBottom();
   }, [messages]);
 
-  const checkInactiveCards = useCallback(async alerts => {
-    const inactiveCards = await mcpClient.callTool('get_credit_cards', { inactive_only: true });
-    const count = inactiveCards.credit_cards?.length || 0;
+  const createAlert = useCallback((type, count, messages, priority, action) => {
     if (count > 0) {
-      alerts.push({
-        type: 'credit_card_inactive',
-        message: `${count} credit card${count > 1 ? "s haven't" : " hasn't"} been used in 90+ days`,
-        priority: 'medium',
-        action: 'show inactive cards',
-      });
+      return {
+        type,
+        message: count + ' ' + (count > 1 ? messages.plural : messages.singular),
+        priority,
+        action,
+      };
     }
+    return null;
   }, []);
 
-  const checkExpiringPromos = useCallback(async alerts => {
-    const expiringPromos = await mcpClient.callTool('get_credit_cards', { promo_expiring: true });
-    const count = expiringPromos.credit_cards?.length || 0;
-    if (count > 0) {
-      alerts.push({
-        type: 'promo_expiring',
-        message: `${count} credit card promo${count > 1 ? 's are' : ' is'} expiring soon`,
-        priority: 'high',
-        action: 'show cards with expiring promos',
-      });
-    }
-  }, []);
-
-  const checkOverdueTodos = useCallback(async alerts => {
-    const overdueTodos = await mcpClient.callTool('get_todos', {
-      due_date_before: new Date().toISOString().split('T')[0],
-      completed: false,
-    });
-    const count = overdueTodos.todos?.length || 0;
-    if (count > 0) {
-      alerts.push({
-        type: 'todos_overdue',
-        message: `${count} task${count > 1 ? 's are' : ' is'} overdue`,
-        priority: 'high',
-        action: 'show overdue todos',
-      });
-    }
-  }, []);
-
-  const checkTodayTodos = useCallback(async alerts => {
-    const todayTodos = await mcpClient.callTool('get_todos', {
-      due_date: new Date().toISOString().split('T')[0],
-      completed: false,
-    });
-    const count = todayTodos.todos?.length || 0;
-    if (count > 0) {
-      alerts.push({
-        type: 'todos_today',
-        message: `${count} task${count > 1 ? 's are' : ' is'} due today`,
-        priority: 'medium',
-        action: "show today's todos",
-      });
-    }
-  }, []);
-
-  const generateProactiveAlerts = useCallback(async () => {
+  const checkAlerts = useCallback(async () => {
     const alerts = [];
     try {
-      await checkInactiveCards(alerts);
-      await checkExpiringPromos(alerts);
-      await checkOverdueTodos(alerts);
-      await checkTodayTodos(alerts);
+      const [inactiveCards, expiringPromos, overdueTodos, todayTodos] = await Promise.all([
+        mcpClient.callTool('get_credit_cards', { inactive_only: true }),
+        mcpClient.callTool('get_credit_cards', { promo_expiring: true }),
+        mcpClient.callTool('get_todos', {
+          due_date_before: new Date().toISOString().split('T')[0],
+          completed: false,
+        }),
+        mcpClient.callTool('get_todos', {
+          due_date: new Date().toISOString().split('T')[0],
+          completed: false,
+        }),
+      ]);
+
+      const alertConfigs = [
+        [
+          inactiveCards.credit_cards?.length || 0,
+          {
+            singular: "credit card hasn't been used in 90+ days",
+            plural: "credit cards haven't been used in 90+ days",
+          },
+          'medium',
+          'show inactive cards',
+        ],
+        [
+          expiringPromos.credit_cards?.length || 0,
+          {
+            singular: 'credit card promo is expiring soon',
+            plural: 'credit card promos are expiring soon',
+          },
+          'high',
+          'show cards with expiring promos',
+        ],
+        [
+          overdueTodos.todos?.length || 0,
+          { singular: 'task is overdue', plural: 'tasks are overdue' },
+          'high',
+          'show overdue todos',
+        ],
+        [
+          todayTodos.todos?.length || 0,
+          { singular: 'task is due today', plural: 'tasks are due today' },
+          'medium',
+          "show today's todos",
+        ],
+      ];
+
+      alertConfigs.forEach(([count, messages, priority, action], index) => {
+        const types = ['credit_card_inactive', 'promo_expiring', 'todos_overdue', 'todos_today'];
+        const alert = createAlert(types[index], count, messages, priority, action);
+        if (alert) alerts.push(alert);
+      });
     } catch (error) {
-      console.error('Error generating proactive alerts:', error);
+      console.error('Error checking alerts:', error);
     }
     return alerts;
-  }, [checkInactiveCards, checkExpiringPromos, checkOverdueTodos, checkTodayTodos]);
+  }, [createAlert]);
 
   const createProactiveMessage = useCallback(alerts => {
     return {
@@ -127,36 +128,45 @@ const AIAssistant = () => {
     };
   }, []);
 
-  useEffect(() => {
-    const checkProactiveAlerts = async () => {
-      try {
-        const alerts = await generateProactiveAlerts();
-        setProactiveAlerts(alerts);
-        if (alerts.length > 0) {
-          const alertMessage = createProactiveMessage(alerts);
-          setTimeout(() => {
-            setMessages(prev => [...prev, alertMessage]);
-          }, 2000);
-        }
-      } catch (error) {
-        console.error('Error checking proactive alerts:', error);
+  const checkProactiveAlerts = useCallback(async () => {
+    try {
+      const alerts = await checkAlerts();
+      setProactiveAlerts(alerts);
+      if (alerts.length > 0) {
+        const alertMessage = createProactiveMessage(alerts);
+        setTimeout(
+          () => addMessage('assistant', alertMessage.content, { isProactive: true, alerts }),
+          2000
+        );
       }
-    };
+    } catch (error) {
+      console.error('Error checking proactive alerts:', error);
+    }
+  }, [checkAlerts, createProactiveMessage, addMessage]);
+
+  useEffect(() => {
     if (isExpanded) {
       checkProactiveAlerts();
     }
-  }, [isExpanded, generateProactiveAlerts, createProactiveMessage]);
+  }, [isExpanded, checkProactiveAlerts]);
 
-  const addErrorMessage = useCallback(content => {
-    const errorMessage = {
-      id: Date.now(),
-      type: 'assistant',
+  const createMessage = useCallback(
+    (type, content, extra = {}) => ({
+      id: Date.now() + (type === 'assistant' ? 1 : 0),
+      type,
       content,
       timestamp: new Date(),
-      isError: true,
-    };
-    setMessages(prev => [...prev, errorMessage]);
-  }, []);
+      ...extra,
+    }),
+    []
+  );
+
+  const addMessage = useCallback(
+    (type, content, extra = {}) => {
+      setMessages(prev => [...prev, createMessage(type, content, extra)]);
+    },
+    [createMessage]
+  );
 
   const formatTodos = response => {
     const todoList = response.todos
@@ -246,37 +256,28 @@ const AIAssistant = () => {
 
   const processQuery = useCallback(
     async query => {
-      const userMessage = {
-        id: Date.now(),
-        type: 'user',
-        content: query,
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, userMessage]);
+      addMessage('user', query);
       setIsLoading(true);
       try {
         const response = await mcpClient.processNaturalLanguageQuery(query);
-        const assistantMessage = {
-          id: Date.now() + 1,
-          type: 'assistant',
-          content: formatResponse(response),
-          timestamp: new Date(),
+        addMessage('assistant', formatResponse(response), {
           data: response,
           processingMode: response.processingMode || 'fallback',
-        };
-        setMessages(prev => [...prev, assistantMessage]);
+        });
         triggerDataRefresh(response);
       } catch (error) {
-        addErrorMessage(`Sorry, I encountered an error: ${error.message}`);
+        addMessage('assistant', `Sorry, I encountered an error: ${error.message}`, {
+          isError: true,
+        });
       } finally {
         setIsLoading(false);
       }
     },
-    [formatResponse, triggerDataRefresh, addErrorMessage]
+    [formatResponse, triggerDataRefresh, addMessage]
   );
 
-  useEffect(() => {
-    const handleAiQuery = async event => {
+  const handleAiQuery = useCallback(
+    async event => {
       const { query } = event.detail;
       if (!query) return;
       if (!isExpanded) {
@@ -285,10 +286,63 @@ const AIAssistant = () => {
       } else {
         processQuery(query);
       }
-    };
+    },
+    [isExpanded, processQuery]
+  );
+
+  useEffect(() => {
     window.addEventListener('aiQuery', handleAiQuery);
     return () => window.removeEventListener('aiQuery', handleAiQuery);
-  }, [isExpanded, processQuery]);
+  }, [handleAiQuery]);
+
+  const handleKeyDown = useCallback(
+    e => {
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (queryHistory.length > 0) {
+          const newIndex = Math.min(historyIndex + 1, queryHistory.length - 1);
+          setHistoryIndex(newIndex);
+          setInputValue(queryHistory[newIndex]);
+        }
+      } else if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (historyIndex > 0) {
+          const newIndex = historyIndex - 1;
+          setHistoryIndex(newIndex);
+          setInputValue(queryHistory[newIndex]);
+        } else if (historyIndex === 0) {
+          setHistoryIndex(-1);
+          setInputValue('');
+        }
+      }
+    },
+    [queryHistory, historyIndex]
+  );
+
+  const handleQuickAction = useCallback(
+    query => {
+      setShowQuickActions(false);
+      processQuery(query);
+    },
+    [processQuery]
+  );
+
+  const getQuickActionClassName = useCallback(action => {
+    const baseClasses =
+      'text-xs px-3 py-2 rounded-full border transition-all duration-300 font-medium shadow-lg hover:shadow-xl hover:scale-105';
+    const highPriorityClasses =
+      'bg-gradient-to-r from-orange-500 to-red-500 text-white border-orange-300/50 hover:from-orange-600 hover:to-red-600';
+    const normalClasses =
+      'bg-gradient-to-r from-white to-blue-50 text-blue-700 border-blue-200/60 hover:from-blue-50 hover:to-blue-100';
+    return `${baseClasses} ${action.priority === 'high' ? highPriorityClasses : normalClasses}`;
+  }, []);
+
+  const focusInput = useCallback(() => {
+    setTimeout(() => {
+      const input = document.querySelector('[data-cy="ai-assistant-input"]');
+      if (input) input.focus();
+    }, 100);
+  }, []);
 
   const handleSubmit = useCallback(
     async e => {
@@ -299,12 +353,9 @@ const AIAssistant = () => {
       setHistoryIndex(-1);
       setInputValue('');
       await processQuery(query);
-      setTimeout(() => {
-        const input = document.querySelector('[data-cy="ai-assistant-input"]');
-        if (input) input.focus();
-      }, 100);
+      focusInput();
     },
-    [inputValue, isLoading, processQuery]
+    [inputValue, isLoading, processQuery, focusInput]
   );
 
   const handleVoiceRecognitionResult = useCallback(
@@ -316,38 +367,46 @@ const AIAssistant = () => {
     [processQuery]
   );
 
-  const handleVoiceInput = useCallback(() => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      addErrorMessage('❌ Voice recognition not supported in this browser');
-      return;
-    }
+  const createSpeechRecognition = useCallback(() => {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const recognition = new SpeechRecognition();
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.lang = 'en-US';
-    recognition.onstart = () => {
-      setIsListening(true);
-      const listeningMessage = {
-        id: Date.now(),
-        type: 'assistant',
-        content: '🎤 Listening... Speak your command',
-        timestamp: new Date(),
+    return recognition;
+  }, []);
+
+  const setupRecognitionHandlers = useCallback(
+    recognition => {
+      recognition.onstart = () => {
+        setIsListening(true);
+        addMessage('assistant', '🎤 Listening... Speak your command');
       };
-      setMessages(prev => [...prev, listeningMessage]);
-    };
-    recognition.onresult = async event => {
-      const transcript = event.results[0][0].transcript;
-      await handleVoiceRecognitionResult(transcript);
-    };
-    recognition.onerror = event => {
-      addErrorMessage(`❌ Voice recognition error: ${event.error}`);
-    };
-    recognition.onend = () => {
-      setIsListening(false);
-    };
+      recognition.onresult = async event => {
+        const transcript = event.results[0][0].transcript;
+        await handleVoiceRecognitionResult(transcript);
+      };
+      recognition.onerror = event => {
+        addMessage('assistant', `❌ Voice recognition error: ${event.error}`, { isError: true });
+      };
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+    },
+    [addMessage, handleVoiceRecognitionResult]
+  );
+
+  const handleVoiceInput = useCallback(() => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      addMessage('assistant', '❌ Voice recognition not supported in this browser', {
+        isError: true,
+      });
+      return;
+    }
+    const recognition = createSpeechRecognition();
+    setupRecognitionHandlers(recognition);
     recognition.start();
-  }, [addErrorMessage, handleVoiceRecognitionResult]);
+  }, [addMessage, createSpeechRecognition, setupRecognitionHandlers]);
 
   const getMessageClassName = message => {
     if (message.type === 'user') {
@@ -558,22 +617,14 @@ const AIAssistant = () => {
       {!isMinimized && showQuickActions && (
         <div className="px-6 py-4 bg-gradient-to-r from-white/80 via-blue-50/40 to-purple-50/40 border-t border-white/40 animate-fadeIn backdrop-blur-sm">
           <div className="text-xs text-gray-700 mb-3 font-semibold flex items-center">
-            <span className="mr-2">🚀</span>
-            Quick Actions
+            <span className="mr-2">🚀</span> Quick Actions
           </div>
           <div className="flex flex-wrap gap-2">
             {quickActions.map(action => (
               <button
                 key={action.query}
-                onClick={() => {
-                  setShowQuickActions(false);
-                  processQuery(action.query);
-                }}
-                className={`text-xs px-3 py-2 rounded-full border transition-all duration-300 font-medium shadow-lg hover:shadow-xl hover:scale-105 ${
-                  action.priority === 'high'
-                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-orange-300/50 hover:from-orange-600 hover:to-red-600'
-                    : 'bg-gradient-to-r from-white to-blue-50 text-blue-700 border-blue-200/60 hover:from-blue-50 hover:to-blue-100'
-                }`}
+                onClick={() => handleQuickAction(action.query)}
+                className={getQuickActionClassName(action)}
                 data-cy={`quick-action-${action.query.replace(/\s+/g, '-').toLowerCase()}`}
               >
                 {action.label}
@@ -623,26 +674,7 @@ const AIAssistant = () => {
                   setInputValue(e.target.value);
                   setHistoryIndex(-1);
                 }}
-                onKeyDown={e => {
-                  if (e.key === 'ArrowUp') {
-                    e.preventDefault();
-                    if (queryHistory.length > 0) {
-                      const newIndex = Math.min(historyIndex + 1, queryHistory.length - 1);
-                      setHistoryIndex(newIndex);
-                      setInputValue(queryHistory[newIndex]);
-                    }
-                  } else if (e.key === 'ArrowDown') {
-                    e.preventDefault();
-                    if (historyIndex > 0) {
-                      const newIndex = historyIndex - 1;
-                      setHistoryIndex(newIndex);
-                      setInputValue(queryHistory[newIndex]);
-                    } else if (historyIndex === 0) {
-                      setHistoryIndex(-1);
-                      setInputValue('');
-                    }
-                  }
-                }}
+                onKeyDown={handleKeyDown}
                 placeholder="Ask me anything about your finances..."
                 className="w-full px-6 py-4 pr-16 bg-gradient-to-r from-white/90 to-gray-50/80 backdrop-blur-sm border border-white/40 rounded-[24px] focus:outline-none focus:ring-2 focus:ring-purple-400/50 focus:border-purple-300/50 focus:bg-white/95 text-sm transition-all duration-300 shadow-lg placeholder-gray-500"
                 disabled={isLoading || isListening}

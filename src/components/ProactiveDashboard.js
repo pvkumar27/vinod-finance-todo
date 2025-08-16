@@ -1,14 +1,95 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
+import PropTypes from 'prop-types';
 import { api } from '../services/api';
+
+const AlertCard = ({ alert, onActionClick }) => {
+  const getAlertStyles = type => {
+    if (type === 'urgent')
+      return 'bg-gradient-to-r from-red-50 to-orange-50 border-red-200 hover:border-red-300';
+    if (type === 'warning')
+      return 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200 hover:border-yellow-300';
+    return 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:border-blue-300';
+  };
+
+  return (
+    <button
+      className={`w-full p-4 rounded-xl border cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-lg ${getAlertStyles(alert.type)}`}
+      onClick={() => onActionClick(alert.action)}
+      type="button"
+    >
+      <div className="flex items-center space-x-3">
+        <div className={`text-2xl ${alert.type === 'urgent' ? 'animate-pulse' : ''}`}>
+          {alert.icon}
+        </div>
+        <div className="flex-1 text-left">
+          <h4 className="font-semibold text-gray-800">{alert.title}</h4>
+          <p className="text-sm text-gray-600">{alert.message}</p>
+        </div>
+        <div className="text-gray-400">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      </div>
+    </button>
+  );
+};
+
+AlertCard.propTypes = {
+  alert: PropTypes.shape({
+    type: PropTypes.string.isRequired,
+    icon: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    message: PropTypes.string.isRequired,
+    action: PropTypes.string.isRequired,
+  }).isRequired,
+  onActionClick: PropTypes.func.isRequired,
+};
+
+const InsightCard = ({ insight, onActionClick }) => {
+  const getInsightStyles = type => {
+    if (type === 'success')
+      return 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 hover:border-green-300';
+    return 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:border-blue-300';
+  };
+
+  return (
+    <button
+      className={`w-full p-4 rounded-xl border cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-lg ${getInsightStyles(insight.type)}`}
+      onClick={() => onActionClick(insight.action)}
+      type="button"
+    >
+      <div className="flex items-center space-x-3">
+        <div className="text-2xl">{insight.icon}</div>
+        <div className="flex-1 text-left">
+          <h4 className="font-semibold text-gray-800">{insight.title}</h4>
+          <p className="text-sm text-gray-600">{insight.message}</p>
+        </div>
+        <div className="text-gray-400">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      </div>
+    </button>
+  );
+};
+
+InsightCard.propTypes = {
+  insight: PropTypes.shape({
+    type: PropTypes.string.isRequired,
+    icon: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+    message: PropTypes.string.isRequired,
+    action: PropTypes.string.isRequired,
+  }).isRequired,
+  onActionClick: PropTypes.func.isRequired,
+};
 
 const ProactiveDashboard = ({ onActionClick }) => {
   const [alerts, setAlerts] = useState([]);
   const [insights, setInsights] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    generateProactiveInsights();
-  }, []);
 
   const checkTodoAlerts = async (alertsData, insightsData) => {
     const overdueTodos = await api.getTodos({
@@ -119,7 +200,7 @@ const ProactiveDashboard = ({ onActionClick }) => {
     }
   };
 
-  const generateProactiveInsights = async () => {
+  const generateProactiveInsights = useCallback(async () => {
     setLoading(true);
     try {
       const alertsData = [];
@@ -136,7 +217,11 @@ const ProactiveDashboard = ({ onActionClick }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    generateProactiveInsights();
+  }, [generateProactiveInsights]);
 
   const handleActionClick = action => {
     if (onActionClick) {
@@ -148,65 +233,13 @@ const ProactiveDashboard = ({ onActionClick }) => {
     return (
       <div className="p-4 space-y-3">
         {[1, 2, 3].map(i => (
-          <div key={i} className="animate-pulse">
+          <div key={`loading-${i}`} className="animate-pulse">
             <div className="h-16 bg-gray-200 rounded-xl"></div>
           </div>
         ))}
       </div>
     );
   }
-
-  const AlertCard = ({ alert }) => (
-    <div
-      className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-lg ${
-        alert.type === 'urgent'
-          ? 'bg-gradient-to-r from-red-50 to-orange-50 border-red-200 hover:border-red-300'
-          : alert.type === 'warning'
-            ? 'bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200 hover:border-yellow-300'
-            : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:border-blue-300'
-      }`}
-      onClick={() => handleActionClick(alert.action)}
-    >
-      <div className="flex items-center space-x-3">
-        <div className={`text-2xl ${alert.type === 'urgent' ? 'animate-pulse' : ''}`}>
-          {alert.icon}
-        </div>
-        <div className="flex-1">
-          <h4 className="font-semibold text-gray-800">{alert.title}</h4>
-          <p className="text-sm text-gray-600">{alert.message}</p>
-        </div>
-        <div className="text-gray-400">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </div>
-      </div>
-    </div>
-  );
-
-  const InsightCard = ({ insight }) => (
-    <div
-      className={`p-4 rounded-xl border cursor-pointer transition-all duration-200 hover:scale-[1.02] hover:shadow-lg ${
-        insight.type === 'success'
-          ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-200 hover:border-green-300'
-          : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200 hover:border-blue-300'
-      }`}
-      onClick={() => handleActionClick(insight.action)}
-    >
-      <div className="flex items-center space-x-3">
-        <div className="text-2xl">{insight.icon}</div>
-        <div className="flex-1">
-          <h4 className="font-semibold text-gray-800">{insight.title}</h4>
-          <p className="text-sm text-gray-600">{insight.message}</p>
-        </div>
-        <div className="text-gray-400">
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </div>
-      </div>
-    </div>
-  );
 
   if (alerts.length === 0 && insights.length === 0) {
     return (
@@ -228,7 +261,11 @@ const ProactiveDashboard = ({ onActionClick }) => {
           </h3>
           <div className="space-y-2">
             {alerts.map((alert, index) => (
-              <AlertCard key={index} alert={alert} />
+              <AlertCard
+                key={`alert-${alert.type}-${index}`}
+                alert={alert}
+                onActionClick={handleActionClick}
+              />
             ))}
           </div>
         </div>
@@ -240,7 +277,11 @@ const ProactiveDashboard = ({ onActionClick }) => {
           <h3 className="text-lg font-bold text-gray-800 mb-3 flex items-center">💡 Insights</h3>
           <div className="space-y-2">
             {insights.map((insight, index) => (
-              <InsightCard key={index} insight={insight} />
+              <InsightCard
+                key={`insight-${insight.type}-${index}`}
+                insight={insight}
+                onActionClick={handleActionClick}
+              />
             ))}
           </div>
         </div>
@@ -260,12 +301,16 @@ const ProactiveDashboard = ({ onActionClick }) => {
             onClick={() => handleActionClick('what needs my attention today?')}
             className="p-3 bg-gradient-to-r from-green-500 to-teal-500 text-white rounded-xl text-sm font-medium hover:from-green-600 hover:to-teal-600 transition-all duration-200"
           >
-            🎯 Priority Items
+            🎯 Priority Check
           </button>
         </div>
       </div>
     </div>
   );
+};
+
+ProactiveDashboard.propTypes = {
+  onActionClick: PropTypes.func.isRequired,
 };
 
 export default ProactiveDashboard;

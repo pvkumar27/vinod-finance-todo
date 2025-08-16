@@ -205,47 +205,45 @@ const AIAssistant = () => {
     [formatTodos, formatCreditCards, formatTransactions]
   );
 
-  const processQuery = useCallback(
-    async query => {
-      const userMessage = {
-        id: Date.now(),
-        type: 'user',
-        content: query,
-        timestamp: new Date(),
-      };
+  const createMessage = useCallback(
+    (type, content, extra = {}) => ({
+      id: Date.now() + (type === 'assistant' ? 1 : 0),
+      type,
+      content,
+      timestamp: new Date(),
+      ...extra,
+    }),
+    []
+  );
 
-      setMessages(prev => [...prev, userMessage]);
+  const processQuery = useCallback(
+    async (query, addUserMessage = true) => {
+      if (addUserMessage) {
+        setMessages(prev => [...prev, createMessage('user', query)]);
+      }
       setIsLoading(true);
 
       try {
         const response = await mcpClient.processNaturalLanguageQuery(query);
-
-        const assistantMessage = {
-          id: Date.now() + 1,
-          type: 'assistant',
-          content: formatResponse(response),
-          timestamp: new Date(),
+        const assistantMessage = createMessage('assistant', formatResponse(response), {
           data: response,
           processingMode: response.processingMode || 'fallback',
-        };
-
+        });
         setMessages(prev => [...prev, assistantMessage]);
         handleDataRefresh(response);
         handleUIActions(response);
       } catch (error) {
-        const errorMessage = {
-          id: Date.now() + 1,
-          type: 'assistant',
-          content: 'Sorry, I encountered an error: ' + error.message,
-          timestamp: new Date(),
-          isError: true,
-        };
-        setMessages(prev => [...prev, errorMessage]);
+        setMessages(prev => [
+          ...prev,
+          createMessage('assistant', 'Sorry, I encountered an error: ' + error.message, {
+            isError: true,
+          }),
+        ]);
       } finally {
         setIsLoading(false);
       }
     },
-    [formatResponse, handleDataRefresh, handleUIActions]
+    [createMessage, formatResponse, handleDataRefresh, handleUIActions]
   );
 
   // Listen for AI queries from dashboard
@@ -273,59 +271,23 @@ const AIAssistant = () => {
     e.preventDefault();
     if (!inputValue.trim() || isLoading) return;
 
-    const userMessage = {
-      id: Date.now(),
-      type: 'user',
-      content: inputValue,
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setQueryHistory(prev => [inputValue, ...prev.slice(0, 49)]);
+    const query = inputValue;
+    setQueryHistory(prev => [query, ...prev.slice(0, 49)]);
     setHistoryIndex(-1);
     setInputValue('');
-    setIsLoading(true);
 
-    try {
-      const response = await mcpClient.processNaturalLanguageQuery(inputValue);
-
-      const assistantMessage = {
-        id: Date.now() + 1,
-        type: 'assistant',
-        content: formatResponse(response),
-        timestamp: new Date(),
-        data: response,
-        processingMode: response.processingMode || 'fallback',
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
-      handleDataRefresh(response);
-      handleUIActions(response);
-    } catch (error) {
-      const errorMessage = {
-        id: Date.now() + 1,
-        type: 'assistant',
-        content: 'Sorry, I encountered an error: ' + error.message,
-        timestamp: new Date(),
-        isError: true,
-      };
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-      restoreInputFocus();
-    }
+    await processQuery(query);
+    restoreInputFocus();
   };
 
   const handleVoiceInput = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      const errorMessage = {
-        id: Date.now(),
-        type: 'assistant',
-        content: '❌ Voice recognition not supported in this browser',
-        timestamp: new Date(),
-        isError: true,
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [
+        ...prev,
+        createMessage('assistant', '❌ Voice recognition not supported in this browser', {
+          isError: true,
+        }),
+      ]);
       return;
     }
 
@@ -338,31 +300,22 @@ const AIAssistant = () => {
 
     const handleRecognitionStart = () => {
       setIsListening(true);
-      const listeningMessage = {
-        id: Date.now(),
-        type: 'assistant',
-        content: '🎤 Listening... Speak your command',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, listeningMessage]);
+      setMessages(prev => [
+        ...prev,
+        createMessage('assistant', '🎤 Listening... Speak your command'),
+      ]);
     };
 
     const handleRecognitionResult = async event => {
       const transcript = event.results[0][0].transcript;
-      setInputValue(transcript);
       await processQuery(transcript);
-      setInputValue('');
     };
 
     const handleRecognitionError = event => {
-      const errorMessage = {
-        id: Date.now(),
-        type: 'assistant',
-        content: '❌ Voice recognition error: ' + event.error,
-        timestamp: new Date(),
-        isError: true,
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [
+        ...prev,
+        createMessage('assistant', '❌ Voice recognition error: ' + event.error, { isError: true }),
+      ]);
     };
 
     recognition.onstart = handleRecognitionStart;
