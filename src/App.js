@@ -3,6 +3,7 @@ import { AuthForm } from './components';
 import { supabase } from './supabaseClient';
 import IOSInstallPrompt from './components/IOSInstallPrompt';
 import MainApp from './components/MainApp';
+import NotificationScheduler from './utils/notificationScheduler';
 import './App.css';
 import './styles/globals.css';
 import './styles/finbot-theme.css';
@@ -21,11 +22,21 @@ function App() {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       setSession(session);
       setLoading(false);
 
-      // User session established
+      // Initialize notifications when user logs in
+      if (session) {
+        try {
+          await NotificationScheduler.init();
+        } catch (error) {
+          console.error('Failed to initialize notifications:', error);
+        }
+      } else {
+        // Cancel notifications when user logs out
+        NotificationScheduler.cancelAllNotifications();
+      }
     });
 
     return () => subscription.unsubscribe();
