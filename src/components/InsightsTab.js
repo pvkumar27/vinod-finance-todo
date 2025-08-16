@@ -58,84 +58,92 @@ const InsightsTab = () => {
   return (
     <div className="space-y-4 p-4">
       {/* Header */}
-      <div className="bg-[#632D1F] text-white rounded-xl p-4 flex items-center space-x-3">
-        <span className="text-2xl">📊</span>
-        <div>
-          <h2 className="finbot-heading-lg text-white">Financial Insights</h2>
-          <p className="text-sm opacity-90">Your complete financial overview</p>
-        </div>
+      <div className="mb-4">
+        <h2 className="finbot-heading-xl finbot-responsive-heading flex items-center">
+          <span className="mr-3 text-2xl">📊</span>
+          Financial Insights
+        </h2>
+        <p className="finbot-responsive-text text-[#8B4513] mt-1">
+          Your complete financial overview
+        </p>
       </div>
 
       {/* Credit Card Insights */}
       <div className="space-y-4">
-        <h3 className="finbot-heading-md flex items-center space-x-2">
-          <span>💳</span>
-          <span>Credit Card Portfolio</span>
+        <h3 className="finbot-heading-lg finbot-responsive-text mb-4">
+          <span className="mr-2">💳</span>Credit Card Portfolio
         </h3>
         <CreditCardDashboardInsights cards={cards} />
       </div>
 
       {/* Todo Insights */}
       <div className="space-y-4">
-        <h3 className="finbot-heading-md flex items-center space-x-2">
-          <span>✅</span>
-          <span>Task Management</span>
+        <h3 className="finbot-heading-lg finbot-responsive-text mb-4">
+          <span className="mr-2">✅</span>Task Management
         </h3>
 
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <div className="finbot-card p-6">
           {/* Summary Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
+          <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4 sm:mb-6">
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3 sm:p-4 border border-blue-200">
               <div className="flex items-center">
-                <div className="bg-blue-500 rounded-lg p-2 mr-3">
-                  <span className="text-lg text-white">📝</span>
+                <div className="bg-blue-500 rounded-lg p-1.5 sm:p-2 mr-2 sm:mr-3">
+                  <span className="text-sm sm:text-lg text-white">📝</span>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-blue-700">Total Tasks</p>
-                  <p className="text-xl font-bold text-blue-900">{todoInsights.totalTodos}</p>
+                  <p className="text-xs sm:text-sm font-medium text-blue-700">Total Tasks</p>
+                  <p className="text-lg sm:text-xl font-bold text-blue-900">
+                    {todoInsights.totalTodos}
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border border-green-200">
+            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-3 sm:p-4 border border-green-200">
               <div className="flex items-center">
-                <div className="bg-green-500 rounded-lg p-2 mr-3">
-                  <span className="text-lg text-white">✅</span>
+                <div className="bg-green-500 rounded-lg p-1.5 sm:p-2 mr-2 sm:mr-3">
+                  <span className="text-sm sm:text-lg text-white">✅</span>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-green-700">Completed</p>
-                  <p className="text-xl font-bold text-green-900">{todoInsights.completedTodos}</p>
+                  <p className="text-xs sm:text-sm font-medium text-green-700">Completed</p>
+                  <p className="text-lg sm:text-xl font-bold text-green-900">
+                    {todoInsights.completedTodos}
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-4 border border-yellow-200">
+            <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-xl p-3 sm:p-4 border border-yellow-200">
               <div className="flex items-center">
-                <div className="bg-yellow-500 rounded-lg p-2 mr-3">
-                  <span className="text-lg text-white">⏳</span>
+                <div className="bg-yellow-500 rounded-lg p-1.5 sm:p-2 mr-2 sm:mr-3">
+                  <span className="text-sm sm:text-lg text-white">⏳</span>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-yellow-700">Pending</p>
-                  <p className="text-xl font-bold text-yellow-900">{todoInsights.pendingTodos}</p>
+                  <p className="text-xs sm:text-sm font-medium text-yellow-700">Pending</p>
+                  <p className="text-lg sm:text-xl font-bold text-yellow-900">
+                    {todoInsights.pendingTodos}
+                  </p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-4 border border-red-200">
+            <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-3 sm:p-4 border border-red-200">
               <div className="flex items-center">
-                <div className="bg-red-500 rounded-lg p-2 mr-3">
-                  <span className="text-lg text-white">⚠️</span>
+                <div className="bg-red-500 rounded-lg p-1.5 sm:p-2 mr-2 sm:mr-3">
+                  <span className="text-sm sm:text-lg text-white">⚠️</span>
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-red-700">Overdue</p>
-                  <p className="text-xl font-bold text-red-900">{todoInsights.overdueTodos}</p>
+                  <p className="text-xs sm:text-sm font-medium text-red-700">Overdue</p>
+                  <p className="text-lg sm:text-xl font-bold text-red-900">
+                    {todoInsights.overdueTodos}
+                  </p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Progress Bar */}
-          <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
+          <div className="finbot-card p-4 bg-white/5 backdrop-blur-sm">
             <div className="flex justify-between items-center mb-2">
               <h4 className="text-base font-semibold text-gray-800">Completion Rate</h4>
               <span className="text-sm font-bold text-[#632D1F]">
@@ -170,22 +178,21 @@ const InsightsTab = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-gradient-to-r from-[#FDF3EE] to-[#FCE7E2] rounded-xl p-6 border border-[#632D1F]/20">
-        <h3 className="finbot-heading-md mb-4 flex items-center space-x-2">
-          <span>🚀</span>
-          <span>Quick Actions</span>
+      <div className="finbot-card p-6">
+        <h3 className="finbot-heading-lg finbot-responsive-text mb-4">
+          <span className="mr-2">🚀</span>Quick Actions
         </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="bg-white/70 rounded-lg p-4 border border-[#632D1F]/10">
-            <h4 className="font-medium text-[#632D1F] mb-2">💳 Credit Cards</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+          <div className="finbot-card p-4 bg-white/5 backdrop-blur-sm">
+            <h4 className="font-medium text-gray-800 mb-2">💳 Credit Cards</h4>
             <ul className="text-sm text-gray-600 space-y-1">
               <li>• Check for inactive cards (90+ days)</li>
               <li>• Review promo expiration dates</li>
               <li>• Set up payment reminders</li>
             </ul>
           </div>
-          <div className="bg-white/70 rounded-lg p-4 border border-[#632D1F]/10">
-            <h4 className="font-medium text-[#632D1F] mb-2">✅ Tasks</h4>
+          <div className="finbot-card p-4 bg-white/5 backdrop-blur-sm">
+            <h4 className="font-medium text-gray-800 mb-2">✅ Tasks</h4>
             <ul className="text-sm text-gray-600 space-y-1">
               <li>• Complete overdue tasks</li>
               <li>• Review pinned priorities</li>
