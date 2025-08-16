@@ -1,6 +1,18 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { mcpClient } from '../services/mcpClient';
 import VisualInsights from './VisualInsights';
+import {
+  MESSAGE_STYLES,
+  BADGE_STYLES,
+  QUICK_ACTIONS,
+  formatResponse,
+  createMessage,
+  getMessageClassName,
+  getMessageBadge,
+  handleDataRefresh,
+  handleUIActions,
+  focusInput,
+} from '../utils/aiAssistantUtils';
 
 const AIAssistant = () => {
   const [messages, setMessages] = useState([
@@ -105,138 +117,32 @@ const AIAssistant = () => {
     }
   }, [isExpanded, checkProactiveAlerts]);
 
-  const handleDataRefresh = useCallback(response => {
-    if (
-      response.success &&
-      (response.todo || response.credit_card || response.deletedCount || response.updatedCount)
-    ) {
-      window.dispatchEvent(new CustomEvent('todoAdded', { detail: response.todo || {} }));
-      if (response.credit_card || response.deletedCount) {
-        const eventDetail = response.deletedCard
-          ? { deleted: true, cardId: response.deletedCard.id }
-          : response.credit_card || {};
-        window.dispatchEvent(new CustomEvent('creditCardAdded', { detail: eventDetail }));
-      }
+  const processQuery = useCallback(async (query, addUserMessage = true) => {
+    if (addUserMessage) {
+      setMessages(prev => [...prev, createMessage('user', query)]);
+    }
+    setIsLoading(true);
+
+    try {
+      const response = await mcpClient.processNaturalLanguageQuery(query);
+      const assistantMessage = createMessage('assistant', formatResponse(response), {
+        data: response,
+        processingMode: response.processingMode || 'fallback',
+      });
+      setMessages(prev => [...prev, assistantMessage]);
+      handleDataRefresh(response);
+      handleUIActions(response);
+    } catch (error) {
+      setMessages(prev => [
+        ...prev,
+        createMessage('assistant', 'Sorry, I encountered an error: ' + error.message, {
+          isError: true,
+        }),
+      ]);
+    } finally {
+      setIsLoading(false);
     }
   }, []);
-
-  const handleUIActions = useCallback(response => {
-    if (response.ui_action === 'switch_view') {
-      window.dispatchEvent(
-        new CustomEvent('switchView', {
-          detail: { viewMode: response.view_mode, source: 'ai' },
-        })
-      );
-    }
-  }, []);
-
-  const restoreInputFocus = useCallback(() => {
-    setTimeout(() => {
-      const input = document.querySelector('[data-cy="ai-assistant-input"]');
-      if (input) input.focus();
-    }, 100);
-  }, []);
-
-  const formatters = {
-    todos: response => {
-      const todoList = response.todos
-        .map(
-          todo =>
-            `• ${todo.task} ${todo.completed ? '✅' : '⏳'} ${todo.priority ? `(${todo.priority})` : ''}`
-        )
-        .join('\n');
-      return `Found ${response.count} todos:\n${todoList}`;
-    },
-    credit_cards: response => {
-      const cardList = response.credit_cards
-        .map(card => {
-          const cardName =
-            card.bank_name && card.last_four_digits
-              ? `${card.bank_name} ${card.last_four_digits}`
-              : card.card_name || 'Card';
-          const lastUsed = card.last_used_date
-            ? `(Last used: ${new Date(card.last_used_date).toLocaleDateString()})`
-            : '(Never used)';
-          return `• ${cardName} - ${card.card_type || 'free'} ${lastUsed}`;
-        })
-        .join('\n');
-      return `Found ${response.count} credit cards:\n${cardList}`;
-    },
-    transactions: response => {
-      const total = response.total_amount || 0;
-      const transactionList = response.transactions
-        .map(t => `• ${t.description} - $${t.amount} (${t.date})`)
-        .join('\n');
-      return `Found ${response.count} transactions (Total: $${total.toFixed(2)}):\n${transactionList}`;
-    },
-  };
-
-  const formatResponse = useCallback(response => {
-    const formatMap = {
-      todos: () => formatters.todos(response),
-      credit_cards: () => formatters.credit_cards(response),
-      transactions: () => formatters.transactions(response),
-      insights: () => `Financial Insights:\n${response.insights.map(i => `• ${i}`).join('\n')}`,
-      urgentItems: () =>
-        `🎯 Priority Items:\n${response.urgentItems.map(i => `• ${i}`).join('\n')}`,
-      alerts: () => `🔔 Alerts:\n${response.alerts.map(a => `• ${a.message || a}`).join('\n')}`,
-      suggestions: () => `🚀 Suggestions:\n${response.suggestions.map(s => `• ${s}`).join('\n')}`,
-    };
-
-    for (const [key, formatter] of Object.entries(formatMap)) {
-      if (response[key]) return formatter();
-    }
-
-    if (response.success && response.todo)
-      return `✅ ${response.message}\nTask: ${response.todo.task}`;
-    if (response.success && (response.deletedCount || response.updatedCount))
-      return `✅ ${response.message}`;
-    if (response.success && response.credit_card)
-      return `✅ ${response.message}\nCard: ${response.credit_card.card_name}`;
-    if (response.ui_action || response.ui_guidance) return `✅ ${response.message}`;
-    return response.message || response.summary || JSON.stringify(response, null, 2);
-  }, []);
-
-  const createMessage = useCallback(
-    (type, content, extra = {}) => ({
-      id: Date.now() + (type === 'assistant' ? 1 : 0),
-      type,
-      content,
-      timestamp: new Date(),
-      ...extra,
-    }),
-    []
-  );
-
-  const processQuery = useCallback(
-    async (query, addUserMessage = true) => {
-      if (addUserMessage) {
-        setMessages(prev => [...prev, createMessage('user', query)]);
-      }
-      setIsLoading(true);
-
-      try {
-        const response = await mcpClient.processNaturalLanguageQuery(query);
-        const assistantMessage = createMessage('assistant', formatResponse(response), {
-          data: response,
-          processingMode: response.processingMode || 'fallback',
-        });
-        setMessages(prev => [...prev, assistantMessage]);
-        handleDataRefresh(response);
-        handleUIActions(response);
-      } catch (error) {
-        setMessages(prev => [
-          ...prev,
-          createMessage('assistant', 'Sorry, I encountered an error: ' + error.message, {
-            isError: true,
-          }),
-        ]);
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [createMessage, formatResponse, handleDataRefresh, handleUIActions]
-  );
 
   // Listen for AI queries from dashboard
   const handleAiQuery = useCallback(
@@ -269,7 +175,7 @@ const AIAssistant = () => {
     setInputValue('');
 
     await processQuery(query);
-    restoreInputFocus();
+    focusInput();
   };
 
   const handleVoiceInput = () => {
@@ -320,56 +226,6 @@ const AIAssistant = () => {
 
     recognition.start();
   };
-
-  const messageStyles = {
-    user: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-3xl rounded-bl-lg shadow-blue-200/50 text-sm font-medium',
-    error:
-      'bg-gradient-to-r from-red-50 to-red-100 text-red-700 border border-red-200/50 rounded-3xl rounded-bl-lg shadow-red-200/30 text-sm',
-    welcome:
-      'bg-gradient-to-r from-green-50 via-blue-50 to-purple-50 text-gray-800 border border-green-200/50 rounded-3xl rounded-bl-lg shadow-green-200/40 text-sm',
-    proactive:
-      'bg-gradient-to-r from-orange-50 via-yellow-50 to-amber-50 text-gray-800 border border-orange-200/50 rounded-3xl rounded-bl-lg shadow-orange-200/40 text-sm',
-    gemini:
-      'bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 text-gray-800 border border-purple-200/50 rounded-3xl rounded-bl-lg italic shadow-purple-200/40 text-sm',
-    default:
-      'bg-white/90 text-gray-800 border border-gray-200/50 rounded-3xl rounded-bl-lg shadow-gray-200/40 text-sm',
-  };
-
-  const badgeStyles = {
-    welcome: { class: 'bg-green-100 text-green-600', text: '👋 Welcome' },
-    proactive: { class: 'bg-orange-100 text-orange-600', text: '🔔 Alert' },
-    gemini: { class: 'bg-purple-100 text-purple-600', text: '🤖 AI' },
-    default: { class: 'bg-gray-100 text-gray-600', text: '🔧 Rule' },
-  };
-
-  const getMessageClassName = message => {
-    if (message.type === 'user') return messageStyles.user;
-    if (message.isError) return messageStyles.error;
-    if (message.isWelcome) return messageStyles.welcome;
-    if (message.isProactive) return messageStyles.proactive;
-    if (message.processingMode === 'gemini') return messageStyles.gemini;
-    return messageStyles.default;
-  };
-
-  const getMessageBadge = message => {
-    if (message.isWelcome) return badgeStyles.welcome;
-    if (message.isProactive) return badgeStyles.proactive;
-    if (message.processingMode === 'gemini') return badgeStyles.gemini;
-    return badgeStyles.default;
-  };
-
-  const quickActions = [
-    {
-      label: '🎯 What needs attention?',
-      query: 'what needs my attention today?',
-      priority: 'high',
-    },
-    { label: '📊 Financial insights', query: 'give me financial insights', priority: 'high' },
-    { label: '📋 Show pending todos', query: 'show me pending todos' },
-    { label: '💳 Show credit cards', query: 'show me my credit cards' },
-    { label: '⚠️ Inactive cards', query: 'which cards are inactive?' },
-    { label: '🔔 Promo alerts', query: 'show cards with expiring promos' },
-  ];
 
   if (!isExpanded) {
     return (
@@ -467,7 +323,7 @@ const AIAssistant = () => {
                 </span>
               </div>
               <div
-                className={`max-w-[80%] px-5 py-4 whitespace-pre-line shadow-lg backdrop-blur-sm ${getMessageClassName(message)}`}
+                className={`max-w-[80%] px-5 py-4 whitespace-pre-line shadow-lg backdrop-blur-sm ${getMessageClassName(message, MESSAGE_STYLES)}`}
               >
                 {message.content}
 
@@ -495,9 +351,9 @@ const AIAssistant = () => {
                   </span>
                   {message.type === 'assistant' && (
                     <span
-                      className={`text-xs px-1.5 py-0.5 rounded-full ${getMessageBadge(message).class}`}
+                      className={`text-xs px-1.5 py-0.5 rounded-full ${getMessageBadge(message, BADGE_STYLES).class}`}
                     >
-                      {getMessageBadge(message).text}
+                      {getMessageBadge(message, BADGE_STYLES).text}
                     </span>
                   )}
                 </div>
@@ -536,7 +392,7 @@ const AIAssistant = () => {
         <div className="px-4 py-3 bg-gradient-to-r from-gray-50 to-blue-50/30 border-t border-gray-100 animate-fadeIn">
           <div className="text-xs text-gray-600 mb-2 font-medium">🚀 Quick Actions</div>
           <div className="flex flex-wrap gap-1.5">
-            {quickActions.map((action, index) => (
+            {QUICK_ACTIONS.map((action, index) => (
               <button
                 key={'action-' + index}
                 onClick={() => {
