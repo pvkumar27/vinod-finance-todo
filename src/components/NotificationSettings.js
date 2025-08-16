@@ -3,8 +3,20 @@ import PushNotificationService from '../services/pushNotifications';
 
 const NotificationSettings = () => {
   const [permission, setPermission] = useState('default');
-
   const [loading, setLoading] = useState(false);
+
+  // Helper functions for UI state
+  const getPermissionBadgeClass = permission => {
+    if (permission === 'granted') return 'bg-green-100 text-green-800';
+    if (permission === 'denied') return 'bg-red-100 text-red-800';
+    return 'bg-gray-100 text-gray-800';
+  };
+
+  const getPermissionBadgeText = permission => {
+    if (permission === 'granted') return '✅ Enabled';
+    if (permission === 'denied') return '❌ Blocked';
+    return '⏳ Not Set';
+  };
 
   useEffect(() => {
     checkNotificationStatus();
@@ -108,19 +120,9 @@ const NotificationSettings = () => {
         </div>
         <div className="flex items-center space-x-2">
           <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              permission === 'granted'
-                ? 'bg-green-100 text-green-800'
-                : permission === 'denied'
-                  ? 'bg-red-100 text-red-800'
-                  : 'bg-gray-100 text-gray-800'
-            }`}
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPermissionBadgeClass(permission)}`}
           >
-            {permission === 'granted'
-              ? '✅ Enabled'
-              : permission === 'denied'
-                ? '❌ Blocked'
-                : '⏳ Not Set'}
+            {getPermissionBadgeText(permission)}
           </span>
         </div>
       </div>

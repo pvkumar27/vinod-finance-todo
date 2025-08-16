@@ -303,14 +303,8 @@ class NotificationScheduler {
       const prompts = {
         morning: `Generate a motivational morning notification for FinTask app. User has ${pendingCount} pending tasks. Keep it under 50 characters, include emoji, be encouraging.`,
         noon: `Generate a midday motivation notification for FinTask. Encourage completing at least 4 tasks today. Keep it under 60 characters, include emoji, be energetic.`,
-        evening:
-          completedCount > 0
-            ? `Generate a celebration notification. User completed ${completedCount} tasks today. Keep it under 60 characters, include emoji, be congratulatory.`
-            : `Generate an encouraging evening notification. User hasn't completed tasks yet. Keep it under 60 characters, include emoji, be supportive.`,
-        night:
-          completedCount > 0
-            ? `Generate a good night appreciation message. User completed ${completedCount} tasks today. Keep it under 70 characters, include emoji, be appreciative.`
-            : `Generate an encouraging good night message for tomorrow. Keep it under 70 characters, include emoji, be hopeful.`,
+        evening: this.getEveningPrompt(completedCount),
+        night: this.getNightPrompt(completedCount),
       };
 
       const response = await geminiClient.processQuery(
@@ -330,6 +324,26 @@ class NotificationScheduler {
   }
 
   /**
+   * Get evening prompt based on completion status
+   */
+  getEveningPrompt(completedCount) {
+    if (completedCount > 0) {
+      return `Generate a celebration notification. User completed ${completedCount} tasks today. Keep it under 60 characters, include emoji, be congratulatory.`;
+    }
+    return `Generate an encouraging evening notification. User hasn't completed tasks yet. Keep it under 60 characters, include emoji, be supportive.`;
+  }
+
+  /**
+   * Get night prompt based on completion status
+   */
+  getNightPrompt(completedCount) {
+    if (completedCount > 0) {
+      return `Generate a good night appreciation message. User completed ${completedCount} tasks today. Keep it under 70 characters, include emoji, be appreciative.`;
+    }
+    return `Generate an encouraging good night message for tomorrow. Keep it under 70 characters, include emoji, be hopeful.`;
+  }
+
+  /**
    * Get static title for notification type
    */
   getStaticTitle(type) {
@@ -346,54 +360,94 @@ class NotificationScheduler {
    * Generate static notification content (fallback)
    */
   generateStaticContent(type, pendingCount, completedCount) {
-    switch (type) {
-      case 'morning':
-        return {
-          title: '🌅 Good Morning!',
-          body:
-            pendingCount === 0
-              ? 'All tasks complete! Ready for a productive day?'
-              : `You have ${pendingCount} pending task${pendingCount !== 1 ? 's' : ''}. Let's tackle them!`,
-        };
+    const contentGenerators = {
+      morning: () => this.generateMorningContent(pendingCount),
+      noon: () => this.generateNoonContent(),
+      evening: () => this.generateEveningContent(completedCount),
+      night: () => this.generateNightContent(completedCount),
+    };
 
-      case 'noon':
-        return {
-          title: '💪 Midday Motivation',
-          body: 'Time to power through! Aim for 4 tasks today 💪',
-        };
+    const generator = contentGenerators[type];
+    return generator ? generator() : this.generateDefaultContent();
+  }
 
-      case 'evening':
-        if (completedCount > 0) {
-          return {
-            title: '🎉 Great Progress!',
-            body: `Amazing! You completed ${completedCount} task${completedCount !== 1 ? 's' : ''} today! 🎉`,
-          };
-        } else {
-          return {
-            title: '🌆 Evening Check',
-            body: 'Still time to complete a task or two before bed! 💪',
-          };
-        }
+  /**
+   * Generate morning notification content
+   */
+  generateMorningContent(pendingCount) {
+    const body =
+      pendingCount === 0
+        ? 'All tasks complete! Ready for a productive day?'
+        : this.getMorningTaskMessage(pendingCount);
 
-      case 'night':
-        if (completedCount > 0) {
-          return {
-            title: '🌙 Day Complete!',
-            body: `Wonderful day! You completed ${completedCount} task${completedCount !== 1 ? 's' : ''}. Sweet dreams! 🌙✨`,
-          };
-        } else {
-          return {
-            title: '🌙 Rest & Recharge',
-            body: "Tomorrow is a fresh start! You've got this! 🌅💪",
-          };
-        }
+    return {
+      title: '🌅 Good Morning!',
+      body,
+    };
+  }
 
-      default:
-        return {
-          title: '📱 FinTask Reminder',
-          body: 'Check your tasks and stay productive!',
-        };
+  /**
+   * Get morning task message
+   */
+  getMorningTaskMessage(pendingCount) {
+    const taskWord = pendingCount !== 1 ? 's' : '';
+    return `You have ${pendingCount} pending task${taskWord}. Let's tackle them!`;
+  }
+
+  /**
+   * Generate noon notification content
+   */
+  generateNoonContent() {
+    return {
+      title: '💪 Midday Motivation',
+      body: 'Time to power through! Aim for 4 tasks today 💪',
+    };
+  }
+
+  /**
+   * Generate evening notification content
+   */
+  generateEveningContent(completedCount) {
+    if (completedCount > 0) {
+      const taskWord = completedCount !== 1 ? 's' : '';
+      return {
+        title: '🎉 Great Progress!',
+        body: `Amazing! You completed ${completedCount} task${taskWord} today! 🎉`,
+      };
     }
+
+    return {
+      title: '🌆 Evening Check',
+      body: 'Still time to complete a task or two before bed! 💪',
+    };
+  }
+
+  /**
+   * Generate night notification content
+   */
+  generateNightContent(completedCount) {
+    if (completedCount > 0) {
+      const taskWord = completedCount !== 1 ? 's' : '';
+      return {
+        title: '🌙 Day Complete!',
+        body: `Wonderful day! You completed ${completedCount} task${taskWord}. Sweet dreams! 🌙✨`,
+      };
+    }
+
+    return {
+      title: '🌙 Rest & Recharge',
+      body: "Tomorrow is a fresh start! You've got this! 🌅💪",
+    };
+  }
+
+  /**
+   * Generate default notification content
+   */
+  generateDefaultContent() {
+    return {
+      title: '📱 FinTask Reminder',
+      body: 'Check your tasks and stay productive!',
+    };
   }
 
   /**
