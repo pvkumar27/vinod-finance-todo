@@ -82,7 +82,7 @@ describe('Essential Application Tests', () => {
     cy.contains('Financial Insights', { timeout: 10000 }).should('be.visible');
 
     // Verify insights content is present
-    cy.contains('Credit Card Portfolio').should('be.visible');
-    cy.contains('Task Management').should('be.visible');
+    cy.contains('Credit Card Portfolio').scrollIntoView().should('be.visible');
+    cy.contains('Task Management').scrollIntoView().should('be.visible');
   });
 });
