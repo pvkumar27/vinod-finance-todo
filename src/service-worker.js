@@ -1,4 +1,5 @@
 /* eslint-disable no-restricted-globals */
+/* global clients */
 
 // This service worker can be customized!
 // See https://developers.google.com/web/tools/workbox/modules
@@ -71,5 +72,122 @@ self.addEventListener('message', event => {
     self.skipWaiting();
   }
 });
+
+// Push Notification Handlers for FinTask PWA
+self.addEventListener('push', event => {
+  console.log('Push notification received:', event);
+
+  let notificationData = {
+    title: '💰 FinTask Reminder',
+    body: 'Check your financial tasks',
+    icon: '/icons/official-logo.png',
+    badge: '/icons/official-logo.png',
+    tag: 'fintask-notification',
+    requireInteraction: false,
+    actions: [
+      {
+        action: 'open',
+        title: '📱 Open FinTask',
+        icon: '/icons/official-logo.png',
+      },
+      {
+        action: 'dismiss',
+        title: '❌ Dismiss',
+      },
+    ],
+    data: {
+      url: '/',
+      timestamp: Date.now(),
+    },
+  };
+
+  // Parse push data if available
+  if (event.data) {
+    try {
+      const pushData = event.data.json();
+      notificationData = { ...notificationData, ...pushData };
+    } catch (error) {
+      console.error('Error parsing push data:', error);
+    }
+  }
+
+  event.waitUntil(self.registration.showNotification(notificationData.title, notificationData));
+});
+
+// Handle notification clicks
+self.addEventListener('notificationclick', event => {
+  console.log('Notification clicked:', event);
+
+  event.notification.close();
+
+  if (event.action === 'dismiss') {
+    return;
+  }
+
+  // Default action or 'open' action
+  const urlToOpen = event.notification.data?.url || '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+      // Check if FinTask is already open
+      for (const client of clientList) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          return client.focus();
+        }
+      }
+
+      // Open new window if not already open
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
+    })
+  );
+});
+
+// Handle notification close
+self.addEventListener('notificationclose', event => {
+  console.log('Notification closed:', event);
+
+  // Track notification dismissal analytics if needed
+  // You can send this data to your analytics service
+});
+
+// Background sync for offline notifications
+self.addEventListener('sync', event => {
+  if (event.tag === 'fintask-reminder') {
+    event.waitUntil(
+      // Send any queued notifications when back online
+      sendQueuedNotifications()
+    );
+  }
+});
+
+// Helper function to send queued notifications
+async function sendQueuedNotifications() {
+  try {
+    // Check for any queued notifications in IndexedDB or localStorage
+    // This is useful for offline scenarios
+    const queuedNotifications = await getQueuedNotifications();
+
+    for (const notification of queuedNotifications) {
+      await self.registration.showNotification(notification.title, notification.options);
+    }
+
+    // Clear the queue after sending
+    await clearNotificationQueue();
+  } catch (error) {
+    console.error('Error sending queued notifications:', error);
+  }
+}
+
+// Helper functions for notification queue management
+async function getQueuedNotifications() {
+  // Implement based on your storage preference
+  return [];
+}
+
+async function clearNotificationQueue() {
+  // Implement based on your storage preference
+}
 
 // Any other custom service worker logic can go here.

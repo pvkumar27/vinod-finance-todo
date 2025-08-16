@@ -52,7 +52,8 @@
     "mochawesome": "^7.1.3",
     "postcss": "^8.5.6",
     "prettier": "^3.6.2",
-    "tailwindcss": "^3.4.17"
+    "tailwindcss": "^3.4.17",
+    "web-push": "^3.6.7"
   },
   "scripts": {
     "start": "netlify dev",
@@ -87,7 +88,8 @@
     "mcp:setup": "node scripts/setup-mcp.js",
     "mcp:install": "cd mcp-server && npm install",
     "mcp:start": "cd mcp-server && npm start",
-    "mcp:dev": "cd mcp-server && npm run dev"
+    "mcp:dev": "cd mcp-server && npm run dev",
+    "generate-vapid": "npx web-push generate-vapid-keys"
   },
   "eslintConfig": {
     "extends": [
