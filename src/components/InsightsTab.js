@@ -56,7 +56,7 @@ const InsightsTab = () => {
   const todoInsights = getTodoInsights();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 p-4">
       {/* Header */}
       <div className="bg-[#632D1F] text-white rounded-xl p-4 flex items-center space-x-3">
         <span className="text-2xl">📊</span>
