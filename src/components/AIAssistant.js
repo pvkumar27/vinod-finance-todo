@@ -137,73 +137,65 @@ const AIAssistant = () => {
     }, 100);
   }, []);
 
-  const formatTodos = useCallback(response => {
-    const todoList = response.todos
-      .map(todo => {
-        const status = todo.completed ? '✅' : '⏳';
-        const priority = todo.priority ? '(' + todo.priority + ')' : '';
-        return '• ' + todo.task + ' ' + status + ' ' + priority;
-      })
-      .join('\n');
-    return 'Found ' + response.count + ' todos:\n' + todoList;
-  }, []);
-
-  const formatCreditCards = useCallback(response => {
-    const cardList = response.credit_cards
-      .map(card => {
-        const cardName =
-          card.bank_name && card.last_four_digits
-            ? card.bank_name + ' ' + card.last_four_digits
-            : card.card_name || 'Card';
-        const cardType = card.card_type || 'free';
-        const lastUsed = card.last_used_date
-          ? '(Last used: ' + new Date(card.last_used_date).toLocaleDateString() + ')'
-          : '(Never used)';
-        return '• ' + cardName + ' - ' + cardType + ' ' + lastUsed;
-      })
-      .join('\n');
-    return 'Found ' + response.count + ' credit cards:\n' + cardList;
-  }, []);
-
-  const formatTransactions = useCallback(response => {
-    const total = response.total_amount || 0;
-    const transactionList = response.transactions
-      .map(t => '• ' + t.description + ' - $' + t.amount + ' (' + t.date + ')')
-      .join('\n');
-    return (
-      'Found ' +
-      response.count +
-      ' transactions (Total: $' +
-      total.toFixed(2) +
-      '):\n' +
-      transactionList
-    );
-  }, []);
-
-  const formatResponse = useCallback(
-    response => {
-      if (response.todos) return formatTodos(response);
-      if (response.credit_cards) return formatCreditCards(response);
-      if (response.transactions) return formatTransactions(response);
-      if (response.insights)
-        return 'Financial Insights:\n' + response.insights.map(i => '• ' + i).join('\n');
-      if (response.urgentItems)
-        return '🎯 Priority Items:\n' + response.urgentItems.map(i => '• ' + i).join('\n');
-      if (response.alerts)
-        return '🔔 Alerts:\n' + response.alerts.map(a => '• ' + (a.message || a)).join('\n');
-      if (response.suggestions)
-        return '🚀 Suggestions:\n' + response.suggestions.map(s => '• ' + s).join('\n');
-      if (response.success && response.todo)
-        return '✅ ' + response.message + '\nTask: ' + response.todo.task;
-      if (response.success && (response.deletedCount || response.updatedCount))
-        return '✅ ' + response.message;
-      if (response.success && response.credit_card)
-        return '✅ ' + response.message + '\nCard: ' + response.credit_card.card_name;
-      if (response.ui_action || response.ui_guidance) return '✅ ' + response.message;
-      return response.message || response.summary || JSON.stringify(response, null, 2);
+  const formatters = {
+    todos: response => {
+      const todoList = response.todos
+        .map(
+          todo =>
+            `• ${todo.task} ${todo.completed ? '✅' : '⏳'} ${todo.priority ? `(${todo.priority})` : ''}`
+        )
+        .join('\n');
+      return `Found ${response.count} todos:\n${todoList}`;
     },
-    [formatTodos, formatCreditCards, formatTransactions]
-  );
+    credit_cards: response => {
+      const cardList = response.credit_cards
+        .map(card => {
+          const cardName =
+            card.bank_name && card.last_four_digits
+              ? `${card.bank_name} ${card.last_four_digits}`
+              : card.card_name || 'Card';
+          const lastUsed = card.last_used_date
+            ? `(Last used: ${new Date(card.last_used_date).toLocaleDateString()})`
+            : '(Never used)';
+          return `• ${cardName} - ${card.card_type || 'free'} ${lastUsed}`;
+        })
+        .join('\n');
+      return `Found ${response.count} credit cards:\n${cardList}`;
+    },
+    transactions: response => {
+      const total = response.total_amount || 0;
+      const transactionList = response.transactions
+        .map(t => `• ${t.description} - $${t.amount} (${t.date})`)
+        .join('\n');
+      return `Found ${response.count} transactions (Total: $${total.toFixed(2)}):\n${transactionList}`;
+    },
+  };
+
+  const formatResponse = useCallback(response => {
+    const formatMap = {
+      todos: () => formatters.todos(response),
+      credit_cards: () => formatters.credit_cards(response),
+      transactions: () => formatters.transactions(response),
+      insights: () => `Financial Insights:\n${response.insights.map(i => `• ${i}`).join('\n')}`,
+      urgentItems: () =>
+        `🎯 Priority Items:\n${response.urgentItems.map(i => `• ${i}`).join('\n')}`,
+      alerts: () => `🔔 Alerts:\n${response.alerts.map(a => `• ${a.message || a}`).join('\n')}`,
+      suggestions: () => `🚀 Suggestions:\n${response.suggestions.map(s => `• ${s}`).join('\n')}`,
+    };
+
+    for (const [key, formatter] of Object.entries(formatMap)) {
+      if (response[key]) return formatter();
+    }
+
+    if (response.success && response.todo)
+      return `✅ ${response.message}\nTask: ${response.todo.task}`;
+    if (response.success && (response.deletedCount || response.updatedCount))
+      return `✅ ${response.message}`;
+    if (response.success && response.credit_card)
+      return `✅ ${response.message}\nCard: ${response.credit_card.card_name}`;
+    if (response.ui_action || response.ui_guidance) return `✅ ${response.message}`;
+    return response.message || response.summary || JSON.stringify(response, null, 2);
+  }, []);
 
   const createMessage = useCallback(
     (type, content, extra = {}) => ({
@@ -329,37 +321,41 @@ const AIAssistant = () => {
     recognition.start();
   };
 
+  const messageStyles = {
+    user: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-3xl rounded-bl-lg shadow-blue-200/50 text-sm font-medium',
+    error:
+      'bg-gradient-to-r from-red-50 to-red-100 text-red-700 border border-red-200/50 rounded-3xl rounded-bl-lg shadow-red-200/30 text-sm',
+    welcome:
+      'bg-gradient-to-r from-green-50 via-blue-50 to-purple-50 text-gray-800 border border-green-200/50 rounded-3xl rounded-bl-lg shadow-green-200/40 text-sm',
+    proactive:
+      'bg-gradient-to-r from-orange-50 via-yellow-50 to-amber-50 text-gray-800 border border-orange-200/50 rounded-3xl rounded-bl-lg shadow-orange-200/40 text-sm',
+    gemini:
+      'bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 text-gray-800 border border-purple-200/50 rounded-3xl rounded-bl-lg italic shadow-purple-200/40 text-sm',
+    default:
+      'bg-white/90 text-gray-800 border border-gray-200/50 rounded-3xl rounded-bl-lg shadow-gray-200/40 text-sm',
+  };
+
+  const badgeStyles = {
+    welcome: { class: 'bg-green-100 text-green-600', text: '👋 Welcome' },
+    proactive: { class: 'bg-orange-100 text-orange-600', text: '🔔 Alert' },
+    gemini: { class: 'bg-purple-100 text-purple-600', text: '🤖 AI' },
+    default: { class: 'bg-gray-100 text-gray-600', text: '🔧 Rule' },
+  };
+
   const getMessageClassName = message => {
-    if (message.type === 'user') {
-      return 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-3xl rounded-bl-lg shadow-blue-200/50 text-sm font-medium';
-    }
-    if (message.isError) {
-      return 'bg-gradient-to-r from-red-50 to-red-100 text-red-700 border border-red-200/50 rounded-3xl rounded-bl-lg shadow-red-200/30 text-sm';
-    }
-    if (message.isWelcome) {
-      return 'bg-gradient-to-r from-green-50 via-blue-50 to-purple-50 text-gray-800 border border-green-200/50 rounded-3xl rounded-bl-lg shadow-green-200/40 text-sm';
-    }
-    if (message.isProactive) {
-      return 'bg-gradient-to-r from-orange-50 via-yellow-50 to-amber-50 text-gray-800 border border-orange-200/50 rounded-3xl rounded-bl-lg shadow-orange-200/40 text-sm';
-    }
-    if (message.processingMode === 'gemini') {
-      return 'bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 text-gray-800 border border-purple-200/50 rounded-3xl rounded-bl-lg italic shadow-purple-200/40 text-sm';
-    }
-    return 'bg-white/90 text-gray-800 border border-gray-200/50 rounded-3xl rounded-bl-lg shadow-gray-200/40 text-sm';
+    if (message.type === 'user') return messageStyles.user;
+    if (message.isError) return messageStyles.error;
+    if (message.isWelcome) return messageStyles.welcome;
+    if (message.isProactive) return messageStyles.proactive;
+    if (message.processingMode === 'gemini') return messageStyles.gemini;
+    return messageStyles.default;
   };
 
-  const getMessageBadgeClassName = message => {
-    if (message.isWelcome) return 'bg-green-100 text-green-600';
-    if (message.isProactive) return 'bg-orange-100 text-orange-600';
-    if (message.processingMode === 'gemini') return 'bg-purple-100 text-purple-600';
-    return 'bg-gray-100 text-gray-600';
-  };
-
-  const getMessageBadgeText = message => {
-    if (message.isWelcome) return '👋 Welcome';
-    if (message.isProactive) return '🔔 Alert';
-    if (message.processingMode === 'gemini') return '🤖 AI';
-    return '🔧 Rule';
+  const getMessageBadge = message => {
+    if (message.isWelcome) return badgeStyles.welcome;
+    if (message.isProactive) return badgeStyles.proactive;
+    if (message.processingMode === 'gemini') return badgeStyles.gemini;
+    return badgeStyles.default;
   };
 
   const quickActions = [
@@ -499,9 +495,9 @@ const AIAssistant = () => {
                   </span>
                   {message.type === 'assistant' && (
                     <span
-                      className={`text-xs px-1.5 py-0.5 rounded-full ${getMessageBadgeClassName(message)}`}
+                      className={`text-xs px-1.5 py-0.5 rounded-full ${getMessageBadge(message).class}`}
                     >
-                      {getMessageBadgeText(message)}
+                      {getMessageBadge(message).text}
                     </span>
                   )}
                 </div>
