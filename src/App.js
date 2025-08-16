@@ -12,6 +12,31 @@ function App() {
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Auto-enable notifications for PWA
+  const autoEnableNotifications = async () => {
+    try {
+      // Check if running as PWA
+      const isPWA =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true;
+
+      if (isPWA) {
+        const PushNotificationService = (await import('./services/pushNotifications')).default;
+
+        // Only request if not already granted
+        if (PushNotificationService.getPermissionStatus() === 'default') {
+          const granted = await PushNotificationService.requestPermission();
+          if (granted) {
+            await PushNotificationService.subscribe();
+          }
+        }
+      }
+    } catch (error) {
+      // Silently fail - don't interrupt user experience
+      console.error('Auto-enable notifications failed:', error);
+    }
+  };
+
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -30,6 +55,8 @@ function App() {
       if (session) {
         try {
           await NotificationScheduler.init();
+          // Auto-enable notifications for PWA
+          await autoEnableNotifications();
         } catch (error) {
           console.error('Failed to initialize notifications:', error);
         }

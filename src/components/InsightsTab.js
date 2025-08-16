@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import CreditCardDashboardInsights from './CreditCardDashboardInsights';
-import NotificationSettings from './NotificationSettings';
 
 const InsightsTab = () => {
   const [cards, setCards] = useState([]);
@@ -176,14 +175,6 @@ const InsightsTab = () => {
             </div>
           )}
         </div>
-      </div>
-
-      {/* Notification Settings */}
-      <div className="space-y-4">
-        <h3 className="finbot-heading-lg finbot-responsive-text mb-4">
-          <span className="mr-2">🔔</span>Notifications
-        </h3>
-        <NotificationSettings />
       </div>
 
       {/* Quick Actions */}
