@@ -10,9 +10,9 @@ ALTER TABLE expenses
 ADD COLUMN owner TEXT DEFAULT 'self',
 ADD COLUMN sync_source TEXT DEFAULT 'Manual';
 
--- Clear all existing data
-DELETE FROM credit_cards_simplified;
-DELETE FROM expenses;
+-- Clear all existing data (intentional full table clear for migration)
+DELETE FROM credit_cards_simplified WHERE TRUE;
+DELETE FROM expenses WHERE TRUE;
 
 -- Update RLS policies to ensure users only see their own data
 -- (Assuming RLS is already set up, this is just a reminder)

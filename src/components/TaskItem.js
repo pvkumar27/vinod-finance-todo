@@ -115,18 +115,20 @@ const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete }) => 
         <button
           type="button"
           onClick={() => onTogglePin(task.id, task.pinned)}
-          className={`w-6 h-6 flex items-center justify-center transition-colors ${
+          className={`w-8 h-8 flex items-center justify-center transition-colors touch-manipulation ${
             isPinned ? 'text-yellow-600' : 'text-gray-400'
           }`}
           title={isPinned ? 'Unpin task' : 'Pin task'}
+          style={{ WebkitTapHighlightColor: 'transparent' }}
         >
           <span className="text-sm">📌</span>
         </button>
         <button
           type="button"
           onClick={() => onEdit(task)}
-          className="w-6 h-6 flex items-center justify-center text-gray-400"
+          className="w-8 h-8 flex items-center justify-center text-gray-400 touch-manipulation"
           aria-label={`Edit task: ${task.task}`}
+          style={{ WebkitTapHighlightColor: 'transparent' }}
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -140,8 +142,9 @@ const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete }) => 
         <button
           type="button"
           onClick={() => onDelete(task.id)}
-          className="w-6 h-6 flex items-center justify-center text-gray-400"
+          className="w-8 h-8 flex items-center justify-center text-gray-400 touch-manipulation"
           aria-label={`Delete task: ${task.task}`}
+          style={{ WebkitTapHighlightColor: 'transparent' }}
         >
           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path

@@ -1,5 +1,6 @@
 import { supabase } from '../supabaseClient';
 import { GeminiClient } from './geminiClient';
+
 import { api } from './api';
 
 class MCPClient {
@@ -89,10 +90,17 @@ class MCPClient {
     throw new Error('Transaction search not available yet. Please add transaction data first.');
   }
 
-  // Natural language processing using Gemini AI
+  // Natural language processing using Gemini with smart fallback
   async processNaturalLanguageQuery(query) {
-    // Always try Gemini first - this is the whole point of the integration
-    return await this.geminiClient.processQuery(query);
+    try {
+      const result = await this.geminiClient.processQuery(query);
+      result.processingMode = 'gemini';
+      return result;
+    } catch (error) {
+      const result = await this.geminiClient.fallbackProcess(query);
+      result.processingMode = 'rule-based-fallback';
+      return result;
+    }
   }
 }
 

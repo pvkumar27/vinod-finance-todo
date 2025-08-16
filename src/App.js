@@ -1,16 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { AuthForm } from './components';
-import { Navbar } from './layout';
-import { Home } from './pages';
 import { supabase } from './supabaseClient';
 import IOSInstallPrompt from './components/IOSInstallPrompt';
-import AIAssistant from './components/AIAssistant';
+import MainApp from './components/MainApp';
 import './App.css';
-import './styles/background.css';
-import './styles/typography.css';
-import './styles/decorative.css';
-import './styles/components.css';
-import './styles/animations.css';
+import './styles/globals.css';
+import './styles/finbot-theme.css';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -38,20 +33,27 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
+      <div className="app min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="card p-8">
+          <div className="pulse text-2xl font-bold text-gradient mb-4">FinTask</div>
+          <div className="text-sm text-gray-600">Loading your AI money assistant...</div>
+        </div>
       </div>
     );
   }
 
   if (!session) {
     return (
-      <div className="App bg-mesh relative">
-        <div className="dots-pattern"></div>
-        <div className="shape-circle shape-circle-1"></div>
-        <div className="shape-circle shape-circle-2"></div>
-        <div className="shape-circle shape-circle-3"></div>
-        <div className="app-content relative z-10">
+      <div className="app relative overflow-hidden bg-gray-50">
+        {/* FinBot-style background */}
+        <div className="absolute inset-0">
+          <div className="absolute top-20 left-10 w-32 h-32 bg-gradient-to-r from-purple-400/30 to-pink-400/30 rounded-full blur-xl bounce"></div>
+          <div
+            className="absolute bottom-20 right-10 w-40 h-40 bg-gradient-to-r from-blue-400/30 to-purple-400/30 rounded-full blur-xl bounce"
+            style={{ animationDelay: '1s' }}
+          ></div>
+        </div>
+        <div className="relative z-10 min-h-screen flex items-center justify-center p-4">
           <AuthForm />
         </div>
       </div>
@@ -59,17 +61,20 @@ function App() {
   }
 
   return (
-    <div className="App bg-mesh relative">
-      <div className="dots-pattern"></div>
-      <div className="shape-circle shape-circle-1"></div>
-      <div className="shape-circle shape-circle-2"></div>
-      <div className="shape-circle shape-circle-3"></div>
-      <div className="app-content relative z-10">
-        <Navbar session={session} />
-        <Home />
+    <div className="app relative overflow-hidden bg-gray-50">
+      {/* FinBot-style background */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full blur-3xl bounce"></div>
+        <div
+          className="absolute bottom-0 right-0 w-80 h-80 bg-gradient-to-r from-blue-400/20 to-purple-400/20 rounded-full blur-3xl bounce"
+          style={{ animationDelay: '2s' }}
+        ></div>
+      </div>
+      <div className="relative z-10">
+        <MainApp />
       </div>
       <IOSInstallPrompt />
-      <AIAssistant />
+      {/* Remove duplicate AI Assistant - it's now in FinBot App */}
     </div>
   );
 }

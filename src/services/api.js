@@ -56,6 +56,7 @@ export const api = {
     const { data: maxOrderData } = await supabase
       .from('todos')
       .select('sort_order')
+      .eq('user_id', user.id)
       .order('sort_order', { ascending: false })
       .limit(1);
 
@@ -112,7 +113,7 @@ export const api = {
 
     const { data, error } = await supabase
       .from('credit_cards_simplified')
-      .insert({ ...cardData, user_id: user.id })
+      .insert({ user_id: user.id, ...cardData })
       .select();
     if (error) throw error;
     return data[0];
@@ -190,12 +191,12 @@ export const api = {
 
     if (filters.inactive_only) {
       filteredData = filteredData.filter(card => {
-        if (card.days_inactive && card.days_inactive > 90) return true;
         if (!card.last_used_date) return true;
-        const daysSince = Math.floor(
-          (new Date() - new Date(card.last_used_date)) / (1000 * 60 * 60 * 24)
-        );
-        return daysSince > 90;
+        const lastUsedDate = new Date(card.last_used_date);
+        const today = new Date();
+        if (lastUsedDate > today) return false;
+        const daysSince = Math.floor((today - lastUsedDate) / (1000 * 60 * 60 * 24));
+        return daysSince >= 90;
       });
     }
 

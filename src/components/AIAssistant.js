@@ -1,5 +1,18 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { mcpClient } from '../services/mcpClient';
+import VisualInsights from './VisualInsights';
+import {
+  MESSAGE_STYLES,
+  BADGE_STYLES,
+  QUICK_ACTIONS,
+  formatResponse,
+  createMessage,
+  getMessageClassName,
+  getMessageBadge,
+  handleDataRefresh,
+  handleUIActions,
+  focusInput,
+} from '../utils/aiAssistantUtils';
 
 const AIAssistant = () => {
   const [messages, setMessages] = useState([
@@ -7,13 +20,15 @@ const AIAssistant = () => {
       id: 1,
       type: 'assistant',
       content:
-        "Hi! I'm Finbot, your FinTask assistant. I can help you with your todos and credit cards!",
+        '👋 Hey there! I\'m Finbot, your AI-powered finance assistant. I\'m here to help you stay on top of your money and tasks!\n\n💡 Try asking me:\n• "What needs my attention today?"\n• "Show me inactive credit cards"\n• "Add a task to pay rent"\n• "Analyze my spending patterns"',
       timestamp: new Date(),
+      isWelcome: true,
     },
   ]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [proactiveAlerts, setProactiveAlerts] = useState([]);
   const [isMinimized, setIsMinimized] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [showQuickActions, setShowQuickActions] = useState(false);
@@ -42,89 +57,135 @@ const AIAssistant = () => {
     scrollToBottom();
   }, [messages]);
 
+  const generateProactiveAlerts = useCallback(async () => {
+    const alerts = [];
+    try {
+      const inactiveCards = await mcpClient.callTool('get_credit_cards', { inactive_only: true });
+      if (inactiveCards.credit_cards && inactiveCards.credit_cards.length > 0) {
+        const count = inactiveCards.credit_cards.length;
+        alerts.push({
+          type: 'credit_card_inactive',
+          message:
+            count +
+            ' credit card' +
+            (count > 1 ? "s haven't" : " hasn't") +
+            ' been used in 90+ days',
+          priority: 'medium',
+          action: 'show inactive cards',
+        });
+      }
+    } catch (error) {
+      console.error('Error generating proactive alerts:', error);
+    }
+    return alerts;
+  }, []);
+
+  const checkProactiveAlerts = useCallback(async () => {
+    try {
+      const alerts = await generateProactiveAlerts();
+      setProactiveAlerts(alerts);
+
+      if (alerts.length > 0) {
+        const alertMessage = {
+          id: Date.now() + 100,
+          type: 'assistant',
+          content:
+            '🔔 I noticed ' +
+            alerts.length +
+            ' thing' +
+            (alerts.length > 1 ? 's' : '') +
+            ' that might need your attention:\n\n' +
+            alerts.map(alert => '• ' + alert.message).join('\n') +
+            '\n\nWould you like me to help you with any of these?',
+          timestamp: new Date(),
+          isProactive: true,
+          alerts: alerts,
+        };
+
+        setTimeout(() => {
+          setMessages(prev => [...prev, alertMessage]);
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Error checking proactive alerts:', error);
+    }
+  }, [generateProactiveAlerts]);
+
+  useEffect(() => {
+    if (isExpanded) {
+      checkProactiveAlerts();
+    }
+  }, [isExpanded, checkProactiveAlerts]);
+
+  const processQuery = useCallback(async (query, addUserMessage = true) => {
+    if (addUserMessage) {
+      setMessages(prev => [...prev, createMessage('user', query)]);
+    }
+    setIsLoading(true);
+
+    try {
+      const response = await mcpClient.processNaturalLanguageQuery(query);
+      const assistantMessage = createMessage('assistant', formatResponse(response), {
+        data: response,
+        processingMode: response.processingMode || 'fallback',
+      });
+      setMessages(prev => [...prev, assistantMessage]);
+      handleDataRefresh(response);
+      handleUIActions(response);
+    } catch (error) {
+      setMessages(prev => [
+        ...prev,
+        createMessage('assistant', 'Sorry, I encountered an error: ' + error.message, {
+          isError: true,
+        }),
+      ]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  // Listen for AI queries from dashboard
+  const handleAiQuery = useCallback(
+    async event => {
+      const { query } = event.detail;
+      if (!query) return;
+
+      if (!isExpanded) {
+        setIsExpanded(true);
+        setTimeout(() => processQuery(query), 300);
+      } else {
+        processQuery(query);
+      }
+    },
+    [isExpanded, processQuery]
+  );
+
+  useEffect(() => {
+    window.addEventListener('aiQuery', handleAiQuery);
+    return () => window.removeEventListener('aiQuery', handleAiQuery);
+  }, [handleAiQuery]);
+
   const handleSubmit = async e => {
     e.preventDefault();
     if (!inputValue.trim() || isLoading) return;
 
-    const userMessage = {
-      id: Date.now(),
-      type: 'user',
-      content: inputValue,
-      timestamp: new Date(),
-    };
-
-    setMessages(prev => [...prev, userMessage]);
-    setQueryHistory(prev => [inputValue, ...prev.slice(0, 49)]); // Keep last 50 queries
+    const query = inputValue;
+    setQueryHistory(prev => [query, ...prev.slice(0, 49)]);
     setHistoryIndex(-1);
     setInputValue('');
-    setIsLoading(true);
 
-    try {
-      const response = await mcpClient.processNaturalLanguageQuery(inputValue);
-
-      const assistantMessage = {
-        id: Date.now() + 1,
-        type: 'assistant',
-        content: formatResponse(response),
-        timestamp: new Date(),
-        data: response,
-        processingMode: response.processingMode || 'fallback',
-      };
-
-      setMessages(prev => [...prev, assistantMessage]);
-
-      // Trigger refresh if todo or credit card was modified successfully
-      if (
-        response.success &&
-        (response.todo || response.credit_card || response.deletedCount || response.updatedCount)
-      ) {
-        window.dispatchEvent(new CustomEvent('todoAdded', { detail: response.todo || {} }));
-        if (response.credit_card || response.deletedCount) {
-          const eventDetail = response.deletedCard
-            ? { deleted: true, cardId: response.deletedCard.id }
-            : response.credit_card || {};
-          window.dispatchEvent(new CustomEvent('creditCardAdded', { detail: eventDetail }));
-        }
-      }
-
-      // Handle UI actions
-      if (response.ui_action === 'switch_view') {
-        window.dispatchEvent(
-          new CustomEvent('switchView', {
-            detail: { viewMode: response.view_mode, source: 'ai' },
-          })
-        );
-      }
-    } catch (error) {
-      const errorMessage = {
-        id: Date.now() + 1,
-        type: 'assistant',
-        content: `Sorry, I encountered an error: ${error.message}`,
-        timestamp: new Date(),
-        isError: true,
-      };
-
-      setMessages(prev => [...prev, errorMessage]);
-    } finally {
-      setIsLoading(false);
-      // Restore focus to input field
-      setTimeout(() => {
-        const input = document.querySelector('[data-cy="ai-assistant-input"]');
-        if (input) input.focus();
-      }, 100);
-    }
+    await processQuery(query);
+    focusInput();
   };
 
   const handleVoiceInput = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      const errorMessage = {
-        id: Date.now(),
-        type: 'assistant',
-        content: '❌ Voice recognition not supported in this browser',
-        timestamp: new Date(),
-        isError: true,
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages(prev => [
+        ...prev,
+        createMessage('assistant', '❌ Voice recognition not supported in this browser', {
+          isError: true,
+        }),
+      ]);
       return;
     }
 
@@ -135,82 +196,29 @@ const AIAssistant = () => {
     recognition.interimResults = false;
     recognition.lang = 'en-US';
 
-    recognition.onstart = () => {
+    const handleRecognitionStart = () => {
       setIsListening(true);
-      const listeningMessage = {
-        id: Date.now(),
-        type: 'assistant',
-        content: '🎤 Listening... Speak your command',
-        timestamp: new Date(),
-      };
-      setMessages(prev => [...prev, listeningMessage]);
+      setMessages(prev => [
+        ...prev,
+        createMessage('assistant', '🎤 Listening... Speak your command'),
+      ]);
     };
 
-    recognition.onresult = async event => {
+    const handleRecognitionResult = async event => {
       const transcript = event.results[0][0].transcript;
-      setInputValue(transcript);
-
-      // Auto-submit the voice command
-      try {
-        const response = await mcpClient.processNaturalLanguageQuery(transcript);
-
-        const assistantMessage = {
-          id: Date.now() + 1,
-          type: 'assistant',
-          content: formatResponse(response),
-          timestamp: new Date(),
-          data: response,
-          processingMode: response.processingMode || 'fallback',
-        };
-
-        setMessages(prev => [...prev, assistantMessage]);
-
-        // Trigger refresh if todo or credit card was modified successfully
-        if (
-          response.success &&
-          (response.todo || response.credit_card || response.deletedCount || response.updatedCount)
-        ) {
-          window.dispatchEvent(new CustomEvent('todoAdded', { detail: response.todo || {} }));
-          if (response.credit_card || response.deletedCount) {
-            const eventDetail = response.deletedCard
-              ? { deleted: true, cardId: response.deletedCard.id }
-              : response.credit_card || {};
-            window.dispatchEvent(new CustomEvent('creditCardAdded', { detail: eventDetail }));
-          }
-        }
-
-        // Handle UI actions
-        if (response.ui_action === 'switch_view') {
-          window.dispatchEvent(
-            new CustomEvent('switchView', {
-              detail: { viewMode: response.view_mode, source: 'ai' },
-            })
-          );
-        }
-      } catch (error) {
-        const errorMessage = {
-          id: Date.now() + 1,
-          type: 'assistant',
-          content: `Sorry, I encountered an error: ${error.message}`,
-          timestamp: new Date(),
-          isError: true,
-        };
-        setMessages(prev => [...prev, errorMessage]);
-      }
-
-      setInputValue('');
+      await processQuery(transcript);
     };
 
-    recognition.onerror = event => {
-      const errorMessage = {
-        id: Date.now(),
-        type: 'assistant',
-        content: `❌ Voice recognition error: ${event.error}`,
-        timestamp: new Date(),
-        isError: true,
-      };
-      setMessages(prev => [...prev, errorMessage]);
+    const handleRecognitionError = event => {
+      setMessages(prev => [
+        ...prev,
+        createMessage('assistant', '❌ Voice recognition error: ' + event.error, { isError: true }),
+      ]);
     };
+
+    recognition.onstart = handleRecognitionStart;
+    recognition.onresult = handleRecognitionResult;
+    recognition.onerror = handleRecognitionError;
 
     recognition.onend = () => {
       setIsListening(false);
@@ -218,77 +226,6 @@ const AIAssistant = () => {
 
     recognition.start();
   };
-
-  const formatResponse = response => {
-    if (response.todos) {
-      return `Found ${response.count} todos:\n${response.todos
-        .map(
-          todo =>
-            `• ${todo.task} ${todo.completed ? '✅' : '⏳'} ${todo.priority ? `(${todo.priority})` : ''}`
-        )
-        .join('\n')}`;
-    }
-
-    if (response.credit_cards) {
-      return `Found ${response.count} credit cards:\n${response.credit_cards
-        .map(card => {
-          const cardName =
-            card.bank_name && card.last_four_digits
-              ? `${card.bank_name} ${card.last_four_digits}`
-              : card.card_name || 'Card';
-          const cardType = card.card_type || 'free';
-          const lastUsed = card.last_used_date
-            ? `(Last used: ${new Date(card.last_used_date).toLocaleDateString()})`
-            : '(Never used)';
-          return `• ${cardName} - ${cardType} ${lastUsed}`;
-        })
-        .join('\n')}`;
-    }
-
-    if (response.transactions) {
-      const total = response.total_amount || 0;
-      return `Found ${response.count} transactions (Total: $${total.toFixed(2)}):\n${response.transactions
-        .map(t => `• ${t.description} - $${t.amount} (${t.date})`)
-        .join('\n')}`;
-    }
-
-    if (response.insights) {
-      return `Financial Insights:\n${response.insights.map(insight => `• ${insight}`).join('\n')}${
-        response.recommendations
-          ? `\n\nRecommendations:\n${response.recommendations.map(rec => `• ${rec}`).join('\n')}`
-          : ''
-      }`;
-    }
-
-    if (response.success && response.todo) {
-      return `✅ ${response.message}\nTask: ${response.todo.task}`;
-    }
-
-    if (response.success && (response.deletedCount || response.updatedCount)) {
-      return `✅ ${response.message}`;
-    }
-
-    if (response.success && response.credit_card) {
-      return `✅ ${response.message}\nCard: ${response.credit_card.card_name}`;
-    }
-
-    if (
-      response.ui_action ||
-      response.ui_guidance ||
-      (response.success === false && response.message && !response.message.includes('Error'))
-    ) {
-      return `✅ ${response.message}`;
-    }
-
-    return response.summary || JSON.stringify(response, null, 2);
-  };
-
-  const quickActions = [
-    { label: 'Show pending todos', query: 'show me pending todos' },
-    { label: 'Show completed todos', query: 'show me completed todos' },
-    { label: 'Show credit cards', query: 'show me my credit cards' },
-    { label: 'Inactive cards', query: 'which cards are inactive?' },
-  ];
 
   if (!isExpanded) {
     return (
@@ -303,6 +240,11 @@ const AIAssistant = () => {
             <span className="text-2xl">🤖</span>
           </div>
           <div className="absolute -top-1 -right-1 w-3 h-3 bg-green-400 rounded-full animate-pulse"></div>
+          {proactiveAlerts.length > 0 && (
+            <div className="absolute -top-2 -left-2 w-6 h-6 bg-red-500 text-white text-xs rounded-full flex items-center justify-center font-bold animate-bounce">
+              {proactiveAlerts.length}
+            </div>
+          )}
         </button>
       </div>
     );
@@ -367,8 +309,8 @@ const AIAssistant = () => {
       {/* Messages */}
       {!isMinimized && (
         <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-gradient-to-b from-gray-50/50 to-white/80">
-          {messages.map(message => (
-            <div key={message.id} className="flex justify-start animate-fadeIn">
+          {messages.map((message, index) => (
+            <div key={message.id || 'msg-' + index} className="flex justify-start animate-fadeIn">
               <div
                 className={`w-8 h-8 rounded-full flex items-center justify-center mr-2 flex-shrink-0 mt-1 ${
                   message.type === 'assistant'
@@ -381,17 +323,21 @@ const AIAssistant = () => {
                 </span>
               </div>
               <div
-                className={`max-w-[80%] px-5 py-4 whitespace-pre-line shadow-lg backdrop-blur-sm ${
-                  message.type === 'user'
-                    ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-3xl rounded-bl-lg shadow-blue-200/50 text-sm font-medium'
-                    : message.isError
-                      ? 'bg-gradient-to-r from-red-50 to-red-100 text-red-700 border border-red-200/50 rounded-3xl rounded-bl-lg shadow-red-200/30 text-sm'
-                      : message.processingMode === 'gemini'
-                        ? 'bg-gradient-to-r from-purple-50 via-blue-50 to-indigo-50 text-gray-800 border border-purple-200/50 rounded-3xl rounded-bl-lg italic shadow-purple-200/40 text-sm'
-                        : 'bg-white/90 text-gray-800 border border-gray-200/50 rounded-3xl rounded-bl-lg shadow-gray-200/40 text-sm'
-                }`}
+                className={`max-w-[80%] px-5 py-4 whitespace-pre-line shadow-lg backdrop-blur-sm ${getMessageClassName(message, MESSAGE_STYLES)}`}
               >
                 {message.content}
+
+                {/* Visual Insights for AI responses */}
+                {message.type === 'assistant' &&
+                  message.data &&
+                  (message.data.insights ||
+                    message.data.urgentItems ||
+                    message.data.suggestions) && (
+                    <div className="mt-3">
+                      <VisualInsights data={message.data} type="overview" />
+                    </div>
+                  )}
+
                 <div
                   className={`text-xs mt-1 opacity-60 flex justify-between items-center ${
                     message.type === 'user' ? 'text-white/70' : 'text-gray-500'
@@ -405,13 +351,9 @@ const AIAssistant = () => {
                   </span>
                   {message.type === 'assistant' && (
                     <span
-                      className={`text-xs px-1.5 py-0.5 rounded-full ${
-                        message.processingMode === 'gemini'
-                          ? 'bg-purple-100 text-purple-600'
-                          : 'bg-gray-100 text-gray-600'
-                      }`}
+                      className={`text-xs px-1.5 py-0.5 rounded-full ${getMessageBadge(message, BADGE_STYLES).class}`}
                     >
-                      {message.processingMode === 'gemini' ? '🤖 AI' : '🔧 Rule'}
+                      {getMessageBadge(message, BADGE_STYLES).text}
                     </span>
                   )}
                 </div>
@@ -447,55 +389,21 @@ const AIAssistant = () => {
 
       {/* Quick Actions */}
       {!isMinimized && showQuickActions && (
-        <div className="px-4 py-2 bg-gray-50 border-t border-gray-100 animate-fadeIn">
+        <div className="px-4 py-3 bg-gradient-to-r from-gray-50 to-blue-50/30 border-t border-gray-100 animate-fadeIn">
+          <div className="text-xs text-gray-600 mb-2 font-medium">🚀 Quick Actions</div>
           <div className="flex flex-wrap gap-1.5">
-            {quickActions.map((action, index) => (
+            {QUICK_ACTIONS.map((action, index) => (
               <button
-                key={index}
-                onClick={async () => {
+                key={'action-' + index}
+                onClick={() => {
                   setShowQuickActions(false);
-                  setIsLoading(true);
-
-                  const userMessage = {
-                    id: Date.now(),
-                    type: 'user',
-                    content: action.query,
-                    timestamp: new Date(),
-                  };
-
-                  setMessages(prev => [...prev, userMessage]);
-
-                  try {
-                    const response = await mcpClient.processNaturalLanguageQuery(action.query);
-
-                    const assistantMessage = {
-                      id: Date.now() + 1,
-                      type: 'assistant',
-                      content: formatResponse(response),
-                      timestamp: new Date(),
-                      data: response,
-                    };
-
-                    setMessages(prev => [...prev, assistantMessage]);
-
-                    if (response.success && response.todo) {
-                      window.dispatchEvent(new CustomEvent('todoAdded', { detail: response.todo }));
-                    }
-                  } catch (error) {
-                    const errorMessage = {
-                      id: Date.now() + 1,
-                      type: 'assistant',
-                      content: `Sorry, I encountered an error: ${error.message}`,
-                      timestamp: new Date(),
-                      isError: true,
-                    };
-
-                    setMessages(prev => [...prev, errorMessage]);
-                  } finally {
-                    setIsLoading(false);
-                  }
+                  processQuery(action.query);
                 }}
-                className="text-xs bg-white text-blue-700 px-2.5 py-1.5 rounded-full border border-blue-200 hover:bg-blue-50 transition-all duration-200 font-medium shadow-sm"
+                className={`text-xs px-2.5 py-1.5 rounded-full border transition-all duration-200 font-medium shadow-sm ${
+                  action.priority === 'high'
+                    ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-orange-300 hover:from-orange-600 hover:to-red-600'
+                    : 'bg-white text-blue-700 border-blue-200 hover:bg-blue-50'
+                }`}
                 data-cy={`quick-action-${index}`}
               >
                 {action.label}
@@ -554,7 +462,9 @@ const AIAssistant = () => {
                       setHistoryIndex(newIndex);
                       setInputValue(queryHistory[newIndex]);
                     }
-                  } else if (e.key === 'ArrowDown') {
+                    return;
+                  }
+                  if (e.key === 'ArrowDown') {
                     e.preventDefault();
                     if (historyIndex > 0) {
                       const newIndex = historyIndex - 1;

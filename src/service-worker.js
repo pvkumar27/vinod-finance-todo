@@ -24,7 +24,7 @@ precacheAndRoute(self.__WB_MANIFEST);
 // Set up App Shell-style routing, so that all navigation requests
 // are fulfilled with your index.html shell. Learn more at
 // https://developers.google.com/web/fundamentals/architecture/app-shell
-const fileExtensionRegexp = new RegExp('/[^/?]+\\.[^/]+$');
+const fileExtensionRegexp = /\/[^/?]+\.[^/]+$/;
 registerRoute(
   // Return false to exempt requests from being fulfilled by index.html.
   ({ request, url }) => {
@@ -37,7 +37,7 @@ registerRoute(
       return false;
     } // If this looks like a URL for a resource, because it contains // a file extension, skip.
 
-    if (url.pathname.match(fileExtensionRegexp)) {
+    if (fileExtensionRegexp.exec(url.pathname)) {
       return false;
     } // Return true to signal that we want to use the handler.
 
@@ -63,7 +63,10 @@ registerRoute(
 
 // This allows the web app to trigger skipWaiting via
 // registration.waiting.postMessage({type: 'SKIP_WAITING'})
-self.addEventListener('message', (event) => {
+self.addEventListener('message', event => {
+  // Verify origin for security
+  if (event.origin !== self.location.origin) return;
+
   if (event.data && event.data.type === 'SKIP_WAITING') {
     self.skipWaiting();
   }

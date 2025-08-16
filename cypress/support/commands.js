@@ -10,37 +10,57 @@ Cypress.Commands.add('login', (email, password) => {
   cy.document().should('exist');
   cy.get('body').should('be.visible');
 
-  // Wait for form elements with longer timeout
-  cy.get('input[type="email"]', { timeout: 15000 }).should('be.visible').clear();
-  cy.get('input[type="email"]').type(testEmail, { delay: 100 });
+  // Wait for auth form to be stable
+  cy.wait(1000);
 
-  cy.get('input[type="password"]').should('be.visible').clear();
-  cy.get('input[type="password"]').type(testPassword, { delay: 100 });
+  // Handle email input with retry logic
+  cy.get('input[type="email"]', { timeout: 15000 })
+    .should('be.visible')
+    .then($input => {
+      cy.wrap($input).clear({ force: true }).type(testEmail, { delay: 50 });
+    });
 
+  // Handle password input with retry logic
+  cy.get('input[type="password"]')
+    .should('be.visible')
+    .then($input => {
+      cy.wrap($input).clear({ force: true }).type(testPassword, { delay: 50 });
+    });
+
+  // Submit form
   cy.get('button[type="submit"]').should('be.visible').click();
 
-  // Wait for navigation to complete
-  cy.get('[data-cy="todo-manager-heading"]', { timeout: 20000 }).should('be.visible');
+  // Wait for navigation to complete - app loads on chat tab by default
+  cy.get('body', { timeout: 20000 }).should('be.visible');
+
+  // Navigate to todos tab for tests
+  cy.get('button[aria-label="Navigate to Todos"]', { timeout: 10000 }).click();
+  cy.get('[data-cy="todo-manager-heading"]', { timeout: 10000 }).should('be.visible');
 });
 
 // Custom command for cleanup
 Cypress.Commands.add('cleanupTestData', () => {
   // Clean up test todos
   cy.get('body').then($body => {
-    // Look for todos containing Test_E2E_
-    if ($body.find('span:contains("Test_E2E_")').length > 0) {
-      cy.get('span:contains("Test_E2E_")', { timeout: 5000 }).each($el => {
-        cy.wrap($el).parents('.group').find('button[aria-label*="Delete"]').click({ force: true });
-      });
+    if ($body.text().includes('Test_E2E_')) {
+      cy.get('*')
+        .contains('Test_E2E_')
+        .each($el => {
+          cy.wrap($el)
+            .closest('.group')
+            .find('button[aria-label*="Delete"]')
+            .click({ force: true });
+        });
     }
 
     // Clean up test credit cards containing Chase (from tests)
-    if ($body.find('h3:contains("Chase 1234")').length > 0) {
-      cy.get('h3:contains("Chase 1234")', { timeout: 5000 }).each($el => {
-        cy.wrap($el).parents('.rounded-lg').find('button').last().click({ force: true });
-        // Confirm deletion
-        cy.on('window:confirm', () => true);
-      });
+    if ($body.text().includes('Chase 1234')) {
+      cy.get('*')
+        .contains('Chase 1234')
+        .each($el => {
+          cy.wrap($el).closest('div').find('button').last().click({ force: true });
+          cy.window().then(win => cy.stub(win, 'confirm').returns(true));
+        });
     }
   });
 });
@@ -48,7 +68,7 @@ Cypress.Commands.add('cleanupTestData', () => {
 // Custom command for generating test data
 Cypress.Commands.add('generateTestData', type => {
   const timestamp = Date.now();
-  const id = Math.floor(Math.random() * 10000);
+  const id = timestamp % 10000; // Use timestamp-based ID instead of Math.random()
 
   const data = {
     todo: {

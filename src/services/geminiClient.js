@@ -7,10 +7,46 @@ const GEMINI_API_KEY = process.env.REACT_APP_GEMINI_API_KEY;
 export class GeminiClient {
   constructor() {
     this.lastCallTime = 0;
-    this.minInterval = 2000; // 2 seconds between calls
+    this.minInterval = 1000; // 1 second between calls (optimized)
     this.learnedQueries = this.loadLearnedQueries();
     this.queryCount = 0;
     this.recentQueries = [];
+    this.dailyQuotaUsed = this.loadDailyQuota();
+    this.quotaResetTime = this.getNextMidnight();
+  }
+
+  getNextMidnight() {
+    const now = new Date();
+    const midnight = new Date(now);
+    midnight.setHours(24, 0, 0, 0);
+    return midnight.getTime();
+  }
+
+  loadDailyQuota() {
+    try {
+      const stored = localStorage.getItem('gemini_daily_quota');
+      if (!stored) return { requests: 0, date: new Date().toDateString() };
+      const quota = JSON.parse(stored);
+      // Reset if it's a new day
+      if (quota.date !== new Date().toDateString()) {
+        return { requests: 0, date: new Date().toDateString() };
+      }
+      return quota;
+    } catch {
+      return { requests: 0, date: new Date().toDateString() };
+    }
+  }
+
+  saveDailyQuota() {
+    localStorage.setItem('gemini_daily_quota', JSON.stringify(this.dailyQuotaUsed));
+  }
+
+  isQuotaAvailable() {
+    // Gemini free tier: 15 requests/minute, 1500 requests/day
+    const now = Date.now();
+    if (now - this.lastCallTime < this.minInterval) return false;
+    if (this.dailyQuotaUsed.requests >= 1400) return false; // Leave buffer
+    return true;
   }
 
   getQueryCount() {
@@ -46,12 +82,13 @@ export class GeminiClient {
       return await this.fallbackProcess(query);
     }
 
-    // Rate limiting protection
-    const now = Date.now();
-    if (now - this.lastCallTime < this.minInterval) {
+    if (!this.isQuotaAvailable()) {
       return await this.fallbackProcess(query);
     }
-    this.lastCallTime = now;
+
+    this.lastCallTime = Date.now();
+    this.dailyQuotaUsed.requests++;
+    this.saveDailyQuota();
 
     try {
       const prompt = `
@@ -62,6 +99,14 @@ Current Time: ${new Date().toISOString()}
 User Context: Active session with ${this.getQueryCount()} previous queries
 
 🎯 COMPREHENSIVE QUERY EXAMPLES:
+
+🤖 AI-FIRST QUERIES (NEW):
+- "what needs my attention today?" → get_priority_insights with focus: "today"
+- "give me financial insights" → get_insights with type: "comprehensive"
+- "analyze my spending patterns" → analyze_spending with period: "current_month"
+- "show me proactive alerts" → get_proactive_alerts
+- "what should I focus on?" → get_priority_insights with focus: "urgent"
+- "help me optimize my finances" → get_optimization_suggestions
 
 📝 TODO QUERIES:
 - "show me completed todos" → get_todos with completed: true
@@ -79,7 +124,11 @@ User Context: Active session with ${this.getQueryCount()} previous queries
 - "sort cards by name" → get_credit_cards with sort_by: "name", sort_order: "asc"
 - "sort cards by days inactive" → get_credit_cards with sort_by: "days_inactive", sort_order: "desc"
 - "show inactive cards" → get_credit_cards with inactive_only: true
+- "cards that haven't been used for 90+days" → get_credit_cards with inactive_only: true
+- "cards not used for 90 days" → get_credit_cards with inactive_only: true
 - "show Chase cards" → get_credit_cards with bank_name: "Chase"
+- "show cards with expiring promos" → get_credit_cards with promo_expiring: true
+- "which cards need attention?" → get_card_alerts
 
 🔄 UI QUERIES:
 - "switch to cards view" → ui_operation with operation_type: "view_switch", view_mode: "cards"
@@ -97,6 +146,13 @@ User Context: Active session with ${this.getQueryCount()} previous queries
 - View switching (table/card views) - Direct user to UI controls
 - Navigation - Direct user to manual controls
 - Settings/preferences - Direct user to UI
+
+🎯 AI-FIRST OPERATIONS (NEW):
+- get_priority_insights: Analyze and surface most important items
+- get_proactive_alerts: Check for items needing attention
+- analyze_spending: Spending analysis and forecasting
+- get_optimization_suggestions: Financial optimization recommendations
+- get_card_alerts: Credit card specific insights and alerts
 
 📝 TODOS (Full CRUD):
 - ui_operation: For view switching, navigation, settings (return helpful message)
@@ -121,16 +177,24 @@ User Context: Active session with ${this.getQueryCount()} previous queries
 - set_reminder: Create reminders for cards
 - get_reminders: View upcoming reminders
 
-📊 INSIGHTS:
-- get_insights: Financial analysis and recommendations
+📊 INSIGHTS & ANALYSIS (ENHANCED):
+- get_insights: Comprehensive financial analysis and recommendations
+- get_priority_insights: Focus on urgent items needing attention
+- get_proactive_alerts: Check for inactive cards, expiring promos, overdue tasks
+- analyze_spending: Spending pattern analysis and forecasting
+- get_optimization_suggestions: AI-powered financial optimization tips
+- get_card_alerts: Credit card specific alerts and recommendations
 
-🎯 SMART FEATURES:
+🎯 SMART FEATURES (ENHANCED):
 - Context awareness: Consider user's recent queries and patterns
+- Proactive intelligence: Automatically surface urgent items and alerts
 - Date intelligence: "today" = "${new Date().toISOString().split('T')[0]}", "tomorrow" = "${new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().split('T')[0]}"
 - Relative dates: "1 week old" = due_date_before: "${new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]}"
 - Overdue patterns: "1 day overdue" = due_date: "${new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().split('T')[0]}"
 - Task extraction: "add task to clean bottle" → task: "clean bottle"
 - Smart defaults: Infer user intent from context (e.g., if asking about overdue, likely wants actionable items)
+- Priority detection: "what needs attention" → get_priority_insights
+- Financial focus: "analyze", "insights", "optimize" → financial analysis actions
 - Default behavior: Always set completed: false unless explicitly asking for completed items
 - Pinned queries: When asking for "pinned", don't set completed filter
 
@@ -212,14 +276,12 @@ Key Parameters:
       const result = await this.executeAction(parsed);
       result.processingMode = 'gemini';
 
-      // Learn successful queries - CRITICAL for fallback improvement
-      if (result.success) {
+      if (result.success !== false) {
         this.saveLearnedQuery(query, parsed.action, parsed.params);
       }
 
       return result;
     } catch (error) {
-      console.log('Gemini failed, using fallback:', error.message || error);
       const fallbackResult = await this.fallbackProcess(query);
       fallbackResult.processingMode = 'fallback';
       return fallbackResult;
@@ -471,6 +533,137 @@ Key Parameters:
           message: `Successfully deleted ${deletedCardCount} credit card${deletedCardCount > 1 ? 's' : ''}`,
         };
 
+      case 'get_priority_insights':
+        const priorityTodos = await api.getTodos({});
+        const priorityCards = await api.getCreditCards({});
+
+        const urgentItems = [];
+        const priorityInsights = [];
+
+        // Check overdue todos
+        const overdueTodos = priorityTodos.filter(
+          t => !t.completed && t.due_date && new Date(t.due_date) < new Date()
+        );
+        if (overdueTodos.length > 0) {
+          urgentItems.push(
+            `${overdueTodos.length} overdue task${overdueTodos.length > 1 ? 's' : ''}`
+          );
+          priorityInsights.push('Focus on completing overdue tasks first');
+        }
+
+        // Check today's todos
+        const todayTodos = priorityTodos.filter(
+          t => !t.completed && t.due_date === new Date().toISOString().split('T')[0]
+        );
+        if (todayTodos.length > 0) {
+          urgentItems.push(
+            `${todayTodos.length} task${todayTodos.length > 1 ? 's are' : ' is'} due today`
+          );
+        }
+
+        // Check inactive cards
+        const priorityInactiveCards = priorityCards.filter(c => {
+          if (!c.last_used_date) return true;
+          const lastUsedDate = new Date(c.last_used_date);
+          const today = new Date();
+          if (lastUsedDate > today) return false;
+          const daysSince = Math.floor((today - lastUsedDate) / (1000 * 60 * 60 * 24));
+          return daysSince >= 90;
+        });
+        if (priorityInactiveCards.length > 0) {
+          urgentItems.push(
+            `${priorityInactiveCards.length} inactive credit card${priorityInactiveCards.length > 1 ? 's' : ''}`
+          );
+          priorityInsights.push('Consider using inactive cards or closing them');
+        }
+
+        return {
+          urgentItems,
+          insights: priorityInsights.length > 0 ? priorityInsights : ['Everything looks good!'],
+          summary:
+            urgentItems.length > 0
+              ? `${urgentItems.length} priority items found`
+              : 'No urgent items',
+        };
+
+      case 'get_proactive_alerts':
+        const alertTodos = await api.getTodos({});
+        const alertCards = await api.getCreditCards({});
+
+        const alerts = [];
+
+        // Check for overdue todos
+        const alertOverdueTodos = alertTodos.filter(
+          t => !t.completed && t.due_date && new Date(t.due_date) < new Date()
+        );
+        if (alertOverdueTodos.length > 0) {
+          alerts.push({
+            type: 'todos_overdue',
+            message: `${alertOverdueTodos.length} task${alertOverdueTodos.length > 1 ? 's are' : ' is'} overdue`,
+            priority: 'high',
+          });
+        }
+
+        // Check for inactive cards
+        const alertInactiveCards = alertCards.filter(c => {
+          if (!c.last_used_date) return true;
+          const lastUsedDate = new Date(c.last_used_date);
+          const today = new Date();
+          if (lastUsedDate > today) return false;
+          const daysSince = Math.floor((today - lastUsedDate) / (1000 * 60 * 60 * 24));
+          return daysSince >= 90;
+        });
+        if (alertInactiveCards.length > 0) {
+          alerts.push({
+            type: 'credit_card_inactive',
+            message: `${alertInactiveCards.length} credit card${alertInactiveCards.length > 1 ? "s haven't" : " hasn't"} been used in 90+ days`,
+            priority: 'medium',
+          });
+        }
+
+        return {
+          alerts,
+          summary: `Found ${alerts.length} alert${alerts.length > 1 ? 's' : ''}`,
+        };
+
+      case 'get_optimization_suggestions':
+        const optTodos = await api.getTodos({});
+        const optCards = await api.getCreditCards({});
+
+        const suggestions = [];
+        const optInsights = [];
+
+        // Analyze todo patterns
+        const incompleteTodos = optTodos.filter(t => !t.completed);
+        if (incompleteTodos.length > 10) {
+          suggestions.push('Consider breaking down large tasks into smaller, manageable steps');
+          optInsights.push(`You have ${incompleteTodos.length} pending tasks`);
+        }
+
+        // Analyze card usage
+        const activeCards = optCards.filter(c => {
+          if (!c.last_used_date) return false;
+          const lastUsedDate = new Date(c.last_used_date);
+          const today = new Date();
+          if (lastUsedDate > today) return false;
+          const daysSince = Math.floor((today - lastUsedDate) / (1000 * 60 * 60 * 24));
+          return daysSince < 90;
+        });
+
+        if (activeCards.length < optCards.length / 2) {
+          suggestions.push('Consider consolidating to fewer credit cards for better management');
+          optInsights.push(
+            `Only ${activeCards.length} of ${optCards.length} cards are actively used`
+          );
+        }
+
+        return {
+          suggestions:
+            suggestions.length > 0 ? suggestions : ['Your financial management looks good!'],
+          insights: optInsights,
+          summary: `Generated ${suggestions.length} optimization suggestion${suggestions.length > 1 ? 's' : ''}`,
+        };
+
       case 'get_insights':
         const allTodos = await api.getTodos({});
         const allCards = await api.getCreditCards({});
@@ -479,13 +672,13 @@ Key Parameters:
         const recommendations = [];
 
         // Todo insights
-        const overdueTodos = allTodos.filter(
+        const insightOverdueTodos = allTodos.filter(
           t => !t.completed && t.due_date && new Date(t.due_date) < new Date()
         );
         const completedTodos = allTodos.filter(t => t.completed);
 
-        if (overdueTodos.length > 0) {
-          insights.push(`${overdueTodos.length} overdue todos`);
+        if (insightOverdueTodos.length > 0) {
+          insights.push(`${insightOverdueTodos.length} overdue todos`);
           recommendations.push('Focus on completing overdue tasks first');
         }
 
@@ -496,10 +689,12 @@ Key Parameters:
         // Card insights
         const inactiveCards = allCards.filter(c => {
           if (!c.last_used_date) return true;
-          const daysSince = Math.floor(
-            (new Date() - new Date(c.last_used_date)) / (1000 * 60 * 60 * 24)
-          );
-          return daysSince > 90;
+          const lastUsedDate = new Date(c.last_used_date);
+          const today = new Date();
+          // Skip cards with future dates (data errors)
+          if (lastUsedDate > today) return false;
+          const daysSince = Math.floor((today - lastUsedDate) / (1000 * 60 * 60 * 24));
+          return daysSince >= 90;
         });
 
         if (inactiveCards.length > 0) {
@@ -521,13 +716,34 @@ Key Parameters:
   async fallbackProcess(query) {
     const lowerQuery = query.toLowerCase();
 
-    // Check learned queries first
     const learned = this.learnedQueries[lowerQuery.trim()];
     if (learned) {
       try {
-        return await this.executeAction({ action: learned.action, params: learned.params });
+        const result = await this.executeAction({ action: learned.action, params: learned.params });
+        result.processingMode = 'learned-pattern';
+        return result;
       } catch (error) {
-        // If learned query fails, continue with regular fallback
+        // Continue with rule-based fallback
+      }
+    }
+
+    const similarQueries = Object.keys(this.learnedQueries).filter(learnedQuery => {
+      const similarity = this.calculateSimilarity(lowerQuery, learnedQuery);
+      return similarity > 0.7;
+    });
+
+    if (similarQueries.length > 0) {
+      try {
+        const bestMatch = similarQueries[0];
+        const learnedPattern = this.learnedQueries[bestMatch];
+        const result = await this.executeAction({
+          action: learnedPattern.action,
+          params: learnedPattern.params,
+        });
+        result.processingMode = 'similar-pattern';
+        return result;
+      } catch (error) {
+        // Continue with rule-based fallback
       }
     }
 
@@ -805,15 +1021,84 @@ Key Parameters:
       // Build filters
       const filters = {};
       if (bankName) filters.bank_name = bankName;
-      if (lowerQuery.includes('inactive')) filters.inactive_only = true;
+
+      if (
+        lowerQuery.includes('inactive') ||
+        lowerQuery.includes('not used') ||
+        lowerQuery.includes("haven't been used") ||
+        lowerQuery.includes('90') ||
+        (lowerQuery.includes('days') &&
+          (lowerQuery.includes('not') || lowerQuery.includes("haven't")))
+      )
+        filters.inactive_only = true;
       if (lowerQuery.includes('promo') && lowerQuery.includes('expir'))
         filters.promo_expiring = true;
-
       return api.getCreditCards(filters).then(cards => ({
         credit_cards: cards,
         count: cards.length,
         summary: `Found ${cards.length} credit cards${bankName ? ` from ${bankName}` : ''}${filters.inactive_only ? ' (inactive)' : ''}${filters.promo_expiring ? ' (promo expiring)' : ''}`,
       }));
+    }
+
+    // Handle priority/attention queries
+    if (lowerQuery.includes('what needs') && lowerQuery.includes('attention')) {
+      const allTodos = await api.getTodos({});
+      const allCards = await api.getCreditCards({});
+
+      const urgentItems = [];
+
+      // Check overdue todos
+      const overdueTodos = allTodos.filter(
+        t => !t.completed && t.due_date && new Date(t.due_date) < new Date()
+      );
+      if (overdueTodos.length > 0) {
+        urgentItems.push(
+          `${overdueTodos.length} overdue task${overdueTodos.length > 1 ? 's' : ''}`
+        );
+      }
+
+      // Check inactive cards
+      const inactiveCards = allCards.filter(c => {
+        if (!c.last_used_date) return true;
+        const lastUsedDate = new Date(c.last_used_date);
+        const today = new Date();
+        if (lastUsedDate > today) return false;
+        const daysSince = Math.floor((today - lastUsedDate) / (1000 * 60 * 60 * 24));
+        return daysSince >= 90;
+      });
+      if (inactiveCards.length > 0) {
+        urgentItems.push(
+          `${inactiveCards.length} inactive credit card${inactiveCards.length > 1 ? 's' : ''}`
+        );
+      }
+
+      return {
+        urgentItems,
+        insights:
+          urgentItems.length > 0
+            ? ['Focus on these priority items first']
+            : ['Everything looks good!'],
+        summary:
+          urgentItems.length > 0
+            ? `${urgentItems.length} items need attention`
+            : 'No urgent items found',
+        processingMode: 'fallback',
+      };
+    }
+
+    // Handle conversational responses
+    if (
+      lowerQuery.includes('thank') ||
+      lowerQuery.includes('thanks') ||
+      lowerQuery === 'ok' ||
+      lowerQuery === 'okay'
+    ) {
+      return {
+        success: true,
+        message:
+          "You're welcome! I'm here whenever you need help with your finances. Try asking me 'what needs my attention today?' for insights.",
+        processingMode: 'fallback',
+      };
     }
 
     // Handle common update patterns that might not be caught
@@ -834,9 +1119,94 @@ Key Parameters:
       };
     }
 
-    throw new Error(
-      'I can help with todos and credit cards. Try: "show my todos" or "show my credit cards"'
-    );
+    // Enhanced default fallback with better pattern recognition
+    if (
+      lowerQuery.includes('pending') ||
+      lowerQuery.includes('incomplete') ||
+      lowerQuery.includes('unfinished')
+    ) {
+      return api.getTodos({ completed: false }).then(todos => ({
+        todos,
+        count: todos.length,
+        summary: `Found ${todos.length} pending todos`,
+        processingMode: 'enhanced-fallback',
+      }));
+    }
+
+    if (
+      lowerQuery.includes('completed') ||
+      lowerQuery.includes('finished') ||
+      lowerQuery.includes('done')
+    ) {
+      return api.getTodos({ completed: true }).then(todos => ({
+        todos,
+        count: todos.length,
+        summary: `Found ${todos.length} completed todos`,
+        processingMode: 'enhanced-fallback',
+      }));
+    }
+
+    if (
+      lowerQuery.includes('all') &&
+      (lowerQuery.includes('todo') || lowerQuery.includes('task'))
+    ) {
+      return api.getTodos({}).then(todos => ({
+        todos,
+        count: todos.length,
+        summary: `Found ${todos.length} total todos`,
+        processingMode: 'enhanced-fallback',
+      }));
+    }
+
+    if (lowerQuery.includes('card') && !lowerQuery.includes('todo')) {
+      return api.getCreditCards({}).then(cards => ({
+        credit_cards: cards,
+        count: cards.length,
+        summary: `Found ${cards.length} credit cards`,
+        processingMode: 'enhanced-fallback',
+      }));
+    }
+
+    // Generic fallback response
+    return {
+      success: false,
+      message:
+        'I can help with todos, credit cards, and financial insights. Try: "show me pending todos" or "what needs my attention today?"',
+      processingMode: 'enhanced-fallback',
+    };
+  }
+
+  calculateSimilarity(str1, str2) {
+    const longer = str1.length > str2.length ? str1 : str2;
+    const shorter = str1.length > str2.length ? str2 : str1;
+    if (longer.length === 0) return 1.0;
+
+    const editDistance = this.levenshteinDistance(longer, shorter);
+    return (longer.length - editDistance) / longer.length;
+  }
+
+  levenshteinDistance(str1, str2) {
+    const matrix = [];
+    for (let i = 0; i <= str2.length; i++) {
+      matrix[i] = [i];
+    }
+    for (let j = 0; j <= str1.length; j++) {
+      matrix[0][j] = j;
+    }
+    for (let i = 1; i <= str2.length; i++) {
+      for (let j = 1; j <= str1.length; j++) {
+        if (str2.charAt(i - 1) === str1.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j - 1] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j] + 1
+          );
+        }
+      }
+    }
+    return matrix[str2.length][str1.length];
   }
 
   extractTodoFilters(query) {

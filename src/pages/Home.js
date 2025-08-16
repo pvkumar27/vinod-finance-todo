@@ -31,29 +31,29 @@ const Home = () => {
     : null;
 
   return (
-    <div>
-      <div className="max-w-6xl mx-auto pt-8 pb-0 px-4 sm:px-6 lg:px-8">
-        {/* Hero Section removed */}
-
-        {/* Main Application Modules - Now more prominent */}
-        <div className="card-fancy rounded-2xl p-6 mb-8 hover-lift">
-          <h2 className="section-header text-xl font-semibold mb-6">Task Management</h2>
-          <div className="card-content">
-            <TabNavigation />
-          </div>
+    <div className="min-h-screen">
+      <div className="max-w-6xl mx-auto pt-8 pb-8 px-4 sm:px-6 lg:px-8">
+        {/* Welcome Header */}
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold finbot-text-gradient mb-4">Welcome to FinTask</h1>
+          <p className="text-lg text-gray-300">Your AI-powered financial companion</p>
         </div>
 
-        {/* Version Footer with Notification Button */}
-        <div className="mt-8 text-center mb-0">
-          <div className="flex flex-col items-center space-y-4">
-            {/* App info */}
+        {/* Main Application Modules */}
+        <div className="mb-8">
+          <h2 className="text-2xl font-bold text-white mb-6 flex items-center">
+            <span className="mr-3">🎯</span>
+            Task Management
+          </h2>
+          <TabNavigation />
+        </div>
 
-            {/* Version Info */}
-            <div className="inline-flex items-center px-4 py-2 rounded-full bg-gradient-to-r from-blue-500/5 to-indigo-500/5 border border-blue-100">
-              <p className="text-sm bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent font-medium flex items-center justify-center">
-                FinTask {APP_VERSION} • Built with React & Supabase
-              </p>
-            </div>
+        {/* Version Footer */}
+        <div className="text-center">
+          <div className="finbot-card inline-flex items-center px-6 py-3">
+            <p className="text-sm finbot-text-gradient font-medium">
+              FinTask {APP_VERSION} • Built with React & Supabase
+            </p>
           </div>
         </div>
       </div>
