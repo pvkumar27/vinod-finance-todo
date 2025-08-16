@@ -76,17 +76,12 @@ describe('Essential Application Tests', () => {
     });
   });
 
-  it('should switch view modes', () => {
-    // Test view mode buttons exist
-    cy.get('[data-cy="view-table-button"]', { timeout: 10000 }).should('exist');
-    cy.get('[data-cy="view-cards-button"]').should('exist');
+  it('should navigate to insights tab', () => {
+    // Navigate to Insights tab
+    cy.get('[data-cy="nav-insights-tab"]').click();
+    cy.contains('Financial Insights', { timeout: 10000 }).should('be.visible');
 
-    // Test Credit Cards tab navigation
-    cy.get('[data-cy="nav-cards-tab"]').click();
-    cy.get('[data-cy="credit-cards-heading"]', { timeout: 10000 }).should('be.visible');
-
-    // Test view mode buttons exist on cards tab
-    cy.get('[data-cy="view-table-button"]').should('exist');
-    cy.get('[data-cy="view-cards-button"]').should('exist');
+    // Scroll down to notification settings and verify
+    cy.contains('Push Notifications').scrollIntoView().should('be.visible');
   });
 });
