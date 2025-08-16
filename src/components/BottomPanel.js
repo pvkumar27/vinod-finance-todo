@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
 
 const BottomPanel = ({ inputValue, setInputValue, onSubmit, onVoiceInput, isLoading }) => {
   const [commandHistory, setCommandHistory] = useState([]);
@@ -90,6 +91,14 @@ const BottomPanel = ({ inputValue, setInputValue, onSubmit, onVoiceInput, isLoad
       </div>
     </div>
   );
+};
+
+BottomPanel.propTypes = {
+  inputValue: PropTypes.string.isRequired,
+  setInputValue: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  onVoiceInput: PropTypes.func.isRequired,
+  isLoading: PropTypes.bool.isRequired,
 };
 
 export default BottomPanel;

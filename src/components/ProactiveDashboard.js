@@ -10,118 +10,124 @@ const ProactiveDashboard = ({ onActionClick }) => {
     generateProactiveInsights();
   }, []);
 
+  const checkTodoAlerts = async (alertsData, insightsData) => {
+    const overdueTodos = await api.getTodos({
+      due_date_before: new Date().toISOString().split('T')[0],
+      completed: false,
+    });
+
+    if (overdueTodos.length > 0) {
+      alertsData.push({
+        type: 'urgent',
+        icon: '⚠️',
+        title: 'Overdue Tasks',
+        message: `${overdueTodos.length} task${overdueTodos.length > 1 ? 's are' : ' is'} overdue`,
+        action: 'show overdue todos',
+        priority: 'high',
+      });
+    }
+
+    const todayTodos = await api.getTodos({
+      due_date: new Date().toISOString().split('T')[0],
+      completed: false,
+    });
+
+    if (todayTodos.length > 0) {
+      insightsData.push({
+        type: 'info',
+        icon: '📅',
+        title: "Today's Focus",
+        message: `${todayTodos.length} task${todayTodos.length > 1 ? 's' : ''} due today`,
+        action: "show today's todos",
+      });
+    }
+  };
+
+  const checkCardAlerts = async (alertsData, insightsData) => {
+    const allCards = await api.getCreditCards({});
+
+    const inactiveCards = allCards.filter(c => {
+      if (!c.last_used_date) return true;
+      const daysSince = Math.floor(
+        (new Date() - new Date(c.last_used_date)) / (1000 * 60 * 60 * 24)
+      );
+      return daysSince > 90;
+    });
+
+    if (inactiveCards.length > 0) {
+      alertsData.push({
+        type: 'warning',
+        icon: '💳',
+        title: 'Inactive Cards',
+        message: `${inactiveCards.length} card${inactiveCards.length > 1 ? "s haven't" : " hasn't"} been used in 90+ days`,
+        action: 'show inactive cards',
+        priority: 'medium',
+      });
+    }
+
+    const expiringPromoCards = allCards.filter(c => {
+      if (!c.current_promos || !Array.isArray(c.current_promos)) return false;
+      const thirtyDaysFromNow = new Date();
+      thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+      return c.current_promos.some(promo => {
+        if (!promo.promo_expiry_date) return false;
+        const expiryDate = new Date(promo.promo_expiry_date);
+        return expiryDate <= thirtyDaysFromNow && expiryDate >= new Date();
+      });
+    });
+
+    if (expiringPromoCards.length > 0) {
+      alertsData.push({
+        type: 'urgent',
+        icon: '🔔',
+        title: 'Expiring Promos',
+        message: `${expiringPromoCards.length} promotional rate${expiringPromoCards.length > 1 ? 's' : ''} expiring soon`,
+        action: 'show cards with expiring promos',
+        priority: 'high',
+      });
+    }
+
+    const activeCards = allCards.filter(c => {
+      if (!c.last_used_date) return false;
+      const daysSince = Math.floor(
+        (new Date() - new Date(c.last_used_date)) / (1000 * 60 * 60 * 24)
+      );
+      return daysSince <= 30;
+    });
+
+    if (activeCards.length > 0) {
+      insightsData.push({
+        type: 'success',
+        icon: '💪',
+        title: 'Active Management',
+        message: `${activeCards.length} card${activeCards.length > 1 ? 's' : ''} used recently`,
+        action: 'show my credit cards',
+      });
+    }
+  };
+
+  const checkPositiveInsights = async insightsData => {
+    const completedTodos = await api.getTodos({ completed: true });
+    if (completedTodos.length > 0) {
+      insightsData.push({
+        type: 'success',
+        icon: '✅',
+        title: 'Great Progress',
+        message: `You've completed ${completedTodos.length} task${completedTodos.length > 1 ? 's' : ''} recently`,
+        action: 'show completed todos',
+      });
+    }
+  };
+
   const generateProactiveInsights = async () => {
     setLoading(true);
     try {
       const alertsData = [];
       const insightsData = [];
 
-      // Check for overdue todos
-      const overdueTodos = await api.getTodos({
-        due_date_before: new Date().toISOString().split('T')[0],
-        completed: false,
-      });
-
-      if (overdueTodos.length > 0) {
-        alertsData.push({
-          type: 'urgent',
-          icon: '⚠️',
-          title: 'Overdue Tasks',
-          message: `${overdueTodos.length} task${overdueTodos.length > 1 ? 's are' : ' is'} overdue`,
-          action: 'show overdue todos',
-          priority: 'high',
-        });
-      }
-
-      // Check for today's todos
-      const todayTodos = await api.getTodos({
-        due_date: new Date().toISOString().split('T')[0],
-        completed: false,
-      });
-
-      if (todayTodos.length > 0) {
-        insightsData.push({
-          type: 'info',
-          icon: '📅',
-          title: "Today's Focus",
-          message: `${todayTodos.length} task${todayTodos.length > 1 ? 's' : ''} due today`,
-          action: "show today's todos",
-        });
-      }
-
-      // Check for inactive cards
-      const allCards = await api.getCreditCards({});
-      const inactiveCards = allCards.filter(c => {
-        if (!c.last_used_date) return true;
-        const daysSince = Math.floor(
-          (new Date() - new Date(c.last_used_date)) / (1000 * 60 * 60 * 24)
-        );
-        return daysSince > 90;
-      });
-
-      if (inactiveCards.length > 0) {
-        alertsData.push({
-          type: 'warning',
-          icon: '💳',
-          title: 'Inactive Cards',
-          message: `${inactiveCards.length} card${inactiveCards.length > 1 ? "s haven't" : " hasn't"} been used in 90+ days`,
-          action: 'show inactive cards',
-          priority: 'medium',
-        });
-      }
-
-      // Check for expiring promos
-      const expiringPromoCards = allCards.filter(c => {
-        if (!c.current_promos || !Array.isArray(c.current_promos)) return false;
-        const thirtyDaysFromNow = new Date();
-        thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
-        return c.current_promos.some(promo => {
-          if (!promo.promo_expiry_date) return false;
-          const expiryDate = new Date(promo.promo_expiry_date);
-          return expiryDate <= thirtyDaysFromNow && expiryDate >= new Date();
-        });
-      });
-
-      if (expiringPromoCards.length > 0) {
-        alertsData.push({
-          type: 'urgent',
-          icon: '🔔',
-          title: 'Expiring Promos',
-          message: `${expiringPromoCards.length} promotional rate${expiringPromoCards.length > 1 ? 's' : ''} expiring soon`,
-          action: 'show cards with expiring promos',
-          priority: 'high',
-        });
-      }
-
-      // Generate positive insights
-      const completedTodos = await api.getTodos({ completed: true });
-      if (completedTodos.length > 0) {
-        insightsData.push({
-          type: 'success',
-          icon: '✅',
-          title: 'Great Progress',
-          message: `You've completed ${completedTodos.length} task${completedTodos.length > 1 ? 's' : ''} recently`,
-          action: 'show completed todos',
-        });
-      }
-
-      const activeCards = allCards.filter(c => {
-        if (!c.last_used_date) return false;
-        const daysSince = Math.floor(
-          (new Date() - new Date(c.last_used_date)) / (1000 * 60 * 60 * 24)
-        );
-        return daysSince <= 30;
-      });
-
-      if (activeCards.length > 0) {
-        insightsData.push({
-          type: 'success',
-          icon: '💪',
-          title: 'Active Management',
-          message: `${activeCards.length} card${activeCards.length > 1 ? 's' : ''} used recently`,
-          action: 'show my credit cards',
-        });
-      }
+      await checkTodoAlerts(alertsData, insightsData);
+      await checkCardAlerts(alertsData, insightsData);
+      await checkPositiveInsights(insightsData);
 
       setAlerts(alertsData);
       setInsights(insightsData);

@@ -22,6 +22,7 @@ const BottomNavigation = ({ activeTab, setActiveTab }) => {
                   : 'text-gray-500 hover:text-[#632D1F]'
               }`}
               aria-label={`Navigate to ${item.label}`}
+              data-cy={`nav-${item.id === 'todos' ? 'todos' : item.id === 'cards' ? 'cards' : item.id}-tab`}
             >
               <span className="text-xl">{item.icon}</span>
               <span className="text-xs font-medium">{item.label}</span>

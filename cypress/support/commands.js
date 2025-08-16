@@ -19,8 +19,12 @@ Cypress.Commands.add('login', (email, password) => {
 
   cy.get('button[type="submit"]').should('be.visible').click();
 
-  // Wait for navigation to complete
-  cy.get('[data-cy="todo-manager-heading"]', { timeout: 20000 }).should('be.visible');
+  // Wait for navigation to complete - app loads on chat tab by default
+  cy.get('body', { timeout: 20000 }).should('be.visible');
+
+  // Navigate to todos tab for tests
+  cy.get('button[aria-label="Navigate to Todos"]').click();
+  cy.get('[data-cy="todo-manager-heading"]', { timeout: 10000 }).should('be.visible');
 });
 
 // Custom command for cleanup

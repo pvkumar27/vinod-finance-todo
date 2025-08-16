@@ -14,6 +14,53 @@ const MainApp = () => {
   const [messages, setMessages] = useState([]);
   const [initialized, setInitialized] = useState(false);
   const [isChatCollapsed, setIsChatCollapsed] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+  const { getRoastReply, getHypeReply } = useToneMode();
+
+  const generateProactiveAlerts = async () => {
+    const alerts = [];
+    try {
+      const allCards = await mcpClient.callTool('get_credit_cards', {});
+      const inactiveCards = allCards.credit_cards
+        ? allCards.credit_cards.filter(card => {
+            if (!card.last_used_date) return true;
+            const daysSince = Math.floor(
+              (new Date() - new Date(card.last_used_date)) / (1000 * 60 * 60 * 24)
+            );
+            return daysSince >= 90;
+          })
+        : [];
+
+      if (inactiveCards.length > 0) {
+        alerts.push({
+          message: `${inactiveCards.length} credit card${inactiveCards.length > 1 ? "s haven't" : " hasn't"} been used in 90+ days`,
+        });
+      }
+
+      const overdueTodos = await mcpClient.callTool('get_todos', {
+        due_date_before: new Date().toISOString().split('T')[0],
+        completed: false,
+      });
+      if (overdueTodos.todos && overdueTodos.todos.length > 0) {
+        alerts.push({
+          message: `${overdueTodos.todos.length} task${overdueTodos.todos.length > 1 ? 's are' : ' is'} overdue`,
+        });
+      }
+    } catch (error) {
+      console.error('Error generating proactive alerts:', error);
+    }
+    return alerts;
+  };
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   useEffect(() => {
     if (activeTab === 'chat') {
@@ -80,18 +127,6 @@ const MainApp = () => {
     window.addEventListener('quickReply', handleQuickReply);
     return () => window.removeEventListener('quickReply', handleQuickReply);
   }, []);
-  const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef(null);
-  const { getRoastReply, getHypeReply } = useToneMode();
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
 
   const handleVoiceInput = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -368,41 +403,6 @@ const MainApp = () => {
     }
 
     return response.message || response.summary || "Hmm, I'm not sure what happened there... 🤔";
-  };
-
-  const generateProactiveAlerts = async () => {
-    const alerts = [];
-    try {
-      const allCards = await mcpClient.callTool('get_credit_cards', {});
-      const inactiveCards = allCards.credit_cards
-        ? allCards.credit_cards.filter(card => {
-            if (!card.last_used_date) return true;
-            const daysSince = Math.floor(
-              (new Date() - new Date(card.last_used_date)) / (1000 * 60 * 60 * 24)
-            );
-            return daysSince >= 90;
-          })
-        : [];
-
-      if (inactiveCards.length > 0) {
-        alerts.push({
-          message: `${inactiveCards.length} credit card${inactiveCards.length > 1 ? "s haven't" : " hasn't"} been used in 90+ days`,
-        });
-      }
-
-      const overdueTodos = await mcpClient.callTool('get_todos', {
-        due_date_before: new Date().toISOString().split('T')[0],
-        completed: false,
-      });
-      if (overdueTodos.todos && overdueTodos.todos.length > 0) {
-        alerts.push({
-          message: `${overdueTodos.todos.length} task${overdueTodos.todos.length > 1 ? 's are' : ' is'} overdue`,
-        });
-      }
-    } catch (error) {
-      console.error('Error generating proactive alerts:', error);
-    }
-    return alerts;
   };
 
   const handleRoast = () => {

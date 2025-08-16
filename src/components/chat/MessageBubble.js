@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import QuickReplyButtons from './QuickReplyButtons';
 import InsightCard from './InsightCard';
 import RoastOrHypeButtons from './RoastOrHypeButtons';
@@ -10,6 +11,29 @@ const MessageBubble = ({ message, isLast, onRoast, onHype }) => {
   const hasInsights =
     message.data?.insights || message.data?.urgentItems || message.data?.suggestions;
   const hasQuickReplies = isBot && isLast;
+
+  const getMessageStyle = () => {
+    if (message.isWelcome) {
+      return 'bg-gradient-to-r from-white to-[#FDF3EE] text-[#331B18] border border-[#EAD2C6]';
+    }
+    if (message.isProactive) {
+      return 'bg-gradient-to-r from-[#A15B49] to-[#8B4513] text-white shadow-[#A15B49]/30';
+    }
+    if (message.isRoast || message.isHype) {
+      return 'bg-gradient-to-r from-[#5C2E27] to-[#632D1F] text-white shadow-[#5C2E27]/30';
+    }
+    return 'bg-gradient-to-r from-white to-[#FDF3EE] text-[#331B18] border border-[#EAD2C6]';
+  };
+
+  const getBadgeText = () => {
+    if (message.isWelcome) return '👋 Welcome';
+    if (message.isProactive) return 'Spotted ⚠️';
+    if (message.processingMode === 'gemini') return '🤖 AI';
+    if (message.processingMode === 'learned-pattern') return '🧠 Learned';
+    if (message.processingMode === 'similar-pattern') return '🔍 Similar';
+    if (message.processingMode === 'enhanced-fallback') return '⚡ Smart';
+    return '🔧 Rule';
+  };
 
   const getQuickReplies = () => {
     if (message.isWelcome) {
@@ -33,12 +57,17 @@ const MessageBubble = ({ message, isLast, onRoast, onHype }) => {
         { text: 'Show me trends 📈', query: 'show me spending trends and patterns' },
       ];
     }
-    // Default quick replies for any bot response
     return [
       { text: 'Tell me more 💬', query: 'tell me more about this' },
       { text: 'What else? 🤔', query: 'what else can you help me with' },
       { text: 'Show summary 📋', query: 'give me a summary of my finances' },
     ];
+  };
+
+  const handleQuickReply = query => {
+    setShowQuickReplies(false);
+    const event = new CustomEvent('quickReply', { detail: query });
+    window.dispatchEvent(event);
   };
 
   return (
@@ -52,36 +81,14 @@ const MessageBubble = ({ message, isLast, onRoast, onHype }) => {
             </div>
             <div className="max-w-[85%]">
               <div
-                className={`px-3 py-2 sm:px-4 sm:py-2.5 rounded-2xl rounded-bl-md shadow-lg transform hover:scale-[1.02] transition-all duration-200 ${
-                  message.isWelcome
-                    ? 'bg-gradient-to-r from-white to-[#FDF3EE] text-[#331B18] border border-[#EAD2C6]'
-                    : message.isProactive
-                      ? 'bg-gradient-to-r from-[#A15B49] to-[#8B4513] text-white shadow-[#A15B49]/30'
-                      : message.isRoast
-                        ? 'bg-gradient-to-r from-[#5C2E27] to-[#632D1F] text-white shadow-[#5C2E27]/30'
-                        : message.isHype
-                          ? 'bg-gradient-to-r from-[#5C2E27] to-[#632D1F] text-white shadow-[#5C2E27]/30'
-                          : 'bg-gradient-to-r from-white to-[#FDF3EE] text-[#331B18] border border-[#EAD2C6]'
-                }`}
+                className={`px-3 py-2 sm:px-4 sm:py-2.5 rounded-2xl rounded-bl-md shadow-lg transform hover:scale-[1.02] transition-all duration-200 ${getMessageStyle()}`}
               >
                 <div className="whitespace-pre-line text-sm sm:text-base font-normal leading-snug sm:leading-relaxed antialiased">
                   {message.content}
                 </div>
                 <div className="flex justify-between items-center mt-1 text-xs opacity-70">
                   <span className="px-2 py-1 bg-white/20 rounded-full text-xs">
-                    {message.isWelcome
-                      ? '👋 Welcome'
-                      : message.isProactive
-                        ? 'Spotted ⚠️'
-                        : message.processingMode === 'gemini'
-                          ? '🤖 AI'
-                          : message.processingMode === 'learned-pattern'
-                            ? '🧠 Learned'
-                            : message.processingMode === 'similar-pattern'
-                              ? '🔍 Similar'
-                              : message.processingMode === 'enhanced-fallback'
-                                ? '⚡ Smart'
-                                : '🔧 Rule'}
+                    {getBadgeText()}
                   </span>
                   <span className="text-[#AAA] text-xs">
                     {new Date(message.timestamp).toLocaleTimeString([], {
@@ -105,15 +112,7 @@ const MessageBubble = ({ message, isLast, onRoast, onHype }) => {
               {/* Quick Reply Buttons */}
               {hasQuickReplies && showQuickReplies && (
                 <div className="mt-3">
-                  <QuickReplyButtons
-                    replies={getQuickReplies()}
-                    onReply={query => {
-                      setShowQuickReplies(false);
-                      // Trigger query
-                      const event = new CustomEvent('quickReply', { detail: query });
-                      window.dispatchEvent(event);
-                    }}
-                  />
+                  <QuickReplyButtons replies={getQuickReplies()} onReply={handleQuickReply} />
                 </div>
               )}
             </div>
@@ -142,6 +141,23 @@ const MessageBubble = ({ message, isLast, onRoast, onHype }) => {
       </div>
     </div>
   );
+};
+
+MessageBubble.propTypes = {
+  message: PropTypes.shape({
+    type: PropTypes.string.isRequired,
+    content: PropTypes.string.isRequired,
+    timestamp: PropTypes.instanceOf(Date).isRequired,
+    data: PropTypes.object,
+    isWelcome: PropTypes.bool,
+    isProactive: PropTypes.bool,
+    isRoast: PropTypes.bool,
+    isHype: PropTypes.bool,
+    processingMode: PropTypes.string,
+  }).isRequired,
+  isLast: PropTypes.bool.isRequired,
+  onRoast: PropTypes.func.isRequired,
+  onHype: PropTypes.func.isRequired,
 };
 
 export default MessageBubble;

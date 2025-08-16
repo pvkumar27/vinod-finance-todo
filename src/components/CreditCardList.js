@@ -8,6 +8,25 @@ import CreditCardTable from './CreditCardTable';
 
 import CreditCardDetailModal from './CreditCardDetailModal';
 
+/* eslint-disable react/prop-types */
+const ReminderItem = ({ reminder, onDelete, formatDate }) => (
+  <div className="flex items-start justify-between mb-2 text-sm last:mb-0">
+    <div>
+      <span className="font-medium text-gray-800">{reminder.type}</span>
+      <span className="text-yellow-600"> – {formatDate(reminder.date)}</span>
+      {reminder.note && <p className="mt-1 text-xs text-yellow-700">{reminder.note}</p>}
+    </div>
+    <button
+      onClick={() => onDelete(reminder.id)}
+      className="ml-2 text-yellow-400 transition-colors duration-200 hover:text-red-400"
+      title="Delete reminder"
+    >
+      ×
+    </button>
+  </div>
+);
+/* eslint-enable react/prop-types */
+
 const CreditCardList = () => {
   const [cards, setCards] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,45 +76,43 @@ const CreditCardList = () => {
     }
   }, [fetchReminders]);
 
-  useEffect(() => {
-    fetchCards();
-
-    // Listen for AI-triggered credit card updates
-    const handleCreditCardUpdate = event => {
+  const handleCreditCardUpdate = useCallback(
+    event => {
       const { detail } = event;
-      if (detail && detail.deleted && detail.cardId) {
-        // Remove deleted card from state directly (like todos)
+      if (detail?.deleted && detail?.cardId) {
         setCards(prev => prev.filter(c => c.id !== detail.cardId));
         setSelectedCards(prev => prev.filter(id => id !== detail.cardId));
       } else {
-        // For add/update operations, refresh from database
         fetchCards();
       }
-    };
+    },
+    [fetchCards]
+  );
 
-    // Listen for AI-triggered view switching
-    const handleViewSwitch = event => {
-      const { detail } = event;
-      if (detail && detail.viewMode && detail.source === 'ai') {
-        handleViewModeChange(detail.viewMode);
-      }
-    };
+  const handleViewSwitch = useCallback(event => {
+    const { detail } = event;
+    if (detail?.viewMode && detail?.source === 'ai') {
+      handleViewModeChange(detail.viewMode);
+    }
+  }, []);
 
-    // Listen for AI-triggered sorting
-    const handleSortCards = event => {
-      const { detail } = event;
-      if (detail && detail.sortBy && detail.source === 'ai') {
-        const sortMapping = {
-          name: 'card_name',
-          days_inactive: 'days_inactive',
-          promo_count: 'promo_count',
-          last_used_newest: 'last_used_newest',
-          last_used_oldest: 'last_used_oldest',
-          last_used: 'last_used_newest',
-        };
-        setSortBy(sortMapping[detail.sortBy] || detail.sortBy);
-      }
-    };
+  const handleSortCards = useCallback(event => {
+    const { detail } = event;
+    if (detail?.sortBy && detail?.source === 'ai') {
+      const sortMapping = {
+        name: 'card_name',
+        days_inactive: 'days_inactive',
+        promo_count: 'promo_count',
+        last_used_newest: 'last_used_newest',
+        last_used_oldest: 'last_used_oldest',
+        last_used: 'last_used_newest',
+      };
+      setSortBy(sortMapping[detail.sortBy] || detail.sortBy);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchCards();
 
     window.addEventListener('creditCardAdded', handleCreditCardUpdate);
     window.addEventListener('switchView', handleViewSwitch);
@@ -106,7 +123,7 @@ const CreditCardList = () => {
       window.removeEventListener('switchView', handleViewSwitch);
       window.removeEventListener('sortCards', handleSortCards);
     };
-  }, [fetchCards]);
+  }, [fetchCards, handleCreditCardUpdate, handleViewSwitch, handleSortCards]);
 
   const handleAddCard = () => {
     setEditingCard(null);
@@ -257,17 +274,19 @@ const CreditCardList = () => {
     return daysSince > 90;
   };
 
+  const isPromoExpiringSoon = promo => {
+    if (!promo.promo_expiry_date) return false;
+    const expiryDate = new Date(promo.promo_expiry_date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    expiryDate.setHours(0, 0, 0, 0);
+    const daysUntil = Math.floor((expiryDate - today) / (1000 * 60 * 60 * 24));
+    return daysUntil <= 30 && daysUntil >= 0;
+  };
+
   const getPromoExpiryBadge = currentPromos => {
     if (!currentPromos || !Array.isArray(currentPromos)) return false;
-    return currentPromos.some(promo => {
-      if (!promo.promo_expiry_date) return false;
-      const expiryDate = new Date(promo.promo_expiry_date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      expiryDate.setHours(0, 0, 0, 0);
-      const daysUntil = Math.floor((expiryDate - today) / (1000 * 60 * 60 * 24));
-      return daysUntil <= 30 && daysUntil >= 0;
-    });
+    return currentPromos.some(isPromoExpiringSoon);
   };
 
   const filteredCards = cards.filter(card => {
@@ -321,10 +340,208 @@ const CreditCardList = () => {
     return isNaN(parsedDate.getTime()) ? '-' : parsedDate.toLocaleDateString();
   };
 
+  const getInactivityText = lastUsedDate => {
+    return lastUsedDate ? 'Inactive' : 'Never Used';
+  };
+
+  const getPromoUsedClass = promoUsed => {
+    return promoUsed ? 'text-green-600' : 'text-gray-500';
+  };
+
+  const getCardClassName = card => {
+    if (selectedCards.includes(card.id)) {
+      return 'finbot-glow border-purple-500/50';
+    }
+    const hasAlert =
+      getInactivityBadge(card.days_inactive, card.last_used_date) ||
+      getPromoExpiryBadge(card.current_promos);
+    return hasAlert ? 'border-red-500/50 bg-red-500/10' : '';
+  };
+
+  const renderTableView = () => (
+    <div className="overflow-hidden finbot-card">
+      <div className="max-h-[600px] overflow-y-auto">
+        <CreditCardTable
+          cards={sortedCards}
+          reminders={reminders}
+          onEditCard={handleEditCard}
+          onDeleteCard={handleDeleteCard}
+          onSetReminder={handleSetReminder}
+          onViewCard={handleViewCard}
+          getInactivityBadge={getInactivityBadge}
+          getPromoExpiryBadge={getPromoExpiryBadge}
+          formatCurrency={formatCurrency}
+          formatDate={formatDate}
+          selectedCards={selectedCards}
+          onCardSelect={handleCardSelect}
+          selectAll={selectAll}
+          onSelectAll={handleSelectAll}
+          onBulkDelete={handleBulkDelete}
+        />
+      </div>
+    </div>
+  );
+
+  const renderCardView = () => (
+    <div className="h-[600px] overflow-y-auto">
+      <div
+        data-cy="card-grid"
+        className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 lg:gap-6"
+      >
+        {sortedCards.map(card => (
+          <div
+            key={card.id}
+            className={`finbot-card p-6 transition-all duration-300 ease-in-out hover:transform hover:scale-105 relative ${getCardClassName(card)}`}
+          >
+            {/* Attention indicator */}
+            {(getInactivityBadge(card.days_inactive, card.last_used_date) ||
+              getPromoExpiryBadge(card.current_promos)) && (
+              <div className="absolute flex items-center justify-center w-4 h-4 bg-red-500 rounded-full -top-2 -right-2">
+                <span className="text-xs font-bold text-white">!</span>
+              </div>
+            )}
+            {/* Card Header */}
+            <div className="flex items-start justify-between mb-5">
+              <div className="flex items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={selectedCards.includes(card.id)}
+                  onChange={() => handleCardSelect(card.id)}
+                  className="w-4 h-4 mt-1 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
+                />
+                <div>
+                  <h3 className="mb-2 text-xl font-bold text-gray-800">
+                    {card.bank_name && card.last_four_digits
+                      ? `${card.bank_name} ${card.last_four_digits}`
+                      : 'Unknown Card'}
+                  </h3>
+                  <div className="space-y-1">
+                    <p className="text-sm text-gray-600">
+                      {card.days_inactive ? `${card.days_inactive} days inactive` : 'Active'}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {card.last_used_date
+                        ? `Last used: ${formatDate(card.last_used_date)}`
+                        : '❌ Never Used'}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {Array.isArray(card.current_promos) ? card.current_promos.length : 0} active
+                      promos
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-start gap-2">
+                <div className="flex flex-col gap-1">
+                  {getInactivityBadge(card.days_inactive, card.last_used_date) && (
+                    <span className="px-3 py-1 text-xs font-bold text-red-400 border rounded-full bg-red-500/20 border-red-500/50">
+                      ⚠️ {getInactivityText(card.last_used_date)}
+                    </span>
+                  )}
+                  {getPromoExpiryBadge(card.current_promos) && (
+                    <span className="px-3 py-1 text-xs text-yellow-400 border rounded-full bg-yellow-500/20 border-yellow-500/50">
+                      ⏳ Promo Soon
+                    </span>
+                  )}
+                  {card.new_promo_available && (
+                    <span className="px-3 py-1 text-xs text-green-400 border rounded-full bg-green-500/20 border-green-500/50">
+                      🏷️ New Promo
+                    </span>
+                  )}
+                </div>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => handleSetReminder(card)}
+                    className="p-2 text-gray-400 transition-all duration-200 rounded-lg hover:text-yellow-400 hover:bg-yellow-500/20"
+                    title="Set reminder"
+                  >
+                    🔔
+                  </button>
+                  <button
+                    onClick={() => handleEditCard(card)}
+                    className="p-2 text-gray-400 transition-all duration-200 rounded-lg hover:text-purple-400 hover:bg-purple-500/20"
+                    title="Edit card"
+                  >
+                    ✏️
+                  </button>
+                  <button
+                    onClick={() => handleDeleteCard(card)}
+                    className="p-2 text-gray-400 transition-all duration-200 rounded-lg hover:text-red-400 hover:bg-red-500/20"
+                    title="Delete card"
+                  >
+                    🗑️
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Card Info */}
+            <div className="p-4 mb-5 space-y-3 border bg-white/5 backdrop-blur-sm rounded-xl border-white/10">
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Days Inactive:</span>
+                <span className="font-semibold text-gray-800">{card.days_inactive || 0}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Last Used:</span>
+                <span className="font-semibold text-gray-800">
+                  {formatDate(card.last_used_date)}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-gray-600">Promo Used:</span>
+                <span className={`font-semibold ${getPromoUsedClass(card.promo_used)}`}>
+                  {card.promo_used ? 'Yes' : 'No'}
+                </span>
+              </div>
+              {card.interest_after_promo && (
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-600">Interest After Promo:</span>
+                  <span className="font-semibold text-gray-800">{card.interest_after_promo}%</span>
+                </div>
+              )}
+            </div>
+
+            {/* Current Promos */}
+            {card.promo_end_date && (
+              <div className="p-4 mb-4 border bg-purple-500/20 border-purple-500/50 rounded-xl">
+                <h4 className="mb-2 text-sm font-semibold text-purple-700">🎯 Current Promo</h4>
+                <div className="flex justify-between text-sm">
+                  <span className="text-purple-600">Expires:</span>
+                  <span className="font-medium text-gray-800">
+                    {formatDate(card.promo_end_date)}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Reminders */}
+            {getCardReminders(card.id).length > 0 && (
+              <div className="p-4 mb-4 border bg-yellow-500/20 border-yellow-500/50 rounded-xl">
+                <h4 className="mb-2 text-sm font-semibold text-yellow-700">🔔 Active Reminders</h4>
+                {getCardReminders(card.id).map(reminder => (
+                  <ReminderItem
+                    key={reminder.id}
+                    reminder={reminder}
+                    onDelete={handleDeleteReminder}
+                    formatDate={formatDate}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const renderMainContent = () => {
+    return viewMode === 'table' ? renderTableView() : renderCardView();
+  };
+
   if (loading) {
     return (
-      <div className="flex justify-center items-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-500"></div>
+      <div className="flex items-center justify-center py-12">
+        <div className="w-8 h-8 border-b-2 border-purple-500 rounded-full animate-spin"></div>
         <span className="ml-2 text-gray-600">Loading cards...</span>
       </div>
     );
@@ -332,7 +549,7 @@ const CreditCardList = () => {
 
   if (error) {
     return (
-      <div className="finbot-card p-4 bg-red-500/20 border border-red-500/50 text-red-400">
+      <div className="p-4 text-red-400 border finbot-card bg-red-500/20 border-red-500/50">
         {error}
       </div>
     );
@@ -341,14 +558,13 @@ const CreditCardList = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+      <div className="flex flex-col items-start justify-between gap-4 mb-6 sm:flex-row sm:items-center">
         <div>
           <h2
             data-cy="credit-cards-heading"
-            className="finbot-heading-xl finbot-responsive-heading mb-2 flex items-center"
+            className="flex items-center mb-2 finbot-heading-xl finbot-responsive-heading"
           >
-            <span className="mr-2 text-2xl">💳</span>
-            Credit Cards
+            <span className="mr-2 text-2xl">💳</span> Credit Cards
           </h2>
           <p className="finbot-responsive-text text-[#8B4513]">{sortedCards.length} cards total</p>
         </div>
@@ -386,7 +602,7 @@ const CreditCardList = () => {
       )}
 
       {/* Tabs */}
-      <div className="finbot-card p-2 flex flex-wrap gap-2 mb-6">
+      <div className="flex flex-wrap gap-2 p-2 mb-6 finbot-card">
         <button
           onClick={() => setActiveTab('all')}
           className={`finbot-tab px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium ${
@@ -419,7 +635,7 @@ const CreditCardList = () => {
       </div>
 
       {/* Search, Sort, and View Toggle */}
-      <div className="flex flex-col lg:flex-row gap-4 mb-6">
+      <div className="flex flex-col gap-4 mb-6 lg:flex-row">
         <div className="flex-1">
           <div className="relative">
             <input
@@ -428,14 +644,14 @@ const CreditCardList = () => {
               placeholder="Search by card name..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="finbot-input w-full pl-10"
+              className="w-full pl-10 finbot-input"
             />
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
               <span className="text-gray-400">🔍</span>
             </div>
           </div>
         </div>
-        <div className="flex flex-col sm:flex-row gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row">
           <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="finbot-input">
             <option value="card_name">Sort by Card Name</option>
             <option value="days_inactive">Sort by Days Inactive</option>
@@ -443,7 +659,7 @@ const CreditCardList = () => {
             <option value="last_used_newest">Last Used (Newest First)</option>
             <option value="last_used_oldest">Last Used (Oldest First)</option>
           </select>
-          <div className="finbot-card p-1 flex">
+          <div className="flex p-1 finbot-card">
             <button
               data-cy="view-cards-button"
               onClick={() => handleViewModeChange('cards')}
@@ -473,21 +689,21 @@ const CreditCardList = () => {
             selectedCards.length > 0 ? 'max-h-20 opacity-100 mb-6' : 'max-h-0 opacity-0 mb-0'
           }`}
         >
-          <div className="finbot-card p-4 flex items-center justify-between">
+          <div className="flex items-center justify-between p-4 finbot-card">
             <div className="flex items-center gap-4">
               <span className="text-sm font-medium text-gray-800">
                 ✅ {selectedCards.length} card{selectedCards.length !== 1 ? 's' : ''} selected
               </span>
               <button
                 onClick={handleDeselectAll}
-                className="text-sm text-purple-400 hover:text-purple-300 underline font-medium transition-colors duration-200"
+                className="text-sm font-medium text-purple-400 underline transition-colors duration-200 hover:text-purple-300"
               >
                 Deselect All
               </button>
             </div>
             <button
               onClick={handleBulkDelete}
-              className="finbot-button-secondary hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-400 transition-all duration-300"
+              className="transition-all duration-300 finbot-button-secondary hover:bg-red-500/20 hover:border-red-500/50 hover:text-red-400"
               title="Delete selected cards"
             >
               🗑️ Delete Selected
@@ -499,212 +715,12 @@ const CreditCardList = () => {
       {/* Content View */}
       <div className="min-h-[600px]">
         {sortedCards.length === 0 ? (
-          <div className="text-center py-12 text-gray-600">
-            <div className="text-6xl mb-4 finbot-animate-float">💳</div>
+          <div className="py-12 text-center text-gray-600">
+            <div className="mb-4 text-6xl finbot-animate-float">💳</div>
             <p className="text-xl">No cards found matching your criteria</p>
           </div>
-        ) : viewMode === 'table' ? (
-          <div className="finbot-card overflow-hidden">
-            <div className="max-h-[600px] overflow-y-auto">
-              <CreditCardTable
-                cards={sortedCards}
-                reminders={reminders}
-                onEditCard={handleEditCard}
-                onDeleteCard={handleDeleteCard}
-                onSetReminder={handleSetReminder}
-                onViewCard={handleViewCard}
-                getInactivityBadge={getInactivityBadge}
-                getPromoExpiryBadge={getPromoExpiryBadge}
-                formatCurrency={formatCurrency}
-                formatDate={formatDate}
-                selectedCards={selectedCards}
-                onCardSelect={handleCardSelect}
-                selectAll={selectAll}
-                onSelectAll={handleSelectAll}
-                onBulkDelete={handleBulkDelete}
-              />
-            </div>
-          </div>
         ) : (
-          <div className="h-[600px] overflow-y-auto">
-            <div
-              data-cy="card-grid"
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6"
-            >
-              {sortedCards.map(card => (
-                <div
-                  key={card.id}
-                  className={`finbot-card p-6 transition-all duration-300 ease-in-out hover:transform hover:scale-105 relative ${
-                    selectedCards.includes(card.id)
-                      ? 'finbot-glow border-purple-500/50'
-                      : getInactivityBadge(card.days_inactive, card.last_used_date) ||
-                          getPromoExpiryBadge(card.current_promos)
-                        ? 'border-red-500/50 bg-red-500/10'
-                        : ''
-                  }`}
-                >
-                  {/* Attention indicator */}
-                  {(getInactivityBadge(card.days_inactive, card.last_used_date) ||
-                    getPromoExpiryBadge(card.current_promos)) && (
-                    <div className="absolute -top-2 -right-2 w-4 h-4 bg-red-500 rounded-full flex items-center justify-center">
-                      <span className="text-white text-xs font-bold">!</span>
-                    </div>
-                  )}
-                  {/* Card Header */}
-                  <div className="flex justify-between items-start mb-5">
-                    <div className="flex items-start gap-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedCards.includes(card.id)}
-                        onChange={() => handleCardSelect(card.id)}
-                        className="mt-1 h-4 w-4 text-blue-600 rounded focus:ring-2 focus:ring-blue-500"
-                      />
-                      <div>
-                        <h3 className="font-bold text-gray-800 text-xl mb-2">
-                          {card.bank_name && card.last_four_digits
-                            ? `${card.bank_name} ${card.last_four_digits}`
-                            : 'Unknown Card'}
-                        </h3>
-                        <div className="space-y-1">
-                          <p className="text-sm text-gray-600">
-                            {card.days_inactive ? `${card.days_inactive} days inactive` : 'Active'}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {card.last_used_date
-                              ? `Last used: ${formatDate(card.last_used_date)}`
-                              : '❌ Never Used'}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {Array.isArray(card.current_promos) ? card.current_promos.length : 0}{' '}
-                            active promos
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <div className="flex flex-col gap-1">
-                        {getInactivityBadge(card.days_inactive, card.last_used_date) && (
-                          <span className="px-3 py-1 bg-red-500/20 border border-red-500/50 text-red-400 text-xs rounded-full font-bold">
-                            ⚠️ {card.last_used_date ? 'Inactive' : 'Never Used'}
-                          </span>
-                        )}
-                        {getPromoExpiryBadge(card.current_promos) && (
-                          <span className="px-3 py-1 bg-yellow-500/20 border border-yellow-500/50 text-yellow-400 text-xs rounded-full">
-                            ⏳ Promo Soon
-                          </span>
-                        )}
-                        {card.new_promo_available && (
-                          <span className="px-3 py-1 bg-green-500/20 border border-green-500/50 text-green-400 text-xs rounded-full">
-                            🏷️ New Promo
-                          </span>
-                        )}
-                      </div>
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => handleSetReminder(card)}
-                          className="p-2 text-gray-400 hover:text-yellow-400 hover:bg-yellow-500/20 rounded-lg transition-all duration-200"
-                          title="Set reminder"
-                        >
-                          🔔
-                        </button>
-                        <button
-                          onClick={() => handleEditCard(card)}
-                          className="p-2 text-gray-400 hover:text-purple-400 hover:bg-purple-500/20 rounded-lg transition-all duration-200"
-                          title="Edit card"
-                        >
-                          ✏️
-                        </button>
-                        <button
-                          onClick={() => handleDeleteCard(card)}
-                          className="p-2 text-gray-400 hover:text-red-400 hover:bg-red-500/20 rounded-lg transition-all duration-200"
-                          title="Delete card"
-                        >
-                          🗑️
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Card Info */}
-                  <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 space-y-3 mb-5 border border-white/10">
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Days Inactive:</span>
-                      <span className="font-semibold text-gray-800">{card.days_inactive || 0}</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Last Used:</span>
-                      <span className="font-semibold text-gray-800">
-                        {formatDate(card.last_used_date)}
-                      </span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-gray-600">Promo Used:</span>
-                      <span
-                        className={`font-semibold ${
-                          card.promo_used ? 'text-green-600' : 'text-gray-500'
-                        }`}
-                      >
-                        {card.promo_used ? 'Yes' : 'No'}
-                      </span>
-                    </div>
-                    {card.interest_after_promo && (
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-gray-600">Interest After Promo:</span>
-                        <span className="font-semibold text-gray-800">
-                          {card.interest_after_promo}%
-                        </span>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Current Promos */}
-                  {card.promo_end_date && (
-                    <div className="bg-purple-500/20 border border-purple-500/50 rounded-xl p-4 mb-4">
-                      <h4 className="text-sm font-semibold text-purple-700 mb-2">
-                        🎯 Current Promo
-                      </h4>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-purple-600">Expires:</span>
-                        <span className="font-medium text-gray-800">
-                          {formatDate(card.promo_end_date)}
-                        </span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Reminders */}
-                  {getCardReminders(card.id).length > 0 && (
-                    <div className="bg-yellow-500/20 border border-yellow-500/50 rounded-xl p-4 mb-4">
-                      <h4 className="text-sm font-semibold text-yellow-700 mb-2">
-                        🔔 Active Reminders
-                      </h4>
-                      {getCardReminders(card.id).map(reminder => (
-                        <div
-                          key={reminder.id}
-                          className="flex justify-between items-start text-sm mb-2 last:mb-0"
-                        >
-                          <div>
-                            <span className="font-medium text-gray-800">{reminder.type}</span>
-                            <span className="text-yellow-600"> – {formatDate(reminder.date)}</span>
-                            {reminder.note && (
-                              <p className="text-xs text-yellow-700 mt-1">{reminder.note}</p>
-                            )}
-                          </div>
-                          <button
-                            onClick={() => handleDeleteReminder(reminder.id)}
-                            className="text-yellow-400 hover:text-red-400 ml-2 transition-colors duration-200"
-                            title="Delete reminder"
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
+          renderMainContent()
         )}
       </div>
 

@@ -327,7 +327,7 @@ const TaskManager = () => {
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <div className="mb-6">
+      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2
           data-cy="todo-manager-heading"
           className="finbot-heading-xl finbot-responsive-heading flex items-center"
@@ -335,6 +335,17 @@ const TaskManager = () => {
           <span className="mr-3 text-2xl">📝</span>
           To-Do Manager
         </h2>
+        <div className="finbot-card p-1 flex">
+          <button
+            data-cy="view-cards-button"
+            className="finbot-tab px-4 py-2 text-sm font-medium active"
+          >
+            📋 Cards
+          </button>
+          <button data-cy="view-table-button" className="finbot-tab px-4 py-2 text-sm font-medium">
+            📊 Table
+          </button>
+        </div>
       </div>
 
       {message && (
