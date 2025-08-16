@@ -326,8 +326,8 @@ const TaskManager = () => {
   if (loading) return <div className="p-4 text-gray-300">Loading tasks...</div>;
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="p-6">
+      <div className="mb-6">
         <h2
           data-cy="todo-manager-heading"
           className="finbot-heading-xl finbot-responsive-heading flex items-center"
@@ -335,17 +335,6 @@ const TaskManager = () => {
           <span className="mr-3 text-2xl">📝</span>
           To-Do Manager
         </h2>
-        <div className="finbot-card p-1 flex">
-          <button
-            data-cy="view-cards-button"
-            className="finbot-tab px-4 py-2 text-sm font-medium active"
-          >
-            📋 Cards
-          </button>
-          <button data-cy="view-table-button" className="finbot-tab px-4 py-2 text-sm font-medium">
-            📊 Table
-          </button>
-        </div>
       </div>
 
       {message && (
@@ -361,13 +350,13 @@ const TaskManager = () => {
       )}
 
       {/* Add Todo Form */}
-      <div className="finbot-card p-6 mb-8">
+      <div className="finbot-card p-4 mb-6">
         <form onSubmit={handleAddTodo}>
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1 relative">
               <label
                 htmlFor="task-input"
-                className="text-sm font-medium text-gray-700 mb-2 block text-left"
+                className="text-sm font-medium text-gray-700 mb-1 block text-left"
               >
                 Task
               </label>
@@ -396,7 +385,7 @@ const TaskManager = () => {
             <div className="flex flex-col w-full sm:w-auto">
               <label
                 htmlFor="task-due-date"
-                className="text-sm font-medium text-gray-700 mb-2 text-left block"
+                className="text-sm font-medium text-gray-700 mb-1 text-left block"
               >
                 Due Date
               </label>
@@ -410,7 +399,7 @@ const TaskManager = () => {
                 required
               />
             </div>
-            <div className="flex flex-col w-full sm:w-auto justify-end mt-4 sm:mt-0">
+            <div className="flex flex-col w-full sm:w-auto justify-end mt-3 sm:mt-0">
               <button
                 type="submit"
                 data-cy={editingTodo ? 'task-update-button' : 'task-add-button'}
@@ -434,7 +423,7 @@ const TaskManager = () => {
               )}
             </div>
           </div>
-          <p className="text-xs text-gray-600 mt-4 flex items-center">
+          <p className="text-xs text-gray-600 mt-3 flex items-center">
             <span className="mr-2">💡</span>
             <span>
               Use natural language or ask <strong className="text-purple-600">FinBot 🤖</strong> for

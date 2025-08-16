@@ -8,29 +8,20 @@ const TabNavigation = ({ activeTab }) => {
     switch (activeTab) {
       case 'todos':
         return (
-          <div className="finbot-card p-6" style={{ height: 'calc(100vh - 220px)' }}>
-            <div
-              className="finbot-inner p-6 overflow-y-auto"
-              style={{ height: 'calc(100vh - 280px)' }}
-            >
-              <ToDoTest />
-            </div>
+          <div className="overflow-y-auto" style={{ height: 'calc(100vh - 220px)' }}>
+            <ToDoTest />
           </div>
         );
       case 'cards':
         return (
-          <div className="finbot-card p-6">
-            <div className="finbot-inner p-6">
-              <CreditCardManager />
-            </div>
+          <div className="overflow-y-auto" style={{ height: 'calc(100vh - 220px)' }}>
+            <CreditCardManager />
           </div>
         );
       case 'insights':
         return (
-          <div className="finbot-card p-6">
-            <div className="finbot-inner p-6">
-              <InsightsTab />
-            </div>
+          <div className="overflow-y-auto" style={{ height: 'calc(100vh - 220px)' }}>
+            <InsightsTab />
           </div>
         );
       default:

@@ -3,7 +3,7 @@ import { supabase } from '../supabaseClient';
 import { api } from '../services/api';
 import CreditCardForm from './CreditCardForm';
 import ReminderForm from './ReminderForm';
-import CreditCardExport from './CreditCardExport';
+
 import CreditCardTable from './CreditCardTable';
 
 import CreditCardDetailModal from './CreditCardDetailModal';
@@ -556,33 +556,27 @@ const CreditCardList = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 p-4">
       {/* Header */}
-      <div className="flex flex-col items-start justify-between gap-4 mb-6 sm:flex-row sm:items-center">
+      <div className="flex flex-col items-start justify-between gap-3 mb-4 sm:flex-row sm:items-center">
         <div>
           <h2
             data-cy="credit-cards-heading"
-            className="flex items-center mb-2 finbot-heading-xl finbot-responsive-heading"
+            className="flex items-center mb-1 finbot-heading-xl finbot-responsive-heading"
           >
             <span className="mr-2 text-2xl">💳</span> Credit Cards
           </h2>
           <p className="finbot-responsive-text text-[#8B4513]">{sortedCards.length} cards total</p>
         </div>
-        <div className="flex flex-wrap gap-3">
-          <CreditCardExport
-            cards={sortedCards}
-            reminders={reminders}
-            activeTab={activeTab}
-            onMessage={setMessage}
-          />
+        <div className="flex flex-wrap gap-2">
           <button
             data-cy="card-add-button"
             onClick={handleAddCard}
-            className="finbot-button-primary"
+            className="finbot-button-primary text-sm px-3 py-2"
           >
             ➕ Add Card
           </button>
-          <button onClick={fetchCards} className="finbot-button-secondary">
+          <button onClick={fetchCards} className="finbot-button-secondary text-sm px-3 py-2">
             🔄 Refresh
           </button>
         </div>
@@ -602,10 +596,10 @@ const CreditCardList = () => {
       )}
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-2 p-2 mb-6 finbot-card">
+      <div className="flex flex-wrap gap-1 p-1 mb-4 finbot-card">
         <button
           onClick={() => setActiveTab('all')}
-          className={`finbot-tab px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium ${
+          className={`finbot-tab px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium ${
             activeTab === 'all' ? 'active' : ''
           }`}
         >
@@ -614,7 +608,7 @@ const CreditCardList = () => {
         </button>
         <button
           onClick={() => setActiveTab('promo')}
-          className={`finbot-tab px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium ${
+          className={`finbot-tab px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium ${
             activeTab === 'promo' ? 'active' : ''
           }`}
         >
@@ -624,18 +618,17 @@ const CreditCardList = () => {
         </button>
         <button
           onClick={() => setActiveTab('inactive')}
-          className={`finbot-tab px-3 sm:px-6 py-2 sm:py-3 text-xs sm:text-sm font-medium ${
+          className={`finbot-tab px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium ${
             activeTab === 'inactive' ? 'active' : ''
           }`}
         >
-          <span className="hidden sm:inline">⚠️ Inactive</span>
-          <span className="sm:hidden">⚠️</span> (
+          ⚠️ Inactive (
           {cards.filter(c => getInactivityBadge(c.days_inactive, c.last_used_date)).length})
         </button>
       </div>
 
       {/* Search, Sort, and View Toggle */}
-      <div className="flex flex-col gap-4 mb-6 lg:flex-row">
+      <div className="flex flex-col gap-3 mb-4 lg:flex-row">
         <div className="flex-1">
           <div className="relative">
             <input
