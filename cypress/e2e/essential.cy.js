@@ -81,7 +81,8 @@ describe('Essential Application Tests', () => {
     cy.get('[data-cy="nav-insights-tab"]').click();
     cy.contains('Financial Insights', { timeout: 10000 }).should('be.visible');
 
-    // Scroll down to notification settings and verify
-    cy.contains('Push Notifications').scrollIntoView().should('be.visible');
+    // Verify insights content is present
+    cy.contains('Credit Card Portfolio').scrollIntoView().should('be.visible');
+    cy.contains('Task Management').scrollIntoView().should('be.visible');
   });
 });
