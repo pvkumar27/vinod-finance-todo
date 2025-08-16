@@ -26,7 +26,6 @@ const TaskManager = () => {
 
   const [showCompleted, setShowCompleted] = useState(false);
   const [activeId, setActiveId] = useState(null);
-  const [viewMode, setViewMode] = useState('cards');
 
   // Configure sensors with no constraints for better mobile support
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
@@ -156,6 +155,45 @@ const TaskManager = () => {
     }
   };
 
+  const handleVoiceInput = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      setMessage('❌ Voice recognition not supported in this browser');
+      setTimeout(() => setMessage(''), 4000);
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setMessage('🎤 Listening... Speak your task');
+    };
+
+    recognition.onresult = event => {
+      const transcript = event.results[0][0].transcript;
+      setNewTask(transcript);
+      setMessage('✅ Voice input captured!');
+      setTimeout(() => setMessage(''), 2000);
+    };
+
+    recognition.onerror = event => {
+      let errorContent;
+      if (event.error === 'not-allowed') {
+        errorContent = '🎤 Microphone access denied. Please allow microphone access.';
+      } else {
+        errorContent = `❌ Voice recognition error: ${event.error}`;
+      }
+      setMessage(errorContent);
+      setTimeout(() => setMessage(''), 4000);
+    };
+
+    recognition.start();
+  };
+
   const handleDragStart = event => {
     setActiveId(event.active.id);
     document.body.classList.add('dragging-active');
@@ -244,14 +282,7 @@ const TaskManager = () => {
       loadTodos();
     };
 
-    // Listen for AI-triggered view switches
-    const handleViewSwitch = event => {
-      const { viewMode } = event.detail;
-      setViewMode(viewMode);
-    };
-
     window.addEventListener('todoAdded', handleTodoAdded);
-    window.addEventListener('switchView', handleViewSwitch);
 
     // Add global styles for drag and drop
     const style = document.createElement('style');
@@ -269,7 +300,7 @@ const TaskManager = () => {
 
     return () => {
       window.removeEventListener('todoAdded', handleTodoAdded);
-      window.removeEventListener('switchView', handleViewSwitch);
+
       document.head.removeChild(style);
     };
   }, []);
@@ -292,39 +323,26 @@ const TaskManager = () => {
   // Find the active task for the drag overlay
   const activeTask = activeId ? todos.find(task => task.id === activeId) : null;
 
-  if (loading) return <div className="p-4">Loading tasks...</div>;
+  if (loading) return <div className="p-4 text-gray-300">Loading tasks...</div>;
 
   return (
-    <div className="p-4 md:p-6 bg-white rounded-lg shadow-lg max-w-3xl mx-auto">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+    <div className="p-6 max-w-4xl mx-auto">
+      <div className="mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <h2
           data-cy="todo-manager-heading"
-          className="text-2xl font-bold text-blue-700 flex items-center"
+          className="finbot-heading-xl finbot-responsive-heading flex items-center"
         >
-          <span className="mr-2">📝</span>
+          <span className="mr-3 text-2xl">📝</span>
           To-Do Manager
         </h2>
-        <div className="flex bg-gray-100 rounded-full p-1 w-full sm:w-auto shadow-inner">
+        <div className="finbot-card p-1 flex">
           <button
             data-cy="view-cards-button"
-            onClick={() => setViewMode('cards')}
-            className={`px-4 py-2 rounded-full text-sm transition-all flex-1 sm:flex-auto ${
-              viewMode === 'cards'
-                ? 'bg-white shadow-md text-blue-600 font-medium'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
+            className="finbot-tab px-4 py-2 text-sm font-medium active"
           >
             📋 Cards
           </button>
-          <button
-            data-cy="view-table-button"
-            onClick={() => setViewMode('table')}
-            className={`px-4 py-2 rounded-full text-sm transition-all flex-1 sm:flex-auto ${
-              viewMode === 'table'
-                ? 'bg-white shadow-md text-blue-600 font-medium'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
-          >
+          <button data-cy="view-table-button" className="finbot-tab px-4 py-2 text-sm font-medium">
             📊 Table
           </button>
         </div>
@@ -332,91 +350,117 @@ const TaskManager = () => {
 
       {message && (
         <div
-          className={`p-3 rounded mb-4 ${message.includes('❌') ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}
+          className={`p-4 rounded-xl mb-6 border ${
+            message.includes('❌')
+              ? 'bg-red-500/20 border-red-500/50 text-red-400'
+              : 'bg-green-500/20 border-green-500/50 text-green-400'
+          }`}
         >
           {message}
         </div>
       )}
 
       {/* Add Todo Form */}
-      <form onSubmit={handleAddTodo} className="mb-8">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <div className="flex-1 relative">
-            <label
-              htmlFor="task-input"
-              className="text-xs font-medium text-gray-700 mb-1 block text-left"
-            >
-              Task
-            </label>
-            <input
-              id="task-input"
-              data-cy="task-input-field"
-              type="text"
-              placeholder={editingTodo ? 'Edit task...' : 'Add a new task...'}
-              value={newTask}
-              onChange={e => setNewTask(e.target.value)}
-              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm shadow-sm"
-            />
-          </div>
-          <div className="flex flex-col w-full sm:w-auto">
-            <label
-              htmlFor="task-due-date"
-              className="text-xs font-medium text-gray-700 mb-1 text-left block"
-            >
-              Due Date
-            </label>
-            <input
-              id="task-due-date"
-              data-cy="task-date-field"
-              type="date"
-              value={taskDate}
-              onChange={e => setTaskDate(e.target.value)}
-              className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 sm:w-40 text-sm"
-              required
-            />
-          </div>
-          <div className="flex flex-col w-full sm:w-auto justify-end mt-4 sm:mt-0">
-            <button
-              type="submit"
-              data-cy={editingTodo ? 'task-update-button' : 'task-add-button'}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors w-full sm:w-auto text-sm font-medium shadow-md flex items-center justify-center"
-            >
-              <span className="mr-1">{editingTodo ? '✏️' : '➕'}</span>
-              {editingTodo ? 'Update' : 'Add Task'}
-            </button>
-            {editingTodo && (
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingTodo(null);
-                  setNewTask('');
-                  // Reset to today's date when canceling
-                  setTaskDate(getTodayDateString());
-                }}
-                className="bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 transition-colors w-full sm:w-auto text-sm mt-2 sm:mt-2 font-medium shadow-md"
+      <div className="finbot-card p-6 mb-8">
+        <form onSubmit={handleAddTodo}>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1 relative">
+              <label
+                htmlFor="task-input"
+                className="text-sm font-medium text-gray-700 mb-2 block text-left"
               >
-                Cancel
+                Task
+              </label>
+              <div className="relative">
+                <input
+                  id="task-input"
+                  data-cy="task-input-field"
+                  type="text"
+                  placeholder={editingTodo ? 'Edit task...' : 'Add a new task...'}
+                  value={newTask}
+                  onChange={e => setNewTask(e.target.value)}
+                  className="finbot-input w-full pr-12"
+                />
+                <button
+                  type="button"
+                  onClick={handleVoiceInput}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-gray-100 active:bg-gray-200 touch-manipulation"
+                  title="Voice input"
+                  aria-label="Voice input"
+                  style={{ WebkitTapHighlightColor: 'transparent' }}
+                >
+                  <span className="text-lg">🎤</span>
+                </button>
+              </div>
+            </div>
+            <div className="flex flex-col w-full sm:w-auto">
+              <label
+                htmlFor="task-due-date"
+                className="text-sm font-medium text-gray-700 mb-2 text-left block"
+              >
+                Due Date
+              </label>
+              <input
+                id="task-due-date"
+                data-cy="task-date-field"
+                type="date"
+                value={taskDate}
+                onChange={e => setTaskDate(e.target.value)}
+                className="finbot-input sm:w-40"
+                required
+              />
+            </div>
+            <div className="flex flex-col w-full sm:w-auto justify-end mt-4 sm:mt-0">
+              <button
+                type="submit"
+                data-cy={editingTodo ? 'task-update-button' : 'task-add-button'}
+                className="finbot-button-primary w-full sm:w-auto flex items-center justify-center"
+              >
+                <span className="mr-2">{editingTodo ? '✏️' : '➕'}</span>
+                {editingTodo ? 'Update' : 'Add Task'}
               </button>
-            )}
+              {editingTodo && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingTodo(null);
+                    setNewTask('');
+                    setTaskDate(getTodayDateString());
+                  }}
+                  className="finbot-button-secondary w-full sm:w-auto mt-3"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
           </div>
-        </div>
-        <p className="text-xs text-gray-500 mt-2 flex items-center">
-          <span className="mr-1">💡</span>
-          <span>
-            Use natural language or ask <strong>FinBot 🤖</strong> for voice input
-          </span>
-        </p>
-      </form>
+          <p className="text-xs text-gray-600 mt-4 flex items-center">
+            <span className="mr-2">💡</span>
+            <span>
+              Use natural language or ask <strong className="text-purple-600">FinBot 🤖</strong> for
+              voice input
+            </span>
+          </p>
+        </form>
+      </div>
 
       {/* Tasks */}
       <div className="mb-8">
-        <h3 className="text-lg font-semibold mb-4">
-          Tasks ({pendingTodos.length} pending, {todos.filter(t => t.completed).length} completed)
+        <h3 className="finbot-heading-lg finbot-responsive-text mb-6 mt-8">
+          <span className="hidden sm:inline">
+            Tasks ({pendingTodos.length} pending, {todos.filter(t => t.completed).length} completed)
+          </span>
+          <span className="sm:hidden">
+            Tasks {pendingTodos.length} pending • {todos.filter(t => t.completed).length} done
+          </span>
         </h3>
 
         {pendingTodos.length === 0 ? (
-          <p className="text-gray-600 text-center py-8">No pending tasks. Great job! 🎉</p>
-        ) : viewMode === 'cards' ? (
+          <div className="text-center py-12">
+            <div className="text-6xl mb-4 finbot-animate-float">🎉</div>
+            <p className="text-xl text-gray-600">No pending tasks. Great job!</p>
+          </div>
+        ) : (
           <div data-cy="task-container" className="task-container">
             <DndContext
               sensors={sensors}
@@ -429,8 +473,8 @@ const TaskManager = () => {
               {/* Pinned Tasks Section */}
               {pinnedTodos.length > 0 && (
                 <div className="mb-6">
-                  <h4 className="text-md font-medium text-yellow-700 mb-3 flex items-center">
-                    <span className="mr-2">📌</span>
+                  <h4 className="finbot-heading-md mb-4 flex items-center">
+                    <span className="mr-3">📌</span>
                     Pinned Tasks
                   </h4>
                   <TaskList
@@ -485,189 +529,6 @@ const TaskManager = () => {
               </DragOverlay>
             </DndContext>
           </div>
-        ) : (
-          <div>
-            <table className="w-full border-collapse border border-gray-300">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="border border-gray-300 px-4 py-2 text-left text-xs font-medium">
-                    Status
-                  </th>
-                  <th className="border border-gray-300 px-4 py-2 text-left text-xs font-medium">
-                    Task
-                  </th>
-                  <th className="border border-gray-300 px-4 py-2 text-left text-xs font-medium">
-                    Due Date
-                  </th>
-                  <th className="border border-gray-300 px-4 py-2 text-left text-xs font-medium">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {/* Pinned todos */}
-                {pinnedTodos.length > 0 && (
-                  <tr className="bg-yellow-100">
-                    <td
-                      colSpan="4"
-                      className="border border-gray-300 px-4 py-2 font-medium text-xs"
-                    >
-                      📌 Pinned Tasks
-                    </td>
-                  </tr>
-                )}
-
-                {pinnedTodos.map(todo => (
-                  <tr key={todo.id} className="bg-yellow-50">
-                    <td className="border border-gray-300 px-4 py-2 text-left">
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked={false}
-                          onChange={() => handleToggleComplete(todo.id, todo.completed)}
-                          className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                        />
-                        <span title="Pinned task">📌</span>
-                      </div>
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2 text-left font-medium text-sm">
-                      {todo.task}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2 text-left text-xs">
-                      {todo.due_date ? formatDateString(todo.due_date) : '-'}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2 text-left">
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleTogglePin(todo.id, todo.pinned)}
-                          className="text-yellow-600 hover:text-yellow-800"
-                          title="Unpin task"
-                        >
-                          📌
-                        </button>
-                        <button
-                          onClick={() => handleEdit(todo)}
-                          className="text-blue-500 hover:text-blue-700"
-                          title="Edit task"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                            />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleDelete(todo.id)}
-                          className="text-red-500 hover:text-red-700"
-                          title="Delete task"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-
-                {/* Separator row if there are both pinned and unpinned todos */}
-                {pinnedTodos.length > 0 && unpinnedTodos.length > 0 && (
-                  <tr className="bg-gray-100">
-                    <td colSpan="4" className="border border-gray-300 py-1"></td>
-                  </tr>
-                )}
-
-                {/* Unpinned todos */}
-                {unpinnedTodos.map(todo => (
-                  <tr key={todo.id} className="hover:bg-gray-50">
-                    <td className="border border-gray-300 px-4 py-2 text-left">
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="checkbox"
-                          checked={false}
-                          onChange={() => handleToggleComplete(todo.id, todo.completed)}
-                          className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500"
-                        />
-                      </div>
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2 text-left font-medium text-sm">
-                      {todo.task}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2 text-left text-xs">
-                      {todo.due_date ? formatDateString(todo.due_date) : '-'}
-                    </td>
-                    <td className="border border-gray-300 px-4 py-2 text-left">
-                      <div className="flex space-x-2">
-                        <button
-                          onClick={() => handleTogglePin(todo.id, todo.pinned)}
-                          className="text-gray-400 hover:text-yellow-600"
-                          title="Pin task"
-                        >
-                          📌
-                        </button>
-                        <button
-                          onClick={() => handleEdit(todo)}
-                          className="text-blue-500 hover:text-blue-700"
-                          title="Edit task"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                            />
-                          </svg>
-                        </button>
-                        <button
-                          onClick={() => handleDelete(todo.id)}
-                          className="text-red-500 hover:text-red-700"
-                          title="Delete task"
-                        >
-                          <svg
-                            className="w-4 h-4"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                          >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         )}
       </div>
 
@@ -676,13 +537,13 @@ const TaskManager = () => {
         <div>
           <button
             onClick={() => setShowCompleted(!showCompleted)}
-            className="flex items-center justify-between w-full p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors mb-4"
+            className="finbot-card flex items-center justify-between w-full p-3 hover:transform hover:scale-[1.02] transition-all duration-300 mb-4"
           >
-            <h3 className="text-lg font-semibold text-gray-700">
-              Completed Tasks ({todos.filter(t => t.completed).length})
+            <h3 className="finbot-heading-md">
+              ✅ Completed ({todos.filter(t => t.completed).length})
             </h3>
             <svg
-              className={`w-5 h-5 text-gray-500 transition-transform ${showCompleted ? 'rotate-180' : ''}`}
+              className={`w-6 h-6 text-gray-600 transition-transform ${showCompleted ? 'rotate-180' : ''}`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -697,31 +558,31 @@ const TaskManager = () => {
           </button>
 
           {showCompleted && (
-            <div className="space-y-1">
+            <div className="space-y-2">
               {todos
                 .filter(t => t.completed)
                 .map(todo => (
                   <div
                     key={todo.id}
-                    className="flex items-center justify-between p-2 bg-green-50 rounded-lg mb-1"
+                    className="finbot-card flex items-center justify-between p-3 bg-green-500/5 border-green-500/20"
                   >
-                    <div className="flex items-center space-x-3">
+                    <div className="flex items-center space-x-2">
                       <input
                         type="checkbox"
                         checked={true}
                         onChange={() => handleToggleComplete(todo.id, todo.completed)}
-                        className="w-4 h-4 text-green-600 rounded"
+                        className="w-3 h-3 text-green-500 rounded"
                       />
-                      <div className="flex flex-wrap sm:flex-nowrap items-center">
-                        <span className="line-through text-gray-600 text-sm">{todo.task}</span>
-                        <span className="text-xs text-gray-500 ml-2 whitespace-nowrap">
-                          Completed: {formatDateString(todo.updated_at)}
+                      <div className="flex flex-col sm:flex-row sm:items-center">
+                        <span className="line-through text-gray-500 text-sm">{todo.task}</span>
+                        <span className="text-xs text-gray-400 sm:ml-2">
+                          {formatDateString(todo.updated_at)}
                         </span>
                       </div>
                     </div>
                     <button
                       onClick={() => handleDelete(todo.id)}
-                      className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded transition-colors"
+                      className="text-red-400 hover:text-red-300 hover:bg-red-500/20 p-2 rounded-lg transition-all duration-200"
                     >
                       <svg
                         className="w-4 h-4"

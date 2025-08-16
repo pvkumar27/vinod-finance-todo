@@ -113,53 +113,53 @@ const CreditCardDashboardInsights = ({ cards = [] }) => {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mb-8">
-        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-5 border border-blue-200">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-8">
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3 sm:p-5 border border-blue-200">
           <div className="flex items-center">
-            <div className="bg-blue-500 rounded-lg p-2 mr-4">
-              <span className="text-xl text-white">💳</span>
+            <div className="bg-blue-500 rounded-lg p-1 sm:p-2 mr-2 sm:mr-4 flex-shrink-0">
+              <span className="text-sm sm:text-xl text-white">💳</span>
             </div>
-            <div>
-              <p className="text-sm font-medium text-blue-700">Total Cards</p>
-              <p className="text-2xl font-bold text-blue-900">{insights.totalCards}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-blue-700">Total Cards</p>
+              <p className="text-lg sm:text-2xl font-bold text-blue-900">{insights.totalCards}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-5 border border-green-200">
+        <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-3 sm:p-5 border border-green-200">
           <div className="flex items-center">
-            <div className="bg-green-500 rounded-lg p-2 mr-4">
-              <span className="text-xl text-white">🎯</span>
+            <div className="bg-green-500 rounded-lg p-1 sm:p-2 mr-2 sm:mr-4 flex-shrink-0">
+              <span className="text-sm sm:text-xl text-white">🎯</span>
             </div>
-            <div>
-              <p className="text-sm font-medium text-green-700">Total Promos</p>
-              <p className="text-2xl font-bold text-green-900">{insights.totalPromos}</p>
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-green-700">Total Promos</p>
+              <p className="text-lg sm:text-2xl font-bold text-green-900">{insights.totalPromos}</p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-5 border border-purple-200">
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-3 sm:p-5 border border-purple-200">
           <div className="flex items-center">
-            <div className="bg-purple-500 rounded-lg p-2 mr-4">
-              <span className="text-xl text-white">🏷️</span>
+            <div className="bg-purple-500 rounded-lg p-1 sm:p-2 mr-2 sm:mr-4 flex-shrink-0">
+              <span className="text-sm sm:text-xl text-white">🏷️</span>
             </div>
-            <div>
-              <p className="text-sm font-medium text-purple-700">New Promos Available</p>
-              <p className="text-2xl font-bold text-purple-900">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-purple-700">New Promos</p>
+              <p className="text-lg sm:text-2xl font-bold text-purple-900">
                 {insights.promoUsage.find(p => p.name === 'New Promo Available')?.value || 0}
               </p>
             </div>
           </div>
         </div>
 
-        <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-5 border border-red-200">
+        <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-xl p-3 sm:p-5 border border-red-200">
           <div className="flex items-center">
-            <div className="bg-red-500 rounded-lg p-2 mr-4">
-              <span className="text-xl text-white">⚠️</span>
+            <div className="bg-red-500 rounded-lg p-1 sm:p-2 mr-2 sm:mr-4 flex-shrink-0">
+              <span className="text-sm sm:text-xl text-white">⚠️</span>
             </div>
-            <div>
-              <p className="text-sm font-medium text-red-700">Inactive Cards</p>
-              <p className="text-2xl font-bold text-red-900">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs sm:text-sm font-medium text-red-700">Inactive</p>
+              <p className="text-lg sm:text-2xl font-bold text-red-900">
                 {insights.inactivity.find(i => i.name === 'Inactive (≥90 days)')?.value || 0}
               </p>
             </div>

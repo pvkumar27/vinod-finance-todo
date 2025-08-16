@@ -38,18 +38,21 @@ create table if not exists credit_cards_simplified (
 alter table credit_cards_simplified enable row level security;
 
 -- RLS Policies for user isolation
-do $$ begin
-  if not exists (select 1 from pg_policies where tablename = 'credit_cards_simplified' and policyname = 'Select own cards') then
-    create policy "Select own cards" on credit_cards_simplified for select using (user_id = auth.uid());
+do $$ 
+declare
+  table_name text := 'credit_cards_simplified';
+begin
+  if not exists (select 1 from pg_policies where tablename = table_name and policyname = 'Select own cards') then
+    execute format('create policy "Select own cards" on %I for select using (user_id = auth.uid())', table_name);
   end if;
-  if not exists (select 1 from pg_policies where tablename = 'credit_cards_simplified' and policyname = 'Insert own cards') then
-    create policy "Insert own cards" on credit_cards_simplified for insert with check (user_id = auth.uid());
+  if not exists (select 1 from pg_policies where tablename = table_name and policyname = 'Insert own cards') then
+    execute format('create policy "Insert own cards" on %I for insert with check (user_id = auth.uid())', table_name);
   end if;
-  if not exists (select 1 from pg_policies where tablename = 'credit_cards_simplified' and policyname = 'Update own cards') then
-    create policy "Update own cards" on credit_cards_simplified for update using (user_id = auth.uid());
+  if not exists (select 1 from pg_policies where tablename = table_name and policyname = 'Update own cards') then
+    execute format('create policy "Update own cards" on %I for update using (user_id = auth.uid())', table_name);
   end if;
-  if not exists (select 1 from pg_policies where tablename = 'credit_cards_simplified' and policyname = 'Delete own cards') then
-    create policy "Delete own cards" on credit_cards_simplified for delete using (user_id = auth.uid());
+  if not exists (select 1 from pg_policies where tablename = table_name and policyname = 'Delete own cards') then
+    execute format('create policy "Delete own cards" on %I for delete using (user_id = auth.uid())', table_name);
   end if;
 end $$;
 
