@@ -42,20 +42,25 @@ Cypress.Commands.add('login', (email, password) => {
 Cypress.Commands.add('cleanupTestData', () => {
   // Clean up test todos
   cy.get('body').then($body => {
-    // Look for todos containing Test_E2E_
-    if ($body.find('span:contains("Test_E2E_")').length > 0) {
-      cy.get('span:contains("Test_E2E_")', { timeout: 5000 }).each($el => {
-        cy.wrap($el).parents('.group').find('button[aria-label*="Delete"]').click({ force: true });
-      });
+    if ($body.text().includes('Test_E2E_')) {
+      cy.get('*')
+        .contains('Test_E2E_')
+        .each($el => {
+          cy.wrap($el)
+            .closest('.group')
+            .find('button[aria-label*="Delete"]')
+            .click({ force: true });
+        });
     }
 
     // Clean up test credit cards containing Chase (from tests)
-    if ($body.find('h3:contains("Chase 1234")').length > 0) {
-      cy.get('h3:contains("Chase 1234")', { timeout: 5000 }).each($el => {
-        cy.wrap($el).parents('.rounded-lg').find('button').last().click({ force: true });
-        // Confirm deletion
-        cy.on('window:confirm', () => true);
-      });
+    if ($body.text().includes('Chase 1234')) {
+      cy.get('*')
+        .contains('Chase 1234')
+        .each($el => {
+          cy.wrap($el).closest('div').find('button').last().click({ force: true });
+          cy.window().then(win => cy.stub(win, 'confirm').returns(true));
+        });
     }
   });
 });
@@ -63,7 +68,7 @@ Cypress.Commands.add('cleanupTestData', () => {
 // Custom command for generating test data
 Cypress.Commands.add('generateTestData', type => {
   const timestamp = Date.now();
-  const id = Math.floor(Math.random() * 10000);
+  const id = timestamp % 10000; // Use timestamp-based ID instead of Math.random()
 
   const data = {
     todo: {
