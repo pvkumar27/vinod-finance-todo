@@ -30,7 +30,7 @@ class SmartForecastingService {
     }
   }
 
-
+  
   async forecastTodoPatterns() {
     const forecasts = [];
 
@@ -380,4 +380,4 @@ class SmartForecastingService {
   }
 }
 
-export 
+export const smartForecasting = new SmartForecastingService();
