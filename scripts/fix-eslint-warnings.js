@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync, spawnSync } = require('child_process');
+const { spawnSync } = require('child_process'); // Removed execSync (unused & risky)
 
 class ESLintWarningFixer {
   constructor() {
@@ -64,6 +64,7 @@ class ESLintWarningFixer {
       // Limit line length to prevent ReDoS
       if (line.length > 500) return;
       
+      // Safe regex: simple, no nested quantifiers; line length is capped above
       const funcDef = /const\s+(\w+)\s*=\s*useCallback/.exec(line);
       if (funcDef) {
         functions.push({ name: funcDef[1], line: index, content: line });
@@ -153,9 +154,9 @@ class ESLintWarningFixer {
   processFile(filePath) {
     try {
       // Validate file path to prevent path traversal
-      const resolvedPath = path.resolve(filePath);
-      const srcPath = path.resolve(__dirname, '../src');
-      if (!resolvedPath.startsWith(srcPath)) {
+      const resolvedPath = fs.realpathSync(path.resolve(filePath));
+      const srcPath = fs.realpathSync(path.resolve(__dirname, '../src'));
+      if (!resolvedPath.startsWith(srcPath + path.sep)) {
         return false;
       }
 
@@ -189,11 +190,12 @@ class ESLintWarningFixer {
   // Fix warnings in staged files
   fixStagedFiles() {
     try {
+      // Safe: static command & args, no user input flows here
       const result = spawnSync('git', ['diff', '--cached', '--name-only', '--diff-filter=ACM'], {
         encoding: 'utf8',
         timeout: 10000, // Prevent hanging
         maxBuffer: 1024 * 1024, // Limit output size
-        env: { PATH: process.platform === 'win32' ? 'C:\\Windows\\System32;C:\\Windows' : '/usr/bin:/bin:/usr/local/bin' } // Fixed, secure PATH
+        env: { PATH: process.env.PATH } // Safe: reuse existing PATH
       });
       
       if (result.error) throw result.error;
@@ -216,7 +218,7 @@ class ESLintWarningFixer {
             const result = spawnSync('git', ['add', file], { 
               encoding: 'utf8',
               timeout: 5000, // Prevent hanging
-              env: { PATH: process.platform === 'win32' ? 'C:\\Windows\\System32;C:\\Windows' : '/usr/bin:/bin:/usr/local/bin' } // Fixed, secure PATH
+              env: { PATH: process.env.PATH } // Safe: reuse existing PATH
             });
             if (result.error) throw result.error;
           } catch (execError) {
