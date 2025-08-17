@@ -17,7 +17,7 @@ class ESLintWarningFixer {
       if (match.length > 200) return match;
       
       // Keep import if it contains used variables (basic heuristic)
-      const importVars = /\{([^}]+)\}/.exec(match)?.[1]?.split(',') || [];
+      const importVars = /\{([^}]+?)\}/.exec(match)?.[1]?.split(',') || [];
       const usedVars = importVars.filter(v => {
         const varName = v.trim();
         // Use more precise matching to avoid false positives
@@ -193,7 +193,7 @@ class ESLintWarningFixer {
         encoding: 'utf8',
         timeout: 10000, // Prevent hanging
         maxBuffer: 1024 * 1024, // Limit output size
-        env: { PATH: '/usr/bin:/bin:/usr/local/bin' } // Fixed, secure PATH
+        env: { PATH: process.platform === 'win32' ? 'C:\\Windows\\System32;C:\\Windows' : '/usr/bin:/bin:/usr/local/bin' } // Fixed, secure PATH
       });
       
       if (result.error) throw result.error;
@@ -216,7 +216,7 @@ class ESLintWarningFixer {
             const result = spawnSync('git', ['add', file], { 
               encoding: 'utf8',
               timeout: 5000, // Prevent hanging
-              env: { PATH: '/usr/bin:/bin:/usr/local/bin' } // Fixed, secure PATH
+              env: { PATH: process.platform === 'win32' ? 'C:\\Windows\\System32;C:\\Windows' : '/usr/bin:/bin:/usr/local/bin' } // Fixed, secure PATH
             });
             if (result.error) throw result.error;
           } catch (execError) {
