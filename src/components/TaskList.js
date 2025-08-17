@@ -1,5 +1,4 @@
 import React from 'react';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import TaskItem from './TaskItem';
 
 const TaskList = ({ tasks, onToggleComplete, onTogglePin, onEdit, onDelete }) => {
@@ -14,24 +13,19 @@ const TaskList = ({ tasks, onToggleComplete, onTogglePin, onEdit, onDelete }) =>
   }
 
   return (
-    <SortableContext 
-      items={tasks.map(task => task.id)} 
-      strategy={verticalListSortingStrategy}
-    >
-      <div className="space-y-0.5">
-        {tasks.map((task) => (
-          <div key={task.id} data-id={task.id} className="task-item">
-            <TaskItem
-              task={task}
-              onToggleComplete={onToggleComplete}
-              onTogglePin={onTogglePin}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
-          </div>
-        ))}
-      </div>
-    </SortableContext>
+    <div className="space-y-0.5">
+      {tasks.map(task => (
+        <div key={task.id} data-id={task.id} className="task-item">
+          <TaskItem
+            task={task}
+            onToggleComplete={onToggleComplete}
+            onTogglePin={onTogglePin}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
+        </div>
+      ))}
+    </div>
   );
 };
 

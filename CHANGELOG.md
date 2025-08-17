@@ -1,5 +1,30 @@
 # 📋 Release Notes - FinTask
 
+## v3.4.3 - 2025-01-15
+### 🤖 AI-First Features Complete
+- **AI Assistant Enhancement**: Complete Cleo-inspired AI-first interface
+- **Proactive Insights**: AI surfaces issues before users ask
+- **Visual Analytics**: Dynamic charts and AI-powered data visualization
+- **Smart Recommendations**: AI-generated financial optimization suggestions
+- **MCP Server Integration**: Model Context Protocol for external AI assistants
+- **Enhanced Testing**: Comprehensive E2E tests for AI features
+- **Documentation**: Complete AI onboarding and knowledge transfer guides
+
+### 🎨 UI/UX Improvements
+- **Conversational Interface**: Natural language interaction with Finbot
+- **Proactive Dashboard**: Interactive insight cards with priority indicators
+- **Visual Insights**: AI-generated charts with smart commentary
+- **Mobile-First Design**: Optimized for mobile usage patterns
+- **Enhanced Styling**: Gradient designs and modern visual elements
+
+### 🔧 Technical Enhancements
+- **Google Gemini Integration**: Advanced natural language processing
+- **Single API Layer**: Consistent data access across React app and AI
+- **Performance Optimization**: Improved response times and user experience
+- **Security Hardening**: Enhanced data protection and user isolation
+
+---
+
 ## v3.1.0 - 2025-08-03
 ### 🚀 Release
 - **Version Update**: v3.1.0

@@ -110,16 +110,7 @@ class GeminiRouter {
   }
 
   logModelSwitch(from, to, reason, requestId) {
-    console.warn(
-      JSON.stringify({
-        event: 'model_switch',
-        from_model: from,
-        to_model: to,
-        reason,
-        request_id: requestId,
-        timestamp: new Date().toISOString(),
-      })
-    );
+    // Model switch logging removed for production
   }
 
   async makeRequest(prompt, intentMeta = {}) {

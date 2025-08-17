@@ -574,7 +574,7 @@ const CreditCardList = () => {
             onClick={handleAddCard}
             className="finbot-button-primary text-sm px-3 py-2"
           >
-            ➕ Add Card
+            Add Card
           </button>
           <button onClick={fetchCards} className="finbot-button-secondary text-sm px-3 py-2">
             🔄 Refresh
@@ -628,7 +628,7 @@ const CreditCardList = () => {
       </div>
 
       {/* Search, Sort, and View Toggle */}
-      <div className="flex flex-col gap-3 mb-4 lg:flex-row">
+      <div className="flex flex-col gap-3 mb-4 lg:flex-row lg:items-center">
         <div className="flex-1">
           <div className="relative">
             <input
@@ -637,22 +637,26 @@ const CreditCardList = () => {
               placeholder="Search by card name..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-10 finbot-input"
+              className="w-full pl-3 pr-10 finbot-input"
             />
-            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-              <span className="text-gray-400">🔍</span>
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+              <span className="text-[#8B4513]/60">🔍</span>
             </div>
           </div>
         </div>
-        <div className="flex flex-col gap-3 sm:flex-row">
-          <select value={sortBy} onChange={e => setSortBy(e.target.value)} className="finbot-input">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <select
+            value={sortBy}
+            onChange={e => setSortBy(e.target.value)}
+            className="finbot-input h-12"
+          >
             <option value="card_name">Sort by Card Name</option>
             <option value="days_inactive">Sort by Days Inactive</option>
             <option value="promo_count">Sort by Promo Count</option>
             <option value="last_used_newest">Last Used (Newest First)</option>
             <option value="last_used_oldest">Last Used (Oldest First)</option>
           </select>
-          <div className="flex p-1 finbot-card">
+          <div className="flex p-1 finbot-card h-12">
             <button
               data-cy="view-cards-button"
               onClick={() => handleViewModeChange('cards')}

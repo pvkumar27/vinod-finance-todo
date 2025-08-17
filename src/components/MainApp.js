@@ -7,7 +7,6 @@ import BottomPanel from './BottomPanel';
 import BottomNavigation from './BottomNavigation';
 import TopBar from './shared/TopBar';
 import useToneMode from '../hooks/useToneMode';
-import { APP_VERSION } from '../constants/version';
 
 const MainApp = () => {
   const [activeTab, setActiveTab] = useState('chat');
@@ -125,8 +124,16 @@ const MainApp = () => {
       }, 100);
     };
 
+    const handleSwitchTab = event => {
+      setActiveTab(event.detail.tab);
+    };
+
     window.addEventListener('quickReply', handleQuickReply);
-    return () => window.removeEventListener('quickReply', handleQuickReply);
+    window.addEventListener('switchTab', handleSwitchTab);
+    return () => {
+      window.removeEventListener('quickReply', handleQuickReply);
+      window.removeEventListener('switchTab', handleSwitchTab);
+    };
   }, []);
 
   const createMessage = (type, content, extra = {}) => ({
@@ -449,6 +456,7 @@ const MainApp = () => {
             </div>
           </div>
         );
+
       default:
         return (
           <div className="h-full flex flex-col fin-gradient-bg">
@@ -477,15 +485,6 @@ const MainApp = () => {
     >
       {/* Main Content */}
       <div className="flex-1 pb-16">{renderContent()}</div>
-
-      {/* Footer */}
-      <div className="fixed bottom-16 left-0 right-0 bg-white/80 backdrop-blur-sm border-t border-gray-200 px-4 py-2 z-40">
-        <div className="max-w-screen-sm mx-auto text-center">
-          <p className="text-xs text-gray-500">
-            FinTask {APP_VERSION} • Your AI-powered finance assistant
-          </p>
-        </div>
-      </div>
 
       {/* Bottom Navigation */}
       <BottomNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
