@@ -193,7 +193,7 @@ class ESLintWarningFixer {
         encoding: 'utf8',
         timeout: 10000, // Prevent hanging
         maxBuffer: 1024 * 1024, // Limit output size
-        env: { PATH: process.env.PATH } // Use inherited PATH
+        env: { PATH: '/usr/bin:/bin:/usr/local/bin' } // Fixed, secure PATH
       });
       
       if (result.error) throw result.error;
@@ -216,7 +216,7 @@ class ESLintWarningFixer {
             const result = spawnSync('git', ['add', file], { 
               encoding: 'utf8',
               timeout: 5000, // Prevent hanging
-              env: { PATH: process.env.PATH } // Use inherited PATH
+              env: { PATH: '/usr/bin:/bin:/usr/local/bin' } // Fixed, secure PATH
             });
             if (result.error) throw result.error;
           } catch (execError) {
