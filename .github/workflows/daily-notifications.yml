@@ -15,6 +15,7 @@ jobs:
       - name: Send daily push notifications
         run: |
           # Send push notifications via Netlify function
+          # Note: NOTIFICATION_API_KEY is configured in GitHub repository secrets
           API_KEY=$(echo -n "${{ secrets.NOTIFICATION_API_KEY }}" | perl -MURI::Escape -ne 'print uri_escape($_)')
           RESPONSE=$(curl -X POST "https://fintask.netlify.app/.netlify/functions/send-push-reminders?key=${API_KEY}" -s)
           echo "Function response: $RESPONSE"

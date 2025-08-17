@@ -43,7 +43,7 @@ self.addEventListener('push', event => {
       const data = event.data.json();
       notificationData = { ...notificationData, ...data };
     } catch (e) {
-      console.log('Push data is not JSON:', event.data.text());
+      console.log('Push data is not JSON:', event.data.text(), 'Error:', e.message);
       notificationData.body = event.data.text() || notificationData.body;
     }
   }

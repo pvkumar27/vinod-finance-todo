@@ -95,12 +95,15 @@ exports.handler = async event => {
 
     const getStaticNotification = (type, taskCount) => {
       if (type === 'morning') {
+        const taskSuffix = taskCount === 1 ? '' : 's';
+        const morningBody =
+          taskCount > 0
+            ? `You have ${taskCount} pending task${taskSuffix}. Let's tackle them!`
+            : 'Ready for a productive day!';
+
         return {
           title: '🌅 Good Morning!',
-          body:
-            taskCount > 0
-              ? `You have ${taskCount} pending task${taskCount === 1 ? '' : 's'}. Let's tackle them!`
-              : 'Ready for a productive day!',
+          body: morningBody,
           tag: 'morning-reminder',
         };
       } else if (type === 'noon') {
