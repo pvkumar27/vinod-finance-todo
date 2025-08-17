@@ -2,7 +2,7 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
+const { execSync, spawnSync } = require('child_process');
 
 class ESLintWarningFixer {
   constructor() {
@@ -189,12 +189,15 @@ class ESLintWarningFixer {
   // Fix warnings in staged files
   fixStagedFiles() {
     try {
-      const stagedFiles = execSync('git diff --cached --name-only --diff-filter=ACM', {
+      const result = spawnSync('git', ['diff', '--cached', '--name-only', '--diff-filter=ACM'], {
         encoding: 'utf8',
         timeout: 10000, // Prevent hanging
         maxBuffer: 1024 * 1024, // Limit output size
         env: { PATH: process.env.PATH } // Use inherited PATH
-      })
+      });
+      
+      if (result.error) throw result.error;
+      const stagedFiles = result.stdout
         .split('\n')
         .filter(file => file.trim() && /\.(js|jsx)$/.exec(file))
         .slice(0, 100); // Limit number of files processed
@@ -208,13 +211,14 @@ class ESLintWarningFixer {
 
         if (this.processFile(file)) {
           filesFixed++;
-          // Re-stage the fixed file with safe escaping
+          // Re-stage the fixed file with safe command execution
           try {
-            execSync('git add ' + JSON.stringify(file), { 
+            const result = spawnSync('git', ['add', file], { 
               encoding: 'utf8',
               timeout: 5000, // Prevent hanging
               env: { PATH: process.env.PATH } // Use inherited PATH
             });
+            if (result.error) throw result.error;
           } catch (execError) {
             console.error(`Failed to re-stage file ${file}:`, execError.message);
           }
