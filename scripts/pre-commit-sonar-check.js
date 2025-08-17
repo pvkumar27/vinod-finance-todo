@@ -14,8 +14,9 @@ const sonarPatterns = [
 function checkStagedFiles() {
   try {
     // Get staged JS files
-    const stagedFiles = execSync('git diff --cached --name-only --diff-filter=ACM')
-      .toString()
+    const stagedFiles = execSync('git diff --cached --name-only --diff-filter=ACM', {
+      encoding: 'utf8',
+    })
       .split('\n')
       .filter(file => file.match(/\.(js|jsx)$/));
 
@@ -25,6 +26,9 @@ function checkStagedFiles() {
     const issueFiles = [];
 
     stagedFiles.forEach(file => {
+      // Validate file path to prevent path traversal
+      if (!/^[a-zA-Z0-9._/-]+$/.test(file)) return;
+
       try {
         const content = require('fs').readFileSync(file, 'utf8');
 
@@ -32,7 +36,7 @@ function checkStagedFiles() {
           if (pattern.test(content)) {
             console.log(`⚠️  ${file}: ${message}`);
             issuesFound++;
-            if (!issueFiles.includes(file)) issueFiles.includes(file);
+            if (!issueFiles.includes(file)) issueFiles.push(file);
           }
         });
       } catch (error) {
@@ -46,9 +50,10 @@ function checkStagedFiles() {
       const fixer = new SonarAutoFixer();
       issueFiles.forEach(file => fixer.processFile(file));
 
-      // Re-stage fixed files
+      // Re-stage fixed files with safe command construction
       if (issueFiles.length > 0) {
-        execSync(`git add ${issueFiles.join(' ')}`);
+        const safeFiles = issueFiles.map(f => JSON.stringify(f)).join(' ');
+        execSync(`git add ${safeFiles}`, { encoding: 'utf8' });
         console.log('✅ Issues fixed and re-staged');
       }
     }

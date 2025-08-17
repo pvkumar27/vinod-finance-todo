@@ -88,44 +88,67 @@ class SonarAutoFixer {
 
   // Process a single file
   processFile(filePath) {
-    if (!fs.existsSync(filePath)) return false;
+    try {
+      // Validate file path to prevent path traversal
+      const resolvedPath = path.resolve(filePath);
+      if (!resolvedPath.includes('/src/') && !resolvedPath.includes('\\src\\')) {
+        return false;
+      }
 
-    let content = fs.readFileSync(filePath, 'utf8');
-    const originalContent = content;
+      if (!fs.existsSync(resolvedPath)) return false;
 
-    content = this.fixNestedTernary(content);
-    content = this.fixChainedArrayOps(content);
-    content = this.fixTodoComments(content);
-    content = this.fixPlaceholderComments(content);
-    content = this.fixCognitiveComplexity(content);
+      let content = fs.readFileSync(resolvedPath, 'utf8');
+      const originalContent = content;
 
-    if (content !== originalContent) {
-      fs.writeFileSync(filePath, content);
-      return true;
+      content = this.fixNestedTernary(content);
+      content = this.fixChainedArrayOps(content);
+      content = this.fixTodoComments(content);
+      content = this.fixPlaceholderComments(content);
+      content = this.fixCognitiveComplexity(content);
+
+      if (content !== originalContent) {
+        fs.writeFileSync(resolvedPath, content);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error(`Error processing file ${filePath}:`, error.message);
+      return false;
     }
-    return false;
   }
 
   // Scan and fix all JS files
   fixAllFiles() {
-    const srcDir = path.join(__dirname, '../src');
+    const srcDir = path.resolve(__dirname, '../src');
     let filesFixed = 0;
 
-    function scanDirectory(dir) {
-      const files = fs.readdirSync(dir);
-      files.forEach(file => {
-        const filePath = path.join(dir, file);
-        if (fs.statSync(filePath).isDirectory()) {
-          scanDirectory(filePath);
-        } else if (file.endsWith('.js') || file.endsWith('.jsx')) {
-          if (this.processFile(filePath)) {
-            filesFixed++;
-          }
-        }
-      });
-    }
+    const scanDirectory = dir => {
+      try {
+        const files = fs.readdirSync(dir);
+        files.forEach(file => {
+          // Validate filename to prevent path traversal
+          if (!/^[a-zA-Z0-9._-]+$/.test(file)) return;
 
-    scanDirectory.call(this, srcDir);
+          const filePath = path.join(dir, file);
+
+          // Ensure file is within src directory
+          if (!filePath.startsWith(srcDir)) return;
+
+          const stats = fs.statSync(filePath);
+          if (stats.isDirectory()) {
+            scanDirectory(filePath);
+          } else if (file.endsWith('.js') || file.endsWith('.jsx')) {
+            if (this.processFile(filePath)) {
+              filesFixed++;
+            }
+          }
+        });
+      } catch (error) {
+        console.error(`Error scanning directory ${dir}:`, error.message);
+      }
+    };
+
+    scanDirectory(srcDir);
 
     console.log(`✅ Fixed ${this.fixes} SonarQube issues in ${filesFixed} files`);
     return this.fixes > 0;

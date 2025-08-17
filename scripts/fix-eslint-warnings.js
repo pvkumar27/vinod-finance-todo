@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 const fs = require('fs');
+const path = require('path');
 const { execSync } = require('child_process');
 
 class ESLintWarningFixer {
@@ -135,27 +136,39 @@ class ESLintWarningFixer {
 
   // Process a single file
   processFile(filePath) {
-    if (!fs.existsSync(filePath)) return false;
+    try {
+      // Validate file path to prevent path traversal
+      const resolvedPath = path.resolve(filePath);
+      if (!resolvedPath.includes('/src/') && !resolvedPath.includes('\\src\\')) {
+        return false;
+      }
 
-    let content = fs.readFileSync(filePath, 'utf8');
-    const originalContent = content;
+      if (!fs.existsSync(resolvedPath)) return false;
 
-    content = this.removeUnusedImports(content);
-    content = this.fixUnusedVars(content);
-    content = this.fixUseBeforeDefine(content);
+      let content = fs.readFileSync(resolvedPath, 'utf8');
+      const originalContent = content;
 
-    if (content !== originalContent) {
-      fs.writeFileSync(filePath, content);
-      return true;
+      content = this.removeUnusedImports(content);
+      content = this.fixUnusedVars(content);
+      content = this.fixUseBeforeDefine(content);
+
+      if (content !== originalContent) {
+        fs.writeFileSync(resolvedPath, content);
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error(`Error processing file ${filePath}:`, error.message);
+      return false;
     }
-    return false;
   }
 
   // Fix warnings in staged files
   fixStagedFiles() {
     try {
-      const stagedFiles = execSync('git diff --cached --name-only --diff-filter=ACM')
-        .toString()
+      const stagedFiles = execSync('git diff --cached --name-only --diff-filter=ACM', {
+        encoding: 'utf8',
+      })
         .split('\n')
         .filter(file => file.match(/\.(js|jsx)$/));
 
@@ -163,10 +176,13 @@ class ESLintWarningFixer {
 
       let filesFixed = 0;
       stagedFiles.forEach(file => {
+        // Validate file path to prevent command injection
+        if (!/^[a-zA-Z0-9._/-]+$/.test(file)) return;
+
         if (this.processFile(file)) {
           filesFixed++;
-          // Re-stage the fixed file
-          execSync(`git add "${file}"`);
+          // Re-stage the fixed file with safe escaping
+          execSync('git add ' + JSON.stringify(file), { encoding: 'utf8' });
         }
       });
 
