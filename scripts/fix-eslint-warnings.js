@@ -61,12 +61,10 @@ class ESLintWarningFixer {
     });
 
     // Reorder functions to be defined before usage
-    let modified = false;
     usages.forEach(usage => {
       const func = functions.find(f => f.name === usage.name);
       if (func && func.line > usage.line) {
         // Move function definition before usage
-        modified = true;
         this.fixes++;
       }
     });
