@@ -1,4 +1,3 @@
-import React from 'react';
 import SmartDashboard from './SmartDashboard';
 
 const InsightsTab = () => {
@@ -6,7 +5,10 @@ const InsightsTab = () => {
     <div className="space-y-4 p-4">
       {/* Header */}
       <div className="mb-4">
-        <h2 className="finbot-heading-xl finbot-responsive-heading flex items-center">
+        <h2
+          className="finbot-heading-xl finbot-responsive-heading flex items-center"
+          data-cy="insights-heading"
+        >
           <span className="mr-3 text-2xl">🧠</span>
           Smart Insights
         </h2>

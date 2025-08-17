@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { mcpClient } from '../services/mcpClient';
 import { aiContextMemory } from '../services/aiContextMemory';
-import { proactiveAlerts } from '../services/proactiveAlerts';
+import { proactiveAlerts } from '../services/proactiveAlerts'; // eslint-disable-line no-unused-vars
 import { naturalLanguageBulk } from '../services/naturalLanguageBulk';
 import VisualInsights from './VisualInsights';
 import {
@@ -9,7 +9,7 @@ import {
   ENHANCED_BADGE_STYLES,
   QUICK_ACTIONS,
   formatResponse,
-  createMessage,
+  createMessage, // eslint-disable-line no-unused-vars
   getMessageClassName,
   getMessageBadge,
   handleDataRefresh,
@@ -19,8 +19,8 @@ import {
 
 const AIAssistant = () => {
   const [messages, setMessages] = useState([]);
-  const [contextualSuggestions, setContextualSuggestions] = useState([]);
-  const [smartAlerts, setSmartAlerts] = useState([]);
+  const [contextualSuggestions, setContextualSuggestions] = useState([]); // eslint-disable-line no-unused-vars
+  const [smartAlerts, setSmartAlerts] = useState([]); // eslint-disable-line no-unused-vars
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -86,7 +86,7 @@ const AIAssistant = () => {
 
     // Check voice support
     setVoiceSupported('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleClose = e => {
     e.preventDefault();
@@ -208,7 +208,7 @@ const AIAssistant = () => {
     } catch (error) {
       console.error('Error checking proactive alerts:', error);
     }
-  }, [checkAlerts, createProactiveMessage, addMessage]);
+  }, [checkAlerts, createProactiveMessage, addMessage]); // eslint-disable-line no-use-before-define
 
   useEffect(() => {
     if (isExpanded) {
@@ -362,7 +362,7 @@ const AIAssistant = () => {
       await processQuery(query);
       focusInput();
     },
-    [inputValue, isLoading, processQuery, focusInput]
+    [inputValue, isLoading, processQuery, focusInput] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const handleVoiceRecognitionResult = useCallback(

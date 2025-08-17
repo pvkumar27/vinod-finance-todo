@@ -9,4 +9,26 @@ if git diff --cached --name-only | grep -q "package.json" && \
   fi
 fi
 
+# Run ESLint warning auto-fix for JS files
+if git diff --cached --name-only | grep -E "\.(js|jsx)$" > /dev/null; then
+  echo "🔧 Auto-fixing ESLint warnings..."
+  node scripts/fix-eslint-warnings.js
+fi
+
+# Run SonarQube auto-fix for JS files
+if git diff --cached --name-only | grep -E "\.(js|jsx)$" > /dev/null; then
+  echo "🔧 Checking SonarQube issues..."
+  node scripts/pre-commit-sonar-check.js
+fi
+
+# Run E2E tests if UI components changed
+if git diff --cached --name-only | grep -E "src/components/.*\.(js|jsx)$" > /dev/null; then
+  echo "🧪 Running essential E2E tests..."
+  npm run test:e2e:essential
+  if [ $? -ne 0 ]; then
+    echo "❌ E2E tests failed. Please fix before committing."
+    exit 1
+  fi
+fi
+
 npx lint-staged
