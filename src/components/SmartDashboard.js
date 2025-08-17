@@ -2,18 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 
 const SmartDashboard = ({ onQueryGenerated }) => {
-  const [data, setData] = useState({ cards: [], todos: [] });
   const [loading, setLoading] = useState(true);
   const [insights, setInsights] = useState(null);
 
   useEffect(() => {
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadData = async () => {
     try {
       const [cards, todos] = await Promise.all([api.getCreditCards(), api.getTodos()]);
-      setData({ cards: cards || [], todos: todos || [] });
       generateInsights(cards || [], todos || []);
     } catch (error) {
       console.error('Error loading data:', error);
