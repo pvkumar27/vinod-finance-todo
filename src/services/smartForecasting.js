@@ -30,7 +30,7 @@ class SmartForecastingService {
     }
   }
 
-  // Analyzes todo patterns and generates forecasting insights
+
   async forecastTodoPatterns() {
     const forecasts = [];
 
@@ -353,7 +353,7 @@ class SmartForecastingService {
         id:
           forecast.cardId ||
           forecast.todoId ||
-          `forecast_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
+          `forecast_${Date.now()}_${crypto.getRandomValues(new Uint32Array(1))[0]}`,
         title: forecast.title,
         message: forecast.message,
         type: forecast.type,
@@ -380,4 +380,4 @@ class SmartForecastingService {
   }
 }
 
-export const smartForecasting = new SmartForecastingService();
+export 

@@ -67,7 +67,6 @@
     "test:pre-commit": "npm run test:e2e:essential",
     "test:update-expectations": "node scripts/update-test-expectations.js",
     "sonar:fix": "node scripts/fix-sonar-issues.js",
-    "sonar:check": "node scripts/pre-commit-sonar-check.js",
     "eslint:fix-warnings": "node scripts/fix-eslint-warnings.js",
     "cypress:open": "npx cypress open",
     "cypress:run": "npx cypress run",

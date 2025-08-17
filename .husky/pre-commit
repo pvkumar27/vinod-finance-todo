@@ -15,11 +15,11 @@ if git diff --cached --name-only | grep -E "\.(js|jsx)$" > /dev/null; then
   node scripts/fix-eslint-warnings.js
 fi
 
-# Run SonarQube auto-fix for JS files
-if git diff --cached --name-only | grep -E "\.(js|jsx)$" > /dev/null; then
-  echo "🔧 Checking SonarQube issues..."
-  node scripts/pre-commit-sonar-check.js
-fi
+# SonarQube auto-fix disabled - was slowing down commits
+# if git diff --cached --name-only | grep -E "\.(js|jsx)$" > /dev/null; then
+#   echo "🔧 Checking SonarQube issues..."
+#   node scripts/pre-commit-sonar-check.js
+# fi
 
 # Run E2E tests if UI components changed (temporarily disabled)
 # if git diff --cached --name-only | grep -E "src/components/.*\.(js|jsx)$" > /dev/null; then

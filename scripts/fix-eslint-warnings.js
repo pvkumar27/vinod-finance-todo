@@ -13,11 +13,17 @@ class ESLintWarningFixer {
   fixUnusedVars(content) {
     // Remove unused imports
     content = content.replace(/import\s+\{[^}]*\}\s+from\s+['"][^'"]*['"];?\s*\n/g, match => {
+      // Limit match length to prevent ReDoS
+      if (match.length > 200) return match;
+      
       // Keep import if it contains used variables (basic heuristic)
-      const importVars = match.match(/\{([^}]+)\}/)?.[1]?.split(',') || [];
+      const importVars = /\{([^}]+)\}/.exec(match)?.[1]?.split(',') || [];
       const usedVars = importVars.filter(v => {
         const varName = v.trim();
-        return content.includes(varName) && content.indexOf(varName) !== content.indexOf(match);
+        // Use more precise matching to avoid false positives
+        const escapedVarName = varName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const varRegex = new RegExp(`\\b${escapedVarName}\\b`);
+        return varRegex.test(content) && content.indexOf(varName) !== content.indexOf(match);
       });
 
       if (usedVars.length === 0) {
@@ -29,7 +35,12 @@ class ESLintWarningFixer {
 
     // Remove unused variable declarations
     content = content.replace(/const\s+(\w+)\s*=\s*[^;]+;?\s*\n/g, (match, varName) => {
-      const regex = new RegExp(`\\b${varName}\\b`, 'g');
+      // Limit match and variable name length
+      if (match.length > 300 || varName.length > 50) return match;
+      
+      // Escape special regex characters to prevent ReDoS
+      const escapedVarName = varName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`\\b${escapedVarName}\\b`, 'g');
       const matches = content.match(regex) || [];
       if (matches.length === 1) {
         // Only the declaration
@@ -50,12 +61,15 @@ class ESLintWarningFixer {
 
     // Find function definitions and usages
     lines.forEach((line, index) => {
-      const funcDef = line.match(/const\s+(\w+)\s*=\s*useCallback/);
+      // Limit line length to prevent ReDoS
+      if (line.length > 500) return;
+      
+      const funcDef = /const\s+(\w+)\s*=\s*useCallback/.exec(line);
       if (funcDef) {
         functions.push({ name: funcDef[1], line: index, content: line });
       }
 
-      const funcUsage = line.match(/(\w+)\(\)/);
+      const funcUsage = /(\w+)\(\)/.exec(line);
       if (funcUsage && !line.includes('const') && !line.includes('function')) {
         usages.push({ name: funcUsage[1], line: index });
       }
@@ -81,7 +95,10 @@ class ESLintWarningFixer {
 
     // Find all imports and their usage
     lines.forEach((line, index) => {
-      const importMatch = line.match(/import\s+(?:\{([^}]+)\}|\*\s+as\s+(\w+)|(\w+))\s+from/);
+      // Limit line length to prevent ReDoS
+      if (line.length > 1000) return;
+      
+      const importMatch = /import\s+(?:\{([^}]+)\}|\*\s+as\s+(\w+)|(\w+))\s+from/.exec(line);
       if (importMatch) {
         importLines.push({
           line,
@@ -106,11 +123,9 @@ class ESLintWarningFixer {
             usedImports.add(cleanImport);
           }
         });
-      } else {
+      } else if (contentWithoutImports.includes(imports.trim())) {
         // Default or namespace import
-        if (contentWithoutImports.includes(imports.trim())) {
-          usedImports.add(imports.trim());
-        }
+        usedImports.add(imports.trim());
       }
     });
 
@@ -139,13 +154,21 @@ class ESLintWarningFixer {
     try {
       // Validate file path to prevent path traversal
       const resolvedPath = path.resolve(filePath);
-      if (!resolvedPath.includes('/src/') && !resolvedPath.includes('\\src\\')) {
+      const srcPath = path.resolve(__dirname, '../src');
+      if (!resolvedPath.startsWith(srcPath)) {
         return false;
       }
 
       if (!fs.existsSync(resolvedPath)) return false;
 
       let content = fs.readFileSync(resolvedPath, 'utf8');
+      
+      // Limit file size to prevent memory exhaustion
+      if (content.length > 1024 * 1024) { // 1MB limit
+        console.warn(`File ${filePath} too large, skipping`);
+        return false;
+      }
+      
       const originalContent = content;
 
       content = this.removeUnusedImports(content);
@@ -168,21 +191,33 @@ class ESLintWarningFixer {
     try {
       const stagedFiles = execSync('git diff --cached --name-only --diff-filter=ACM', {
         encoding: 'utf8',
+        timeout: 10000, // Prevent hanging
+        maxBuffer: 1024 * 1024, // Limit output size
+        env: { PATH: process.env.PATH } // Use inherited PATH
       })
         .split('\n')
-        .filter(file => file.match(/\.(js|jsx)$/));
+        .filter(file => file.trim() && /\.(js|jsx)$/.exec(file))
+        .slice(0, 100); // Limit number of files processed
 
       if (stagedFiles.length === 0) return 0;
 
       let filesFixed = 0;
       stagedFiles.forEach(file => {
         // Validate file path to prevent command injection
-        if (!/^[a-zA-Z0-9._/-]+$/.test(file)) return;
+        if (!/^[a-zA-Z0-9._/\\-]+$/.test(file) || file.includes('..') || file.length > 255) return;
 
         if (this.processFile(file)) {
           filesFixed++;
           // Re-stage the fixed file with safe escaping
-          execSync('git add ' + JSON.stringify(file), { encoding: 'utf8' });
+          try {
+            execSync('git add ' + JSON.stringify(file), { 
+              encoding: 'utf8',
+              timeout: 5000, // Prevent hanging
+              env: { PATH: process.env.PATH } // Use inherited PATH
+            });
+          } catch (execError) {
+            console.error(`Failed to re-stage file ${file}:`, execError.message);
+          }
         }
       });
 
