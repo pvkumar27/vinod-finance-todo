@@ -12,7 +12,7 @@ class ESLintWarningFixer {
   // Actually fix unused variables by removing them
   fixUnusedVars(content) {
     // Remove unused imports
-    content = content.replace(/import\s+\{[^}]*\}\s+from\s+['"][^'"]*['"];?\s*\n/g, match => {
+    content = content.replace(/import\s+\{[^}]*?\}\s+from\s+['"][^'"]*?['"];?\s*?\n/g, match => {
       // Limit match length to prevent ReDoS
       if (match.length > 200) return match;
       
@@ -34,7 +34,7 @@ class ESLintWarningFixer {
     });
 
     // Remove unused variable declarations
-    content = content.replace(/const\s+(\w+)\s*=\s*[^;]+;?\s*\n/g, (match, varName) => {
+    content = content.replace(/const\s+(\w+)\s*=\s*[^;]+?;?\s*?\n/g, (match, varName) => {
       // Limit match and variable name length
       if (match.length > 300 || varName.length > 50) return match;
       
@@ -98,7 +98,7 @@ class ESLintWarningFixer {
       // Limit line length to prevent ReDoS
       if (line.length > 1000) return;
       
-      const importMatch = /import\s+(?:\{([^}]+)\}|\*\s+as\s+(\w+)|(\w+))\s+from/.exec(line);
+      const importMatch = /import\s+(?:\{([^}]+?)\}|\*\s+as\s+(\w+)|(\w+))\s+from/.exec(line);
       if (importMatch) {
         importLines.push({
           line,
