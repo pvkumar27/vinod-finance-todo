@@ -10,36 +10,20 @@ class SonarAutoFixer {
 
   // Fix nested ternary operations
   fixNestedTernary(content) {
-    const nestedTernaryRegex =
-      /(\w+)\s*=\s*([^?]+)\s*\?\s*([^:]+)\s*:\s*([^?]+)\s*\?\s*([^:]+)\s*:\s*([^;]+);/g;
-
-    return content.replace(
-      nestedTernaryRegex,
-      (match, varName, condition1, value1, condition2, value2, value3) => {
-        this.fixes++;
-        return `let ${varName};
-    if (${condition1.trim()}) {
-      ${varName} = ${value1.trim()};
-    } else if (${condition2.trim()}) {
-      ${varName} = ${value2.trim()};
-    } else {
-      ${varName} = ${value3.trim()};
-    }`;
-      }
-    );
+    // Disable this fix as it's causing syntax errors
+    // TODO: Implement safer nested ternary detection
+    return content;
   }
 
   // Fix chained array operations
   fixChainedArrayOps(content) {
-    const chainedOpsRegex = /(\w+)\.sort\([^)]+\)\.slice\([^)]+\)/g;
+    // Only fix if it's a simple assignment or return statement
+    const chainedOpsRegex = /(const|let|var)\s+(\w+)\s*=\s*(\w+)\.sort\([^)]+\)\.slice\([^)]+\);/g;
 
-    return content.replace(chainedOpsRegex, match => {
+    return content.replace(chainedOpsRegex, (match, declaration, varName, arrayName) => {
       this.fixes++;
-      const varName = match.split('.')[0];
-      return `(() => {
-        const sorted = ${varName}.sort((a, b) => { /* sort logic */ });
-        return sorted.slice(0, 3);
-      })()`;
+      return `${declaration} sortedArray = [...${arrayName}].sort((a, b) => { /* sort logic */ });
+    ${declaration} ${varName} = sortedArray.slice(0, 3);`;
     });
   }
 
@@ -65,25 +49,9 @@ class SonarAutoFixer {
 
   // Fix cognitive complexity by extracting methods
   fixCognitiveComplexity(content) {
-    // Simple heuristic: if function has > 15 lines and multiple if statements
-    const functionRegex = /(async\s+)?(\w+)\s*\([^)]*\)\s*\{([^}]+)\}/g;
-
-    return content.replace(functionRegex, (match, async, funcName, body) => {
-      const lines = body.split('\n').filter(line => line.trim());
-      const ifCount = (body.match(/if\s*\(/g) || []).length;
-
-      if (lines.length > 15 && ifCount > 3) {
-        this.fixes++;
-        return `${async || ''}${funcName}() {
-    // Refactored for reduced complexity
-    return this.${funcName}Helper();
-  }
-
-  ${funcName}Helper() {${body}
-  }`;
-      }
-      return match;
-    });
+    // Disable this fix as it's too aggressive and can break code
+    // TODO: Implement safer complexity detection
+    return content;
   }
 
   // Fix command injection vulnerabilities
