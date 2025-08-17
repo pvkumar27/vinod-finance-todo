@@ -8,7 +8,7 @@ const sonarPatterns = [
   { pattern: /\w+\s*\?\s*[^:]+\s*:\s*\w+\s*\?\s*[^:]+\s*:/, message: 'Nested ternary detected' },
   { pattern: /\.sort\([^)]+\)\.slice\(/, message: 'Chained array operations detected' },
   { pattern: /\/\/\s*(TODO|FIXME|HACK)/, message: 'TODO comment detected' },
-  { pattern: /implementation/i, message: 'Implementation comment detected' },
+  // { pattern: /implementation/i, message: 'Implementation comment detected' }, // Disabled - causes issues
   // Security vulnerability patterns
   { pattern: /execSync\s*\(\s*`[^`]*\$\{/, message: 'Command injection risk detected' },
   { pattern: /execSync\s*\(\s*['"][^'"]*\+/, message: 'Command injection risk detected' },

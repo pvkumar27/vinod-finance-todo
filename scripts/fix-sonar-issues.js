@@ -39,12 +39,9 @@ class SonarAutoFixer {
 
   // Fix placeholder comments
   fixPlaceholderComments(content) {
-    const placeholderRegex = /\/\/.*placeholder.*$/gim;
-
-    return content.replace(placeholderRegex, match => {
-      this.fixes++;
-      return match.replace(/placeholder/gi, 'implementation');
-    });
+    // Disable this fix as it can cause parsing issues
+    // TODO: Implement safer comment replacement
+    return content;
   }
 
   // Fix cognitive complexity by extracting methods
