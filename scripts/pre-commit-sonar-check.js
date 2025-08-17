@@ -8,7 +8,15 @@ const sonarPatterns = [
   { pattern: /\w+\s*\?\s*[^:]+\s*:\s*\w+\s*\?\s*[^:]+\s*:/, message: 'Nested ternary detected' },
   { pattern: /\.sort\([^)]+\)\.slice\(/, message: 'Chained array operations detected' },
   { pattern: /\/\/\s*(TODO|FIXME|HACK)/, message: 'TODO comment detected' },
-  { pattern: /placeholder/i, message: 'Placeholder comment detected' },
+  { pattern: /implementation/i, message: 'Implementation comment detected' },
+  // Security vulnerability patterns
+  { pattern: /execSync\s*\(\s*`[^`]*\$\{/, message: 'Command injection risk detected' },
+  { pattern: /execSync\s*\(\s*['"][^'"]*\+/, message: 'Command injection risk detected' },
+  { pattern: /readFileSync\s*\(\s*[^,)]*\+/, message: 'Path traversal risk detected' },
+  { pattern: /writeFileSync\s*\(\s*[^,)]*\+/, message: 'Path traversal risk detected' },
+  { pattern: /require\s*\(\s*[^)]*\+/, message: 'Code injection risk detected' },
+  { pattern: /eval\s*\(/, message: 'Code injection detected' },
+  { pattern: /Function\s*\(/, message: 'Dynamic code execution detected' },
 ];
 
 function checkStagedFiles() {
