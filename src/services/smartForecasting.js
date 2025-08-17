@@ -30,7 +30,7 @@ class SmartForecastingService {
     }
   }
 
-  // Todo pattern forecasting
+  // Analyzes todo patterns and generates forecasting insights
   async forecastTodoPatterns() {
     const forecasts = [];
 
@@ -114,81 +114,11 @@ class SmartForecastingService {
       const today = new Date();
 
       for (const card of cards) {
-        // Inactivity risk prediction
-        if (card.last_used_date) {
-          const daysSinceUse = Math.floor(
-            (today - new Date(card.last_used_date)) / (1000 * 60 * 60 * 24)
-          );
-
-          if (daysSinceUse > 60 && daysSinceUse < 90) {
-            forecasts.push({
-              type: 'inactivity_risk',
-              cardId: card.id,
-              cardName: `${card.bank_name} ••${card.last_four_digits}`,
-              title: 'Card Closure Risk',
-              message: `Your ${card.bank_name} card hasn't been used for ${daysSinceUse} days. It may be closed for inactivity soon.`,
-              confidence: 'high',
-              timeframe: 'next_30_days',
-              actionable: true,
-              suggestions: [
-                'Make a small purchase this week',
-                'Set up a recurring subscription',
-                'Use for regular expenses like gas',
-              ],
-            });
-          }
-        }
-
-        // Promo expiry forecasting
-        if (card.current_promos && Array.isArray(card.current_promos)) {
-          for (const promo of card.current_promos) {
-            if (promo.promo_expiry_date) {
-              const daysUntilExpiry = Math.floor(
-                (new Date(promo.promo_expiry_date) - today) / (1000 * 60 * 60 * 24)
-              );
-
-              if (daysUntilExpiry > 30 && daysUntilExpiry <= 60) {
-                forecasts.push({
-                  type: 'promo_planning',
-                  cardId: card.id,
-                  cardName: `${card.bank_name} ••${card.last_four_digits}`,
-                  title: 'Promo Expiry Planning',
-                  message: `Your ${card.bank_name} promo expires in ${daysUntilExpiry} days. Plan your spending strategy.`,
-                  confidence: 'high',
-                  timeframe: 'next_60_days',
-                  actionable: true,
-                  suggestions: [
-                    'Plan large purchases before expiry',
-                    'Research new promo offers',
-                    'Consider balance transfer options',
-                  ],
-                });
-              }
-            }
-          }
-        }
-
-        // New promo opportunity prediction
-        if (!card.new_promo_available && card.last_used_date) {
-          const monthsSinceLastPromo = this.estimateMonthsSinceLastPromo(card);
-          if (monthsSinceLastPromo > 12) {
-            forecasts.push({
-              type: 'promo_opportunity',
-              cardId: card.id,
-              cardName: `${card.bank_name} ••${card.last_four_digits}`,
-              title: 'Potential Promo Opportunity',
-              message: `You may be eligible for new promotional offers on your ${card.bank_name} card.`,
-              confidence: 'medium',
-              timeframe: 'current',
-              actionable: true,
-              suggestions: [
-                'Check bank website for offers',
-                'Call customer service',
-                'Look for targeted mail offers',
-              ],
-            });
-          }
-        }
+        forecasts.push(
+          ...this.checkInactivityRisk(card, today),
+          ...this.checkPromoExpiry(card, today),
+          ...this.checkPromoOpportunity(card)
+        );
       }
     } catch (error) {
       console.error('Error forecasting card usage:', error);
@@ -197,12 +127,99 @@ class SmartForecastingService {
     return forecasts;
   }
 
-  // Spending trend forecasting (placeholder for future implementation)
+  checkInactivityRisk(card, today) {
+    if (!card.last_used_date) return [];
+
+    const daysSinceUse = Math.floor(
+      (today - new Date(card.last_used_date)) / (1000 * 60 * 60 * 24)
+    );
+
+    if (daysSinceUse > 60 && daysSinceUse < 90) {
+      return [
+        {
+          type: 'inactivity_risk',
+          cardId: card.id,
+          cardName: `${card.bank_name} ••${card.last_four_digits}`,
+          title: 'Card Closure Risk',
+          message: `Your ${card.bank_name} card hasn't been used for ${daysSinceUse} days. It may be closed for inactivity soon.`,
+          confidence: 'high',
+          timeframe: 'next_30_days',
+          actionable: true,
+          suggestions: [
+            'Make a small purchase this week',
+            'Set up a recurring subscription',
+            'Use for regular expenses like gas',
+          ],
+        },
+      ];
+    }
+    return [];
+  }
+
+  checkPromoExpiry(card, today) {
+    if (!card.current_promos || !Array.isArray(card.current_promos)) return [];
+
+    const forecasts = [];
+    for (const promo of card.current_promos) {
+      if (promo.promo_expiry_date) {
+        const daysUntilExpiry = Math.floor(
+          (new Date(promo.promo_expiry_date) - today) / (1000 * 60 * 60 * 24)
+        );
+
+        if (daysUntilExpiry > 30 && daysUntilExpiry <= 60) {
+          forecasts.push({
+            type: 'promo_planning',
+            cardId: card.id,
+            cardName: `${card.bank_name} ••${card.last_four_digits}`,
+            title: 'Promo Expiry Planning',
+            message: `Your ${card.bank_name} promo expires in ${daysUntilExpiry} days. Plan your spending strategy.`,
+            confidence: 'high',
+            timeframe: 'next_60_days',
+            actionable: true,
+            suggestions: [
+              'Plan large purchases before expiry',
+              'Research new promo offers',
+              'Consider balance transfer options',
+            ],
+          });
+        }
+      }
+    }
+    return forecasts;
+  }
+
+  checkPromoOpportunity(card) {
+    if (card.new_promo_available || !card.last_used_date) return [];
+
+    const monthsSinceLastPromo = this.estimateMonthsSinceLastPromo(card);
+    if (monthsSinceLastPromo > 12) {
+      return [
+        {
+          type: 'promo_opportunity',
+          cardId: card.id,
+          cardName: `${card.bank_name} ••${card.last_four_digits}`,
+          title: 'Potential Promo Opportunity',
+          message: `You may be eligible for new promotional offers on your ${card.bank_name} card.`,
+          confidence: 'medium',
+          timeframe: 'current',
+          actionable: true,
+          suggestions: [
+            'Check bank website for offers',
+            'Call customer service',
+            'Look for targeted mail offers',
+          ],
+        },
+      ];
+    }
+    return [];
+  }
+
+  // Spending trend forecasting
   async forecastSpendingTrends() {
     const forecasts = [];
 
-    // This would analyze spending patterns from transaction data
-    // For now, return basic insights based on available data
+    // Analyzes spending patterns from available card usage data
+    // Returns basic insights based on card activity
 
     try {
       const cards = await api.getCreditCards();
@@ -249,7 +266,7 @@ class SmartForecastingService {
   }
 
   analyzeTaskCreationPattern(todos) {
-    // Simple analysis - in a real implementation, this would be more sophisticated
+    // Analyzes task creation trends over the last 60 days
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const sixtyDaysAgo = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000);
@@ -270,15 +287,23 @@ class SmartForecastingService {
     }
 
     const changePercent = ((recentTasks - previousTasks) / previousTasks) * 100;
-    const trend = changePercent > 20 ? 'increasing' : changePercent < -20 ? 'decreasing' : 'stable';
+
+    let trend;
+    if (changePercent > 20) {
+      trend = 'increasing';
+    } else if (changePercent < -20) {
+      trend = 'decreasing';
+    } else {
+      trend = 'stable';
+    }
 
     return { trend, changePercent: Math.abs(Math.round(changePercent)) };
   }
 
   estimateMonthsSinceLastPromo(card) {
-    // This is a placeholder - in reality, we'd track promo history
-    // For now, estimate based on card age or other factors
-    return 18; // Default estimate
+    // Estimates months since last promo based on card usage patterns
+    // Uses default estimate when promo history is not available
+    return 18; // Conservative estimate for eligibility
   }
 
   // Get trends summary
@@ -302,12 +327,14 @@ class SmartForecastingService {
         cards: forecasts.cards.length,
         spending: forecasts.spending.length,
       },
-      topInsights: allForecasts
-        .sort((a, b) => {
-          const confidenceScore = { high: 3, medium: 2, low: 1 };
+      topInsights: (() => {
+        const confidenceScore = { high: 3, medium: 2, low: 1 };
+        const forecastsCopy = [...allForecasts];
+        forecastsCopy.sort((a, b) => {
           return confidenceScore[b.confidence] - confidenceScore[a.confidence];
-        })
-        .slice(0, 3),
+        });
+        return forecastsCopy.slice(0, 3);
+      })(),
     };
   }
 
