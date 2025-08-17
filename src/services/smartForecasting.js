@@ -323,7 +323,10 @@ class SmartForecastingService {
 
     for (const forecast of allForecasts) {
       const displayForecast = {
-        id: forecast.cardId || forecast.todoId || Date.now() + Math.random(),
+        id:
+          forecast.cardId ||
+          forecast.todoId ||
+          `forecast_${Date.now()}_${Math.floor(Math.random() * 1000)}`,
         title: forecast.title,
         message: forecast.message,
         type: forecast.type,
