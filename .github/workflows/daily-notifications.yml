@@ -1,22 +1,26 @@
-name: Daily Task Notifications (8:00 AM CT)
+name: Daily Push Notifications
 
 on:
   schedule:
     - cron: '0 13 * * *'  # 8:00 AM Central Time (13:00 UTC)
+    - cron: '0 17 * * *'  # 12:00 PM Central Time (17:00 UTC) 
+    - cron: '0 23 * * *'  # 6:00 PM Central Time (23:00 UTC)
+    - cron: '0 2 * * *'   # 9:00 PM Central Time (02:00 UTC next day)
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
   trigger-notification:
     runs-on: ubuntu-latest
     steps:
-      - name: Send daily email reminders
+      - name: Send daily push notifications
         run: |
-          # Send email notifications via Netlify function
+          # Send push notifications via Netlify function
+          # Note: NOTIFICATION_API_KEY is configured in GitHub repository secrets
           API_KEY=$(echo -n "${{ secrets.NOTIFICATION_API_KEY }}" | perl -MURI::Escape -ne 'print uri_escape($_)')
-          RESPONSE=$(curl -X POST "https://fintask.netlify.app/.netlify/functions/send-daily-reminders?key=${API_KEY}" -s)
+          RESPONSE=$(curl -X POST "https://fintask.netlify.app/.netlify/functions/send-push-reminders?key=${API_KEY}" -s)
           echo "Function response: $RESPONSE"
-          if [[ "$RESPONSE" == *"Sent notifications"* || "$RESPONSE" == *"No tasks due today"* ]]; then
-            echo "✅ Email notifications sent successfully"
+          if [[ "$RESPONSE" == *"sent"* || "$RESPONSE" == *"No subscriptions"* ]]; then
+            echo "✅ Push notifications sent successfully"
           else
-            echo "❌ Email notification may have failed: $RESPONSE"
+            echo "❌ Push notification may have failed: $RESPONSE"
           fi

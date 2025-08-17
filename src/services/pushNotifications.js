@@ -64,6 +64,9 @@ class PushNotificationService {
     // Store subscription in localStorage for persistence
     localStorage.setItem('pushSubscription', JSON.stringify(subscription));
 
+    // Send to server for push notifications
+    await this.sendSubscriptionToServer(subscription);
+
     return subscription;
   }
 
@@ -73,6 +76,7 @@ class PushNotificationService {
   async unsubscribe() {
     if (this.subscription) {
       await this.subscription.unsubscribe();
+      await this.removeSubscriptionFromServer();
       this.subscription = null;
       localStorage.removeItem('pushSubscription');
     }
@@ -96,11 +100,49 @@ class PushNotificationService {
   }
 
   /**
-   * Send subscription to your server (placeholder for future implementation)
+   * Send subscription to Supabase for server-side push notifications
    */
   async sendSubscriptionToServer(subscription) {
-    // For now, just store locally - implement server endpoint later if needed
-    return true;
+    try {
+      // Import Supabase client
+      const { createClient } = await import('../supabaseClient');
+      const supabase = createClient.default || createClient;
+
+      // Get current user
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      if (userError || !user) {
+        console.error('No authenticated user found');
+        return false;
+      }
+
+      // Store subscription in Supabase
+      const { error } = await supabase.from('push_subscriptions').upsert(
+        {
+          user_id: user.id,
+          subscription: JSON.stringify(subscription),
+          endpoint: subscription.endpoint,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        },
+        {
+          onConflict: 'user_id',
+        }
+      );
+
+      if (error) {
+        console.error('Error storing subscription:', error);
+        return false;
+      }
+
+      console.log('Push subscription stored successfully');
+      return true;
+    } catch (error) {
+      console.error('Error sending subscription to server:', error);
+      return false;
+    }
   }
 
   /**
@@ -126,24 +168,6 @@ class PushNotificationService {
   }
 
   /**
-   * Schedule reminder notifications for FinTask (test notification)
-   */
-  async scheduleFinTaskReminders() {
-    // Import NotificationScheduler dynamically to avoid circular dependency
-    const { default: NotificationScheduler } = await import('../utils/notificationScheduler');
-    const { title, body } = await NotificationScheduler.generateDynamicContent(
-      'morning',
-      'check-tasks'
-    );
-
-    return this.showLocalNotification(title, {
-      body,
-      tag: 'test-reminder',
-      data: { type: 'test' },
-    });
-  }
-
-  /**
    * Utility function to convert VAPID key
    */
   urlBase64ToUint8Array(base64String) {
@@ -160,11 +184,48 @@ class PushNotificationService {
   }
 
   /**
-   * Get current user ID (implement based on your auth system)
+   * Get current user ID from Supabase auth
    */
-  getCurrentUserId() {
-    // Implement based on your Supabase auth
-    return localStorage.getItem('userId') || 'anonymous';
+  async getCurrentUserId() {
+    try {
+      const { createClient } = await import('../supabaseClient');
+      const supabase = createClient.default || createClient;
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      return user?.id || null;
+    } catch (error) {
+      console.error('Error getting current user:', error);
+      return null;
+    }
+  }
+
+  /**
+   * Remove subscription from server when unsubscribing
+   */
+  async removeSubscriptionFromServer() {
+    try {
+      const { createClient } = await import('../supabaseClient');
+      const supabase = createClient.default || createClient;
+
+      const {
+        data: { user },
+        error: userError,
+      } = await supabase.auth.getUser();
+      if (userError || !user) return false;
+
+      const { error } = await supabase.from('push_subscriptions').delete().eq('user_id', user.id);
+
+      if (error) {
+        console.error('Error removing subscription:', error);
+        return false;
+      }
+
+      return true;
+    } catch (error) {
+      console.error('Error removing subscription from server:', error);
+      return false;
+    }
   }
 }
 

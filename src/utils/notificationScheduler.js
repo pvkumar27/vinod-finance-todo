@@ -204,21 +204,6 @@ class NotificationScheduler {
         body: `You have ${data.count || 1} overdue task${data.count !== 1 ? 's' : ''}`,
         tag: 'task-overdue',
       },
-      'card-inactive': {
-        title: '💳 Inactive Card Alert',
-        body: `${data.cardName || 'A credit card'} hasn't been used in 90+ days`,
-        tag: 'card-inactive',
-      },
-      'payment-reminder': {
-        title: '💰 Payment Reminder',
-        body: `Don't forget to pay your ${data.cardName || 'credit card'} bill`,
-        tag: 'payment-reminder',
-      },
-      'expense-log': {
-        title: '📝 Log Your Expenses',
-        body: 'Remember to track your spending for today',
-        tag: 'expense-log',
-      },
     };
 
     const notification = notifications[type];
@@ -232,7 +217,7 @@ class NotificationScheduler {
         body: notification.body,
         tag: notification.tag,
         data: { type, ...data },
-        requireInteraction: type === 'task-overdue' || type === 'payment-reminder',
+        requireInteraction: type === 'task-overdue',
       });
     } catch (error) {
       console.error('Failed to send immediate notification:', error);

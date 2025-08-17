@@ -39,12 +39,6 @@ const NotificationSettings = () => {
         await PushNotificationService.subscribe();
 
         setPermission('granted');
-
-        // Show welcome notification
-        await PushNotificationService.showLocalNotification('🎉 FinTask Notifications Enabled!', {
-          body: 'You will now receive reminders for your financial tasks',
-          tag: 'welcome-notification',
-        });
       }
     } catch (error) {
       console.error('Failed to enable notifications:', error);
@@ -64,30 +58,6 @@ const NotificationSettings = () => {
       alert(`Failed to disable notifications: ${error.message}`);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleTestNotification = async () => {
-    try {
-      // Try native Notification API first (works better in Chrome)
-      if ('Notification' in window && Notification.permission === 'granted') {
-        new Notification('🧪 FinTask Test', {
-          body: 'This is a test notification from FinTask!',
-          icon: '/icons/official-logo.png',
-          tag: 'test-notification',
-        });
-      } else {
-        // Fallback to service worker notification
-        await PushNotificationService.showLocalNotification('🧪 Test Notification', {
-          body: 'This is a test notification from FinTask!',
-          tag: 'test-notification',
-          requireInteraction: false,
-          data: { type: 'test' },
-        });
-      }
-    } catch (error) {
-      console.error('Failed to send test notification:', error);
-      alert(`Test notification failed: ${error.message}`);
     }
   };
 
@@ -165,12 +135,6 @@ const NotificationSettings = () => {
                   Notifications are enabled
                 </span>
               </div>
-              <button
-                onClick={handleTestNotification}
-                className="inline-flex items-center px-3 py-1.5 border border-green-300 text-sm font-medium rounded-md text-green-700 bg-green-50 hover:bg-green-100 hover:text-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors cursor-pointer"
-              >
-                🧪 Test Notification
-              </button>
             </div>
 
             <div className="flex space-x-3">
