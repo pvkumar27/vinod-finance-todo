@@ -1,6 +1,7 @@
 // ✅ Final Lambda: Pixel-Perfect HTML Email with All Constraints Fixed
 const { createClient } = require('@supabase/supabase-js');
 const nodemailer = require('nodemailer');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_KEY;
@@ -87,6 +88,56 @@ exports.handler = async event => {
       return task.title?.trim() || task.name?.trim() || task.task?.trim() || '📌 Untitled Task';
     };
 
+    // Generate Gemini AI greeting
+    const generateGeminiGreeting = async taskCount => {
+      try {
+        if (!process.env.REACT_APP_GEMINI_API_KEY) {
+          return "Good morning: Progress, not perfection. Let's tackle these tasks! 🔥";
+        }
+
+        const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+        const prompt = `Generate a motivational morning greeting for email. User has ${taskCount} pending tasks. Keep it under 80 characters, include emoji, be encouraging and personal.`;
+
+        const result = await model.generateContent(prompt);
+        const aiMessage = result.response.text().trim();
+
+        if (aiMessage && aiMessage.length < 100) {
+          return aiMessage;
+        }
+      } catch (error) {
+        console.error('Gemini greeting failed:', error);
+      }
+
+      return "Good morning: Progress, not perfection. Let's tackle these tasks! 🔥";
+    };
+
+    // Generate Gemini AI task message
+    const generateGeminiTaskMessage = async taskCount => {
+      try {
+        if (!process.env.REACT_APP_GEMINI_API_KEY) {
+          return `You have <strong>${taskCount}</strong> pending tasks that need attention:`;
+        }
+
+        const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY);
+        const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+        const prompt = `Generate an encouraging task summary message for email. User has ${taskCount} pending tasks. Keep it under 100 characters, use HTML <strong> tags around the number, be motivating.`;
+
+        const result = await model.generateContent(prompt);
+        const aiMessage = result.response.text().trim();
+
+        if (aiMessage && aiMessage.length < 150) {
+          return aiMessage;
+        }
+      } catch (error) {
+        console.error('Gemini task message failed:', error);
+      }
+
+      return `You have <strong>${taskCount}</strong> pending tasks that need attention:`;
+    };
+
     for (const profile of profiles) {
       const userTasks = tasksByUser[profile.id];
 
@@ -103,35 +154,13 @@ exports.handler = async event => {
     <div style="background: #2b6cb0; color: white; padding: 16px 20px; border-radius: 10px; display: flex; align-items: center;">
       <img src="https://fintask.netlify.app/icons/official-logo.png" alt="FinTask Logo" style="width: 50px; height: 50px; margin-right: 16px;">
       <div style="flex: 1; display: flex; flex-direction: column; justify-content: center; height: 50px;">
-        <div style="font-size: 22px; font-weight: bold; line-height: 1.2;">Your Daily Tasks<br><span style="font-size: 13px; font-weight: normal; opacity: 0.9;">${(() => {
-          const headerMessages = [
-            "Good morning: Progress, not perfection. Let's tackle these tasks! 🔥",
-            "Good morning: Small steps lead to big victories. You've got this! ✨",
-            "Good morning: Every task completed is progress made. Let's go! 🚀",
-            'Good morning: Focus on what matters most today. Time to shine! ☀️',
-            "Good morning: Consistency beats perfection. Let's make it happen! 💪",
-            'Good morning: Your future self will thank you. Start strong! 🎆',
-            'Good morning: Turn your to-dos into ta-das! Ready to conquer? 🏆',
-          ];
-          return headerMessages[new Date().getDate() % headerMessages.length];
-        })()}</span></div>
+        <div style="font-size: 22px; font-weight: bold; line-height: 1.2;">Your Daily Tasks<br><span style="font-size: 13px; font-weight: normal; opacity: 0.9;">${await generateGeminiGreeting(userTasks.length)}</span></div>
       </div>
     </div>
     
     <!-- Task Count -->
     <div style="font-size: 18px; font-weight: 600; margin: 24px 0 12px; text-align: left; color: #6b7280;">
-      ${(() => {
-        const messages = [
-          `You have <strong>${userTasks.length}</strong> pending tasks that need attention:`,
-          `Ready to tackle <strong>${userTasks.length}</strong> tasks today? Let's get started:`,
-          `Time to conquer <strong>${userTasks.length}</strong> pending items on your list:`,
-          `<strong>${userTasks.length}</strong> tasks are waiting for your attention:`,
-          `Let's make progress on these <strong>${userTasks.length}</strong> important tasks:`,
-          `Your productivity journey continues with <strong>${userTasks.length}</strong> tasks:`,
-          `Focus time! You have <strong>${userTasks.length}</strong> tasks to complete:`,
-        ];
-        return messages[new Date().getDate() % messages.length];
-      })()}
+      ${await generateGeminiTaskMessage(userTasks.length)}
     </div>
     
     <!-- Main Layout -->
