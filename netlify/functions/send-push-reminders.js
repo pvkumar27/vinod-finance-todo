@@ -62,6 +62,7 @@ exports.handler = async event => {
         const prompts = {
           morning: `Generate a motivational morning notification for FinTask app. User has ${taskCount} pending tasks. Keep it under 50 characters, include emoji, be encouraging.`,
           noon: `Generate a midday motivation notification for FinTask. Encourage completing at least 4 tasks today. Keep it under 60 characters, include emoji, be energetic.`,
+          afternoon: `Generate an afternoon productivity notification for FinTask. User has ${taskCount} pending tasks. Keep it under 60 characters, include emoji, be motivating.`,
           evening: `Generate an evening check-in notification. ${taskCount > 0 ? 'User has ' + taskCount + ' tasks remaining.' : 'User completed tasks today.'} Keep it under 60 characters, include emoji.`,
           night: `Generate a good night message for FinTask users. Keep it under 70 characters, include emoji, be appreciative and hopeful for tomorrow.`,
         };
@@ -87,6 +88,7 @@ exports.handler = async event => {
       const titles = {
         morning: '🌅 Good Morning!',
         noon: '💪 Midday Boost',
+        afternoon: '⚡ Afternoon Power',
         evening: '🌆 Evening Check',
         night: '🌙 Day Summary',
       };
@@ -112,6 +114,17 @@ exports.handler = async event => {
           body: 'Time to power through! Aim for 4 tasks today 💪',
           tag: 'noon-reminder',
         };
+      } else if (type === 'afternoon') {
+        const taskSuffix = taskCount === 1 ? '' : 's';
+        const afternoonBody =
+          taskCount > 0
+            ? `⚡ ${taskCount} task${taskSuffix} left! You've got this!`
+            : '⚡ Great progress today! Keep it up!';
+        return {
+          title: '⚡ Afternoon Power',
+          body: afternoonBody,
+          tag: 'afternoon-reminder',
+        };
       } else if (type === 'evening') {
         return {
           title: '🌆 Evening Check',
@@ -131,6 +144,7 @@ exports.handler = async event => {
     const getNotificationType = () => {
       if (utcHour === 13) return 'morning'; // 8 AM CT = 13 UTC
       if (utcHour === 17) return 'noon'; // 12 PM CT = 17 UTC
+      if (utcHour === 21) return 'afternoon'; // 4 PM CT = 21 UTC
       if (utcHour === 23) return 'evening'; // 6 PM CT = 23 UTC
       if (utcHour === 2) return 'night'; // 9 PM CT = 2 UTC next day
       return 'morning'; // fallback
