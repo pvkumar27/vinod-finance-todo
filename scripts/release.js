@@ -153,19 +153,21 @@ try {
 // 9. Create PR
 console.log('🔄 Creating pull request...');
 try {
-  const secureEnv = {
-    ...process.env,
-    PATH: process.platform === 'win32' 
-      ? 'C:\\Windows\\System32;C:\\Windows'
-      : '/usr/bin:/bin:/usr/local/bin'
-  };
   const result = spawnSync('gh', [
     'pr', 'create',
     '--title', `Release ${normalizedVersion}`,
     '--body', `This PR updates the version to ${normalizedVersion}.\n\nChanges:\n- Updated version in package.json\n- Updated version in src/constants/version.js\n- Updated CHANGELOG.md with release notes`,
     '--base', 'main',
     '--head', branchName
-  ], { encoding: 'utf8', env: secureEnv });
+  ], { 
+    encoding: 'utf8',
+    env: {
+      ...process.env,
+      PATH: process.platform === 'win32' 
+        ? 'C:\\Windows\\System32;C:\\Windows'
+        : '/usr/bin:/bin:/usr/local/bin'
+    }
+  });
   
   if (result.stdout) {
     console.log(`✅ Pull request created: ${sanitizeForLog(result.stdout.trim())}`);
