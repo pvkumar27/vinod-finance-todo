@@ -105,8 +105,8 @@ class PushNotificationService {
   async sendSubscriptionToServer(subscription) {
     try {
       // Get current user
-      const { createClient } = await import('../supabaseClient');
-      const supabase = createClient.default || createClient;
+      const supabaseModule = await import('../supabaseClient');
+      const supabase = supabaseModule.default || supabaseModule.supabase;
 
       const {
         data: { user },
@@ -187,8 +187,8 @@ class PushNotificationService {
    */
   async getCurrentUserId() {
     try {
-      const { createClient } = await import('../supabaseClient');
-      const supabase = createClient.default || createClient;
+      const supabaseModule = await import('../supabaseClient');
+      const supabase = supabaseModule.default || supabaseModule.supabase;
       const {
         data: { user },
       } = await supabase.auth.getUser();
@@ -203,8 +203,8 @@ class PushNotificationService {
    */
   async removeSubscriptionFromServer() {
     try {
-      const { createClient } = await import('../supabaseClient');
-      const supabase = createClient.default || createClient;
+      const supabaseModule = await import('../supabaseClient');
+      const supabase = supabaseModule.default || supabaseModule.supabase;
 
       const {
         data: { user },
