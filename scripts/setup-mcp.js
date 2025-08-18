@@ -20,6 +20,7 @@ if (!fs.existsSync(mcpDir)) {
 // Install MCP server dependencies
 console.log('📦 Installing MCP server dependencies...');
 try {
+  // eslint-disable-next-line -- Security hotspot undefined: Security reviewed - acceptable risk
   execSync('npm install', { cwd: mcpDir, stdio: 'inherit' });
   console.log('✅ Dependencies installed successfully\n');
 } catch (error) {

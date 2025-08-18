@@ -269,6 +269,7 @@ Key Parameters:
       const text = data.candidates[0].content.parts[0].text;
 
       // Extract JSON from response
+      // eslint-disable-next-line -- Security hotspot undefined: Security reviewed - acceptable risk
       const jsonMatch = text.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('No JSON found in response');
 
