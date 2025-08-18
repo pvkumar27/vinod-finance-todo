@@ -1,13 +1,10 @@
-name: Daily Push Notifications
+# DISABLED: Replaced with Netlify Scheduled Functions
+# This workflow is kept for manual testing only
+
+name: Daily Push Notifications (DISABLED)
 
 on:
-  # schedule:
-  #   - cron: '0 13 * * *'  # 8:00 AM Central Time (13:00 UTC)
-  #   - cron: '0 17 * * *'  # 12:00 PM Central Time (17:00 UTC) 
-  #   - cron: '0 21 * * *'  # 4:00 PM Central Time (21:00 UTC)
-  #   - cron: '0 23 * * *'  # 6:00 PM Central Time (23:00 UTC)
-  #   - cron: '0 2 * * *'   # 9:00 PM Central Time (02:00 UTC next day)
-  workflow_dispatch:  # Allow manual trigger only
+  workflow_dispatch:  # Manual trigger only - scheduled jobs moved to Netlify
 
 jobs:
   trigger-notification:
