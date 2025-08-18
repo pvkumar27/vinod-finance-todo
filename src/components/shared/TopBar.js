@@ -47,7 +47,7 @@ const TopBar = () => {
             FinTask
           </h1>
           <p className="text-xs text-[#8B4513]/70 font-medium">
-            {APP_VERSION} • AI Finance Assistant
+            {APP_VERSION.replace(/-build.*$/, '')} • AI Finance Assistant
           </p>
         </div>
       </div>

@@ -2,35 +2,39 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
-console.log('🔄 Auto-generating version...');
+console.log('🔄 Auto-incrementing version...');
 
 try {
-  // Get build info from Netlify environment or git
-  const commitRef =
-    process.env.COMMIT_REF || execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
-  const buildId = process.env.BUILD_ID || Date.now().toString();
-  const branch =
-    process.env.BRANCH || execSync('git branch --show-current', { encoding: 'utf8' }).trim();
+  // Read current package.json version
+  const packagePath = path.join(__dirname, '../package.json');
+  const packageJson = JSON.parse(fs.readFileSync(packagePath, 'utf8'));
+  let currentVersion = packageJson.version;
 
-  // Generate version: v4.1.0-build.123-abc1234
-  const baseVersion = 'v4.1.0';
-  const autoVersion = `${baseVersion}-build.${buildId}-${commitRef}`;
+  // Auto-increment patch version for each build
+  const versionParts = currentVersion.split('.');
+  const major = parseInt(versionParts[0]);
+  const minor = parseInt(versionParts[1]);
+  const patch = parseInt(versionParts[2]) + 1;
+
+  const newVersion = `v${major}.${minor}.${patch}`;
+  const newPackageVersion = `${major}.${minor}.${patch}`;
+
+  // Update package.json
+  packageJson.version = newPackageVersion;
+  fs.writeFileSync(packagePath, JSON.stringify(packageJson, null, 2) + '\n');
 
   // Update version.js
   const versionPath = path.join(__dirname, '../src/constants/version.js');
-  const versionContent = `export const APP_VERSION = '${autoVersion}';\n`;
+  const versionContent = `export const APP_VERSION = '${newVersion}';\n`;
   fs.writeFileSync(versionPath, versionContent);
 
-  console.log(`✅ Version updated: ${autoVersion}`);
-  console.log(`📋 Branch: ${branch}`);
-  console.log(`🔨 Build ID: ${buildId}`);
-  console.log(`📝 Commit: ${commitRef}`);
+  console.log(`✅ Version auto-incremented: ${currentVersion} → ${newVersion}`);
+  console.log(`📦 Package.json updated to: ${newPackageVersion}`);
 } catch (error) {
   console.error('❌ Auto-version failed:', error.message);
-  // Fallback to timestamp version
-  const fallbackVersion = `v4.1.0-${Date.now()}`;
+  // Fallback to manual increment
+  const fallbackVersion = 'v4.1.1';
   const versionPath = path.join(__dirname, '../src/constants/version.js');
   fs.writeFileSync(versionPath, `export const APP_VERSION = '${fallbackVersion}';\n`);
   console.log(`🔄 Using fallback version: ${fallbackVersion}`);
