@@ -64,7 +64,7 @@ exports.handler = async event => {
           noon: `Generate a midday motivation notification for FinTask. Encourage completing at least 4 tasks today. Keep it under 60 characters, include emoji, be energetic.`,
           afternoon: `Generate an afternoon productivity notification for FinTask. User has ${taskCount} pending tasks. Keep it under 60 characters, include emoji, be motivating.`,
           evening: `Generate an evening check-in notification. ${taskCount > 0 ? 'User has ' + taskCount + ' tasks remaining.' : 'User completed tasks today.'} Keep it under 60 characters, include emoji.`,
-          night: `Generate a good night message for FinTask users. Keep it under 70 characters, include emoji, be appreciative and hopeful for tomorrow.`,
+          night: `Generate a good night message for FinTask users who have ${taskCount} pending tasks. Keep it under 70 characters, include emoji, be appreciative and hopeful for tomorrow.`,
         };
 
         const result = await model.generateContent(prompts[type]);
@@ -132,9 +132,16 @@ exports.handler = async event => {
           tag: 'evening-reminder',
         };
       } else {
+        // Night notification with task-based message
+        const taskSuffix = taskCount === 1 ? '' : 's';
+        const nightBody =
+          taskCount > 0
+            ? `You completed some tasks today! ${taskCount} remaining for tomorrow 🌙`
+            : 'Great job today! All tasks completed 🌟 Rest well!';
+
         return {
           title: '🌙 Day Summary',
-          body: 'Rest well! Tomorrow is a fresh start 🌅',
+          body: nightBody,
           tag: 'night-reminder',
         };
       }
