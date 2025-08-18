@@ -10,13 +10,17 @@ try {
   // Get build info from Netlify environment or git
   const commitRef =
     process.env.COMMIT_REF || execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
-  const buildId = process.env.BUILD_ID || Date.now().toString();
+  const buildNumber = process.env.BUILD_ID
+    ? process.env.BUILD_ID.slice(-6)
+    : Math.floor(Date.now() / 1000)
+        .toString()
+        .slice(-6);
   const branch =
     process.env.BRANCH || execSync('git branch --show-current', { encoding: 'utf8' }).trim();
 
-  // Generate version: v4.1.0-build.123-abc1234
+  // Generate version: v4.1.0-build.123456-abc1234
   const baseVersion = 'v4.1.0';
-  const autoVersion = `${baseVersion}-build.${buildId}-${commitRef}`;
+  const autoVersion = `${baseVersion}-build.${buildNumber}-${commitRef.slice(0, 7)}`;
 
   // Update version.js
   const versionPath = path.join(__dirname, '../src/constants/version.js');
@@ -25,7 +29,7 @@ try {
 
   console.log(`✅ Version updated: ${autoVersion}`);
   console.log(`📋 Branch: ${branch}`);
-  console.log(`🔨 Build ID: ${buildId}`);
+  console.log(`🔨 Build ID: ${buildNumber}`);
   console.log(`📝 Commit: ${commitRef}`);
 } catch (error) {
   console.error('❌ Auto-version failed:', error.message);
