@@ -17,7 +17,7 @@ const safeExec = (command, args, options = {}) => {
   const result = spawnSync(command, args, { 
     encoding: 'utf8', 
     stdio: 'inherit', 
-    env: { ...process.env, PATH: SECURE_PATH },
+    env: { PATH: SECURE_PATH },
     ...options 
   });
   if (result.error) throw result.error;
@@ -160,7 +160,7 @@ try {
     '--head', branchName
   ], { 
     encoding: 'utf8',
-    env: { ...process.env, PATH: SECURE_PATH }
+    env: { PATH: SECURE_PATH }
   });
   
   if (result.stdout) {
