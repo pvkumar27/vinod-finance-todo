@@ -14,8 +14,8 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     detectSessionInUrl: true,
     // Set site URL for redirects and email links
-    site: siteUrl
-  }
+    site: siteUrl,
+  },
 });
 
 export default supabase;

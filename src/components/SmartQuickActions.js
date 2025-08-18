@@ -2,31 +2,31 @@ import React, { useState } from 'react';
 
 const SmartQuickActions = ({ onAddTask, onAddExpense, recentPatterns }) => {
   const [isOpen, setIsOpen] = useState(false);
-  
+
   const quickActions = [
     {
       id: 'add-task',
       label: 'Add Task',
       icon: '✅',
       action: () => onAddTask(),
-      color: 'bg-blue-500'
+      color: 'bg-blue-500',
     },
     {
       id: 'add-expense',
       label: 'Add Expense',
       icon: '💸',
       action: () => onAddExpense(),
-      color: 'bg-red-500'
+      color: 'bg-red-500',
     },
     {
       id: 'add-income',
       label: 'Add Income',
       icon: '💰',
       action: () => onAddExpense('income'),
-      color: 'bg-green-500'
-    }
+      color: 'bg-green-500',
+    },
   ];
-  
+
   // Add smart suggestions based on patterns
   if (recentPatterns?.frequentTask) {
     quickActions.unshift({
@@ -34,10 +34,10 @@ const SmartQuickActions = ({ onAddTask, onAddExpense, recentPatterns }) => {
       label: `Add "${recentPatterns.frequentTask}"`,
       icon: '🔄',
       action: () => onAddTask(recentPatterns.frequentTask),
-      color: 'bg-purple-500'
+      color: 'bg-purple-500',
     });
   }
-  
+
   return (
     <div className="fixed bottom-20 right-4 z-40">
       {/* Quick Action Items */}
@@ -59,7 +59,7 @@ const SmartQuickActions = ({ onAddTask, onAddExpense, recentPatterns }) => {
           ))}
         </div>
       )}
-      
+
       {/* Main FAB */}
       <button
         onClick={() => setIsOpen(!isOpen)}
