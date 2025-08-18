@@ -178,17 +178,17 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-start justify-center z-50 p-2 sm:p-4 overflow-y-auto">
       <div className="bg-white rounded-xl max-w-3xl w-full my-4 max-h-[calc(100vh-2rem)] overflow-y-auto shadow-2xl">
         {/* Header */}
-        <div className="flex justify-between items-center p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+        <div className="flex justify-between items-center p-6 border-b border-[#632D1F]/20 bg-gradient-to-r from-[#FDF3EE] to-[#FCE7E2]">
           <div className="text-center flex-1">
-            <h2 className="text-2xl font-bold text-gray-900 flex items-center justify-center">
+            <h2 className="text-2xl font-bold text-[#632D1F] flex items-center justify-center">
               {card ? '✏️ Edit Credit Card' : '💳 Add New Credit Card'}
             </h2>
-            <p className="text-sm text-gray-600 mt-1">Enter your credit card details below</p>
+            <p className="text-sm text-[#8B4513] mt-1">Enter your credit card details below</p>
           </div>
           <button
             type="button"
             onClick={onCancel}
-            className="text-gray-400 hover:text-gray-600 text-2xl p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+            className="text-[#8B4513]/60 hover:text-[#632D1F] text-2xl p-2 hover:bg-[#632D1F]/10 rounded-lg transition-colors duration-200"
           >
             ×
           </button>
@@ -202,18 +202,18 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
           )}
 
           {/* Card Details Section */}
-          <div className="bg-gray-50 rounded-lg p-5 border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+          <div className="bg-[#FDF3EE] rounded-lg p-5 border border-[#632D1F]/20">
+            <h3 className="text-lg font-semibold text-[#632D1F] mb-4 flex items-center">
               💳 Card Details
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Bank Name *</label>
+                <label className="block text-sm font-medium text-[#632D1F] mb-2">Bank Name *</label>
                 <select
                   required
                   value={formData.bank_name}
                   onChange={e => handleChange('bank_name', e.target.value)}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full px-4 py-3 border border-[#632D1F]/30 rounded-lg focus:ring-2 focus:ring-[#632D1F]/50 focus:border-[#632D1F] bg-white"
                 >
                   <option value="">Select Bank</option>
                   {bankOptions.map(bank => (
@@ -488,7 +488,7 @@ const CreditCardForm = ({ card, onSave, onCancel, isOpen }) => {
             <button
               type="submit"
               disabled={loading}
-              className="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+              className="px-8 py-3 bg-gradient-to-r from-[#632D1F] to-[#8B4513] text-white rounded-lg hover:from-[#8B4513] hover:to-[#632D1F] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
               title={loading ? 'Saving card...' : 'Save this credit card'}
             >
               {loading ? (

@@ -35,7 +35,7 @@ const handleServiceWorkerUpdate = registration => {
   );
 
   if (isLocalhost) {
-    console.log('Update available, but skipping toast in development mode');
+    // Update available, but skipping toast in development mode
     return;
   }
 
@@ -66,7 +66,7 @@ registerServiceWorkers().then(() => {
   serviceWorkerRegistration.register({
     onUpdate: handleServiceWorkerUpdate,
     onSuccess: () => {
-      console.log('Content is cached for offline use.');
+      // Content is cached for offline use
     },
   });
 });

@@ -10,11 +10,6 @@ export const useNotifications = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Check notification status on mount
-  useEffect(() => {
-    checkNotificationStatus();
-  }, [checkNotificationStatus]);
-
   const checkNotificationStatus = useCallback(async () => {
     try {
       const currentPermission = PushNotificationService.getPermissionStatus();
@@ -26,6 +21,11 @@ export const useNotifications = () => {
       setError(err.message);
     }
   }, []);
+
+  // Check notification status on mount
+  useEffect(() => {
+    checkNotificationStatus();
+  }, [checkNotificationStatus]);
 
   const requestPermission = useCallback(async () => {
     setLoading(true);

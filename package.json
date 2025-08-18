@@ -1,6 +1,6 @@
 {
   "name": "fintask",
-  "version": "3.4.3",
+  "version": "4.1.0",
   "homepage": "https://fintask.netlify.app",
   "private": true,
   "dependencies": {
@@ -61,9 +61,13 @@
     "start:react": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "lint": "eslint src/**/*.{js,jsx}",
+    "lint": "eslint src/**/*.{js,jsx} --max-warnings 0",
     "lint:fix": "eslint --fix src/**/*.{js,jsx}",
     "prepare": "husky install",
+    "test:pre-commit": "npm run test:e2e:essential",
+    "test:update-expectations": "node scripts/update-test-expectations.js",
+    "sonar:fix": "node scripts/fix-sonar-issues.js",
+
     "cypress:open": "npx cypress open",
     "cypress:run": "npx cypress run",
     "test:e2e": "npx cypress run",

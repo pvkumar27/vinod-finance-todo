@@ -7,9 +7,17 @@ A Progressive Web App for managing finances and to-dos.
 
 ## 📚 Documentation
 
+### 👥 Team Onboarding
+- [**Knowledge Transfer Document**](ONBOARDING_KT.md) - **Comprehensive guide for new team members**
+- [**Quick Reference Guide**](QUICK_REFERENCE.md) - **Essential commands and concepts**
+- [AI Features Summary](AI_FEATURES_SUMMARY.md) - Current AI capabilities and implementation status
+- [MCP Integration Guide](docs/MCP_INTEGRATION_GUIDE.md) - Model Context Protocol setup and usage
+
+### 👨‍💻 Developer Resources
 - [Developer Setup Guide](DEVELOPER_SETUP.md) - Complete setup instructions for new developers
 - [Health Check Summary](HEALTH_CHECK_SUMMARY.md) - Latest repository health check results
 - [Project Guidelines](docs/PWA_Project_Guidelines.md) - Project strategy and guidelines
+- [API Architecture](docs/API_ARCHITECTURE.md) - Single source of truth API design
 
 ## 🧪 End-to-End Testing
 
@@ -173,17 +181,21 @@ BACKUP_EMAIL=your_admin_email
 BACKUP_PASSWORD=your_admin_password
 ```
 
-## 🧪 Plaid Sandbox Testing
+## ❌ **Plaid Integration Removed**
 
-The app uses Plaid for bank account integration. For testing:
+**Note**: Plaid integration was removed in v3.0+ due to complexity and cost considerations.
 
-1. Use the "Connect Bank" button in the Credit Cards section
-2. In the Plaid sandbox, use these credentials:
-   - Username: `user_good`
-   - Password: `pass_good`
-   - Any MFA code will work (e.g., `1234`)
-3. Select any bank account to connect
-4. Credit cards will be imported with the 🏦 Plaid Synced badge
+### What was removed:
+- Bank account connection via Plaid
+- Automatic transaction import
+- Credit card syncing from banks
+- Plaid sandbox testing
+
+### Current approach:
+- Manual credit card entry only
+- Focus on metadata tracking (no sensitive data)
+- AI-powered insights without bank connections
+- Simplified user experience
 
 ## 🤖 AI Assistant & MCP Server
 
@@ -194,7 +206,13 @@ FinTask includes an AI-powered assistant that provides intelligent insights and 
 - **Smart Insights**: AI-powered financial recommendations and alerts
 - **Todo Management**: Add and manage tasks through conversation
 - **Credit Card Analysis**: Get insights on utilization, inactivity, and promo expirations
-- **Spending Analysis**: Analyze patterns and get forecasting insights
+- **Proactive Alerts**: AI surfaces issues before you ask
+
+### ❌ **Removed Features**
+- **Expense Tracking**: Manual expense entry removed in v3.0+
+- **Plaid Integration**: Bank connection removed due to complexity
+- **Firebase Notifications**: Replaced with simpler web-push API
+- **Transaction Analysis**: Focus shifted to credit card management only
 
 ### MCP Server Setup
 ```bash
@@ -232,18 +250,24 @@ AI Assistant (React) → MCP Client → MCP Server → Supabase Database
 
 ## 🔔 Daily Notifications
 
-The app uses Firebase Blaze Plan (staying within free tier limits) for daily notifications:
+The app uses Web Push API for daily notifications (Firebase removed):
 
 ### Daily Task Reminders
 - Sends notifications at 8:00 AM Central Time via GitHub Actions scheduler
-- Push notification via Firebase Cloud Messaging (FCM)
+- Push notification via Web Push API with VAPID keys
 - Supports both iOS and Android devices
-- Works within Firebase free tier limits (costs $0/month)
+- No external service dependencies (costs $0/month)
 
 ### Setup
-1. Deploy the HTTP-triggered Cloud Function: `cd functions && npm run deploy`
-2. Set up environment variables in Firebase Console
+1. Generate VAPID keys: `npm run generate-vapid`
+2. Set up environment variables in `.env`
 3. Configure GitHub Actions secrets for the daily trigger
+
+### ❌ **Firebase Removed**
+- Firebase Cloud Messaging removed in v3.0+
+- Replaced with simpler Web Push API
+- No Firebase project needed
+- Reduced complexity and dependencies
 
 ## 📁 Project Structure
 ```

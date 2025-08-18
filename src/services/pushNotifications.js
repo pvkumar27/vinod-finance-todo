@@ -114,7 +114,6 @@ class PushNotificationService {
         error: userError,
       } = await supabase.auth.getUser();
       if (userError || !user) {
-        console.error('No authenticated user found');
         return false;
       }
 
@@ -133,14 +132,11 @@ class PushNotificationService {
       );
 
       if (error) {
-        console.error('Error storing subscription:', error);
         return false;
       }
 
-      console.log('Push subscription stored successfully');
       return true;
     } catch (error) {
-      console.error('Error sending subscription to server:', error);
       return false;
     }
   }
@@ -195,7 +191,6 @@ class PushNotificationService {
       } = await supabase.auth.getUser();
       return user?.id || null;
     } catch (error) {
-      console.error('Error getting current user:', error);
       return null;
     }
   }
@@ -217,13 +212,11 @@ class PushNotificationService {
       const { error } = await supabase.from('push_subscriptions').delete().eq('user_id', user.id);
 
       if (error) {
-        console.error('Error removing subscription:', error);
         return false;
       }
 
       return true;
     } catch (error) {
-      console.error('Error removing subscription from server:', error);
       return false;
     }
   }

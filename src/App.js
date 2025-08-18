@@ -33,7 +33,7 @@ function App() {
       }
     } catch (error) {
       // Silently fail - don't interrupt user experience
-      console.error('Auto-enable notifications failed:', error);
+      // Auto-enable notifications failed
     }
   };
 
@@ -58,7 +58,7 @@ function App() {
           // Auto-enable notifications for PWA
           await autoEnableNotifications();
         } catch (error) {
-          console.error('Failed to initialize notifications:', error);
+          // Failed to initialize notifications
         }
       } else {
         // Cancel notifications when user logs out

@@ -75,7 +75,7 @@ const AIAssistant = () => {
         });
       }
     } catch (error) {
-      console.error('Error generating proactive alerts:', error);
+      // Error generating proactive alerts
     }
     return alerts;
   }, []);
@@ -107,7 +107,7 @@ const AIAssistant = () => {
         }, 2000);
       }
     } catch (error) {
-      console.error('Error checking proactive alerts:', error);
+      // Error checking proactive alerts
     }
   }, [generateProactiveAlerts]);
 

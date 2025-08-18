@@ -1,29 +1,7 @@
 import React from 'react';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { formatDateString, getTodayDateString } from '../utils/dateUtils';
 
 const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete }) => {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: task.id,
-    transition: {
-      duration: 150,
-      easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
-    },
-    // Reduce activation delay to make dragging more responsive
-    activationConstraint: {
-      delay: 100,
-      tolerance: 5,
-    },
-  });
-
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    zIndex: isDragging ? 999 : 1,
-    position: 'relative',
-  };
-
   const isPinned = task.pinned;
   const formattedDate = task.due_date ? formatDateString(task.due_date) : null;
 
@@ -66,15 +44,11 @@ const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete }) => 
 
   return (
     <div
-      ref={setNodeRef}
-      style={style}
       className={`
         group flex items-center py-1 px-1 sm:p-2 mb-1 rounded-lg transition-all duration-200 min-h-[2.25rem]
-        cursor-grab active:cursor-grabbing w-full
-        ${isDragging ? `shadow-lg scale-[1.03] opacity-90 ${bgColor} border border-gray-300 z-50` : 'shadow-sm hover:shadow'}
+        w-full shadow-sm hover:shadow
         ${bgColor} ${borderColor}
       `}
-      {...attributes}
     >
       {/* Checkbox */}
       <div className="mr-1 sm:mr-3">
@@ -87,11 +61,8 @@ const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete }) => 
         />
       </div>
 
-      {/* Task Content - Apply drag listeners only to this part */}
-      <div
-        className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center pl-1 pr-0.5"
-        {...listeners}
-      >
+      {/* Task Content */}
+      <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center pl-1 pr-0.5">
         <span className="max-w-full text-sm font-medium text-left text-gray-900 truncate">
           {task.task}
         </span>
@@ -156,11 +127,6 @@ const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete }) => 
           </svg>
         </button>
       </div>
-
-      {/* Visual indicator for drag state */}
-      {isDragging && (
-        <div className="absolute inset-0 bg-blue-500 rounded-lg pointer-events-none bg-opacity-10"></div>
-      )}
     </div>
   );
 };

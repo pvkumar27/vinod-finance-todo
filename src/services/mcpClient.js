@@ -29,7 +29,6 @@ class MCPClient {
       // In a full implementation, this would make HTTP requests to the MCP server
       return await this.simulateToolCall(toolName, toolArgs);
     } catch (error) {
-      console.error(`MCP Tool Error (${toolName}):`, error);
       throw error;
     }
   }

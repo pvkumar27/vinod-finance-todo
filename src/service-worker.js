@@ -75,7 +75,7 @@ self.addEventListener('message', event => {
 
 // Push Notification Handlers for FinTask PWA
 self.addEventListener('push', event => {
-  console.log('Push notification received:', event);
+  // Push notification received
 
   let notificationData = {
     title: '💰 FinTask Reminder',
@@ -107,7 +107,7 @@ self.addEventListener('push', event => {
       const pushData = event.data.json();
       notificationData = { ...notificationData, ...pushData };
     } catch (error) {
-      console.error('Error parsing push data:', error);
+      // Error parsing push data
     }
   }
 
@@ -116,7 +116,7 @@ self.addEventListener('push', event => {
 
 // Handle notification clicks
 self.addEventListener('notificationclick', event => {
-  console.log('Notification clicked:', event);
+  // Notification clicked
 
   event.notification.close();
 
@@ -146,8 +146,7 @@ self.addEventListener('notificationclick', event => {
 
 // Handle notification close
 self.addEventListener('notificationclose', event => {
-  console.log('Notification closed:', event);
-
+  // Notification closed
   // Track notification dismissal analytics if needed
   // You can send this data to your analytics service
 });
@@ -176,7 +175,7 @@ async function sendQueuedNotifications() {
     // Clear the queue after sending
     await clearNotificationQueue();
   } catch (error) {
-    console.error('Error sending queued notifications:', error);
+    // Error sending queued notifications
   }
 }
 

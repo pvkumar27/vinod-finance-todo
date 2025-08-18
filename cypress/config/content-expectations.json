@@ -1,0 +1,15 @@
+{
+  "insights": {
+    "heading": "Smart Insights",
+    "sections": ["Overview", "Quick Actions"],
+    "dataCy": "insights-heading"
+  },
+  "todos": {
+    "heading": "Task Manager",
+    "dataCy": "todo-manager-heading"
+  },
+  "cards": {
+    "heading": "Credit Cards",
+    "dataCy": "credit-cards-heading"
+  }
+}

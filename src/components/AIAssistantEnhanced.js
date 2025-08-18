@@ -1,12 +1,15 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { mcpClient } from '../services/mcpClient';
+import { aiContextMemory } from '../services/aiContextMemory';
+import { proactiveAlerts } from '../services/proactiveAlerts'; // eslint-disable-line no-unused-vars
+import { naturalLanguageBulk } from '../services/naturalLanguageBulk';
 import VisualInsights from './VisualInsights';
 import {
   ENHANCED_MESSAGE_STYLES,
   ENHANCED_BADGE_STYLES,
   QUICK_ACTIONS,
   formatResponse,
-  createMessage,
+  createMessage, // eslint-disable-line no-unused-vars
   getMessageClassName,
   getMessageBadge,
   handleDataRefresh,
@@ -15,16 +18,9 @@ import {
 } from '../utils/aiAssistantUtils';
 
 const AIAssistant = () => {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      type: 'assistant',
-      content:
-        '👋 Hey there! I\'m Finbot, your AI-powered finance assistant. I\'m here to help you stay on top of your money and tasks!\n\n💡 Try asking me:\n• "What needs my attention today?"\n• "Show me inactive credit cards"\n• "Add a task to pay rent"\n• "Analyze my spending patterns"',
-      timestamp: new Date(),
-      isWelcome: true,
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
+  const [contextualSuggestions, setContextualSuggestions] = useState([]); // eslint-disable-line no-unused-vars
+  const [smartAlerts, setSmartAlerts] = useState([]); // eslint-disable-line no-unused-vars
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -34,11 +30,63 @@ const AIAssistant = () => {
   const [showQuickActions, setShowQuickActions] = useState(false);
   const [queryHistory, setQueryHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
+  const [voiceSupported, setVoiceSupported] = useState(false);
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
+
+  // Initialize AI assistant with context memory
+  const initializeAssistant = useCallback(async () => {
+    // Load conversation history
+    const recentContext = aiContextMemory.getRecentContext();
+    if (recentContext.length === 0) {
+      // First time user - show welcome message
+      const welcomeMessage = {
+        id: 1,
+        type: 'assistant',
+        content:
+          '👋 Hey there! I\'m FinBot, your AI-powered finance assistant with enhanced intelligence!\n\n🧠 I now remember our conversations and learn your patterns to provide smarter suggestions.\n\n💡 Try asking me:\n• "What needs my attention today?"\n• "Complete all overdue tasks"\n• "Show me spending trends"\n• "Set up smart reminders"',
+        timestamp: new Date(),
+        isWelcome: true,
+      };
+      setMessages([welcomeMessage]);
+      aiContextMemory.addMessage('assistant', welcomeMessage.content, { isWelcome: true });
+    } else {
+      // Returning user - restore context and show smart suggestions
+      setMessages(recentContext);
+      const suggestions = aiContextMemory.getSmartSuggestions();
+      setContextualSuggestions(suggestions);
+    }
+
+    // Check for proactive alerts
+    try {
+      const alerts = await proactiveAlerts.checkAllAlerts();
+      setSmartAlerts(alerts);
+
+      if (alerts.totalCount > 0) {
+        const alertSummary = proactiveAlerts.generateAlertSummary(alerts);
+        const alertMessage = {
+          id: Date.now(),
+          type: 'assistant',
+          content: `🔔 Smart Alert: ${alertSummary}\n\nWould you like me to help you address these items?`,
+          timestamp: new Date(),
+          isProactive: true,
+          alerts: alerts,
+        };
+
+        setTimeout(() => {
+          addMessage('assistant', alertMessage.content, { isProactive: true, alerts });
+        }, 2000);
+      }
+    } catch (error) {
+      console.error('Error checking proactive alerts:', error);
+    }
+
+    // Check voice support
+    setVoiceSupported('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleClose = e => {
     e.preventDefault();
@@ -56,6 +104,12 @@ const AIAssistant = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    if (isExpanded) {
+      initializeAssistant();
+    }
+  }, [isExpanded, initializeAssistant]);
 
   const createAlert = useCallback((type, count, messages, priority, action) => {
     if (count > 0) {
@@ -154,7 +208,7 @@ const AIAssistant = () => {
     } catch (error) {
       console.error('Error checking proactive alerts:', error);
     }
-  }, [checkAlerts, createProactiveMessage, addMessage]);
+  }, [checkAlerts, createProactiveMessage, addMessage]); // eslint-disable-line no-use-before-define
 
   useEffect(() => {
     if (isExpanded) {
@@ -175,7 +229,19 @@ const AIAssistant = () => {
 
   const addMessage = useCallback(
     (type, content, extra = {}) => {
-      setMessages(prev => [...prev, createMessage(type, content, extra)]);
+      const message = createMessage(type, content, extra);
+      setMessages(prev => [...prev, message]);
+
+      // Store in context memory
+      aiContextMemory.addMessage(type, content, extra);
+
+      // Update contextual suggestions after user messages
+      if (type === 'user') {
+        setTimeout(() => {
+          const suggestions = aiContextMemory.getSmartSuggestions();
+          setContextualSuggestions(suggestions);
+        }, 1000);
+      }
     },
     [createMessage]
   );
@@ -184,7 +250,28 @@ const AIAssistant = () => {
     async query => {
       addMessage('user', query);
       setIsLoading(true);
+
       try {
+        // Check if it's a bulk operation first
+        const bulkResult = await naturalLanguageBulk.processBulkOperation(query);
+        if (bulkResult.success) {
+          addMessage('assistant', `✨ Bulk Operation Complete!\n\n${bulkResult.message}`, {
+            data: bulkResult,
+            processingMode: 'bulk_operation',
+            isBulkOperation: true,
+          });
+
+          // Trigger data refresh for bulk operations
+          if (bulkResult.category === 'todos') {
+            window.dispatchEvent(new CustomEvent('todoAdded', { detail: {} }));
+          } else if (bulkResult.category === 'cards') {
+            window.dispatchEvent(new CustomEvent('creditCardAdded', { detail: {} }));
+          }
+
+          return;
+        }
+
+        // Regular query processing
         const response = await mcpClient.processNaturalLanguageQuery(query);
         addMessage('assistant', formatResponse(response), {
           data: response,
@@ -275,7 +362,7 @@ const AIAssistant = () => {
       await processQuery(query);
       focusInput();
     },
-    [inputValue, isLoading, processQuery, focusInput]
+    [inputValue, isLoading, processQuery, focusInput] // eslint-disable-line react-hooks/exhaustive-deps
   );
 
   const handleVoiceRecognitionResult = useCallback(
@@ -317,7 +404,7 @@ const AIAssistant = () => {
   );
 
   const handleVoiceInput = useCallback(() => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+    if (!voiceSupported) {
       addMessage('assistant', '❌ Voice recognition not supported in this browser', {
         isError: true,
       });
@@ -326,7 +413,7 @@ const AIAssistant = () => {
     const recognition = createSpeechRecognition();
     setupRecognitionHandlers(recognition);
     recognition.start();
-  }, [addMessage, createSpeechRecognition, setupRecognitionHandlers]);
+  }, [addMessage, createSpeechRecognition, setupRecognitionHandlers, voiceSupported]);
 
   if (!isExpanded) {
     return (

@@ -21,6 +21,9 @@ const path = require('path');
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
 
+// Sanitize function for log injection prevention
+const sanitizeForLog = (input) => encodeURIComponent(String(input)).replace(/%20/g, ' ');
+
 // Configuration
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_KEY;
@@ -54,12 +57,12 @@ if (!fs.existsSync(BACKUP_DIR)) {
 }
 
 // Initialize Supabase client
-console.log(`Initializing Supabase client with URL: ${SUPABASE_URL.substring(0, 20)}...`);
+console.log(`Initializing Supabase client with URL: ${sanitizeForLog(SUPABASE_URL.substring(0, 20))}...`);
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 async function backupTables() {
   console.log('🔐 Authenticating with Supabase...');
-  console.log(`Using email: ${BACKUP_EMAIL}`);
+  console.log(`Using email: ${sanitizeForLog(BACKUP_EMAIL)}`);
 
   try {
     // Sign in with provided credentials
@@ -101,10 +104,9 @@ async function backupTables() {
         const backupFile = path.join(BACKUP_DIR, `${table}_${timestamp}.json`);
         fs.writeFileSync(backupFile, JSON.stringify(data, null, 2));
 
-        console.log(`✅ Exported ${data.length} records from ${table} to ${backupFile}`);
+        console.log(`✅ Exported ${data.length} records from ${sanitizeForLog(table)} to ${sanitizeForLog(backupFile)}`);
       } catch (error) {
-        console.error(`❌ Error processing ${table}:`, error.message);
-        console.error(error);
+        console.error(`❌ Error processing ${sanitizeForLog(table)}:`, sanitizeForLog(error.message));
       }
     }
 
