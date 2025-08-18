@@ -9,11 +9,11 @@ if git diff --cached --name-only | grep -q "package.json" && \
   fi
 fi
 
-# Run ESLint warning auto-fix for JS files
-if git diff --cached --name-only | grep -E "\.(js|jsx)$" > /dev/null; then
-  echo "🔧 Auto-fixing ESLint warnings..."
-  node scripts/fix-eslint-warnings.js
-fi
+# ESLint auto-fix disabled - was causing parsing errors
+# if git diff --cached --name-only | grep -E "\.(js|jsx)$" > /dev/null; then
+#   echo "🔧 Auto-fixing ESLint warnings..."
+#   node scripts/fix-eslint-warnings.js
+# fi
 
 # SonarQube auto-fix disabled - was slowing down commits
 # if git diff --cached --name-only | grep -E "\.(js|jsx)$" > /dev/null; then
