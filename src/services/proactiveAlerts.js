@@ -99,7 +99,6 @@ class ProactiveAlertsService {
     return null;
   }
 
-  // eslint-disable-next-line -- SonarCloud javascript:S3776: Complex function - refactoring would break functionality
   checkPromoExpiry(card, today) {
     const alerts = [];
 
@@ -150,7 +149,6 @@ class ProactiveAlertsService {
     return null;
   }
 
-  // eslint-disable-next-line -- SonarCloud javascript:S3776: Complex function - refactoring would break functionality
   // Todo specific alerts
   async checkTodoAlerts() {
     const alerts = [];

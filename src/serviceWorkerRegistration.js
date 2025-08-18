@@ -87,7 +87,6 @@ function registerValidSW(swUrl, config) {
               // Listen for skip waiting message
               navigator.serviceWorker.addEventListener('message', event => {
                 if (event.data && event.data.type === 'SW_UPDATED') {
-                  // eslint-disable-next-line -- SonarCloud javascript:S2004: Function binding required for event handler
                   window.location.reload();
                 }
               });

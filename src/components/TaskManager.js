@@ -15,7 +15,6 @@ import { api } from '../services/api';
 import { parseInput } from '../utils/parseInput';
 import TaskList from './TaskList';
 
-// eslint-disable-next-line -- SonarCloud javascript:S3776: Complex function - refactoring would break functionality
 const TaskManager = () => {
   const [todos, setTodos] = useState([]);
   const [loading, setLoading] = useState(true);
