@@ -7,18 +7,17 @@ const path = require('path');
 // Sanitize function for log injection prevention
 const sanitizeForLog = (input) => encodeURIComponent(String(input)).replace(/%20/g, ' ');
 
+// Secure PATH for all commands
+const SECURE_PATH = process.platform === 'win32' 
+  ? 'C:\\Windows\\System32;C:\\Windows'
+  : '/usr/bin:/bin:/usr/local/bin';
+
 // Safe command execution with secure PATH
 const safeExec = (command, args, options = {}) => {
-  const secureEnv = {
-    ...process.env,
-    PATH: process.platform === 'win32' 
-      ? 'C:\\Windows\\System32;C:\\Windows'
-      : '/usr/bin:/bin:/usr/local/bin'
-  };
   const result = spawnSync(command, args, { 
     encoding: 'utf8', 
     stdio: 'inherit', 
-    env: secureEnv,
+    env: { ...process.env, PATH: SECURE_PATH },
     ...options 
   });
   if (result.error) throw result.error;
@@ -161,12 +160,7 @@ try {
     '--head', branchName
   ], { 
     encoding: 'utf8',
-    env: {
-      ...process.env,
-      PATH: process.platform === 'win32' 
-        ? 'C:\\Windows\\System32;C:\\Windows'
-        : '/usr/bin:/bin:/usr/local/bin'
-    }
+    env: { ...process.env, PATH: SECURE_PATH }
   });
   
   if (result.stdout) {
