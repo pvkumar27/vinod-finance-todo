@@ -27,24 +27,24 @@ export const parseInput = text => {
 
   // Todo patterns - Simplified to avoid ReDoS
   const todoPatterns = [
-    /(?:create|add)\s+(?:task|todo):\s*([\w\s]{1,50})/i,
-    /(?:remind|todo)\s+([\w\s]{1,50})/i,
-    /([\w\s]{1,50})\s+due\s+([\w\s]{1,20})/i,
-    /([\w\s]{1,50})\s+by\s+([\w\s]{1,20})/i,
-    /^(clean|wash|fix|buy|call|email|visit|check|update|review|finish|complete|start)\s+([\w\s]{1,50})/i,
+    /(?:create|add)\s+(?:task|todo):\s*([a-zA-Z0-9 ]{1,50})/i,
+    /(?:remind|todo)\s+([a-zA-Z0-9 ]{1,50})/i,
+    /([a-zA-Z0-9 ]{1,50})\s+due\s+([a-zA-Z0-9 ]{1,20})/i,
+    /([a-zA-Z0-9 ]{1,50})\s+by\s+([a-zA-Z0-9 ]{1,20})/i,
+    /^(clean|wash|fix|buy|call|email|visit|check|update|review|finish|complete|start)\s+([a-zA-Z0-9 ]{1,50})/i,
     /^([a-zA-Z][\w\s]{4,30})$/i,
   ];
 
   // Credit card patterns - Simplified to avoid ReDoS
   const creditCardPatterns = [
-    /add\s+credit\s+card:\s*([\w\s]{1,30})/i,
-    /new\s+card:\s*([\w\s]{1,30})/i,
+    /add\s+credit\s+card:\s*([a-zA-Z0-9 ]{1,30})/i,
+    /new\s+card:\s*([a-zA-Z0-9 ]{1,30})/i,
   ];
 
   // Reminder patterns - Simplified to avoid ReDoS
   const reminderPatterns = [
-    /remind\s+me\s+to\s+pay\s+([\w\s]{1,30})/i,
-    /pay\s+([\w\s]{1,30})\s+card/i,
+    /remind\s+me\s+to\s+pay\s+([a-zA-Z0-9 ]{1,30})/i,
+    /pay\s+([a-zA-Z0-9 ]{1,30})\s+card/i,
   ];
 
   // Check for expense intent
