@@ -7,9 +7,20 @@ const path = require('path');
 // Sanitize function for log injection prevention
 const sanitizeForLog = (input) => encodeURIComponent(String(input)).replace(/%20/g, ' ');
 
-// Safe command execution
+// Safe command execution with secure PATH
 const safeExec = (command, args, options = {}) => {
-  const result = spawnSync(command, args, { encoding: 'utf8', stdio: 'inherit', ...options });
+  const secureEnv = {
+    ...process.env,
+    PATH: process.platform === 'win32' 
+      ? 'C:\\Windows\\System32;C:\\Windows'
+      : '/usr/bin:/bin:/usr/local/bin'
+  };
+  const result = spawnSync(command, args, { 
+    encoding: 'utf8', 
+    stdio: 'inherit', 
+    env: secureEnv,
+    ...options 
+  });
   if (result.error) throw result.error;
   return result;
 };
@@ -142,13 +153,19 @@ try {
 // 9. Create PR
 console.log('🔄 Creating pull request...');
 try {
+  const secureEnv = {
+    ...process.env,
+    PATH: process.platform === 'win32' 
+      ? 'C:\\Windows\\System32;C:\\Windows'
+      : '/usr/bin:/bin:/usr/local/bin'
+  };
   const result = spawnSync('gh', [
     'pr', 'create',
     '--title', `Release ${normalizedVersion}`,
     '--body', `This PR updates the version to ${normalizedVersion}.\n\nChanges:\n- Updated version in package.json\n- Updated version in src/constants/version.js\n- Updated CHANGELOG.md with release notes`,
     '--base', 'main',
     '--head', branchName
-  ], { encoding: 'utf8' });
+  ], { encoding: 'utf8', env: secureEnv });
   
   if (result.stdout) {
     console.log(`✅ Pull request created: ${sanitizeForLog(result.stdout.trim())}`);
