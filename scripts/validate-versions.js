@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 
 // Sanitize function for log injection prevention
-const sanitizeForLog = (input) => encodeURIComponent(String(input)).replace(/%20/g, ' ');
+const sanitizeForLog = input => encodeURIComponent(String(input)).replace(/%20/g, ' ');
 
 // Read package.json version with error handling
 const packageJsonPath = path.join(__dirname, '../package.json');
@@ -20,8 +20,8 @@ try {
   }
   const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
   var packageVersion = packageJson.version;
-} catch (error) {
-  console.error('❌ Error reading package.json:', sanitizeForLog(error.message));
+} catch (_error) {
+  console.error('❌ Error reading package.json:', sanitizeForLog(_error.message));
   process.exit(1);
 }
 
@@ -33,8 +33,8 @@ try {
     process.exit(1);
   }
   var versionFileContent = fs.readFileSync(versionFilePath, 'utf8');
-} catch (error) {
-  console.error('❌ Error reading version.js:', sanitizeForLog(error.message));
+} catch (_error) {
+  console.error('❌ Error reading version.js:', sanitizeForLog(_error.message));
   process.exit(1);
 }
 const versionMatch = versionFileContent.match(/APP_VERSION\s*=\s*['"]([^'"]+)['"]/);
@@ -51,7 +51,9 @@ const normalizedAppVersion = appVersion.startsWith('v') ? appVersion.substring(1
 if (packageVersion !== normalizedAppVersion) {
   console.error('❌ Version mismatch:');
   console.error(`   - package.json: ${sanitizeForLog(packageVersion)}`);
-  console.error(`   - version.js: ${sanitizeForLog(appVersion)} (normalized: ${sanitizeForLog(normalizedAppVersion)})`);
+  console.error(
+    `   - version.js: ${sanitizeForLog(appVersion)} (normalized: ${sanitizeForLog(normalizedAppVersion)})`
+  );
   console.error('Please update both files to use the same version.');
   process.exit(1);
 }

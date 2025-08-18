@@ -12,10 +12,10 @@ export const parseInput = text => {
       : new Date().toISOString().split('T')[0];
 
   // eslint-disable-next-line -- Security hotspot undefined: Security reviewed - acceptable risk
-  // Expense patterns - Fixed ReDoS vulnerabilities
+  // Expense patterns - Simplified to avoid ReDoS
   const expensePatterns = [
-    /(?:add|log|spent?)\s*\$?(\d+(?:\.\d{2})?)\s*(?:for|to|on|as)?\s*([a-zA-Z\s]{1,50}?)(?:\s+(?:on|today|tomorrow|yesterday)|\s*$)/i,
-    /\$(\d+(?:\.\d{2})?)\s*(?:for|to|on|as)\s*([a-zA-Z\s]{1,50})/i,
+    /(?:add|log|spent)\s*\$?(\d+(?:\.\d{2})?)\s*(?:for|to|on|as)?\s*([a-zA-Z\s]{1,30})/i,
+    /\$(\d+(?:\.\d{2})?)\s*(?:for|to|on|as)\s*([a-zA-Z\s]{1,30})/i,
   ];
   // eslint-disable-next-line -- Security hotspot undefined: Security reviewed - acceptable risk
   // eslint-disable-next-line -- Security hotspot undefined: Security reviewed - acceptable risk
@@ -25,29 +25,26 @@ export const parseInput = text => {
   // eslint-disable-next-line -- Security hotspot undefined: Security reviewed - acceptable risk
   // eslint-disable-next-line -- Security hotspot undefined: Security reviewed - acceptable risk
 
-  // Todo patterns - Fixed ReDoS vulnerabilities
+  // Todo patterns - Simplified to avoid ReDoS
   const todoPatterns = [
-    /(?:create\s+(?:a\s+)?to-?do|add\s+task|remind\s+me\s+to):\s*([^\n]{1,100})(?:\s+(?:on|by|tomorrow|today|next)|\s*$)/i,
-    /(?:remind\s+me\s+to|need\s+to|todo)\s+([^\n]{1,100})(?:\s+(?:on|by|tomorrow|today|next)|\s*$)/i,
-    /([^\n]{1,100})\s+due\s+date\s+is\s+([^\n]{1,50})/i,
-    /([^\n]{1,100})\s+(?:is\s+)?due\s+([^\n]{1,50})/i,
-    /([^\n]{1,100})\s+by\s+([^\n]{1,50})/i,
-    /add\s+(?:a\s+)?reminder\s+to\s+([^\n]{1,100})\s+(?:for|on|by)\s+([^\n]{1,50})/i,
-    /(?:create\s+)?reminder\s+(?:to\s+)?([^\n]{1,100})\s+(?:for|on|by)\s+([^\n]{1,50})/i,
-    /^(clean|wash|fix|buy|call|email|visit|check|update|review|finish|complete|start|organize|prepare|schedule)\s+([^\n]{1,100})/i,
-    /^([a-zA-Z][a-zA-Z\s]{4,50})$/i,
+    /(?:create|add)\s+(?:task|todo):\s*([a-zA-Z0-9 ]{1,50})/i,
+    /(?:remind|todo)\s+([a-zA-Z0-9 ]{1,50})/i,
+    /([a-zA-Z0-9 ]{1,50})\s+due\s+([a-zA-Z0-9 ]{1,20})/i,
+    /([a-zA-Z0-9 ]{1,50})\s+by\s+([a-zA-Z0-9 ]{1,20})/i,
+    /^(clean|wash|fix|buy|call|email|visit|check|update|review|finish|complete|start)\s+([a-zA-Z0-9 ]{1,50})/i,
+    /^([a-zA-Z][\w\s]{4,30})$/i,
   ];
 
-  // Credit card patterns - Fixed ReDoS vulnerabilities
+  // Credit card patterns - Simplified to avoid ReDoS
   const creditCardPatterns = [
-    /add\s+credit\s+card:\s*([^,\n]{1,50}),?\s*(?:(\d+%?)\s*(?:until|till|expires?)\s*([a-zA-Z\s\d]{1,30}))?/i,
-    /new\s+card:\s*([^,\n]{1,50})/i,
+    /add\s+credit\s+card:\s*([a-zA-Z0-9 ]{1,30})/i,
+    /new\s+card:\s*([a-zA-Z0-9 ]{1,30})/i,
   ];
 
-  // Reminder patterns - Fixed ReDoS vulnerabilities
+  // Reminder patterns - Simplified to avoid ReDoS
   const reminderPatterns = [
-    /remind\s+me\s+to\s+pay\s+([a-zA-Z\s]{1,50})(?:\s+(?:on|by|card|next)|\s*$)/i,
-    /pay\s+([a-zA-Z\s]{1,50})\s+(?:card|on|next|by)/i,
+    /remind\s+me\s+to\s+pay\s+([a-zA-Z0-9 ]{1,30})/i,
+    /pay\s+([a-zA-Z0-9 ]{1,30})\s+card/i,
   ];
 
   // Check for expense intent
