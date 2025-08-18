@@ -104,39 +104,42 @@ class PushNotificationService {
    */
   async sendSubscriptionToServer(subscription) {
     try {
-      // Import Supabase client
+      // Get current user
       const { createClient } = await import('../supabaseClient');
       const supabase = createClient.default || createClient;
 
-      // Get current user
       const {
         data: { user },
         error: userError,
       } = await supabase.auth.getUser();
       if (userError || !user) {
+        console.error('No authenticated user for subscription');
         return false;
       }
 
-      // Store subscription in Supabase
-      const { error } = await supabase.from('push_subscriptions').upsert(
-        {
-          user_id: user.id,
-          subscription: JSON.stringify(subscription),
-          endpoint: subscription.endpoint,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+      // Use Netlify function to save subscription (bypasses RLS)
+      const response = await fetch('/.netlify/functions/save-push-subscription', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        {
-          onConflict: 'user_id',
-        }
-      );
+        body: JSON.stringify({
+          subscription,
+          userId: user.id,
+        }),
+      });
 
-      if (error) {
+      const result = await response.json();
+
+      if (!response.ok) {
+        console.error('Subscription save failed:', result.error);
         return false;
       }
 
+      console.log('✅ Push subscription saved successfully!');
       return true;
     } catch (error) {
+      console.error('Subscription save error:', error);
       return false;
     }
   }
