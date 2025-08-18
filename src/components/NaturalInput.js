@@ -10,7 +10,7 @@ const NaturalInput = () => {
 
   // Removed examples as requested
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     if (!input.trim()) return;
 
@@ -19,16 +19,15 @@ const NaturalInput = () => {
 
     try {
       const parsed = parseInput(input);
-      
+
       if (parsed.intent === 'unknown') {
-        setMessage('❓ Sorry, I couldn\'t understand that. Try one of the examples below.');
+        setMessage("❓ Sorry, I couldn't understand that. Try one of the examples below.");
         setLoading(false);
         return;
       }
 
       // Show preview
       setPreview(parsed);
-      
     } catch (error) {
       setMessage(`❌ Error: ${error.message}`);
     } finally {
@@ -44,24 +43,24 @@ const NaturalInput = () => {
       switch (preview.intent) {
         case 'add_todo':
         case 'reminder':
-          const todoData = preview.intent === 'add_todo' 
-            ? preview.payload 
-            : {
-                task: preview.payload.task,
-                due_date: preview.payload.due_date,
-                notes: `Reminder for ${preview.payload.card_name}`
-              };
+          const todoData =
+            preview.intent === 'add_todo'
+              ? preview.payload
+              : {
+                  task: preview.payload.task,
+                  due_date: preview.payload.due_date,
+                  notes: `Reminder for ${preview.payload.card_name}`,
+                };
           await addTodo(todoData);
           setMessage('✅ To-do added successfully!');
           break;
-          
+
         default:
           setMessage('❌ Only to-do commands are supported here.');
       }
-      
+
       setInput('');
       setPreview(null);
-      
     } catch (error) {
       setMessage(`❌ Error: ${error.message}`);
     } finally {
@@ -82,11 +81,13 @@ const NaturalInput = () => {
       </p>
 
       {message && (
-        <div className={`p-3 rounded mb-4 ${
-          message.includes('❌') || message.includes('❓') 
-            ? 'bg-red-100 text-red-700' 
-            : 'bg-green-100 text-green-700'
-        }`}>
+        <div
+          className={`p-3 rounded mb-4 ${
+            message.includes('❌') || message.includes('❓')
+              ? 'bg-red-100 text-red-700'
+              : 'bg-green-100 text-green-700'
+          }`}
+        >
           {message}
         </div>
       )}
@@ -124,7 +125,7 @@ const NaturalInput = () => {
           <input
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={e => setInput(e.target.value)}
             placeholder="Try: 'Remind me to pay bills tomorrow' or 'Create task: fix sink'"
             className="flex-1 p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={loading}

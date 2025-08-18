@@ -30,7 +30,6 @@ class SmartForecastingService {
     }
   }
 
-  
   async forecastTodoPatterns() {
     const forecasts = [];
 

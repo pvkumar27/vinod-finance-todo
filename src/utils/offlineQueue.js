@@ -1,11 +1,11 @@
 const OFFLINE_QUEUE_KEY = 'finance_todos_offline_queue';
 
-export const addToOfflineQueue = (action) => {
+export const addToOfflineQueue = action => {
   const queue = getOfflineQueue();
   queue.push({
     ...action,
     timestamp: Date.now(),
-    id: `offline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    id: `offline_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
   });
   localStorage.setItem(OFFLINE_QUEUE_KEY, JSON.stringify(queue));
 };
@@ -22,12 +22,12 @@ export const clearOfflineQueue = () => {
   localStorage.removeItem(OFFLINE_QUEUE_KEY);
 };
 
-export const processOfflineQueue = async (apiHandlers) => {
+export const processOfflineQueue = async apiHandlers => {
   const queue = getOfflineQueue();
   if (queue.length === 0) return;
-  
+
   const results = [];
-  
+
   for (const action of queue) {
     try {
       let result;
@@ -49,10 +49,10 @@ export const processOfflineQueue = async (apiHandlers) => {
       results.push({ success: false, action, error: error.message });
     }
   }
-  
+
   // Clear queue after processing
   clearOfflineQueue();
-  
+
   return results;
 };
 
@@ -63,7 +63,7 @@ export const isOnline = () => {
 export const setupOfflineHandlers = (onOnline, onOffline) => {
   window.addEventListener('online', onOnline);
   window.addEventListener('offline', onOffline);
-  
+
   return () => {
     window.removeEventListener('online', onOnline);
     window.removeEventListener('offline', onOffline);
