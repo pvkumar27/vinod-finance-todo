@@ -1,21 +1,35 @@
 const { schedule } = require('@netlify/functions');
 
-// Simple scheduled function that calls the existing send-push-reminders function
+// Send both email and push notifications at 9AM Central
 const sendScheduledNotifications = async () => {
   try {
-    const response = await fetch(
+    // Send email reminders (full task list)
+    const emailResponse = await fetch(
+      'https://fintask.netlify.app/.netlify/functions/send-daily-reminders?key=fintask_notify_2025_secure_key_v1',
+      {
+        method: 'POST',
+      }
+    );
+    const emailResult = await emailResponse.text();
+    console.log('Email notification result:', emailResult);
+
+    // Send push notifications (task count only)
+    const pushResponse = await fetch(
       'https://fintask.netlify.app/.netlify/functions/send-push-reminders?key=fintask_notify_2025_secure_key_v1',
       {
         method: 'POST',
       }
     );
-
-    const result = await response.text();
-    console.log('Scheduled notification result:', result);
+    const pushResult = await pushResponse.text();
+    console.log('Push notification result:', pushResult);
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'Scheduled notification sent', result }),
+      body: JSON.stringify({
+        message: 'Daily notifications sent at 9AM Central',
+        email: emailResult,
+        push: pushResult,
+      }),
     };
   } catch (error) {
     console.error('Scheduled notification error:', error);
@@ -26,5 +40,5 @@ const sendScheduledNotifications = async () => {
   }
 };
 
-// Schedule for all 5 notification times: 8AM, 12PM, 4PM, 6PM, 9PM Central
-exports.handler = schedule('0 13,17,21,23,2 * * *', sendScheduledNotifications);
+// Schedule for 9AM Central (14 UTC) daily - both email and push
+exports.handler = schedule('0 14 * * *', sendScheduledNotifications);
