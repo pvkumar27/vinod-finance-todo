@@ -19,8 +19,6 @@ import {
 
 const AIAssistant = () => {
   const [messages, setMessages] = useState([]);
-  // eslint-disable-next-line -- SonarCloud javascript:S1854: Variable used in complex logic
-  // eslint-disable-next-line -- SonarCloud javascript:S1854: Variable used in complex logic
   const [contextualSuggestions, setContextualSuggestions] = useState([]); // eslint-disable-line no-unused-vars
   const [smartAlerts, setSmartAlerts] = useState([]); // eslint-disable-line no-unused-vars
   const [inputValue, setInputValue] = useState('');
@@ -88,7 +86,7 @@ const AIAssistant = () => {
 
     // Check voice support
     setVoiceSupported('webkitSpeechRecognition' in window || 'SpeechRecognition' in window);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleClose = e => {
     e.preventDefault();
@@ -364,7 +362,7 @@ const AIAssistant = () => {
       await processQuery(query);
       focusInput();
     },
-    [inputValue, isLoading, processQuery, focusInput] // eslint-disable-line react-hooks/exhaustive-deps
+    [inputValue, isLoading, processQuery]
   );
 
   const handleVoiceRecognitionResult = useCallback(
