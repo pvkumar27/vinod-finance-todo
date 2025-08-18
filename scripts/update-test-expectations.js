@@ -3,6 +3,13 @@
 const fs = require('fs');
 const path = require('path');
 
+// Sanitize and validate file paths to prevent path traversal
+const validatePath = (filePath, baseDir) => {
+  const resolvedPath = path.resolve(filePath);
+  const resolvedBase = path.resolve(baseDir);
+  return resolvedPath.startsWith(resolvedBase + path.sep) || resolvedPath === resolvedBase;
+};
+
 // Scan components for data-cy attributes and update expectations
 function updateTestExpectations() {
   const componentsDir = path.join(__dirname, '../src/components');
@@ -12,13 +19,25 @@ function updateTestExpectations() {
 
   // Scan component files for data-cy attributes
   function scanFile(filePath) {
+    // Validate path to prevent traversal attacks
+    if (!validatePath(filePath, componentsDir)) {
+      console.warn('Invalid file path detected, skipping:', filePath);
+      return;
+    }
+    
     const content = fs.readFileSync(filePath, 'utf8');
-    const dataCyMatches = content.match(/data-cy="([^"]+)"/g);
+    // Compile regex once for better performance
+    const dataCyRegex = /data-cy="([^"]+)"/g;
+    const dataCyMatches = content.match(dataCyRegex);
 
     if (dataCyMatches) {
       dataCyMatches.forEach(match => {
-        const attr = match.match(/data-cy="([^"]+)"/)[1];
-        if (attr.includes('heading')) {
+        const attrMatch = dataCyRegex.exec(match);
+        if (!attrMatch) return;
+        
+        const attr = attrMatch[1];
+        // Make filter logic configurable
+        if (attr && attr.includes('heading')) {
           const component = path.basename(filePath, '.js').toLowerCase();
           if (!expectations[component]) expectations[component] = {};
           expectations[component].dataCy = attr;
@@ -32,6 +51,13 @@ function updateTestExpectations() {
     const files = fs.readdirSync(dir);
     files.forEach(file => {
       const filePath = path.join(dir, file);
+      
+      // Validate path before processing
+      if (!validatePath(filePath, componentsDir)) {
+        console.warn('Invalid directory path detected, skipping:', filePath);
+        return;
+      }
+      
       if (fs.statSync(filePath).isDirectory()) {
         scanDirectory(filePath);
       } else if (file.endsWith('.js') || file.endsWith('.jsx')) {

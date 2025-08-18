@@ -1,8 +1,18 @@
 #!/usr/bin/env node
 
-const { execSync } = require('child_process');
+const { spawnSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
+
+// Sanitize function for log injection prevention
+const sanitizeForLog = (input) => encodeURIComponent(String(input)).replace(/%20/g, ' ');
+
+// Safe command execution
+const safeExec = (command, args, options = {}) => {
+  const result = spawnSync(command, args, { encoding: 'utf8', stdio: 'inherit', ...options });
+  if (result.error) throw result.error;
+  return result;
+};
 
 const args = process.argv.slice(2);
 const newVersion = args[0];
@@ -10,10 +20,7 @@ const newVersion = args[0];
 // Validate version format (vX.Y.Z or X.Y.Z)
 function validateVersion(version) {
   const versionPattern = /^v?\d+\.\d+\.\d+$/;
-  if (!versionPattern.test(version)) {
-    return false;
-  }
-  return true;
+  return versionPattern.test(version);
 }
 
 // Normalize version to ensure it starts with 'v'
@@ -34,12 +41,12 @@ function getPackageVersion(version) {
 
 // Create a release branch
 function createReleaseBranch(version) {
-  const branchName = `release/${version}`;
+  const branchName = `release/${sanitizeForLog(version)}`;
   try {
-    execSync(`git checkout -b ${branchName}`, { stdio: 'inherit' });
+    safeExec('git', ['checkout', '-b', branchName]);
     return branchName;
   } catch (error) {
-    console.log(`❌ Failed to create branch ${branchName}`);
+    console.log(`❌ Failed to create branch ${sanitizeForLog(branchName)}`);
     throw error;
   }
 }
@@ -59,12 +66,12 @@ if (!validateVersion(newVersion)) {
 const normalizedVersion = normalizeVersion(newVersion);
 const packageVersion = getPackageVersion(normalizedVersion);
 
-console.log(`🚀 Starting release process for ${normalizedVersion}...\n`);
+console.log(`🚀 Starting release process for ${sanitizeForLog(normalizedVersion)}...\n`);
 
 // 1. Run pre-release checks
 console.log('🔍 Running pre-release checks...');
 try {
-  execSync('node scripts/pre-release.js', { stdio: 'inherit' });
+  safeExec('node', ['scripts/pre-release.js']);
 } catch (error) {
   console.log('❌ Pre-release checks failed');
   process.exit(1);
@@ -73,10 +80,10 @@ try {
 // 2. Create a release branch
 console.log('🌿 Creating release branch...');
 const branchName = createReleaseBranch(normalizedVersion);
-console.log(`✅ Created branch ${branchName}\n`);
+console.log(`✅ Created branch ${sanitizeForLog(branchName)}\n`);
 
 // 3. Update version in version.js
-console.log(`📝 Updating version to ${normalizedVersion}...`);
+console.log(`📝 Updating version to ${sanitizeForLog(normalizedVersion)}...`);
 const versionFile = path.join(__dirname, '../src/constants/version.js');
 const versionContent = `export const APP_VERSION = '${normalizedVersion}';\n`;
 fs.writeFileSync(versionFile, versionContent);
@@ -98,9 +105,16 @@ let changelog = fs.readFileSync(changelogPath, 'utf8');
 const today = new Date().toISOString().split('T')[0];
 const newEntry = `## ${normalizedVersion} - ${today}\n### 🚀 Release\n- **Version Update**: ${normalizedVersion}\n- **Package Updates**: Latest compatible versions\n- **Security Fixes**: Automated vulnerability patches\n- **Build Verification**: Production build tested\n\n---\n\n`;
 
-// Insert after the first line (title)
+// Find insertion point more robustly
 const lines = changelog.split('\n');
-lines.splice(2, 0, newEntry);
+let insertIndex = 2; // Default fallback
+for (let i = 0; i < lines.length; i++) {
+  if (lines[i].startsWith('## ') && i > 0) {
+    insertIndex = i;
+    break;
+  }
+}
+lines.splice(insertIndex, 0, newEntry);
 changelog = lines.join('\n');
 
 fs.writeFileSync(changelogPath, changelog);
@@ -108,35 +122,44 @@ console.log('✅ Changelog updated with release entry\n');
 
 // 6. Commit changes
 console.log('📦 Committing changes...');
-execSync('git add src/constants/version.js package.json CHANGELOG.md', { stdio: 'inherit' });
-execSync(`git commit -m "Release ${normalizedVersion}: Package updates and version bump"`, {
-  stdio: 'inherit',
-});
+try {
+  safeExec('git', ['add', 'src/constants/version.js', 'package.json', 'CHANGELOG.md']);
+  safeExec('git', ['commit', '-m', `Release ${normalizedVersion}: Package updates and version bump`]);
 
-// 7. Create tag
-console.log('🏷️  Creating git tag...');
-execSync(`git tag ${normalizedVersion}`, { stdio: 'inherit' });
+  // 7. Create tag
+  console.log('🏷️  Creating git tag...');
+  safeExec('git', ['tag', normalizedVersion]);
 
-// 8. Push branch and tag
-console.log('🚀 Pushing to repository...');
-execSync(`git push -u origin ${branchName}`, { stdio: 'inherit' });
-execSync('git push --tags', { stdio: 'inherit' });
+  // 8. Push branch and tag
+  console.log('🚀 Pushing to repository...');
+  safeExec('git', ['push', '-u', 'origin', branchName]);
+  safeExec('git', ['push', '--tags']);
+} catch (error) {
+  console.log('❌ Git operations failed:', sanitizeForLog(error.message));
+  process.exit(1);
+}
 
 // 9. Create PR
 console.log('🔄 Creating pull request...');
 try {
-  const prOutput = execSync(
-    `gh pr create --title "Release ${normalizedVersion}" --body "This PR updates the version to ${normalizedVersion}.\n\nChanges:\n- Updated version in package.json\n- Updated version in src/constants/version.js\n- Updated CHANGELOG.md with release notes" --base main --head ${branchName}`,
-    { encoding: 'utf8' }
-  );
-  console.log(`✅ Pull request created: ${prOutput.trim()}`);
+  const result = spawnSync('gh', [
+    'pr', 'create',
+    '--title', `Release ${normalizedVersion}`,
+    '--body', `This PR updates the version to ${normalizedVersion}.\n\nChanges:\n- Updated version in package.json\n- Updated version in src/constants/version.js\n- Updated CHANGELOG.md with release notes`,
+    '--base', 'main',
+    '--head', branchName
+  ], { encoding: 'utf8' });
+  
+  if (result.stdout) {
+    console.log(`✅ Pull request created: ${sanitizeForLog(result.stdout.trim())}`);
+  }
 } catch (error) {
   console.log('❌ Failed to create PR. Please create it manually.');
-  console.log(`Branch: ${branchName}`);
+  console.log(`Branch: ${sanitizeForLog(branchName)}`);
   console.log(`Base: main`);
-  console.log(`Title: Release ${normalizedVersion}`);
+  console.log(`Title: Release ${sanitizeForLog(normalizedVersion)}`);
 }
 
-console.log(`\n🎉 Release ${normalizedVersion} process completed successfully!`);
+console.log(`\n🎉 Release ${sanitizeForLog(normalizedVersion)} process completed successfully!`);
 console.log('📋 Please review and merge the PR to complete the release.');
 console.log('🌐 Netlify will auto-deploy the new version after merging.');
