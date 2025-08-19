@@ -1,13 +1,14 @@
-name: All Daily Notifications (5 Times)
+# DISABLED: Netlify handles all scheduling
+# name: All Daily Notifications (5 Times)
 
-on:
-  schedule:
-    - cron: '0 14 * * *'  # 9:00 AM Central (Morning + Email)
-    - cron: '0 17 * * *'  # 12:00 PM Central (Noon Push)
-    - cron: '0 21 * * *'  # 4:00 PM Central (Afternoon Push)
-    - cron: '0 23 * * *'  # 6:00 PM Central (Evening Push)
-    - cron: '0 2 * * *'   # 9:00 PM Central (Night Push)
-  workflow_dispatch:  # Allow manual trigger
+# on:
+#   schedule:
+#     - cron: '0 14 * * *'  # 9:00 AM Central (Morning + Email)
+#     - cron: '0 17 * * *'  # 12:00 PM Central (Noon Push)
+#     - cron: '0 21 * * *'  # 4:00 PM Central (Afternoon Push)
+#     - cron: '0 23 * * *'  # 6:00 PM Central (Evening Push)
+#     - cron: '0 2 * * *'   # 9:00 PM Central (Night Push)
+#   workflow_dispatch:  # Allow manual trigger
 
 jobs:
   send-notifications:

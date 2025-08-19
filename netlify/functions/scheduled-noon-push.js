@@ -1,6 +1,6 @@
 const { schedule } = require('@netlify/functions');
 
-const sendMorningPush = async () => {
+const sendNoonPush = async () => {
   try {
     const apiKey = process.env.NOTIFICATION_API_KEY;
     const response = await fetch(
@@ -8,13 +8,13 @@ const sendMorningPush = async () => {
       { method: 'POST' }
     );
     const result = await response.text();
-    console.log('Morning push result:', result);
-    return { statusCode: 200, body: JSON.stringify({ message: 'Morning push sent', result }) };
+    console.log('Noon push result:', result);
+    return { statusCode: 200, body: JSON.stringify({ message: 'Noon push sent', result }) };
   } catch (error) {
-    console.error('Morning push error:', error);
+    console.error('Noon push error:', error);
     return { statusCode: 500, body: JSON.stringify({ error: error.message }) };
   }
 };
 
-// 9:00 AM Central = 14:00 UTC
-exports.handler = schedule('0 14 * * *', sendMorningPush);
+// 12:00 PM Central = 17:00 UTC
+exports.handler = schedule('0 17 * * *', sendNoonPush);
