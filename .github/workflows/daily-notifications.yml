@@ -1,41 +1,51 @@
-name: Daily Notifications (9:00 AM CT)
+name: All Daily Notifications (5 Times)
 
 on:
   schedule:
-    - cron: '0 14 * * *'  # 9:00 AM Central Time (14:00 UTC)
+    - cron: '0 14 * * *'  # 9:00 AM Central (Morning + Email)
+    - cron: '0 17 * * *'  # 12:00 PM Central (Noon Push)
+    - cron: '0 21 * * *'  # 4:00 PM Central (Afternoon Push)
+    - cron: '0 23 * * *'  # 6:00 PM Central (Evening Push)
+    - cron: '0 2 * * *'   # 9:00 PM Central (Night Push)
   workflow_dispatch:  # Allow manual trigger
 
 jobs:
   send-notifications:
     runs-on: ubuntu-latest
     steps:
-      - name: Send daily email reminders
+      - name: Determine notification type
+        id: time-check
         run: |
-          # Send email notifications via Netlify function
+          UTC_HOUR=$(date -u +%H)
+          if [ "$UTC_HOUR" = "14" ]; then
+            echo "type=morning" >> $GITHUB_OUTPUT
+            echo "send_email=true" >> $GITHUB_OUTPUT
+          elif [ "$UTC_HOUR" = "17" ]; then
+            echo "type=noon" >> $GITHUB_OUTPUT
+            echo "send_email=false" >> $GITHUB_OUTPUT
+          elif [ "$UTC_HOUR" = "21" ]; then
+            echo "type=afternoon" >> $GITHUB_OUTPUT
+            echo "send_email=false" >> $GITHUB_OUTPUT
+          elif [ "$UTC_HOUR" = "23" ]; then
+            echo "type=evening" >> $GITHUB_OUTPUT
+            echo "send_email=false" >> $GITHUB_OUTPUT
+          elif [ "$UTC_HOUR" = "02" ]; then
+            echo "type=night" >> $GITHUB_OUTPUT
+            echo "send_email=false" >> $GITHUB_OUTPUT
+          else
+            echo "type=morning" >> $GITHUB_OUTPUT
+            echo "send_email=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send email reminders (morning only)
+        if: steps.time-check.outputs.send_email == 'true'
+        run: |
           API_KEY=$(echo -n "${{ secrets.NOTIFICATION_API_KEY }}" | perl -MURI::Escape -ne 'print uri_escape($_)')
           EMAIL_RESPONSE=$(curl -X POST "https://fintask.netlify.app/.netlify/functions/send-daily-reminders?key=${API_KEY}" -s)
-          echo "Email function response: $EMAIL_RESPONSE"
-          if [[ "$EMAIL_RESPONSE" == *"sent"* || "$EMAIL_RESPONSE" == *"No tasks"* ]]; then
-            echo "✅ Email notifications sent successfully"
-          else
-            echo "❌ Email notification may have failed: $EMAIL_RESPONSE"
-          fi
+          echo "📧 Email response: $EMAIL_RESPONSE"
 
-      - name: Send daily push notifications
+      - name: Send push notifications (all times)
         run: |
-          # Send push notifications via Netlify function
           API_KEY=$(echo -n "${{ secrets.NOTIFICATION_API_KEY }}" | perl -MURI::Escape -ne 'print uri_escape($_)')
           PUSH_RESPONSE=$(curl -X POST "https://fintask.netlify.app/.netlify/functions/send-push-reminders?key=${API_KEY}" -s)
-          echo "Push function response: $PUSH_RESPONSE"
-          if [[ "$PUSH_RESPONSE" == *"sent"* || "$PUSH_RESPONSE" == *"No subscriptions"* ]]; then
-            echo "✅ Push notifications sent successfully"
-          else
-            echo "❌ Push notification may have failed: $PUSH_RESPONSE"
-          fi
-
-      - name: Summary
-        run: |
-          echo "📱 Daily notification summary:"
-          echo "   📧 Email reminders: Processed"
-          echo "   🔔 Push notifications: Processed"
-          echo "   ⏰ Scheduled for 9:00 AM Central Time daily"
+          echo "🔔 Push response (${{ steps.time-check.outputs.type }}): $PUSH_RESPONSE"
