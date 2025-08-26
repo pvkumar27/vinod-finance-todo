@@ -1,7 +1,7 @@
 import React from 'react';
 import { formatDateString, getTodayDateString } from '../utils/dateUtils';
 
-const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete }) => {
+const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete, onStartPomodoro }) => {
   const isPinned = task.pinned;
   const formattedDate = task.due_date ? formatDateString(task.due_date) : null;
 
@@ -83,6 +83,17 @@ const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete }) => 
 
       {/* Actions - Smaller buttons for iPhone 16 Pro Max */}
       <div className="flex flex-row items-center flex-shrink-0 ml-auto mr-0 space-x-1">
+        {onStartPomodoro && !task.completed && (
+          <button
+            type="button"
+            onClick={() => onStartPomodoro(task)}
+            className="w-8 h-8 flex items-center justify-center text-red-500 hover:text-red-600 transition-colors touch-manipulation"
+            title="Start Pomodoro session"
+            style={{ WebkitTapHighlightColor: 'transparent' }}
+          >
+            <span className="text-sm">🍅</span>
+          </button>
+        )}
         <button
           type="button"
           onClick={() => onTogglePin(task.id, task.pinned)}

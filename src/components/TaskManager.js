@@ -14,6 +14,8 @@ import { arrayMove } from '@dnd-kit/sortable';
 import { api } from '../services/api';
 import { parseInput } from '../utils/parseInput';
 import TaskList from './TaskList';
+import TaskPomodoroIntegration from './pomodoro/TaskPomodoroIntegration';
+import TodoProgressBar from './TodoProgressBar';
 
 const TaskManager = () => {
   const [todos, setTodos] = useState([]);
@@ -26,6 +28,7 @@ const TaskManager = () => {
 
   const [showCompleted, setShowCompleted] = useState(false);
   const [activeId, setActiveId] = useState(null);
+  const [selectedPomodoroTask, setSelectedPomodoroTask] = useState(null);
 
   // Configure sensors with no constraints for better mobile support
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor));
@@ -148,6 +151,32 @@ const TaskManager = () => {
       await api.deleteTodo(id);
       setMessage('✅ Task deleted!');
       setTimeout(() => setMessage(''), 4000);
+      loadTodos();
+    } catch (err) {
+      setMessage(`❌ Error: ${err.message}`);
+      setTimeout(() => setMessage(''), 4000);
+    }
+  };
+
+  const handleStartPomodoro = task => {
+    // Request notification permission
+    if (window.Notification && Notification.permission === 'default') {
+      Notification.requestPermission().then(permission => {
+        if (permission === 'granted') {
+          setMessage('🔔 Notifications enabled for Pomodoro alerts!');
+          setTimeout(() => setMessage(''), 3000);
+        }
+      });
+    }
+    setSelectedPomodoroTask(task);
+  };
+
+  const handlePomodoroTaskComplete = async taskId => {
+    try {
+      await api.updateTodo(taskId, { completed: true });
+      setMessage('✅ Task completed via Pomodoro! 🍅');
+      setTimeout(() => setMessage(''), 4000);
+      setSelectedPomodoroTask(null);
       loadTodos();
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
@@ -433,6 +462,9 @@ const TaskManager = () => {
         </form>
       </div>
 
+      {/* Progress Bar */}
+      <TodoProgressBar todos={todos} />
+
       {/* Tasks */}
       <div className="mb-8">
         <h3 className="finbot-heading-lg finbot-responsive-text mb-6 mt-8">
@@ -472,6 +504,7 @@ const TaskManager = () => {
                     onTogglePin={handleTogglePin}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
+                    onStartPomodoro={handleStartPomodoro}
                   />
                 </div>
               )}
@@ -485,6 +518,7 @@ const TaskManager = () => {
                     onTogglePin={handleTogglePin}
                     onEdit={handleEdit}
                     onDelete={handleDelete}
+                    onStartPomodoro={handleStartPomodoro}
                   />
                 </div>
               )}
@@ -591,6 +625,19 @@ const TaskManager = () => {
                 ))}
             </div>
           )}
+        </div>
+      )}
+
+      {/* Pomodoro Modal */}
+      {selectedPomodoroTask && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="max-w-md w-full">
+            <TaskPomodoroIntegration
+              task={selectedPomodoroTask}
+              onTaskComplete={handlePomodoroTaskComplete}
+              onClose={() => setSelectedPomodoroTask(null)}
+            />
+          </div>
         </div>
       )}
     </div>

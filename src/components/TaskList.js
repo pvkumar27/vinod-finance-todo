@@ -1,7 +1,7 @@
 import React from 'react';
 import TaskItem from './TaskItem';
 
-const TaskList = ({ tasks, onToggleComplete, onTogglePin, onEdit, onDelete }) => {
+const TaskList = ({ tasks, onToggleComplete, onTogglePin, onEdit, onDelete, onStartPomodoro }) => {
   // If no tasks, show empty state
   if (tasks.length === 0) {
     return (
@@ -22,6 +22,7 @@ const TaskList = ({ tasks, onToggleComplete, onTogglePin, onEdit, onDelete }) =>
             onTogglePin={onTogglePin}
             onEdit={onEdit}
             onDelete={onDelete}
+            onStartPomodoro={onStartPomodoro}
           />
         </div>
       ))}

@@ -25,14 +25,29 @@ export const parseInput = text => {
   // eslint-disable-next-line -- Security hotspot undefined: Security reviewed - acceptable risk
   // eslint-disable-next-line -- Security hotspot undefined: Security reviewed - acceptable risk
 
-  // Todo patterns - Simplified to avoid ReDoS
+  // Skip if text looks like AI notification or system message
+  if (
+    input.includes('notification') ||
+    input.includes('generate') ||
+    input.includes('finbot') ||
+    input.includes('user has') ||
+    input.length > 100
+  ) {
+    return {
+      intent: 'unknown',
+      payload: {
+        original_text: text,
+      },
+    };
+  }
+
+  // Todo patterns - More specific to avoid false matches
   const todoPatterns = [
     /(?:create|add)\s+(?:task|todo):\s*([a-zA-Z0-9 ]{1,50})/i,
     /(?:remind|todo)\s+([a-zA-Z0-9 ]{1,50})/i,
     /([a-zA-Z0-9 ]{1,50})\s+due\s+([a-zA-Z0-9 ]{1,20})/i,
     /([a-zA-Z0-9 ]{1,50})\s+by\s+([a-zA-Z0-9 ]{1,20})/i,
     /^(clean|wash|fix|buy|call|email|visit|check|update|review|finish|complete|start)\s+([a-zA-Z0-9 ]{1,50})/i,
-    /^([a-zA-Z][\w\s]{4,30})$/i,
   ];
 
   // Credit card patterns - Simplified to avoid ReDoS
@@ -83,14 +98,9 @@ export const parseInput = text => {
         }
       }
 
-      // For simple action verb patterns (pattern 7)
-      if (i === 7 && match[2]) {
+      // For simple action verb patterns (pattern 5)
+      if (i === 4 && match[2]) {
         taskText = `${match[1]} ${match[2]}`.trim();
-      }
-
-      // For generic simple task (pattern 8)
-      if (i === 8) {
-        taskText = match[1].trim();
       }
 
       return {
