@@ -5,7 +5,11 @@ const PomodoroTimer = ({ selectedTask, onComplete, onCancel }) => {
   const [isRunning, setIsRunning] = useState(false);
   const [mode, setMode] = useState('work'); // 'work', 'shortBreak', 'longBreak'
   const [completedPomodoros, setCompletedPomodoros] = useState(0);
+  const [tickingEnabled, setTickingEnabled] = useState(true);
   const intervalRef = useRef(null);
+  const tickIntervalRef = useRef(null);
+  const audioContextRef = useRef(null);
+  const wakeLockRef = useRef(null);
 
   const modes = useMemo(
     () => ({
@@ -24,6 +28,57 @@ const PomodoroTimer = ({ selectedTask, onComplete, onCancel }) => {
     },
     [modes]
   );
+
+  const playTickSound = useCallback(() => {
+    if (!tickingEnabled) return;
+    try {
+      // Initialize audio context once and reuse
+      if (!audioContextRef.current) {
+        audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      }
+
+      const audioContext = audioContextRef.current;
+
+      // Resume audio context if suspended (required for mobile)
+      if (audioContext.state === 'suspended') {
+        audioContext.resume().catch(() => {});
+      }
+
+      // Skip if audio context is not running (mobile restriction)
+      if (audioContext.state !== 'running') {
+        return;
+      }
+
+      // Create white noise burst for authentic timer tick
+      const bufferSize = audioContext.sampleRate * 0.02; // 20ms
+      const buffer = audioContext.createBuffer(1, bufferSize, audioContext.sampleRate);
+      const output = buffer.getChannelData(0);
+
+      // Generate white noise with quick decay
+      for (let i = 0; i < bufferSize; i++) {
+        const decay = Math.exp(-i / (bufferSize * 0.1));
+        output[i] = (Math.random() * 2 - 1) * decay * 0.8;
+      }
+
+      const whiteNoise = audioContext.createBufferSource();
+      const filter = audioContext.createBiquadFilter();
+      const gainNode = audioContext.createGain();
+
+      whiteNoise.buffer = buffer;
+      filter.type = 'highpass';
+      filter.frequency.setValueAtTime(2000, audioContext.currentTime);
+
+      whiteNoise.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(audioContext.destination);
+
+      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+
+      whiteNoise.start(audioContext.currentTime);
+    } catch (error) {
+      console.log('Tick sound not supported:', error);
+    }
+  }, [tickingEnabled]);
 
   const handleTimerComplete = useCallback(() => {
     // Play notification sound
@@ -55,35 +110,78 @@ const PomodoroTimer = ({ selectedTask, onComplete, onCancel }) => {
       intervalRef.current = setInterval(() => {
         setTimeLeft(prev => prev - 1);
       }, 1000);
+
+      // Keep screen awake during Pomodoro
+      if ('wakeLock' in navigator) {
+        navigator.wakeLock
+          .request('screen')
+          .then(wakeLock => {
+            wakeLockRef.current = wakeLock;
+          })
+          .catch(() => {});
+      }
     } else {
       clearInterval(intervalRef.current);
+
+      // Release wake lock when timer stops
+      if (wakeLockRef.current) {
+        wakeLockRef.current.release();
+        wakeLockRef.current = null;
+      }
 
       if (timeLeft === 0) {
         handleTimerComplete();
       }
     }
 
-    return () => clearInterval(intervalRef.current);
+    return () => {
+      clearInterval(intervalRef.current);
+      if (wakeLockRef.current) {
+        wakeLockRef.current.release();
+        wakeLockRef.current = null;
+      }
+    };
   }, [isRunning, timeLeft, handleTimerComplete]);
+
+  // Separate interval for ticking sound to prevent pausing
+  useEffect(() => {
+    if (isRunning && tickingEnabled) {
+      tickIntervalRef.current = setInterval(() => {
+        playTickSound();
+      }, 300);
+    } else {
+      clearInterval(tickIntervalRef.current);
+    }
+
+    return () => clearInterval(tickIntervalRef.current);
+  }, [isRunning, tickingEnabled, playTickSound]);
 
   const playNotificationSound = () => {
     try {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gainNode = audioContext.createGain();
+      const audioContext =
+        audioContextRef.current || new (window.AudioContext || window.webkitAudioContext)();
 
-      oscillator.connect(gainNode);
-      gainNode.connect(audioContext.destination);
+      // Play completion chime - 3 ascending tones
+      const frequencies = [523, 659, 784]; // C5, E5, G5 - major chord
 
-      oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-      oscillator.frequency.setValueAtTime(600, audioContext.currentTime + 0.1);
-      oscillator.frequency.setValueAtTime(800, audioContext.currentTime + 0.2);
+      frequencies.forEach((freq, index) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
 
-      gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
 
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.3);
+        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+        oscillator.type = 'sine';
+
+        const startTime = audioContext.currentTime + index * 0.15;
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(0.4, startTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.4);
+
+        oscillator.start(startTime);
+        oscillator.stop(startTime + 0.4);
+      });
     } catch (error) {
       console.log('Audio not supported:', error);
     }
@@ -160,7 +258,16 @@ const PomodoroTimer = ({ selectedTask, onComplete, onCancel }) => {
       {/* Controls */}
       <div className="flex justify-center space-x-2 mb-4">
         <button
-          onClick={() => setIsRunning(!isRunning)}
+          onClick={() => {
+            // Initialize audio context on user interaction (required for mobile)
+            if (!audioContextRef.current && tickingEnabled) {
+              audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+              if (audioContextRef.current.state === 'suspended') {
+                audioContextRef.current.resume().catch(() => {});
+              }
+            }
+            setIsRunning(!isRunning);
+          }}
           className={`finbot-button-primary px-4 py-3 ${currentMode.color}`}
         >
           {isRunning ? '⏸️ Pause' : '▶️ Start'}
@@ -169,17 +276,28 @@ const PomodoroTimer = ({ selectedTask, onComplete, onCancel }) => {
         {mode === 'work' && selectedTask && (
           <button
             onClick={() => {
+              const focusedMinutes = Math.floor((currentMode.duration - timeLeft) / 60);
               const shouldComplete = window.confirm(
-                `Task finished early? You've focused for ${Math.floor((currentMode.duration - timeLeft) / 60)} minutes. Complete the task?`
+                `Task finished early? You've focused for ${focusedMinutes} minutes. Complete the task?`
               );
               if (shouldComplete && onComplete) {
                 onComplete(selectedTask, completedPomodoros + 1, true); // true = early completion
+                onCancel(); // Close the timer
               }
             }}
             className="finbot-button-primary px-4 py-3 bg-green-500 hover:bg-green-600"
             disabled={timeLeft === currentMode.duration}
           >
             ✅ Done Early
+          </button>
+        )}
+
+        {(mode === 'shortBreak' || mode === 'longBreak') && (
+          <button
+            onClick={() => switchMode('work')}
+            className="finbot-button-primary px-4 py-3 bg-orange-500 hover:bg-orange-600"
+          >
+            ⏭️ Skip Break
           </button>
         )}
 
@@ -209,6 +327,32 @@ const PomodoroTimer = ({ selectedTask, onComplete, onCancel }) => {
             {modeData.emoji} {modeData.label}
           </button>
         ))}
+      </div>
+
+      {/* Settings */}
+      <div className="mt-4 pt-4 border-t border-gray-200">
+        <div className="flex items-center justify-center">
+          <button
+            onClick={() => {
+              // Initialize audio context on user interaction for mobile
+              if (!audioContextRef.current) {
+                audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioContextRef.current.state === 'suspended') {
+                  audioContextRef.current.resume().catch(() => {});
+                }
+              }
+              setTickingEnabled(!tickingEnabled);
+            }}
+            className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              tickingEnabled
+                ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                : 'bg-red-100 text-red-700 hover:bg-red-200'
+            }`}
+          >
+            <span className="mr-2">{tickingEnabled ? '🔊' : '🔇'}</span>
+            {tickingEnabled ? 'Mute' : 'Unmute'}
+          </button>
+        </div>
       </div>
 
       {/* Stats */}

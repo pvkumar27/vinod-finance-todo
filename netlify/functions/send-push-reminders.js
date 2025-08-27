@@ -60,17 +60,23 @@ exports.handler = async event => {
         const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
         const prompts = {
-          morning: `Generate a motivational morning notification for FinTask app. User has ${taskCount} pending tasks. Keep it under 50 characters, include emoji, be encouraging.`,
-          noon: `Generate a midday motivation notification for FinTask. Encourage completing at least 4 tasks today. Keep it under 60 characters, include emoji, be energetic.`,
-          afternoon: `Generate an afternoon productivity notification for FinTask. User has ${taskCount} pending tasks. Keep it under 60 characters, include emoji, be motivating.`,
-          evening: `Generate an evening check-in notification. ${taskCount > 0 ? 'User has ' + taskCount + ' tasks remaining.' : 'User completed tasks today.'} Keep it under 60 characters, include emoji.`,
-          night: `Generate a good night message for FinTask users who have ${taskCount} pending tasks. Keep it under 70 characters, include emoji, be appreciative and hopeful for tomorrow.`,
+          morning: `Create a short motivational morning message. User has ${taskCount} pending tasks. Max 50 chars with emoji.`,
+          noon: `Create midday motivation. Encourage 4 tasks today. Max 60 chars with emoji.`,
+          afternoon: `Create afternoon boost message. ${taskCount} tasks left. Max 60 chars with emoji.`,
+          evening: `Create evening check-in. ${taskCount > 0 ? taskCount + ' tasks remaining' : 'Tasks completed'}. Max 60 chars with emoji.`,
+          night: `Create goodnight message. ${taskCount} pending tasks. Max 70 chars with emoji.`,
         };
 
         const result = await model.generateContent(prompts[type]);
-        const aiMessage = result.response.text().trim();
+        let aiMessage = result.response.text().trim();
 
-        if (aiMessage && aiMessage.length < 100) {
+        // Clean up AI response - remove any prompt echoing
+        aiMessage = aiMessage.replace(/^.*?Generate.*?encouraging\.?\s*/i, '');
+        aiMessage = aiMessage.replace(/^.*?notification.*?app\.?\s*/i, '');
+        aiMessage = aiMessage.replace(/^.*?Return only.*?\s*/i, '');
+        aiMessage = aiMessage.trim();
+
+        if (aiMessage && aiMessage.length < 100 && !aiMessage.toLowerCase().includes('generate')) {
           return {
             title: getStaticTitle(type),
             body: aiMessage,
