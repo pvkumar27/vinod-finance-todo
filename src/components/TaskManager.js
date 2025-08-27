@@ -16,6 +16,9 @@ import { parseInput } from '../utils/parseInput';
 import TaskList from './TaskList';
 import TaskPomodoroIntegration from './pomodoro/TaskPomodoroIntegration';
 import TodoProgressBar from './TodoProgressBar';
+import ModernCard from './ui/ModernCard';
+import ModernButton from './ui/ModernButton';
+import useSoundEffects from '../hooks/useSoundEffects';
 
 const TaskManager = () => {
   const [todos, setTodos] = useState([]);
@@ -25,6 +28,8 @@ const TaskManager = () => {
   // Default due date is today
   const [taskDate, setTaskDate] = useState(getTodayDateString());
   const [editingTodo, setEditingTodo] = useState(null);
+
+  const { taskComplete, buttonPress, success, error: errorSound } = useSoundEffects();
 
   const [showCompleted, setShowCompleted] = useState(false);
   const [activeId, setActiveId] = useState(null);
@@ -128,10 +133,11 @@ const TaskManager = () => {
 
       if (!completed) {
         // Task completed - play celebration sound and show animation
-        playTaskCompleteSound();
+        taskComplete();
         showTaskCompleteAnimation();
         setMessage('🎉 Task completed! Great job!');
       } else {
+        success();
         setMessage('✅ Task updated!');
       }
 
@@ -444,15 +450,19 @@ const TaskManager = () => {
 
   return (
     <div className="p-6">
-      <div className="mb-6">
+      <ModernCard className="mb-6 fade-in" padding="default">
         <h2
           data-cy="todo-manager-heading"
-          className="finbot-heading-xl finbot-responsive-heading flex items-center"
+          className="text-2xl sm:text-3xl font-bold flex items-center"
+          style={{ color: 'var(--color-text-primary)' }}
         >
           <span className="mr-3 text-2xl">📝</span>
           To-Do Manager
         </h2>
-      </div>
+        <p className="mt-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+          Organize your tasks with AI-powered productivity
+        </p>
+      </ModernCard>
 
       {message && (
         <div
@@ -467,13 +477,14 @@ const TaskManager = () => {
       )}
 
       {/* Add Todo Form */}
-      <div className="finbot-card p-4 mb-6">
+      <ModernCard className="mb-6 slide-in">
         <form onSubmit={handleAddTodo}>
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
               <label
                 htmlFor="task-input"
-                className="text-sm font-medium text-gray-700 mb-1 block text-left"
+                className="text-sm font-medium mb-2 block text-left"
+                style={{ color: 'var(--color-text-secondary)' }}
               >
                 Task
               </label>
@@ -482,18 +493,20 @@ const TaskManager = () => {
                   id="task-input"
                   data-cy="task-input-field"
                   type="text"
-                  placeholder={editingTodo ? 'Edit task...' : 'Add a new task...'}
+                  placeholder={editingTodo ? 'Edit task...' : 'What needs to be done?'}
                   value={newTask}
                   onChange={e => setNewTask(e.target.value)}
-                  className="finbot-input w-full pr-12"
+                  className="modern-input pr-12"
                 />
                 <button
                   type="button"
-                  onClick={handleVoiceInput}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-gray-100 active:bg-gray-200 touch-manipulation"
+                  onClick={() => {
+                    buttonPress();
+                    handleVoiceInput();
+                  }}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:bg-gray-100 active:scale-95"
                   title="Voice input"
                   aria-label="Voice input"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   <span className="text-lg">🎤</span>
                 </button>
@@ -502,7 +515,8 @@ const TaskManager = () => {
             <div className="flex flex-col w-full sm:w-auto">
               <label
                 htmlFor="task-due-date"
-                className="text-sm font-medium text-gray-700 mb-1 text-left block"
+                className="text-sm font-medium mb-2 text-left block"
+                style={{ color: 'var(--color-text-secondary)' }}
               >
                 Due Date
               </label>
@@ -512,43 +526,50 @@ const TaskManager = () => {
                 type="date"
                 value={taskDate}
                 onChange={e => setTaskDate(e.target.value)}
-                className="finbot-input sm:w-40"
+                className="modern-input sm:w-40"
                 required
               />
             </div>
             <div className="flex flex-col w-full sm:w-auto justify-end mt-3 sm:mt-0">
-              <button
+              <ModernButton
                 type="submit"
+                variant="primary"
                 data-cy={editingTodo ? 'task-update-button' : 'task-add-button'}
-                className="finbot-button-primary w-full sm:w-auto flex items-center justify-center"
+                className="w-full sm:w-auto"
+                icon={editingTodo ? '✏️' : '📝'}
+                onClick={() => buttonPress()}
               >
-                <span className="mr-2">{editingTodo ? '✏️' : '📝'}</span>
                 {editingTodo ? 'Update' : 'Add Task'}
-              </button>
+              </ModernButton>
               {editingTodo && (
-                <button
+                <ModernButton
                   type="button"
+                  variant="secondary"
                   onClick={() => {
+                    buttonPress();
                     setEditingTodo(null);
                     setNewTask('');
                     setTaskDate(getTodayDateString());
                   }}
-                  className="finbot-button-secondary w-full sm:w-auto mt-3"
+                  className="w-full sm:w-auto mt-3"
                 >
                   Cancel
-                </button>
+                </ModernButton>
               )}
             </div>
           </div>
-          <p className="text-xs text-gray-600 mt-3 flex items-center">
+          <p
+            className="text-xs mt-4 flex items-center"
+            style={{ color: 'var(--color-text-tertiary)' }}
+          >
             <span className="mr-2">💡</span>
             <span>
-              Use natural language or ask <strong className="text-purple-600">FinBot 🤖</strong> for
-              voice input
+              Use natural language or ask{' '}
+              <strong style={{ color: 'var(--color-primary)' }}>FinBot 🤖</strong> for voice input
             </span>
           </p>
         </form>
-      </div>
+      </ModernCard>
 
       {/* Progress Bar */}
       <TodoProgressBar todos={todos} />
