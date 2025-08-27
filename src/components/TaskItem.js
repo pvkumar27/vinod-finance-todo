@@ -82,16 +82,16 @@ const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete, onSta
       </div>
 
       {/* Actions - Smaller buttons for iPhone 16 Pro Max */}
-      <div className="flex flex-row items-center flex-shrink-0 ml-auto mr-0 space-x-1">
+      <div className="flex flex-row items-center flex-shrink-0 ml-auto mr-0 space-x-0.5 sm:space-x-1">
         {onStartPomodoro && !task.completed && (
           <button
             type="button"
             onClick={() => onStartPomodoro(task)}
-            className="w-8 h-8 flex items-center justify-center text-red-500 hover:text-red-600 transition-colors touch-manipulation"
+            className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-red-500 hover:text-red-600 transition-colors touch-manipulation"
             title="Start Pomodoro session"
             style={{ WebkitTapHighlightColor: 'transparent' }}
           >
-            <span className="text-sm">🍅</span>
+            <span className="text-xs sm:text-sm">🍅</span>
           </button>
         )}
         <button

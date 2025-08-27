@@ -125,12 +125,99 @@ const TaskManager = () => {
   const handleToggleComplete = async (id, completed) => {
     try {
       await api.updateTodo(id, { completed: !completed });
-      setMessage('✅ Task updated!');
+
+      if (!completed) {
+        // Task completed - play celebration sound and show animation
+        playTaskCompleteSound();
+        showTaskCompleteAnimation();
+        setMessage('🎉 Task completed! Great job!');
+      } else {
+        setMessage('✅ Task updated!');
+      }
+
       setTimeout(() => setMessage(''), 4000);
       loadTodos();
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
       setTimeout(() => setMessage(''), 4000);
+    }
+  };
+
+  const playTaskCompleteSound = () => {
+    try {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+      // Success sound - ascending notes
+      const notes = [261, 329, 392, 523]; // C4, E4, G4, C5
+
+      notes.forEach((freq, index) => {
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+        oscillator.type = 'sine';
+
+        const startTime = audioContext.currentTime + index * 0.1;
+        gainNode.gain.setValueAtTime(0, startTime);
+        gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.3);
+
+        oscillator.start(startTime);
+        oscillator.stop(startTime + 0.3);
+      });
+    } catch (error) {
+      console.log('Audio not supported:', error);
+    }
+  };
+
+  const showTaskCompleteAnimation = () => {
+    // Create confetti animation
+    const colors = ['🎉', '✨', '🎆', '🎈'];
+
+    for (let i = 0; i < 8; i++) {
+      setTimeout(() => {
+        const confetti = document.createElement('div');
+        confetti.innerHTML = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.cssText = `
+          position: fixed;
+          top: 20%;
+          left: ${Math.random() * 100}%;
+          font-size: 24px;
+          pointer-events: none;
+          z-index: 9999;
+          animation: confetti-fall 2s ease-out forwards;
+        `;
+
+        document.body.appendChild(confetti);
+
+        setTimeout(() => {
+          if (confetti.parentNode) {
+            confetti.parentNode.removeChild(confetti);
+          }
+        }, 2000);
+      }, i * 100);
+    }
+
+    // Add CSS animation if not exists
+    if (!document.getElementById('confetti-style')) {
+      const style = document.createElement('style');
+      style.id = 'confetti-style';
+      style.textContent = `
+        @keyframes confetti-fall {
+          0% {
+            transform: translateY(-100px) rotate(0deg);
+            opacity: 1;
+          }
+          100% {
+            transform: translateY(100vh) rotate(360deg);
+            opacity: 0;
+          }
+        }
+      `;
+      document.head.appendChild(style);
     }
   };
 
@@ -173,11 +260,12 @@ const TaskManager = () => {
 
   const handlePomodoroTaskComplete = async taskId => {
     try {
-      await api.updateTodo(taskId, { completed: true });
-      setMessage('✅ Task completed via Pomodoro! 🍅');
-      setTimeout(() => setMessage(''), 4000);
+      // Use handleToggleComplete to trigger celebration animation
+      const task = todos.find(t => t.id === taskId);
+      if (task) {
+        await handleToggleComplete(taskId, task.completed);
+      }
       setSelectedPomodoroTask(null);
-      loadTodos();
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
       setTimeout(() => setMessage(''), 4000);
@@ -434,7 +522,7 @@ const TaskManager = () => {
                 data-cy={editingTodo ? 'task-update-button' : 'task-add-button'}
                 className="finbot-button-primary w-full sm:w-auto flex items-center justify-center"
               >
-                <span className="mr-2">{editingTodo ? '✏️' : '➕'}</span>
+                <span className="mr-2">{editingTodo ? '✏️' : '📝'}</span>
                 {editingTodo ? 'Update' : 'Add Task'}
               </button>
               {editingTodo && (
@@ -630,8 +718,8 @@ const TaskManager = () => {
 
       {/* Pomodoro Modal */}
       {selectedPomodoroTask && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="max-w-md w-full">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2 sm:p-4">
+          <div className="w-full max-w-sm sm:max-w-md max-h-[90vh] overflow-y-auto">
             <TaskPomodoroIntegration
               task={selectedPomodoroTask}
               onTaskComplete={handlePomodoroTaskComplete}

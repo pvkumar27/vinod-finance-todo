@@ -35,6 +35,14 @@ const TaskPomodoroIntegration = ({ task, onTaskComplete, onClose }) => {
     if (isEarlyCompletion && onTaskComplete) {
       onTaskComplete(completedTask.id);
       setShowTimer(false);
+
+      // Show success message for early completion
+      if (window.Notification && Notification.permission === 'granted') {
+        new Notification('Task Completed Early! ✅', {
+          body: `Great efficiency! Task completed ahead of schedule 🚀`,
+          icon: '/icons/official-logo.png',
+        });
+      }
       return;
     }
 

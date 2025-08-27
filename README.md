@@ -207,6 +207,7 @@ FinTask includes an AI-powered assistant that provides intelligent insights and 
 - **Todo Management**: Add and manage tasks through conversation
 - **Credit Card Analysis**: Get insights on utilization, inactivity, and promo expirations
 - **Proactive Alerts**: AI surfaces issues before you ask
+- **🍅 Pomodoro Timer**: Built-in focus sessions with task integration
 
 ### ❌ **Removed Features**
 - **Expense Tracking**: Manual expense entry removed in v3.0+
@@ -243,9 +244,60 @@ npm start
   - _"Add a todo to pay rent next month"_
   - _"Analyze my spending this quarter"_
 
+## 🍅 Pomodoro Timer Integration
+
+FinTask includes a built-in Pomodoro timer for enhanced productivity and focus sessions.
+
+### Features
+- **25-minute focus sessions** with automatic break cycles
+- **Task integration** - Start Pomodoro directly from any todo
+- **Visual progress ring** with real-time countdown
+- **Authentic timer sounds** - Realistic ticking and completion chimes
+- **Early completion** - Mark tasks done before 25 minutes
+- **Skip breaks** - Jump back to work when ready
+- **Mobile wake lock** - Keeps screen on during sessions
+- **Celebration effects** - Confetti animation and success sounds
+
+### How to Use
+1. **Start Session**: Click the 🍅 button next to any todo
+2. **Focus Time**: 25-minute timer with optional ticking sound
+3. **Break Time**: Automatic 5-minute (short) or 15-minute (long) breaks
+4. **Early Completion**: Click "Done Early" if task finishes before timer
+5. **Skip Breaks**: Use "Skip Break" to return to work immediately
+
+### Timer Controls
+- **▶️ Start/Pause**: Control timer playback
+- **✅ Done Early**: Complete task before 25 minutes
+- **⏭️ Skip Break**: Jump back to work session
+- **🔄 Reset**: Restart current session
+- **🔊 Mute/Unmute**: Toggle ticking sound
+
+### Pomodoro Cycles
+- **Work**: 25 minutes focus time
+- **Short Break**: 5 minutes (after 1st, 2nd, 3rd pomodoro)
+- **Long Break**: 15 minutes (after 4th pomodoro)
+- **Auto-switching**: Seamless transitions between work and breaks
+
+### Mobile Optimization
+- **Responsive design** - Works perfectly on all screen sizes
+- **Touch-friendly controls** - Large buttons for mobile use
+- **Screen wake lock** - Prevents phone from sleeping during sessions
+- **Mobile audio support** - Ticking and completion sounds work on mobile
+
+### Productivity Features
+- **Task completion tracking** - See daily pomodoro count
+- **Focus time display** - Shows actual time spent on tasks
+- **Celebration animations** - Confetti and success sounds for completed tasks
+- **Progress visualization** - Real-time progress ring and statistics
+
 ### MCP Server Architecture
 ```
 AI Assistant (React) → MCP Client → MCP Server → Supabase Database
+```
+
+### Pomodoro Architecture
+```
+TaskManager → TaskPomodoroIntegration → PomodoroTimer → Audio/Visual Effects
 ```
 
 ## 🔔 Daily Notifications
