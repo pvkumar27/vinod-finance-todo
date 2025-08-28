@@ -459,15 +459,13 @@ const TaskManager = () => {
       </AppleWalletCard>
 
       {message && (
-        <div
-          className={`p-4 rounded-xl mb-6 border ${
-            message.includes('❌')
-              ? 'bg-red-500/20 border-red-500/50 text-red-400'
-              : 'bg-green-500/20 border-green-500/50 text-green-400'
+        <AppleWalletCard
+          className={`mb-6 aw-fade-in ${
+            message.includes('❌') ? 'aw-badge-error' : 'aw-badge-success'
           }`}
         >
-          {message}
-        </div>
+          <div className="aw-text-body font-medium">{message}</div>
+        </AppleWalletCard>
       )}
 
       {/* Add Todo Form */}
@@ -563,14 +561,17 @@ const TaskManager = () => {
 
       {/* Tasks */}
       <div className="mb-8">
-        <h3 className="finbot-heading-lg finbot-responsive-text mb-6 mt-8">
-          <span className="hidden sm:inline">
-            Tasks ({pendingTodos.length} pending, {todos.filter(t => t.completed).length} completed)
-          </span>
-          <span className="sm:hidden">
-            Tasks {pendingTodos.length} pending • {todos.filter(t => t.completed).length} done
-          </span>
-        </h3>
+        <div className="mb-6">
+          <h3 className="aw-heading-lg mb-2">
+            <span className="hidden sm:inline">
+              Tasks ({pendingTodos.length} pending, {todos.filter(t => t.completed).length}{' '}
+              completed)
+            </span>
+            <span className="sm:hidden">
+              Tasks {pendingTodos.length} pending • {todos.filter(t => t.completed).length} done
+            </span>
+          </h3>
+        </div>
 
         {pendingTodos.length === 0 ? (
           <div className="text-center py-12">
@@ -589,8 +590,8 @@ const TaskManager = () => {
             >
               {/* Pinned Tasks Section */}
               {pinnedTodos.length > 0 && (
-                <div className="mb-6">
-                  <h4 className="finbot-heading-md mb-4 flex items-center">
+                <AppleWalletCard className="mb-6 aw-slide-in" elevated>
+                  <h4 className="aw-heading-md mb-4 flex items-center">
                     <span className="mr-3">📌</span>
                     Pinned Tasks
                   </h4>
@@ -602,12 +603,12 @@ const TaskManager = () => {
                     onDelete={handleDelete}
                     onStartPomodoro={handleStartPomodoro}
                   />
-                </div>
+                </AppleWalletCard>
               )}
 
-              {/* Unpinned Tasks Section - No heading */}
+              {/* Unpinned Tasks Section */}
               {unpinnedTodos.length > 0 && (
-                <div className={pinnedTodos.length > 0 ? 'mt-8' : ''}>
+                <div className={pinnedTodos.length > 0 ? 'mt-6' : ''}>
                   <TaskList
                     tasks={unpinnedTodos}
                     onToggleComplete={handleToggleComplete}
@@ -653,16 +654,18 @@ const TaskManager = () => {
 
       {/* Completed Tasks - Collapsible */}
       {todos.filter(t => t.completed).length > 0 && (
-        <div>
-          <button
+        <AppleWalletCard className="aw-fade-in">
+          <AppleWalletButton
+            variant="ghost"
             onClick={() => setShowCompleted(!showCompleted)}
-            className="finbot-card flex items-center justify-between w-full p-3 hover:transform hover:scale-[1.02] transition-all duration-300 mb-4"
+            className="w-full justify-between p-0 min-h-0 h-auto"
           >
-            <h3 className="finbot-heading-md">
+            <h3 className="aw-heading-md">
               ✅ Completed ({todos.filter(t => t.completed).length})
             </h3>
             <svg
-              className={`w-6 h-6 text-gray-600 transition-transform ${showCompleted ? 'rotate-180' : ''}`}
+              className={`w-6 h-6 transition-transform ${showCompleted ? 'rotate-180' : ''}`}
+              style={{ color: 'var(--aw-text-tertiary)' }}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -674,54 +677,49 @@ const TaskManager = () => {
                 d="M19 9l-7 7-7-7"
               />
             </svg>
-          </button>
+          </AppleWalletButton>
 
           {showCompleted && (
-            <div className="space-y-2">
+            <div className="mt-4 space-y-2">
               {todos
                 .filter(t => t.completed)
-                .map(todo => (
+                .map((todo, index) => (
                   <div
                     key={todo.id}
-                    className="finbot-card flex items-center justify-between p-3 bg-green-500/5 border-green-500/20"
+                    className="aw-slide-in flex items-center justify-between p-3 rounded-lg"
+                    style={{
+                      background: 'var(--aw-surface-secondary)',
+                      animationDelay: `${index * 50}ms`,
+                    }}
                   >
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-3">
                       <input
                         type="checkbox"
                         checked={true}
                         onChange={() => handleToggleComplete(todo.id, todo.completed)}
-                        className="w-3 h-3 text-green-500 rounded"
+                        className="w-4 h-4 rounded"
+                        style={{ accentColor: 'var(--aw-secondary)' }}
                       />
-                      <div className="flex flex-col sm:flex-row sm:items-center">
-                        <span className="line-through text-gray-500 text-sm">{todo.task}</span>
-                        <span className="text-xs text-gray-400 sm:ml-2">
-                          {formatDateString(todo.updated_at)}
-                        </span>
+                      <div>
+                        <div className="aw-text-body line-through opacity-70">{todo.task}</div>
+                        <div className="aw-text-caption">
+                          Completed: {formatDateString(todo.updated_at)}
+                        </div>
                       </div>
                     </div>
-                    <button
+                    <AppleWalletButton
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handleDelete(todo.id)}
-                      className="text-red-400 hover:text-red-300 hover:bg-red-500/20 p-2 rounded-lg transition-all duration-200"
+                      className="w-8 h-8 p-0 min-h-0 text-red-500"
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </button>
+                      🗑️
+                    </AppleWalletButton>
                   </div>
                 ))}
             </div>
           )}
-        </div>
+        </AppleWalletCard>
       )}
 
       {/* Pomodoro Modal */}
