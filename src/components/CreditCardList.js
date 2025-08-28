@@ -556,29 +556,37 @@ const CreditCardList = () => {
   }
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-6 p-4">
       {/* Header */}
-      <div className="flex flex-col items-start justify-between gap-3 mb-4 sm:flex-row sm:items-center">
-        <div>
-          <h2
-            data-cy="credit-cards-heading"
-            className="flex items-center mb-1 finbot-heading-xl finbot-responsive-heading"
-          >
-            <span className="mr-2 text-2xl">💳</span> Credit Cards
-          </h2>
-          <p className="finbot-responsive-text text-[#8B4513]">{sortedCards.length} cards total</p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button
-            data-cy="card-add-button"
-            onClick={handleAddCard}
-            className="finbot-button-primary text-sm px-3 py-2"
-          >
-            Add Card
-          </button>
-          <button onClick={fetchCards} className="finbot-button-secondary text-sm px-3 py-2">
-            🔄 Refresh
-          </button>
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
+        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
+          <div>
+            <h2
+              data-cy="credit-cards-heading"
+              className="text-2xl sm:text-3xl font-bold flex items-center text-gray-900"
+            >
+              <span className="mr-3 text-2xl">💳</span>
+              Credit Cards
+            </h2>
+            <p className="mt-2 text-sm text-gray-600">{sortedCards.length} cards in your wallet</p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <button
+              data-cy="card-add-button"
+              onClick={handleAddCard}
+              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold px-4 py-2 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 active:scale-95 flex items-center gap-2"
+            >
+              <span>💳</span>
+              Add Card
+            </button>
+            <button
+              onClick={fetchCards}
+              className="bg-white text-gray-800 font-semibold px-4 py-2 rounded-xl border border-gray-300 shadow-md hover:bg-gray-50 hover:shadow-lg transition-all duration-200 active:scale-95 flex items-center gap-2"
+            >
+              <span>🔄</span>
+              Refresh
+            </button>
+          </div>
         </div>
       </div>
 
@@ -596,11 +604,13 @@ const CreditCardList = () => {
       )}
 
       {/* Tabs */}
-      <div className="flex flex-wrap gap-1 p-1 mb-4 finbot-card">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-2 flex flex-wrap gap-1">
         <button
           onClick={() => setActiveTab('all')}
-          className={`finbot-tab px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium ${
-            activeTab === 'all' ? 'active' : ''
+          className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-xl transition-all duration-200 ${
+            activeTab === 'all'
+              ? 'bg-blue-100 text-blue-700 shadow-md'
+              : 'text-gray-600 hover:bg-gray-100'
           }`}
         >
           <span className="hidden sm:inline">All Cards</span>
@@ -608,8 +618,10 @@ const CreditCardList = () => {
         </button>
         <button
           onClick={() => setActiveTab('promo')}
-          className={`finbot-tab px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium ${
-            activeTab === 'promo' ? 'active' : ''
+          className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-xl transition-all duration-200 ${
+            activeTab === 'promo'
+              ? 'bg-orange-100 text-orange-700 shadow-md'
+              : 'text-gray-600 hover:bg-gray-100'
           }`}
         >
           <span className="hidden sm:inline">⏳ Promo Expiring</span>
@@ -618,8 +630,10 @@ const CreditCardList = () => {
         </button>
         <button
           onClick={() => setActiveTab('inactive')}
-          className={`finbot-tab px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium ${
-            activeTab === 'inactive' ? 'active' : ''
+          className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-xl transition-all duration-200 ${
+            activeTab === 'inactive'
+              ? 'bg-red-100 text-red-700 shadow-md'
+              : 'text-gray-600 hover:bg-gray-100'
           }`}
         >
           ⚠️ Inactive (
@@ -637,7 +651,7 @@ const CreditCardList = () => {
               placeholder="Search by card name..."
               value={searchTerm}
               onChange={e => setSearchTerm(e.target.value)}
-              className="w-full pl-3 pr-10 finbot-input"
+              className="w-full px-4 py-3 pr-10 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
             />
             <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
               <span className="text-[#8B4513]/60">🔍</span>
@@ -648,7 +662,7 @@ const CreditCardList = () => {
           <select
             value={sortBy}
             onChange={e => setSortBy(e.target.value)}
-            className="finbot-input h-12"
+            className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
           >
             <option value="card_name">Sort by Card Name</option>
             <option value="days_inactive">Sort by Days Inactive</option>
@@ -656,12 +670,14 @@ const CreditCardList = () => {
             <option value="last_used_newest">Last Used (Newest First)</option>
             <option value="last_used_oldest">Last Used (Oldest First)</option>
           </select>
-          <div className="flex p-1 finbot-card h-12">
+          <div className="flex bg-gray-100 rounded-xl p-1">
             <button
               data-cy="view-cards-button"
               onClick={() => handleViewModeChange('cards')}
-              className={`finbot-tab px-4 py-2 text-sm font-medium ${
-                viewMode === 'cards' ? 'active' : ''
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                viewMode === 'cards'
+                  ? 'bg-white text-blue-600 shadow-md'
+                  : 'text-gray-600 hover:text-blue-600'
               }`}
             >
               📋 Cards
@@ -669,8 +685,10 @@ const CreditCardList = () => {
             <button
               data-cy="view-table-button"
               onClick={() => handleViewModeChange('table')}
-              className={`finbot-tab px-4 py-2 text-sm font-medium ${
-                viewMode === 'table' ? 'active' : ''
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 ${
+                viewMode === 'table'
+                  ? 'bg-white text-blue-600 shadow-md'
+                  : 'text-gray-600 hover:text-blue-600'
               }`}
             >
               📊 Table

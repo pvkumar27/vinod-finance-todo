@@ -431,7 +431,7 @@ const MainApp = () => {
         );
       case 'todos':
         return (
-          <div className="h-full fin-gradient-bg">
+          <div className="h-full bg-gray-50">
             <TopBar />
             <div className="p-4" style={{ height: 'calc(100vh - 140px)' }}>
               <TabNavigation activeTab="todos" />
@@ -440,7 +440,7 @@ const MainApp = () => {
         );
       case 'cards':
         return (
-          <div className="h-full overflow-auto fin-gradient-bg">
+          <div className="h-full overflow-auto bg-gray-50">
             <TopBar />
             <div className="p-4">
               <TabNavigation activeTab="cards" />
@@ -449,7 +449,7 @@ const MainApp = () => {
         );
       case 'insights':
         return (
-          <div className="h-full overflow-auto fin-gradient-bg">
+          <div className="h-full overflow-auto bg-gray-50">
             <TopBar />
             <div className="p-4">
               <TabNavigation activeTab="insights" />
@@ -477,7 +477,7 @@ const MainApp = () => {
 
   return (
     <div
-      className="min-h-screen flex flex-col fin-gradient-bg"
+      className="min-h-screen flex flex-col bg-gray-50"
       style={{
         paddingTop: 'env(safe-area-inset-top)',
         paddingBottom: 'env(safe-area-inset-bottom)',
