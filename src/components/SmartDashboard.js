@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
+import AppleWalletCard from './ui/AppleWalletCard';
+import AppleWalletButton from './ui/AppleWalletButton';
 
 const SmartDashboard = ({ onQueryGenerated }) => {
   const [loading, setLoading] = useState(true);
@@ -116,21 +118,20 @@ const SmartDashboard = ({ onQueryGenerated }) => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#632D1F]"></div>
-        <span className="ml-2 text-[#8B4513]">Loading insights...</span>
-      </div>
+      <AppleWalletCard className="text-center py-12 aw-fade-in">
+        <div className="aw-loading mx-auto mb-4"></div>
+        <p className="aw-text-body">Loading insights...</p>
+      </AppleWalletCard>
     );
   }
 
   if (!insights) {
     return (
-      <div className="finbot-card p-6 text-center">
+      <AppleWalletCard className="text-center aw-fade-in">
         <div className="text-4xl mb-4">📊</div>
-        <p className="text-[#8B4513]">
-          No data available. Add some tasks or credit cards to see insights.
-        </p>
-      </div>
+        <h3 className="aw-heading-md mb-2">No Data Available</h3>
+        <p className="aw-text-body">Add some tasks or credit cards to see insights.</p>
+      </AppleWalletCard>
     );
   }
 
