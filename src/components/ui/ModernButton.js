@@ -11,15 +11,21 @@ const ModernButton = ({
   onClick,
   ...props
 }) => {
-  const baseClasses = 'modern-button';
+  const baseClasses =
+    'font-semibold rounded-xl border-0 cursor-pointer transition-all duration-200 inline-flex items-center justify-center gap-2 select-none active:scale-95';
 
   const variantClasses = {
-    primary: 'modern-button-primary',
-    secondary: 'modern-button-secondary',
-    ghost: 'modern-button-ghost',
-    success: 'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-sm hover:shadow-md',
-    warning: 'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-sm hover:shadow-md',
-    error: 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-sm hover:shadow-md',
+    primary:
+      'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5',
+    secondary:
+      'bg-white text-gray-800 border border-gray-300 shadow-md hover:bg-gray-50 hover:shadow-lg',
+    ghost: 'bg-transparent text-blue-600 border border-transparent hover:bg-blue-50',
+    success:
+      'bg-gradient-to-r from-green-500 to-green-600 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5',
+    warning:
+      'bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5',
+    error:
+      'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5',
   };
 
   const sizeClasses = {

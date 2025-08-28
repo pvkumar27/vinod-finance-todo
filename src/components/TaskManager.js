@@ -450,19 +450,18 @@ const TaskManager = () => {
 
   return (
     <div className="p-6">
-      <ModernCard className="mb-6 fade-in" padding="default">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-6 hover:shadow-xl transition-all duration-200">
         <h2
           data-cy="todo-manager-heading"
-          className="text-2xl sm:text-3xl font-bold flex items-center"
-          style={{ color: 'var(--color-text-primary)' }}
+          className="text-2xl sm:text-3xl font-bold flex items-center text-gray-900"
         >
           <span className="mr-3 text-2xl">📝</span>
           To-Do Manager
         </h2>
-        <p className="mt-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+        <p className="mt-2 text-sm text-gray-600">
           Organize your tasks with AI-powered productivity
         </p>
-      </ModernCard>
+      </div>
 
       {message && (
         <div
@@ -477,14 +476,13 @@ const TaskManager = () => {
       )}
 
       {/* Add Todo Form */}
-      <ModernCard className="mb-6 slide-in">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-6 hover:shadow-xl transition-all duration-200">
         <form onSubmit={handleAddTodo}>
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
               <label
                 htmlFor="task-input"
-                className="text-sm font-medium mb-2 block text-left"
-                style={{ color: 'var(--color-text-secondary)' }}
+                className="text-sm font-medium mb-2 block text-left text-gray-700"
               >
                 Task
               </label>
@@ -496,7 +494,7 @@ const TaskManager = () => {
                   placeholder={editingTodo ? 'Edit task...' : 'What needs to be done?'}
                   value={newTask}
                   onChange={e => setNewTask(e.target.value)}
-                  className="modern-input pr-12"
+                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
                 />
                 <button
                   type="button"
@@ -515,8 +513,7 @@ const TaskManager = () => {
             <div className="flex flex-col w-full sm:w-auto">
               <label
                 htmlFor="task-due-date"
-                className="text-sm font-medium mb-2 text-left block"
-                style={{ color: 'var(--color-text-secondary)' }}
+                className="text-sm font-medium mb-2 text-left block text-gray-700"
               >
                 Due Date
               </label>
@@ -526,50 +523,45 @@ const TaskManager = () => {
                 type="date"
                 value={taskDate}
                 onChange={e => setTaskDate(e.target.value)}
-                className="modern-input sm:w-40"
+                className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white sm:w-40"
                 required
               />
             </div>
             <div className="flex flex-col w-full sm:w-auto justify-end mt-3 sm:mt-0">
-              <ModernButton
+              <button
                 type="submit"
-                variant="primary"
                 data-cy={editingTodo ? 'task-update-button' : 'task-add-button'}
-                className="w-full sm:w-auto"
-                icon={editingTodo ? '✏️' : '📝'}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 w-full sm:w-auto"
                 onClick={() => buttonPress()}
               >
+                <span>{editingTodo ? '✏️' : '📝'}</span>
                 {editingTodo ? 'Update' : 'Add Task'}
-              </ModernButton>
+              </button>
               {editingTodo && (
-                <ModernButton
+                <button
                   type="button"
-                  variant="secondary"
                   onClick={() => {
                     buttonPress();
                     setEditingTodo(null);
                     setNewTask('');
                     setTaskDate(getTodayDateString());
                   }}
-                  className="w-full sm:w-auto mt-3"
+                  className="bg-white text-gray-800 font-semibold px-6 py-3 rounded-xl border border-gray-300 shadow-md hover:bg-gray-50 hover:shadow-lg transition-all duration-200 active:scale-95 w-full sm:w-auto mt-3"
                 >
                   Cancel
-                </ModernButton>
+                </button>
               )}
             </div>
           </div>
-          <p
-            className="text-xs mt-4 flex items-center"
-            style={{ color: 'var(--color-text-tertiary)' }}
-          >
+          <p className="text-xs mt-4 flex items-center text-gray-500">
             <span className="mr-2">💡</span>
             <span>
-              Use natural language or ask{' '}
-              <strong style={{ color: 'var(--color-primary)' }}>FinBot 🤖</strong> for voice input
+              Use natural language or ask <strong className="text-blue-600">FinBot 🤖</strong> for
+              voice input
             </span>
           </p>
         </form>
-      </ModernCard>
+      </div>
 
       {/* Progress Bar */}
       <TodoProgressBar todos={todos} />

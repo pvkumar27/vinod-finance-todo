@@ -17,16 +17,17 @@ const ModernCard = ({
   };
 
   const variantClasses = {
-    default: 'modern-card',
-    elevated: 'modern-card shadow-xl',
+    default: 'bg-white border border-gray-200 rounded-2xl shadow-lg',
+    elevated: 'bg-white border border-gray-200 rounded-2xl shadow-2xl',
     flat: 'bg-white border border-gray-200 rounded-2xl',
-    gradient: 'modern-card bg-gradient-to-br from-white to-gray-50',
+    gradient:
+      'bg-gradient-to-br from-white to-gray-50 border border-gray-200 rounded-2xl shadow-lg',
   };
 
   const baseClasses = `
     ${variantClasses[variant]}
     ${paddingClasses[padding]}
-    ${hover ? 'hover:transform hover:-translate-y-1 hover:shadow-lg' : ''}
+    ${hover ? 'hover:transform hover:-translate-y-1 hover:shadow-xl transition-all duration-200' : ''}
     ${onClick ? 'cursor-pointer' : ''}
     ${className}
   `
