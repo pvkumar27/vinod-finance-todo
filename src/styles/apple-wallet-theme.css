@@ -1,0 +1,497 @@
+/* Apple Wallet-Inspired Design System */
+
+:root {
+  /* Apple Wallet Color Palette */
+  --aw-primary: #007AFF;
+  --aw-primary-light: #5AC8FA;
+  --aw-primary-dark: #0051D5;
+  
+  --aw-secondary: #34C759;
+  --aw-secondary-light: #30D158;
+  
+  --aw-accent: #FF9500;
+  --aw-accent-light: #FFCC02;
+  
+  --aw-error: #FF3B30;
+  --aw-warning: #FFCC02;
+  
+  /* Neutral Palette */
+  --aw-background: #F2F2F7;
+  --aw-surface: #FFFFFF;
+  --aw-surface-elevated: #FEFEFE;
+  --aw-surface-secondary: #F9F9FB;
+  
+  --aw-text-primary: #1C1C1E;
+  --aw-text-secondary: #3A3A3C;
+  --aw-text-tertiary: #8E8E93;
+  --aw-text-quaternary: #C7C7CC;
+  
+  --aw-border: #E5E5EA;
+  --aw-border-secondary: #D1D1D6;
+  --aw-separator: #C6C6C8;
+  
+  /* Gradients */
+  --aw-gradient-primary: linear-gradient(135deg, var(--aw-primary) 0%, var(--aw-primary-light) 100%);
+  --aw-gradient-secondary: linear-gradient(135deg, var(--aw-secondary) 0%, var(--aw-secondary-light) 100%);
+  --aw-gradient-accent: linear-gradient(135deg, var(--aw-accent) 0%, var(--aw-accent-light) 100%);
+  --aw-gradient-surface: linear-gradient(145deg, #FFFFFF 0%, #F8F9FA 100%);
+  
+  /* Shadows - Apple Wallet Style */
+  --aw-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --aw-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.05), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --aw-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.08), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --aw-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
+  --aw-shadow-card: 0 2px 8px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --aw-shadow-floating: 0 8px 30px rgba(0, 0, 0, 0.12), 0 4px 8px rgba(0, 0, 0, 0.08);
+  
+  /* Border Radius */
+  --aw-radius-sm: 8px;
+  --aw-radius-md: 12px;
+  --aw-radius-lg: 16px;
+  --aw-radius-xl: 20px;
+  --aw-radius-2xl: 24px;
+  --aw-radius-card: 16px;
+  
+  /* Spacing */
+  --aw-space-xs: 4px;
+  --aw-space-sm: 8px;
+  --aw-space-md: 12px;
+  --aw-space-lg: 16px;
+  --aw-space-xl: 20px;
+  --aw-space-2xl: 24px;
+  --aw-space-3xl: 32px;
+  --aw-space-4xl: 40px;
+  
+  /* Typography */
+  --aw-font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', 'Roboto', 'Helvetica Neue', Arial, sans-serif;
+  --aw-font-weight-regular: 400;
+  --aw-font-weight-medium: 500;
+  --aw-font-weight-semibold: 600;
+  --aw-font-weight-bold: 700;
+  
+  /* Transitions */
+  --aw-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --aw-transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --aw-transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+  --aw-transition-bounce: 400ms cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Global Styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--aw-font-family);
+  background: var(--aw-background);
+  color: var(--aw-text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  margin: 0;
+  padding: 0;
+}
+
+/* Apple Wallet Card Component */
+.aw-card {
+  background: var(--aw-gradient-surface);
+  border-radius: var(--aw-radius-card);
+  box-shadow: var(--aw-shadow-card);
+  border: 1px solid var(--aw-border);
+  padding: var(--aw-space-2xl);
+  transition: all var(--aw-transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.aw-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.8), transparent);
+  pointer-events: none;
+}
+
+.aw-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--aw-shadow-lg);
+}
+
+.aw-card-elevated {
+  background: var(--aw-surface-elevated);
+  box-shadow: var(--aw-shadow-floating);
+}
+
+.aw-card-interactive {
+  cursor: pointer;
+  transition: all var(--aw-transition-fast);
+}
+
+.aw-card-interactive:active {
+  transform: scale(0.98);
+}
+
+/* Apple Wallet Button System */
+.aw-button {
+  font-family: var(--aw-font-family);
+  font-weight: var(--aw-font-weight-semibold);
+  font-size: 16px;
+  border-radius: var(--aw-radius-md);
+  border: none;
+  padding: var(--aw-space-md) var(--aw-space-2xl);
+  cursor: pointer;
+  transition: all var(--aw-transition-fast);
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--aw-space-sm);
+  text-decoration: none;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 44px; /* iOS touch target */
+}
+
+.aw-button:active {
+  transform: scale(0.96);
+}
+
+.aw-button-primary {
+  background: var(--aw-gradient-primary);
+  color: white;
+  box-shadow: var(--aw-shadow-sm);
+}
+
+.aw-button-primary:hover {
+  box-shadow: var(--aw-shadow-md);
+  transform: translateY(-1px);
+}
+
+.aw-button-secondary {
+  background: var(--aw-surface);
+  color: var(--aw-text-primary);
+  border: 1px solid var(--aw-border);
+  box-shadow: var(--aw-shadow-sm);
+}
+
+.aw-button-secondary:hover {
+  background: var(--aw-surface-secondary);
+  border-color: var(--aw-border-secondary);
+}
+
+.aw-button-ghost {
+  background: transparent;
+  color: var(--aw-primary);
+  border: 1px solid transparent;
+}
+
+.aw-button-ghost:hover {
+  background: rgba(0, 122, 255, 0.08);
+  border-color: var(--aw-primary);
+}
+
+.aw-button-success {
+  background: var(--aw-gradient-secondary);
+  color: white;
+  box-shadow: var(--aw-shadow-sm);
+}
+
+.aw-button-warning {
+  background: var(--aw-gradient-accent);
+  color: white;
+  box-shadow: var(--aw-shadow-sm);
+}
+
+.aw-button-error {
+  background: linear-gradient(135deg, var(--aw-error) 0%, #D70015 100%);
+  color: white;
+  box-shadow: var(--aw-shadow-sm);
+}
+
+/* Apple Wallet Input System */
+.aw-input {
+  font-family: var(--aw-font-family);
+  font-size: 16px;
+  background: var(--aw-surface);
+  border: 1px solid var(--aw-border);
+  border-radius: var(--aw-radius-md);
+  padding: var(--aw-space-lg);
+  transition: all var(--aw-transition-fast);
+  width: 100%;
+  color: var(--aw-text-primary);
+  min-height: 44px; /* iOS touch target */
+}
+
+.aw-input:focus {
+  outline: none;
+  border-color: var(--aw-primary);
+  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+  background: var(--aw-surface);
+}
+
+.aw-input::placeholder {
+  color: var(--aw-text-tertiary);
+}
+
+/* Apple Wallet Typography */
+.aw-heading-xl {
+  font-size: 28px;
+  font-weight: var(--aw-font-weight-bold);
+  color: var(--aw-text-primary);
+  line-height: 1.2;
+  margin: 0;
+}
+
+.aw-heading-lg {
+  font-size: 22px;
+  font-weight: var(--aw-font-weight-semibold);
+  color: var(--aw-text-primary);
+  line-height: 1.3;
+  margin: 0;
+}
+
+.aw-heading-md {
+  font-size: 18px;
+  font-weight: var(--aw-font-weight-semibold);
+  color: var(--aw-text-primary);
+  line-height: 1.4;
+  margin: 0;
+}
+
+.aw-text-body {
+  font-size: 16px;
+  font-weight: var(--aw-font-weight-regular);
+  color: var(--aw-text-secondary);
+  line-height: 1.5;
+}
+
+.aw-text-caption {
+  font-size: 14px;
+  font-weight: var(--aw-font-weight-regular);
+  color: var(--aw-text-tertiary);
+  line-height: 1.4;
+}
+
+/* Apple Wallet Animations */
+.aw-fade-in {
+  animation: awFadeIn var(--aw-transition-normal) ease-out;
+}
+
+@keyframes awFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.aw-slide-in {
+  animation: awSlideIn var(--aw-transition-normal) ease-out;
+}
+
+@keyframes awSlideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.aw-scale-in {
+  animation: awScaleIn var(--aw-transition-bounce) ease-out;
+}
+
+@keyframes awScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.aw-card-flip {
+  animation: awCardFlip 0.6s ease-in-out;
+}
+
+@keyframes awCardFlip {
+  0% { transform: rotateY(0deg); }
+  50% { transform: rotateY(90deg); }
+  100% { transform: rotateY(0deg); }
+}
+
+/* Apple Wallet Loading */
+.aw-loading {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--aw-border);
+  border-radius: 50%;
+  border-top-color: var(--aw-primary);
+  animation: awSpin 1s ease-in-out infinite;
+}
+
+@keyframes awSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* Apple Wallet Navigation */
+.aw-nav {
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-top: 1px solid var(--aw-border);
+  box-shadow: var(--aw-shadow-lg);
+}
+
+.aw-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--aw-space-xs);
+  padding: var(--aw-space-md);
+  border-radius: var(--aw-radius-md);
+  transition: all var(--aw-transition-fast);
+  color: var(--aw-text-tertiary);
+  text-decoration: none;
+  min-height: 44px;
+  justify-content: center;
+}
+
+.aw-nav-item:hover {
+  background: rgba(0, 122, 255, 0.08);
+  color: var(--aw-primary);
+}
+
+.aw-nav-item.active {
+  background: rgba(0, 122, 255, 0.1);
+  color: var(--aw-primary);
+  transform: scale(1.05);
+}
+
+/* Apple Wallet Tabs */
+.aw-tabs {
+  display: flex;
+  background: var(--aw-surface);
+  border-radius: var(--aw-radius-md);
+  padding: var(--aw-space-xs);
+  box-shadow: var(--aw-shadow-sm);
+  border: 1px solid var(--aw-border);
+}
+
+.aw-tab {
+  flex: 1;
+  padding: var(--aw-space-md) var(--aw-space-lg);
+  border-radius: var(--aw-radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--aw-text-secondary);
+  font-weight: var(--aw-font-weight-medium);
+  transition: all var(--aw-transition-fast);
+  cursor: pointer;
+}
+
+.aw-tab:hover {
+  background: var(--aw-surface-secondary);
+  color: var(--aw-text-primary);
+}
+
+.aw-tab.active {
+  background: var(--aw-primary);
+  color: white;
+  box-shadow: var(--aw-shadow-sm);
+}
+
+/* Apple Wallet Status Indicators */
+.aw-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--aw-space-xs) var(--aw-space-md);
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: var(--aw-font-weight-semibold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.aw-badge-primary {
+  background: rgba(0, 122, 255, 0.1);
+  color: var(--aw-primary);
+}
+
+.aw-badge-success {
+  background: rgba(52, 199, 89, 0.1);
+  color: var(--aw-secondary);
+}
+
+.aw-badge-warning {
+  background: rgba(255, 149, 0, 0.1);
+  color: var(--aw-accent);
+}
+
+.aw-badge-error {
+  background: rgba(255, 59, 48, 0.1);
+  color: var(--aw-error);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .aw-card {
+    padding: var(--aw-space-lg);
+    border-radius: var(--aw-radius-lg);
+  }
+  
+  .aw-button {
+    padding: var(--aw-space-lg) var(--aw-space-xl);
+    font-size: 16px;
+  }
+  
+  .aw-heading-xl {
+    font-size: 24px;
+  }
+  
+  .aw-heading-lg {
+    font-size: 20px;
+  }
+}
+
+/* Apple Wallet Card Stack Effect */
+.aw-card-stack {
+  position: relative;
+}
+
+.aw-card-stack::before,
+.aw-card-stack::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: -4px;
+  bottom: -4px;
+  background: var(--aw-surface);
+  border-radius: var(--aw-radius-card);
+  box-shadow: var(--aw-shadow-sm);
+  z-index: -1;
+  opacity: 0.6;
+}
+
+.aw-card-stack::after {
+  top: 8px;
+  left: 8px;
+  right: -8px;
+  bottom: -8px;
+  opacity: 0.3;
+  z-index: -2;
+}

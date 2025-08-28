@@ -8,6 +8,7 @@ import './App.css';
 import './styles/globals.css';
 import './styles/finbot-theme.css';
 import './styles/design-system.css';
+import './styles/apple-wallet-theme.css';
 
 function App() {
   const [session, setSession] = useState(null);

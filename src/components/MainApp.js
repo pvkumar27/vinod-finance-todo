@@ -441,7 +441,7 @@ const MainApp = () => {
         );
       case 'cards':
         return (
-          <div className="h-full overflow-auto bg-gray-50">
+          <div className="h-full overflow-auto" style={{ background: 'var(--aw-background)' }}>
             <TopBar />
             <div className="p-4">
               <TabNavigation activeTab="cards" />
@@ -450,7 +450,7 @@ const MainApp = () => {
         );
       case 'insights':
         return (
-          <div className="h-full overflow-auto bg-gray-50">
+          <div className="h-full overflow-auto" style={{ background: 'var(--aw-background)' }}>
             <TopBar />
             <div className="p-4">
               <TabNavigation activeTab="insights" />
@@ -478,7 +478,8 @@ const MainApp = () => {
 
   return (
     <div
-      className="min-h-screen flex flex-col bg-gray-50"
+      className="min-h-screen flex flex-col"
+      style={{ background: 'var(--aw-background)' }}
       style={{
         paddingTop: 'env(safe-area-inset-top)',
         paddingBottom: 'env(safe-area-inset-bottom)',

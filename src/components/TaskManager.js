@@ -16,8 +16,8 @@ import { parseInput } from '../utils/parseInput';
 import TaskList from './TaskList';
 import TaskPomodoroIntegration from './pomodoro/TaskPomodoroIntegration';
 import TodoProgressBar from './TodoProgressBar';
-import ModernCard from './ui/ModernCard';
-import ModernButton from './ui/ModernButton';
+import AppleWalletCard from './ui/AppleWalletCard';
+import AppleWalletButton from './ui/AppleWalletButton';
 import useSoundEffects from '../hooks/useSoundEffects';
 
 const TaskManager = () => {
@@ -449,19 +449,14 @@ const TaskManager = () => {
   if (loading) return <div className="p-4 text-gray-300">Loading tasks...</div>;
 
   return (
-    <div className="p-6">
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-6 hover:shadow-xl transition-all duration-200">
-        <h2
-          data-cy="todo-manager-heading"
-          className="text-2xl sm:text-3xl font-bold flex items-center text-gray-900"
-        >
+    <div className="p-6" style={{ background: 'var(--aw-background)', minHeight: '100vh' }}>
+      <AppleWalletCard className="mb-6 aw-fade-in">
+        <h2 data-cy="todo-manager-heading" className="aw-heading-xl flex items-center">
           <span className="mr-3 text-2xl">📝</span>
           To-Do Manager
         </h2>
-        <p className="mt-2 text-sm text-gray-600">
-          Organize your tasks with AI-powered productivity
-        </p>
-      </div>
+        <p className="aw-text-body mt-2">Organize your tasks with AI-powered productivity</p>
+      </AppleWalletCard>
 
       {message && (
         <div
