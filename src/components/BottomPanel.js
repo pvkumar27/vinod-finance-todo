@@ -48,7 +48,7 @@ const BottomPanel = ({ inputValue, setInputValue, onSubmit, onVoiceInput, isLoad
     onSubmit(e);
   };
   return (
-    <div className="fin-gradient-bg border-t border-gray-200 px-4 py-3">
+    <div className="bg-white/95 backdrop-blur-xl border-t border-gray-200 px-4 py-4 shadow-2xl">
       <div className="max-w-screen-sm mx-auto">
         {/* Input field */}
         <form onSubmit={handleSubmit} className="flex items-center space-x-3">
@@ -57,8 +57,8 @@ const BottomPanel = ({ inputValue, setInputValue, onSubmit, onVoiceInput, isLoad
               type="text"
               value={inputValue}
               onChange={e => setInputValue(e.target.value)}
-              placeholder="Ask me anything"
-              className="fin-input pr-12"
+              placeholder="Ask me anything..."
+              className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-2xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white shadow-sm"
               onKeyDown={handleKeyDown}
               disabled={isLoading}
               aria-label="Ask FinBot anything"
@@ -67,10 +67,9 @@ const BottomPanel = ({ inputValue, setInputValue, onSubmit, onVoiceInput, isLoad
               type="button"
               onClick={onVoiceInput}
               disabled={isLoading}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-gray-100 active:bg-gray-200 touch-manipulation"
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-gray-100 active:scale-95"
               title="Voice input"
               aria-label="Voice input"
-              style={{ WebkitTapHighlightColor: 'transparent' }}
             >
               <span className="text-lg">🎤</span>
             </button>
@@ -78,9 +77,8 @@ const BottomPanel = ({ inputValue, setInputValue, onSubmit, onVoiceInput, isLoad
           <button
             type="submit"
             disabled={isLoading || !inputValue.trim()}
-            className="fin-button-primary px-4 py-2 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed touch-manipulation"
+            className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold px-6 py-3 rounded-2xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 active:scale-95 flex items-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
             title="Send message"
-            style={{ WebkitTapHighlightColor: 'transparent' }}
           >
             <span className="text-sm">{isLoading ? '⏳' : '🚀'}</span>
             <span className="hidden sm:inline text-sm font-medium">

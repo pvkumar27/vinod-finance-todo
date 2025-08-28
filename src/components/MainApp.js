@@ -379,7 +379,7 @@ const MainApp = () => {
       case 'chat':
         return (
           <>
-            <div className="fixed inset-0 bg-white z-30 flex flex-col">
+            <div className="fixed inset-0 bg-gray-50 z-30 flex flex-col">
               <TopBar />
               <ChatHeader
                 isCollapsed={isChatCollapsed}
@@ -393,9 +393,9 @@ const MainApp = () => {
                 }}
               />
               {!isChatCollapsed && (
-                <div className="flex-1 fin-gradient-bg transition-all duration-300 p-4 overflow-hidden pb-36">
-                  <div className="finbot-card p-4 h-full">
-                    <div className="finbot-inner p-4 h-full flex flex-col">
+                <div className="flex-1 bg-gray-50 transition-all duration-300 p-4 overflow-hidden pb-36">
+                  <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 h-full">
+                    <div className="p-4 h-full flex flex-col">
                       <ChatContainer
                         messages={messages}
                         isLoading={isLoading}
@@ -408,10 +408,11 @@ const MainApp = () => {
                 </div>
               )}
               {isChatCollapsed && (
-                <div className="flex-1 fin-gradient-bg flex items-center justify-center transition-all duration-300">
-                  <div className="text-center">
-                    <span className="text-4xl mb-2 block">👋</span>
-                    <p className="text-[#632D1F] font-medium">Chat with FinBot</p>
+                <div className="flex-1 bg-gray-50 flex items-center justify-center transition-all duration-300">
+                  <div className="text-center bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
+                    <span className="text-4xl mb-4 block">👋</span>
+                    <p className="text-gray-700 font-medium">Chat with FinBot</p>
+                    <p className="text-sm text-gray-500 mt-2">Your AI financial assistant</p>
                   </div>
                 </div>
               )}

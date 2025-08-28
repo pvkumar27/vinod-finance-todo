@@ -2,17 +2,17 @@ import SmartDashboard from './SmartDashboard';
 
 const InsightsTab = () => {
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-6 p-4">
       {/* Header */}
-      <div className="mb-4">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
         <h2
-          className="finbot-heading-xl finbot-responsive-heading flex items-center"
+          className="text-2xl sm:text-3xl font-bold flex items-center text-gray-900"
           data-cy="insights-heading"
         >
           <span className="mr-3 text-2xl">🧠</span>
           Smart Insights
         </h2>
-        <p className="finbot-responsive-text text-[#8B4513] mt-1">
+        <p className="mt-2 text-sm text-gray-600">
           AI-powered financial overview and recommendations
         </p>
       </div>
