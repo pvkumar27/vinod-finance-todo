@@ -3,6 +3,7 @@
 
 :root {
   /* Colors */
+  --color-background: #F9FAFB;
   --background: #F9FAFB;
   --surface: #FFFFFF;
   --surface-secondary: #F3F4F6;
@@ -16,6 +17,11 @@
   --text-tertiary: #9CA3AF;
   --border: #E5E7EB;
   --border-light: #F3F4F6;
+  
+  /* Gradients */
+  --gradient-primary: linear-gradient(135deg, var(--primary), var(--secondary));
+  --gradient-secondary: linear-gradient(135deg, var(--secondary), var(--primary));
+  --gradient-accent: linear-gradient(135deg, var(--warning), var(--success));
   
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
@@ -263,4 +269,38 @@ body {
   .text-xl, .headline { font-size: 1.125rem; } /* Headlines smaller on mobile */
   .text-lg, .section-header { font-size: 1rem; } /* Section headers smaller */
   .text-base, .body-text { font-size: 0.875rem; } /* Body text smaller */
+  
+  /* Mobile grid adjustments */
+  .grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .md\:grid-cols-2 {
+    grid-template-columns: 1fr;
+  }
+  
+  .lg\:grid-cols-3 {
+    grid-template-columns: 1fr;
+  }
+  
+  .lg\:grid-cols-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tablet responsive */
+@media (min-width: 768px) {
+  .md\:grid-cols-2 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .lg\:grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  
+  .lg\:grid-cols-4 {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }

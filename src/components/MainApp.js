@@ -5,14 +5,16 @@ import ChatContainer from './chat/ChatContainer';
 import ChatHeader from './chat/ChatHeader';
 import BottomPanel from './BottomPanel';
 import BottomNavigation from './BottomNavigation';
+import FloatingChatBubble from './FloatingChatBubble';
 import TopBar from './shared/TopBar';
 import useToneMode from '../hooks/useToneMode';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const MainApp = () => {
-  const [activeTab, setActiveTab] = useState('chat');
+  const [activeTab, setActiveTab] = useState('todos');
   const [messages, setMessages] = useState([]);
   const [initialized, setInitialized] = useState(false);
-  const [isChatCollapsed, setIsChatCollapsed] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
@@ -62,58 +64,19 @@ const MainApp = () => {
   }, [messages]);
 
   useEffect(() => {
-    if (activeTab === 'chat') {
-      setIsChatCollapsed(false);
+    if (isChatOpen && !initialized) {
+      setInitialized(true);
+      const welcomeMessage = {
+        id: 1,
+        type: 'assistant',
+        content:
+          "👋 Hey! I'm FinBot, your sassy money coach! 💸\n\nI'm here to help you crush your financial goals, roast your spending habits (lovingly), and keep your tasks in check. What's on your mind today? 🤔",
+        timestamp: new Date(),
+        isWelcome: true,
+      };
+      setMessages([welcomeMessage]);
     }
-  }, [activeTab]);
-
-  useEffect(() => {
-    if (activeTab !== 'chat' || initialized) return;
-
-    setInitialized(true);
-
-    const welcomeMessage = {
-      id: 1,
-      type: 'assistant',
-      content:
-        "👋 Hey! I'm FinBot, your sassy money coach! 💸\n\nI'm here to help you crush your financial goals, roast your spending habits (lovingly), and keep your tasks in check. What's on your mind today? 🤔",
-      timestamp: new Date(),
-      isWelcome: true,
-    };
-    setMessages([welcomeMessage]);
-
-    const timeoutId = setTimeout(async () => {
-      try {
-        const alerts = await generateProactiveAlerts();
-        if (alerts.length > 0) {
-          const alertList = alerts.map(alert => `• ${alert.message}`).join('\n');
-          const alertMessage = {
-            id: Date.now(),
-            type: 'assistant',
-            content: `🚨 Heads up! I spotted ${alerts.length} thing${alerts.length > 1 ? 's' : ''} that need some TLC:\n\n${alertList}\n\nDon't worry, I've got your back! Want me to help fix these? 💪`,
-            timestamp: new Date(),
-            isProactive: true,
-          };
-          setMessages(prev => [...prev, alertMessage]);
-        } else {
-          const positiveMessage = {
-            id: Date.now(),
-            type: 'assistant',
-            content:
-              "You're crushing it today 💰 — zero overdue tasks and all cards active! Want a 🍪?",
-            timestamp: new Date(),
-            isPositive: true,
-          };
-          setMessages(prev => [...prev, positiveMessage]);
-        }
-      } catch (error) {
-        console.error('Error checking proactive alerts:', error);
-      }
-    }, 3000);
-
-    return () => clearTimeout(timeoutId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isChatOpen, initialized]);
 
   useEffect(() => {
     const handleQuickReply = event => {
@@ -376,102 +339,71 @@ const MainApp = () => {
 
   const renderContent = () => {
     switch (activeTab) {
-      case 'chat':
-        return (
-          <>
-            <div className="fixed inset-0 bg-gray-50 z-30 flex flex-col">
-              <TopBar />
-              <ChatHeader
-                isCollapsed={isChatCollapsed}
-                onToggleCollapse={() => {
-                  setIsChatCollapsed(!isChatCollapsed);
-                  if (!isChatCollapsed) {
-                    setTimeout(() => {
-                      setActiveTab('todos');
-                    }, 2000);
-                  }
-                }}
-              />
-              {!isChatCollapsed && (
-                <div className="flex-1 bg-gray-50 transition-all duration-300 p-4 overflow-hidden pb-36">
-                  <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 h-full">
-                    <div className="p-4 h-full flex flex-col">
-                      <ChatContainer
-                        messages={messages}
-                        isLoading={isLoading}
-                        messagesEndRef={messagesEndRef}
-                        onRoast={handleRoast}
-                        onHype={handleHype}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-              {isChatCollapsed && (
-                <div className="flex-1 bg-gray-50 flex items-center justify-center transition-all duration-300">
-                  <div className="text-center bg-white rounded-2xl shadow-lg border border-gray-200 p-8">
-                    <span className="text-4xl mb-4 block">👋</span>
-                    <p className="text-gray-700 font-medium">Chat with FinBot</p>
-                    <p className="text-sm text-gray-500 mt-2">Your AI financial assistant</p>
-                  </div>
-                </div>
-              )}
-            </div>
-            {!isChatCollapsed && (
-              <div className="fixed bottom-16 left-0 right-0 z-50">
-                <BottomPanel
-                  inputValue={inputValue}
-                  setInputValue={setInputValue}
-                  onSubmit={handleSubmit}
-                  onVoiceInput={handleVoiceInput}
-                  isLoading={isLoading}
-                />
-              </div>
-            )}
-          </>
-        );
       case 'todos':
         return (
-          <div className="h-full bg-gray-50">
+          <motion.div
+            className="h-full"
+            style={{ background: 'var(--color-background)' }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}
+          >
             <TopBar />
-            <div className="p-4" style={{ height: 'calc(100vh - 140px)' }}>
+            <div className="overflow-auto" style={{ height: 'calc(100vh - 140px)' }}>
               <TabNavigation activeTab="todos" />
             </div>
-          </div>
+          </motion.div>
         );
       case 'cards':
         return (
-          <div className="h-full overflow-auto" style={{ background: 'var(--aw-background)' }}>
+          <motion.div
+            className="h-full overflow-auto"
+            style={{ background: 'var(--color-background)' }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}
+          >
             <TopBar />
-            <div className="p-4">
+            <div className="overflow-auto" style={{ height: 'calc(100vh - 140px)' }}>
               <TabNavigation activeTab="cards" />
             </div>
-          </div>
+          </motion.div>
         );
       case 'insights':
         return (
-          <div className="h-full overflow-auto" style={{ background: 'var(--aw-background)' }}>
+          <motion.div
+            className="h-full overflow-auto"
+            style={{ background: 'var(--color-background)' }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}
+          >
             <TopBar />
-            <div className="p-4">
+            <div className="overflow-auto" style={{ height: 'calc(100vh - 140px)' }}>
               <TabNavigation activeTab="insights" />
             </div>
-          </div>
+          </motion.div>
         );
-
       default:
         return (
-          <div className="h-full flex flex-col fin-gradient-bg">
+          <motion.div
+            className="h-full flex flex-col"
+            style={{ background: 'var(--color-background)' }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.25 }}
+          >
             <TopBar />
             <div className="p-4">
-              <div className="fin-card text-center">
-                <div className="bg-[#632D1F] text-white rounded-xl p-3 mb-4 flex items-center justify-center space-x-2">
+              <div className="card text-center">
+                <div className="bg-primary text-white rounded-xl p-3 mb-4 flex items-center justify-center space-x-2">
                   <span className="text-xl">🤖</span>
                   <h1 className="text-lg font-bold">FinTask AI</h1>
                 </div>
-                <p className="text-gray-600">Your AI money assistant</p>
+                <p className="text-secondary">Your AI money assistant</p>
               </div>
             </div>
-          </div>
+          </motion.div>
         );
     }
   };
@@ -479,8 +411,8 @@ const MainApp = () => {
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: 'var(--aw-background)' }}
       style={{
+        background: 'var(--color-background)',
         paddingTop: 'env(safe-area-inset-top)',
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}
@@ -490,6 +422,48 @@ const MainApp = () => {
 
       {/* Bottom Navigation */}
       <BottomNavigation activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      {/* Floating Chat Bubble */}
+      <FloatingChatBubble onClick={() => setIsChatOpen(!isChatOpen)} isActive={isChatOpen} />
+
+      {/* Chat Overlay */}
+      <AnimatePresence>
+        {isChatOpen && (
+          <motion.div
+            className="fixed inset-0 z-40 flex flex-col"
+            style={{ background: 'var(--color-background)' }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25 }}
+          >
+            <TopBar />
+            <ChatHeader isCollapsed={false} onToggleCollapse={() => setIsChatOpen(false)} />
+            <div className="flex-1 p-4 overflow-hidden pb-36">
+              <div className="card h-full">
+                <div className="p-4 h-full flex flex-col">
+                  <ChatContainer
+                    messages={messages}
+                    isLoading={isLoading}
+                    messagesEndRef={messagesEndRef}
+                    onRoast={handleRoast}
+                    onHype={handleHype}
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="fixed bottom-16 left-0 right-0 z-50">
+              <BottomPanel
+                inputValue={inputValue}
+                setInputValue={setInputValue}
+                onSubmit={handleSubmit}
+                onVoiceInput={handleVoiceInput}
+                isLoading={isLoading}
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

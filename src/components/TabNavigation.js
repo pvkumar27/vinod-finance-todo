@@ -1,43 +1,55 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import CreditCardManager from './CreditCardManager';
-import ToDoTest from './ToDoTest';
-import InsightsTab from './InsightsTab';
+import TaskManager from './TaskManager';
+import SmartDashboard from './SmartDashboard';
 
 const TabNavigation = ({ activeTab }) => {
   const renderContent = () => {
     switch (activeTab) {
       case 'todos':
         return (
-          <div className="overflow-y-auto" style={{ height: 'calc(100vh - 220px)' }}>
-            <ToDoTest />
-          </div>
+          <motion.div
+            className="h-full overflow-y-auto"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.25 }}
+          >
+            <TaskManager />
+          </motion.div>
         );
       case 'cards':
         return (
-          <div className="overflow-y-auto" style={{ height: 'calc(100vh - 220px)' }}>
+          <motion.div
+            className="h-full overflow-y-auto"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.25 }}
+          >
             <CreditCardManager />
-          </div>
+          </motion.div>
         );
       case 'insights':
         return (
-          <div className="overflow-y-auto" style={{ height: 'calc(100vh - 220px)' }}>
-            <InsightsTab />
-          </div>
+          <motion.div
+            className="h-full overflow-y-auto"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.25 }}
+          >
+            <SmartDashboard />
+          </motion.div>
         );
       default:
         return (
-          <div className="fin-card p-6">
-            <ToDoTest />
-          </div>
+          <motion.div className="card p-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+            <TaskManager />
+          </motion.div>
         );
     }
   };
 
-  return (
-    <div className="w-full" style={{ height: 'calc(100vh - 180px)' }}>
-      {renderContent()}
-    </div>
-  );
+  return <div className="w-full h-full">{renderContent()}</div>;
 };
 
 export default TabNavigation;
