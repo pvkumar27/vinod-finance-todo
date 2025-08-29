@@ -6,6 +6,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import useSoundEffects from '../hooks/useSoundEffects';
+import useAudioCues from '../hooks/useAudioCues';
 
 const CreditCardList = () => {
   const [cards, setCards] = useState([]);
@@ -16,6 +17,7 @@ const CreditCardList = () => {
   const [message, setMessage] = useState('');
 
   const { success, error: errorSound, buttonPress } = useSoundEffects();
+  const { error: errorAudio } = useAudioCues();
 
   const fetchCards = useCallback(async () => {
     try {
@@ -25,10 +27,11 @@ const CreditCardList = () => {
     } catch (err) {
       setError(`Failed to fetch cards: ${err.message}`);
       errorSound();
+      errorAudio();
     } finally {
       setLoading(false);
     }
-  }, [errorSound]);
+  }, [errorSound, errorAudio]);
 
   useEffect(() => {
     fetchCards();

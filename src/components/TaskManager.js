@@ -7,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
 import useSoundEffects from '../hooks/useSoundEffects';
+import useAudioCues from '../hooks/useAudioCues';
 
 const TaskManager = () => {
   const [todos, setTodos] = useState([]);
@@ -17,6 +18,7 @@ const TaskManager = () => {
   const [showCompleted, setShowCompleted] = useState(false);
 
   const { taskComplete, buttonPress, success, error: errorSound } = useSoundEffects();
+  const { taskComplete: taskCompleteAudio, error: errorAudio } = useAudioCues();
 
   const loadTodos = async () => {
     try {
@@ -25,6 +27,7 @@ const TaskManager = () => {
     } catch (error) {
       setMessage(`Error loading tasks: ${error.message}`);
       errorSound();
+      errorAudio();
       setTimeout(() => setMessage(''), 4000);
     } finally {
       setLoading(false);
@@ -52,6 +55,7 @@ const TaskManager = () => {
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
       errorSound();
+      errorAudio();
       setTimeout(() => setMessage(''), 4000);
     }
   };
@@ -62,6 +66,7 @@ const TaskManager = () => {
 
       if (!completed) {
         taskComplete();
+        taskCompleteAudio();
         setMessage('🎉 Task completed!');
       } else {
         success();
