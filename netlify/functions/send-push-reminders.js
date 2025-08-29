@@ -60,23 +60,53 @@ exports.handler = async event => {
         const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
         const prompts = {
-          morning: `Create a short motivational morning message. User has ${taskCount} pending tasks. Max 50 chars with emoji.`,
-          noon: `Create midday motivation. Encourage 4 tasks today. Max 60 chars with emoji.`,
-          afternoon: `Create afternoon boost message. ${taskCount} tasks left. Max 60 chars with emoji.`,
-          evening: `Create evening check-in. ${taskCount > 0 ? taskCount + ' tasks remaining' : 'Tasks completed'}. Max 60 chars with emoji.`,
-          night: `Create goodnight message. ${taskCount} pending tasks. Max 70 chars with emoji.`,
+          morning: `Generate a motivational morning notification message for a productivity app. User has ${taskCount} pending tasks. Keep it under 50 characters, include emoji, be encouraging. Return ONLY the notification message text, no instructions or extra formatting.`,
+          noon: `Generate a midday motivation notification for a productivity app. Encourage completing tasks today. Max 60 chars with emoji. Return ONLY the notification message text.`,
+          afternoon: `Generate an afternoon boost notification for a productivity app. ${taskCount} tasks remaining. Max 60 chars with emoji. Return ONLY the notification message text.`,
+          evening: `Generate an evening check-in notification for a productivity app. ${taskCount > 0 ? taskCount + ' tasks remaining' : 'Tasks completed'}. Max 60 chars with emoji. Return ONLY the notification message text.`,
+          night: `Generate a goodnight notification for a productivity app. ${taskCount} pending tasks for tomorrow. Max 70 chars with emoji. Return ONLY the notification message text.`,
         };
 
         const result = await model.generateContent(prompts[type]);
         let aiMessage = result.response.text().trim();
 
-        // Clean up AI response - remove any prompt echoing
+        // Clean up AI response - remove any prompt echoing or instructions
         aiMessage = aiMessage.replace(/^.*?Generate.*?encouraging\.?\s*/i, '');
         aiMessage = aiMessage.replace(/^.*?notification.*?app\.?\s*/i, '');
         aiMessage = aiMessage.replace(/^.*?Return only.*?\s*/i, '');
+        aiMessage = aiMessage.replace(/^.*?Return ONLY.*?\s*/i, '');
+        aiMessage = aiMessage.replace(/^.*?Keep it under.*?\s*/i, '');
+        aiMessage = aiMessage.replace(/^.*?Max \d+ chars.*?\s*/i, '');
+        aiMessage = aiMessage.replace(/^.*?productivity app.*?\s*/i, '');
+        aiMessage = aiMessage.replace(/^.*?FinTask.*?\s*/i, '');
+        aiMessage = aiMessage.replace(/^.*?User has.*?tasks.*?\s*/i, '');
+        aiMessage = aiMessage.replace(/^.*?pending tasks.*?\s*/i, '');
+        aiMessage = aiMessage.replace(/^["'`]|["'`]$/g, ''); // Remove quotes
         aiMessage = aiMessage.trim();
 
-        if (aiMessage && aiMessage.length < 100 && !aiMessage.toLowerCase().includes('generate')) {
+        // Additional safety: ensure the message doesn't contain command-like patterns
+        if (aiMessage.toLowerCase().includes('add') && aiMessage.toLowerCase().includes('task')) {
+          aiMessage = aiMessage.replace(/add.*?task/gi, 'complete your tasks');
+        }
+        if (
+          aiMessage.toLowerCase().includes('create') &&
+          aiMessage.toLowerCase().includes('todo')
+        ) {
+          aiMessage = aiMessage.replace(/create.*?todo/gi, 'finish your todos');
+        }
+
+        if (
+          aiMessage &&
+          aiMessage.length < 100 &&
+          !aiMessage.toLowerCase().includes('generate') &&
+          !aiMessage.toLowerCase().includes('create') &&
+          !aiMessage.toLowerCase().includes('return') &&
+          !aiMessage.toLowerCase().includes('notification') &&
+          !aiMessage.toLowerCase().includes('add task') &&
+          !aiMessage.toLowerCase().includes('add todo') &&
+          !aiMessage.toLowerCase().includes('create task') &&
+          !aiMessage.toLowerCase().includes('create todo')
+        ) {
           return {
             title: getStaticTitle(type),
             body: aiMessage,
