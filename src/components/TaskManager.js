@@ -16,6 +16,9 @@ import { parseInput } from '../utils/parseInput';
 import TaskList from './TaskList';
 import TaskPomodoroIntegration from './pomodoro/TaskPomodoroIntegration';
 import TodoProgressBar from './TodoProgressBar';
+import AppleWalletCard from './ui/AppleWalletCard';
+import AppleWalletButton from './ui/AppleWalletButton';
+import useSoundEffects from '../hooks/useSoundEffects';
 
 const TaskManager = () => {
   const [todos, setTodos] = useState([]);
@@ -25,6 +28,8 @@ const TaskManager = () => {
   // Default due date is today
   const [taskDate, setTaskDate] = useState(getTodayDateString());
   const [editingTodo, setEditingTodo] = useState(null);
+
+  const { taskComplete, buttonPress, success } = useSoundEffects();
 
   const [showCompleted, setShowCompleted] = useState(false);
   const [activeId, setActiveId] = useState(null);
@@ -128,10 +133,11 @@ const TaskManager = () => {
 
       if (!completed) {
         // Task completed - play celebration sound and show animation
-        playTaskCompleteSound();
+        taskComplete();
         showTaskCompleteAnimation();
         setMessage('🎉 Task completed! Great job!');
       } else {
+        success();
         setMessage('✅ Task updated!');
       }
 
@@ -140,36 +146,6 @@ const TaskManager = () => {
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
       setTimeout(() => setMessage(''), 4000);
-    }
-  };
-
-  const playTaskCompleteSound = () => {
-    try {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-      // Success sound - ascending notes
-      const notes = [261, 329, 392, 523]; // C4, E4, G4, C5
-
-      notes.forEach((freq, index) => {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-
-        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
-        oscillator.type = 'sine';
-
-        const startTime = audioContext.currentTime + index * 0.1;
-        gainNode.gain.setValueAtTime(0, startTime);
-        gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.3);
-
-        oscillator.start(startTime);
-        oscillator.stop(startTime + 0.3);
-      });
-    } catch (error) {
-      console.log('Audio not supported:', error);
     }
   };
 
@@ -443,37 +419,33 @@ const TaskManager = () => {
   if (loading) return <div className="p-4 text-gray-300">Loading tasks...</div>;
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h2
-          data-cy="todo-manager-heading"
-          className="finbot-heading-xl finbot-responsive-heading flex items-center"
-        >
+    <div className="p-6" style={{ background: 'var(--aw-background)', minHeight: '100vh' }}>
+      <AppleWalletCard className="mb-6 aw-fade-in">
+        <h2 data-cy="todo-manager-heading" className="aw-heading-xl flex items-center">
           <span className="mr-3 text-2xl">📝</span>
           To-Do Manager
         </h2>
-      </div>
+        <p className="aw-text-body mt-2">Organize your tasks with AI-powered productivity</p>
+      </AppleWalletCard>
 
       {message && (
-        <div
-          className={`p-4 rounded-xl mb-6 border ${
-            message.includes('❌')
-              ? 'bg-red-500/20 border-red-500/50 text-red-400'
-              : 'bg-green-500/20 border-green-500/50 text-green-400'
+        <AppleWalletCard
+          className={`mb-6 aw-fade-in ${
+            message.includes('❌') ? 'aw-badge-error' : 'aw-badge-success'
           }`}
         >
-          {message}
-        </div>
+          <div className="aw-text-body font-medium">{message}</div>
+        </AppleWalletCard>
       )}
 
       {/* Add Todo Form */}
-      <div className="finbot-card p-4 mb-6">
+      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-6 hover:shadow-xl transition-all duration-200">
         <form onSubmit={handleAddTodo}>
-          <div className="flex flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1 relative">
               <label
                 htmlFor="task-input"
-                className="text-sm font-medium text-gray-700 mb-1 block text-left"
+                className="text-sm font-medium mb-2 block text-left text-gray-700"
               >
                 Task
               </label>
@@ -482,18 +454,20 @@ const TaskManager = () => {
                   id="task-input"
                   data-cy="task-input-field"
                   type="text"
-                  placeholder={editingTodo ? 'Edit task...' : 'Add a new task...'}
+                  placeholder={editingTodo ? 'Edit task...' : 'What needs to be done?'}
                   value={newTask}
                   onChange={e => setNewTask(e.target.value)}
-                  className="finbot-input w-full pr-12"
+                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
                 />
                 <button
                   type="button"
-                  onClick={handleVoiceInput}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 hover:bg-gray-100 active:bg-gray-200 touch-manipulation"
+                  onClick={() => {
+                    buttonPress();
+                    handleVoiceInput();
+                  }}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:bg-gray-100 active:scale-95"
                   title="Voice input"
                   aria-label="Voice input"
-                  style={{ WebkitTapHighlightColor: 'transparent' }}
                 >
                   <span className="text-lg">🎤</span>
                 </button>
@@ -502,7 +476,7 @@ const TaskManager = () => {
             <div className="flex flex-col w-full sm:w-auto">
               <label
                 htmlFor="task-due-date"
-                className="text-sm font-medium text-gray-700 mb-1 text-left block"
+                className="text-sm font-medium mb-2 text-left block text-gray-700"
               >
                 Due Date
               </label>
@@ -512,7 +486,7 @@ const TaskManager = () => {
                 type="date"
                 value={taskDate}
                 onChange={e => setTaskDate(e.target.value)}
-                className="finbot-input sm:w-40"
+                className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white sm:w-40"
                 required
               />
             </div>
@@ -520,30 +494,32 @@ const TaskManager = () => {
               <button
                 type="submit"
                 data-cy={editingTodo ? 'task-update-button' : 'task-add-button'}
-                className="finbot-button-primary w-full sm:w-auto flex items-center justify-center"
+                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 w-full sm:w-auto"
+                onClick={() => buttonPress()}
               >
-                <span className="mr-2">{editingTodo ? '✏️' : '📝'}</span>
+                <span>{editingTodo ? '✏️' : '📝'}</span>
                 {editingTodo ? 'Update' : 'Add Task'}
               </button>
               {editingTodo && (
                 <button
                   type="button"
                   onClick={() => {
+                    buttonPress();
                     setEditingTodo(null);
                     setNewTask('');
                     setTaskDate(getTodayDateString());
                   }}
-                  className="finbot-button-secondary w-full sm:w-auto mt-3"
+                  className="bg-white text-gray-800 font-semibold px-6 py-3 rounded-xl border border-gray-300 shadow-md hover:bg-gray-50 hover:shadow-lg transition-all duration-200 active:scale-95 w-full sm:w-auto mt-3"
                 >
                   Cancel
                 </button>
               )}
             </div>
           </div>
-          <p className="text-xs text-gray-600 mt-3 flex items-center">
+          <p className="text-xs mt-4 flex items-center text-gray-500">
             <span className="mr-2">💡</span>
             <span>
-              Use natural language or ask <strong className="text-purple-600">FinBot 🤖</strong> for
+              Use natural language or ask <strong className="text-blue-600">FinBot 🤖</strong> for
               voice input
             </span>
           </p>
@@ -555,14 +531,17 @@ const TaskManager = () => {
 
       {/* Tasks */}
       <div className="mb-8">
-        <h3 className="finbot-heading-lg finbot-responsive-text mb-6 mt-8">
-          <span className="hidden sm:inline">
-            Tasks ({pendingTodos.length} pending, {todos.filter(t => t.completed).length} completed)
-          </span>
-          <span className="sm:hidden">
-            Tasks {pendingTodos.length} pending • {todos.filter(t => t.completed).length} done
-          </span>
-        </h3>
+        <div className="mb-6">
+          <h3 className="aw-heading-lg mb-2">
+            <span className="hidden sm:inline">
+              Tasks ({pendingTodos.length} pending, {todos.filter(t => t.completed).length}{' '}
+              completed)
+            </span>
+            <span className="sm:hidden">
+              Tasks {pendingTodos.length} pending • {todos.filter(t => t.completed).length} done
+            </span>
+          </h3>
+        </div>
 
         {pendingTodos.length === 0 ? (
           <div className="text-center py-12">
@@ -581,8 +560,8 @@ const TaskManager = () => {
             >
               {/* Pinned Tasks Section */}
               {pinnedTodos.length > 0 && (
-                <div className="mb-6">
-                  <h4 className="finbot-heading-md mb-4 flex items-center">
+                <AppleWalletCard className="mb-6 aw-slide-in" elevated>
+                  <h4 className="aw-heading-md mb-4 flex items-center">
                     <span className="mr-3">📌</span>
                     Pinned Tasks
                   </h4>
@@ -594,12 +573,12 @@ const TaskManager = () => {
                     onDelete={handleDelete}
                     onStartPomodoro={handleStartPomodoro}
                   />
-                </div>
+                </AppleWalletCard>
               )}
 
-              {/* Unpinned Tasks Section - No heading */}
+              {/* Unpinned Tasks Section */}
               {unpinnedTodos.length > 0 && (
-                <div className={pinnedTodos.length > 0 ? 'mt-8' : ''}>
+                <div className={pinnedTodos.length > 0 ? 'mt-6' : ''}>
                   <TaskList
                     tasks={unpinnedTodos}
                     onToggleComplete={handleToggleComplete}
@@ -645,16 +624,18 @@ const TaskManager = () => {
 
       {/* Completed Tasks - Collapsible */}
       {todos.filter(t => t.completed).length > 0 && (
-        <div>
-          <button
+        <AppleWalletCard className="aw-fade-in">
+          <AppleWalletButton
+            variant="ghost"
             onClick={() => setShowCompleted(!showCompleted)}
-            className="finbot-card flex items-center justify-between w-full p-3 hover:transform hover:scale-[1.02] transition-all duration-300 mb-4"
+            className="w-full justify-between p-0 min-h-0 h-auto"
           >
-            <h3 className="finbot-heading-md">
+            <h3 className="aw-heading-md">
               ✅ Completed ({todos.filter(t => t.completed).length})
             </h3>
             <svg
-              className={`w-6 h-6 text-gray-600 transition-transform ${showCompleted ? 'rotate-180' : ''}`}
+              className={`w-6 h-6 transition-transform ${showCompleted ? 'rotate-180' : ''}`}
+              style={{ color: 'var(--aw-text-tertiary)' }}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -666,54 +647,49 @@ const TaskManager = () => {
                 d="M19 9l-7 7-7-7"
               />
             </svg>
-          </button>
+          </AppleWalletButton>
 
           {showCompleted && (
-            <div className="space-y-2">
+            <div className="mt-4 space-y-2">
               {todos
                 .filter(t => t.completed)
-                .map(todo => (
+                .map((todo, index) => (
                   <div
                     key={todo.id}
-                    className="finbot-card flex items-center justify-between p-3 bg-green-500/5 border-green-500/20"
+                    className="aw-slide-in flex items-center justify-between p-3 rounded-lg"
+                    style={{
+                      background: 'var(--aw-surface-secondary)',
+                      animationDelay: `${index * 50}ms`,
+                    }}
                   >
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center gap-3">
                       <input
                         type="checkbox"
                         checked={true}
                         onChange={() => handleToggleComplete(todo.id, todo.completed)}
-                        className="w-3 h-3 text-green-500 rounded"
+                        className="w-4 h-4 rounded"
+                        style={{ accentColor: 'var(--aw-secondary)' }}
                       />
-                      <div className="flex flex-col sm:flex-row sm:items-center">
-                        <span className="line-through text-gray-500 text-sm">{todo.task}</span>
-                        <span className="text-xs text-gray-400 sm:ml-2">
-                          {formatDateString(todo.updated_at)}
-                        </span>
+                      <div>
+                        <div className="aw-text-body line-through opacity-70">{todo.task}</div>
+                        <div className="aw-text-caption">
+                          Completed: {formatDateString(todo.updated_at)}
+                        </div>
                       </div>
                     </div>
-                    <button
+                    <AppleWalletButton
+                      variant="ghost"
+                      size="sm"
                       onClick={() => handleDelete(todo.id)}
-                      className="text-red-400 hover:text-red-300 hover:bg-red-500/20 p-2 rounded-lg transition-all duration-200"
+                      className="w-8 h-8 p-0 min-h-0 text-red-500"
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </button>
+                      🗑️
+                    </AppleWalletButton>
                   </div>
                 ))}
             </div>
           )}
-        </div>
+        </AppleWalletCard>
       )}
 
       {/* Pomodoro Modal */}

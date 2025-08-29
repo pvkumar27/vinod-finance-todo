@@ -1,21 +1,17 @@
 import SmartDashboard from './SmartDashboard';
+import AppleWalletCard from './ui/AppleWalletCard';
 
 const InsightsTab = () => {
   return (
-    <div className="space-y-4 p-4">
+    <div className="space-y-6 p-4">
       {/* Header */}
-      <div className="mb-4">
-        <h2
-          className="finbot-heading-xl finbot-responsive-heading flex items-center"
-          data-cy="insights-heading"
-        >
+      <AppleWalletCard className="aw-fade-in">
+        <h2 className="aw-heading-xl flex items-center" data-cy="insights-heading">
           <span className="mr-3 text-2xl">🧠</span>
           Smart Insights
         </h2>
-        <p className="finbot-responsive-text text-[#8B4513] mt-1">
-          AI-powered financial overview and recommendations
-        </p>
-      </div>
+        <p className="aw-text-body mt-2">AI-powered financial overview and recommendations</p>
+      </AppleWalletCard>
 
       {/* Unified Smart Dashboard */}
       <SmartDashboard

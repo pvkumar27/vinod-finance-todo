@@ -1,144 +1,155 @@
 import React from 'react';
 import { formatDateString, getTodayDateString } from '../utils/dateUtils';
+import AppleWalletCard from './ui/AppleWalletCard';
+import AppleWalletButton from './ui/AppleWalletButton';
+import useSoundEffects from '../hooks/useSoundEffects';
 
 const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete, onStartPomodoro }) => {
+  const { taskComplete, buttonPress, success } = useSoundEffects();
   const isPinned = task.pinned;
   const formattedDate = task.due_date ? formatDateString(task.due_date) : null;
 
-  // Visual indicators similar to email
+  // Visual indicators
   const todayStr = getTodayDateString();
   const isToday = task.due_date === todayStr;
   const isOverdue = task.due_date < todayStr;
-  const isFuture = task.due_date > todayStr;
 
-  // Calculate visual styling
-  let bgColor, borderColor;
-
-  if (isPinned) {
-    bgColor = 'bg-yellow-50';
-    borderColor = 'border-l-2 border-yellow-400';
-  } else if (isToday) {
-    bgColor = 'bg-green-50';
-    borderColor = 'border-l-4 border-green-500';
-  } else if (isOverdue) {
-    const daysOverdue = Math.floor(
-      (new Date(todayStr) - new Date(task.due_date)) / (1000 * 60 * 60 * 24)
-    );
-    if (daysOverdue > 14) {
-      bgColor = 'bg-red-100';
-      borderColor = 'border-l-4 border-red-600';
-    } else if (daysOverdue > 7) {
-      bgColor = 'bg-red-75';
-      borderColor = 'border-l-4 border-red-500';
-    } else {
-      bgColor = 'bg-red-50';
-      borderColor = 'border-l-4 border-red-400';
+  // Apple Wallet style states
+  const getTaskStyle = () => {
+    if (task.completed) {
+      return {
+        background:
+          'linear-gradient(135deg, var(--aw-secondary) 0%, var(--aw-secondary-light) 100%)',
+        borderLeft: '4px solid var(--aw-secondary)',
+      };
     }
-  } else if (isFuture) {
-    bgColor = 'bg-blue-50';
-    borderColor = 'border-l-4 border-blue-400';
-  } else {
-    bgColor = 'bg-gray-50';
-    borderColor = 'border-l-2 border-gray-300';
-  }
+    if (isPinned) {
+      return {
+        background: 'linear-gradient(135deg, var(--aw-accent) 0%, var(--aw-accent-light) 100%)',
+        borderLeft: '4px solid var(--aw-accent)',
+      };
+    }
+    if (isOverdue) {
+      return {
+        background: 'linear-gradient(135deg, var(--aw-error) 0%, #FF6B6B 100%)',
+        borderLeft: '4px solid var(--aw-error)',
+      };
+    }
+    if (isToday) {
+      return {
+        background: 'linear-gradient(135deg, var(--aw-primary) 0%, var(--aw-primary-light) 100%)',
+        borderLeft: '4px solid var(--aw-primary)',
+      };
+    }
+    return {
+      background: 'var(--aw-surface)',
+      borderLeft: '4px solid var(--aw-border)',
+    };
+  };
+
+  const handleComplete = () => {
+    if (!task.completed) {
+      taskComplete();
+    } else {
+      success();
+    }
+    onToggleComplete(task.id, task.completed);
+  };
+
+  const handleAction = action => {
+    buttonPress();
+    action();
+  };
 
   return (
-    <div
-      className={`
-        group flex items-center py-1 px-1 sm:p-2 mb-1 rounded-lg transition-all duration-200 min-h-[2.25rem]
-        w-full shadow-sm hover:shadow
-        ${bgColor} ${borderColor}
-      `}
+    <AppleWalletCard
+      className={`aw-fade-in mb-2 ${task.completed ? 'aw-scale-in' : ''}`}
+      interactive
+      style={getTaskStyle()}
     >
-      {/* Checkbox */}
-      <div className="mr-1 sm:mr-3">
-        <input
-          type="checkbox"
-          checked={task.completed || false}
-          onChange={() => onToggleComplete(task.id, task.completed)}
-          className="w-3 h-3 text-blue-500 border border-gray-300 rounded-full sm:w-4 sm:h-4"
-          aria-label={`Mark "${task.task}" as ${task.completed ? 'incomplete' : 'complete'}`}
-        />
-      </div>
+      <div className="flex items-center gap-4">
+        {/* Checkbox */}
+        <div className="flex-shrink-0">
+          <input
+            type="checkbox"
+            checked={task.completed || false}
+            onChange={handleComplete}
+            className="w-5 h-5 rounded-full border-2 transition-all"
+            style={{
+              borderColor: task.completed ? 'var(--aw-secondary)' : 'var(--aw-border)',
+              backgroundColor: task.completed ? 'var(--aw-secondary)' : 'transparent',
+            }}
+            aria-label={`Mark "${task.task}" as ${task.completed ? 'incomplete' : 'complete'}`}
+          />
+        </div>
 
-      {/* Task Content */}
-      <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center pl-1 pr-0.5">
-        <span className="max-w-full text-sm font-medium text-left text-gray-900 truncate">
-          {task.task}
-        </span>
-        {formattedDate && (
-          <span className="text-[10px] sm:text-xs text-gray-500 sm:ml-2 whitespace-nowrap mt-0.5 sm:mt-0 flex items-center text-left">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mr-0.5 inline-block sm:hidden"></span>
-            Due: {formattedDate}
-            {isOverdue && (
-              <span className="ml-1 text-red-600 font-medium">
-                (
-                {Math.floor((new Date(todayStr) - new Date(task.due_date)) / (1000 * 60 * 60 * 24))}{' '}
-                days overdue)
-              </span>
-            )}
-          </span>
-        )}
-      </div>
-
-      {/* Actions - Smaller buttons for iPhone 16 Pro Max */}
-      <div className="flex flex-row items-center flex-shrink-0 ml-auto mr-0 space-x-0.5 sm:space-x-1">
-        {onStartPomodoro && !task.completed && (
-          <button
-            type="button"
-            onClick={() => onStartPomodoro(task)}
-            className="w-7 h-7 sm:w-8 sm:h-8 flex items-center justify-center text-red-500 hover:text-red-600 transition-colors touch-manipulation"
-            title="Start Pomodoro session"
-            style={{ WebkitTapHighlightColor: 'transparent' }}
+        {/* Task Content */}
+        <div className="flex-1 min-w-0">
+          <div
+            className={`aw-text-body font-medium ${task.completed ? 'line-through opacity-70' : ''}`}
           >
-            <span className="text-xs sm:text-sm">🍅</span>
-          </button>
-        )}
-        <button
-          type="button"
-          onClick={() => onTogglePin(task.id, task.pinned)}
-          className={`w-8 h-8 flex items-center justify-center transition-colors touch-manipulation ${
-            isPinned ? 'text-yellow-600' : 'text-gray-400'
-          }`}
-          title={isPinned ? 'Unpin task' : 'Pin task'}
-          style={{ WebkitTapHighlightColor: 'transparent' }}
-        >
-          <span className="text-sm">📌</span>
-        </button>
-        <button
-          type="button"
-          onClick={() => onEdit(task)}
-          className="w-8 h-8 flex items-center justify-center text-gray-400 touch-manipulation"
-          aria-label={`Edit task: ${task.task}`}
-          style={{ WebkitTapHighlightColor: 'transparent' }}
-        >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-            />
-          </svg>
-        </button>
-        <button
-          type="button"
-          onClick={() => onDelete(task.id)}
-          className="w-8 h-8 flex items-center justify-center text-gray-400 touch-manipulation"
-          aria-label={`Delete task: ${task.task}`}
-          style={{ WebkitTapHighlightColor: 'transparent' }}
-        >
-          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-            />
-          </svg>
-        </button>
+            {task.task}
+          </div>
+          {formattedDate && (
+            <div className="aw-text-caption mt-1 flex items-center gap-2">
+              <span>Due: {formattedDate}</span>
+              {isOverdue && (
+                <span className="aw-badge aw-badge-error">
+                  {Math.floor(
+                    (new Date(todayStr) - new Date(task.due_date)) / (1000 * 60 * 60 * 24)
+                  )}{' '}
+                  days overdue
+                </span>
+              )}
+              {isToday && <span className="aw-badge aw-badge-primary">Today</span>}
+              {isPinned && <span className="aw-badge aw-badge-warning">Pinned</span>}
+            </div>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {onStartPomodoro && !task.completed && (
+            <AppleWalletButton
+              variant="ghost"
+              size="sm"
+              onClick={() => handleAction(() => onStartPomodoro(task))}
+              className="w-10 h-10 p-0 min-h-0"
+              title="Start Pomodoro session"
+            >
+              🍅
+            </AppleWalletButton>
+          )}
+          <AppleWalletButton
+            variant="ghost"
+            size="sm"
+            onClick={() => handleAction(() => onTogglePin(task.id, task.pinned))}
+            className={`w-10 h-10 p-0 min-h-0 ${isPinned ? 'text-orange-600' : ''}`}
+            title={isPinned ? 'Unpin task' : 'Pin task'}
+          >
+            📌
+          </AppleWalletButton>
+          <AppleWalletButton
+            variant="ghost"
+            size="sm"
+            onClick={() => handleAction(() => onEdit(task))}
+            className="w-10 h-10 p-0 min-h-0"
+            title="Edit task"
+          >
+            ✏️
+          </AppleWalletButton>
+          <AppleWalletButton
+            variant="ghost"
+            size="sm"
+            onClick={() => handleAction(() => onDelete(task.id))}
+            className="w-10 h-10 p-0 min-h-0 text-red-500 hover:text-red-600"
+            title="Delete task"
+          >
+            🗑️
+          </AppleWalletButton>
+        </div>
       </div>
-    </div>
+    </AppleWalletCard>
   );
 };
 
