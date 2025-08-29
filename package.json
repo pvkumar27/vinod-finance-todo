@@ -21,6 +21,7 @@
     "chrono-node": "^2.8.4",
     "date-fns": "^4.1.0",
     "dotenv": "^16.6.1",
+    "framer-motion": "^12.23.12",
     "glob": "^11.0.3",
     "node-fetch": "^3.3.2",
     "nodemailer": "^6.10.1",
@@ -67,7 +68,6 @@
     "prepare": "husky install",
     "test:pre-commit": "npm run test:e2e:essential",
     "test:update-expectations": "node scripts/update-test-expectations.js",
-
     "cypress:open": "npx cypress open",
     "cypress:run": "npx cypress run",
     "test:e2e": "npx cypress run",

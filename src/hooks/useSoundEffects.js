@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 
 const useSoundEffects = () => {
   const [soundEnabled, setSoundEnabled] = useState(() => {
@@ -6,88 +6,82 @@ const useSoundEffects = () => {
     return saved !== null ? JSON.parse(saved) : true;
   });
 
-  const audioContextRef = useRef(null);
-
   useEffect(() => {
     localStorage.setItem('soundEnabled', JSON.stringify(soundEnabled));
   }, [soundEnabled]);
 
-  const initAudioContext = useCallback(() => {
-    if (!audioContextRef.current) {
-      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
-    }
-
-    if (audioContextRef.current.state === 'suspended') {
-      audioContextRef.current.resume().catch(() => {});
-    }
-
-    return audioContextRef.current;
-  }, []);
-
   const playSound = useCallback(
-    (type, options = {}) => {
+    (frequency, duration = 150, type = 'sine') => {
       if (!soundEnabled) return;
 
       try {
-        const audioContext = initAudioContext();
-        if (audioContext.state !== 'running') return;
-
-        const { frequency = 800, duration = 0.2, volume = 0.1, waveType = 'sine' } = options;
-
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         const oscillator = audioContext.createOscillator();
         const gainNode = audioContext.createGain();
 
         oscillator.connect(gainNode);
         gainNode.connect(audioContext.destination);
 
-        oscillator.type = waveType;
         oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+        oscillator.type = type;
 
         gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
-        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+        gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01);
+        gainNode.gain.exponentialRampToValueAtTime(
+          0.001,
+          audioContext.currentTime + duration / 1000
+        );
 
         oscillator.start(audioContext.currentTime);
-        oscillator.stop(audioContext.currentTime + duration);
+        oscillator.stop(audioContext.currentTime + duration / 1000);
       } catch (error) {
-        console.log('Sound not supported:', error);
+        console.log('Audio not supported:', error);
       }
     },
-    [soundEnabled, initAudioContext]
+    [soundEnabled]
   );
 
-  // Predefined sound effects
-  const sounds = {
-    // Success sounds
-    taskComplete: () => playSound('success', { frequency: 523, duration: 0.3, volume: 0.15 }),
-    success: () => playSound('success', { frequency: 659, duration: 0.25, volume: 0.12 }),
+  const taskComplete = useCallback(() => {
+    // Soft success chime - C major chord
+    playSound(523.25, 100); // C5
+    setTimeout(() => playSound(659.25, 100), 50); // E5
+    setTimeout(() => playSound(783.99, 150), 100); // G5
+  }, [playSound]);
 
-    // Interaction sounds
-    buttonPress: () => playSound('press', { frequency: 1000, duration: 0.1, volume: 0.08 }),
-    cardFlip: () => playSound('flip', { frequency: 800, duration: 0.15, volume: 0.1 }),
-    swipe: () => playSound('swipe', { frequency: 600, duration: 0.12, volume: 0.09 }),
+  const buttonPress = useCallback(() => {
+    // Subtle tap sound
+    playSound(800, 50);
+  }, [playSound]);
 
-    // Notification sounds
-    notification: () => playSound('notification', { frequency: 880, duration: 0.2, volume: 0.1 }),
-    alert: () => playSound('alert', { frequency: 440, duration: 0.3, volume: 0.12 }),
+  const success = useCallback(() => {
+    // Single pleasant tone
+    playSound(659.25, 200);
+  }, [playSound]);
 
-    // Error sounds
-    error: () => playSound('error', { frequency: 300, duration: 0.4, volume: 0.1 }),
+  const error = useCallback(() => {
+    // Low warning tone
+    playSound(220, 300);
+  }, [playSound]);
 
-    // Navigation sounds
-    pageTransition: () => playSound('transition', { frequency: 700, duration: 0.18, volume: 0.08 }),
+  const pomodoroStart = useCallback(() => {
+    // Ascending chime
+    playSound(440, 100);
+    setTimeout(() => playSound(554.37, 100), 100);
+    setTimeout(() => playSound(659.25, 150), 200);
+  }, [playSound]);
 
-    // Special effects
-    celebration: () => {
-      // Multi-tone celebration
-      const notes = [523, 659, 784, 1047]; // C5, E5, G5, C6
-      notes.forEach((freq, index) => {
-        setTimeout(() => {
-          playSound('celebration', { frequency: freq, duration: 0.3, volume: 0.12 });
-        }, index * 100);
-      });
-    },
-  };
+  const pomodoroEnd = useCallback(() => {
+    // Descending completion chime
+    playSound(783.99, 150);
+    setTimeout(() => playSound(659.25, 150), 150);
+    setTimeout(() => playSound(523.25, 200), 300);
+  }, [playSound]);
+
+  const notification = useCallback(() => {
+    // Gentle notification sound
+    playSound(523.25, 100);
+    setTimeout(() => playSound(659.25, 150), 100);
+  }, [playSound]);
 
   const toggleSound = useCallback(() => {
     setSoundEnabled(prev => !prev);
@@ -96,8 +90,13 @@ const useSoundEffects = () => {
   return {
     soundEnabled,
     toggleSound,
-    playSound,
-    ...sounds,
+    taskComplete,
+    buttonPress,
+    success,
+    error,
+    pomodoroStart,
+    pomodoroEnd,
+    notification,
   };
 };
 

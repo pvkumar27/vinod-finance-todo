@@ -6,7 +6,7 @@ import MainApp from './components/MainApp';
 import NotificationScheduler from './utils/notificationScheduler';
 import './App.css';
 import './styles/globals.css';
-import './styles/modern-ui.css';
+import './styles/design-system.css';
 
 function App() {
   const [session, setSession] = useState(null);
@@ -75,16 +75,12 @@ function App() {
         className="min-h-screen flex items-center justify-center"
         style={{ background: 'var(--color-background)' }}
       >
-        <div className="modern-card scale-in">
-          <div className="text-center">
-            <div className="text-3xl font-bold mb-4" style={{ color: 'var(--color-primary)' }}>
-              FinTask
-            </div>
-            <div className="modern-loading mx-auto mb-4"></div>
-            <div className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-              Loading your AI money assistant...
-            </div>
+        <div className="modern-card scale-in" style={{ textAlign: 'center' }}>
+          <div className="text-3xl font-bold mb-4" style={{ color: 'var(--color-primary)' }}>
+            FinTask
           </div>
+          <div className="modern-loading" style={{ margin: '0 auto var(--space-4)' }}></div>
+          <div className="text-sm text-secondary">Loading your AI money assistant...</div>
         </div>
       </div>
     );
