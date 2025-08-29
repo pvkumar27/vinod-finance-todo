@@ -64,11 +64,16 @@ const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete, onSta
 
   return (
     <AppleWalletCard
-      className={`aw-fade-in mb-2 ${task.completed ? 'aw-scale-in' : ''}`}
+      className={`aw-fade-in ${task.completed ? 'aw-scale-in' : ''}`}
       interactive
-      style={getTaskStyle()}
+      style={{
+        ...getTaskStyle(),
+        marginBottom: 'var(--aw-space-lg)',
+        padding: 'var(--aw-space-xl)',
+        color: task.completed ? 'white' : 'var(--aw-text-primary)',
+      }}
     >
-      <div className="flex items-center gap-4">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--aw-space-lg)' }}>
         {/* Checkbox */}
         <div className="flex-shrink-0">
           <input
@@ -85,14 +90,27 @@ const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete, onSta
         </div>
 
         {/* Task Content */}
-        <div className="flex-1 min-w-0">
+        <div style={{ flex: 1, minWidth: 0 }}>
           <div
-            className={`aw-text-body font-medium ${task.completed ? 'line-through opacity-70' : ''}`}
+            className={`aw-heading-md ${task.completed ? 'line-through opacity-70' : ''}`}
+            style={{
+              color: task.completed ? 'rgba(255,255,255,0.9)' : 'var(--aw-text-primary)',
+              fontWeight: 'var(--aw-font-weight-semibold)',
+            }}
           >
             {task.task}
           </div>
           {formattedDate && (
-            <div className="aw-text-caption mt-1 flex items-center gap-2">
+            <div
+              className="aw-text-caption"
+              style={{
+                marginTop: 'var(--aw-space-sm)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 'var(--aw-space-sm)',
+                color: task.completed ? 'rgba(255,255,255,0.7)' : 'var(--aw-text-tertiary)',
+              }}
+            >
               <span>Due: {formattedDate}</span>
               {isOverdue && (
                 <span className="aw-badge aw-badge-error">
@@ -109,7 +127,14 @@ const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete, onSta
         </div>
 
         {/* Actions */}
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 'var(--aw-space-sm)',
+            flexShrink: 0,
+          }}
+        >
           {onStartPomodoro && !task.completed && (
             <AppleWalletButton
               variant="ghost"

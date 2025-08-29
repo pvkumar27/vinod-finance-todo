@@ -469,69 +469,97 @@ const TaskManager = () => {
       )}
 
       {/* Add Todo Form */}
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 mb-6 hover:shadow-xl transition-all duration-200">
+      <AppleWalletCard className="mb-6 aw-scale-in" elevated>
         <form onSubmit={handleAddTodo}>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1 relative">
-              <label
-                htmlFor="task-input"
-                className="text-sm font-medium mb-2 block text-left text-gray-700"
-              >
-                Task
-              </label>
-              <div className="relative">
-                <input
-                  id="task-input"
-                  data-cy="task-input-field"
-                  type="text"
-                  placeholder={editingTodo ? 'Edit task...' : 'What needs to be done?'}
-                  value={newTask}
-                  onChange={e => setNewTask(e.target.value)}
-                  className="w-full px-4 py-3 pr-12 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white"
-                />
-                <button
-                  type="button"
-                  onClick={() => {
-                    buttonPress();
-                    handleVoiceInput();
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--aw-space-lg)' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--aw-space-md)' }}>
+              <div style={{ flex: 1 }}>
+                <label
+                  htmlFor="task-input"
+                  className="aw-text-caption"
+                  style={{
+                    display: 'block',
+                    marginBottom: 'var(--aw-space-sm)',
+                    fontWeight: 'var(--aw-font-weight-semibold)',
                   }}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 w-10 h-10 rounded-full flex items-center justify-center transition-all hover:bg-gray-100 active:scale-95"
-                  title="Voice input"
-                  aria-label="Voice input"
                 >
-                  <span className="text-lg">🎤</span>
-                </button>
+                  Task
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    id="task-input"
+                    data-cy="task-input-field"
+                    type="text"
+                    placeholder={editingTodo ? 'Edit task...' : 'What needs to be done?'}
+                    value={newTask}
+                    onChange={e => setNewTask(e.target.value)}
+                    className="aw-input"
+                    style={{ paddingRight: '50px' }}
+                  />
+                  <AppleWalletButton
+                    variant="ghost"
+                    size="sm"
+                    type="button"
+                    onClick={() => {
+                      buttonPress();
+                      handleVoiceInput();
+                    }}
+                    style={{
+                      position: 'absolute',
+                      right: 'var(--aw-space-sm)',
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      width: '40px',
+                      height: '40px',
+                      padding: 0,
+                      minHeight: 0,
+                    }}
+                    title="Voice input"
+                    aria-label="Voice input"
+                  >
+                    🎤
+                  </AppleWalletButton>
+                </div>
+              </div>
+              <div>
+                <label
+                  htmlFor="task-due-date"
+                  className="aw-text-caption"
+                  style={{
+                    display: 'block',
+                    marginBottom: 'var(--aw-space-sm)',
+                    fontWeight: 'var(--aw-font-weight-semibold)',
+                  }}
+                >
+                  Due Date
+                </label>
+                <input
+                  id="task-due-date"
+                  data-cy="task-date-field"
+                  type="date"
+                  value={taskDate}
+                  onChange={e => setTaskDate(e.target.value)}
+                  className="aw-input"
+                  required
+                />
               </div>
             </div>
-            <div className="flex flex-col w-full sm:w-auto">
-              <label
-                htmlFor="task-due-date"
-                className="text-sm font-medium mb-2 text-left block text-gray-700"
-              >
-                Due Date
-              </label>
-              <input
-                id="task-due-date"
-                data-cy="task-date-field"
-                type="date"
-                value={taskDate}
-                onChange={e => setTaskDate(e.target.value)}
-                className="px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-white sm:w-40"
-                required
-              />
-            </div>
-            <div className="flex flex-col w-full sm:w-auto justify-end mt-3 sm:mt-0">
-              <button
+            <div style={{ display: 'flex', gap: 'var(--aw-space-md)', flexWrap: 'wrap' }}>
+              <AppleWalletButton
+                variant="primary"
                 type="submit"
                 data-cy={editingTodo ? 'task-update-button' : 'task-add-button'}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 active:scale-95 flex items-center justify-center gap-2 w-full sm:w-auto"
                 onClick={() => buttonPress()}
+                style={{ flex: 1, minWidth: '120px' }}
               >
-                <span>{editingTodo ? '✏️' : '📝'}</span>
+                <span style={{ marginRight: 'var(--aw-space-sm)' }}>
+                  {editingTodo ? '✏️' : '📝'}
+                </span>
                 {editingTodo ? 'Update' : 'Add Task'}
-              </button>
+              </AppleWalletButton>
               {editingTodo && (
-                <button
+                <AppleWalletButton
+                  variant="secondary"
                   type="button"
                   onClick={() => {
                     buttonPress();
@@ -539,39 +567,50 @@ const TaskManager = () => {
                     setNewTask('');
                     setTaskDate(getTodayDateString());
                   }}
-                  className="bg-white text-gray-800 font-semibold px-6 py-3 rounded-xl border border-gray-300 shadow-md hover:bg-gray-50 hover:shadow-lg transition-all duration-200 active:scale-95 w-full sm:w-auto mt-3"
+                  style={{ flex: 1, minWidth: '120px' }}
                 >
                   Cancel
-                </button>
+                </AppleWalletButton>
               )}
             </div>
+            <div
+              className="aw-text-caption"
+              style={{ display: 'flex', alignItems: 'center', gap: 'var(--aw-space-sm)' }}
+            >
+              <span>💡</span>
+              <span>
+                Use natural language or ask{' '}
+                <strong style={{ color: 'var(--aw-primary)' }}>FinBot 🤖</strong> for voice input
+              </span>
+            </div>
           </div>
-          <p className="text-xs mt-4 flex items-center text-gray-500">
-            <span className="mr-2">💡</span>
-            <span>
-              Use natural language or ask <strong className="text-blue-600">FinBot 🤖</strong> for
-              voice input
-            </span>
-          </p>
         </form>
-      </div>
+      </AppleWalletCard>
 
       {/* Progress Bar */}
       <TodoProgressBar todos={todos} />
 
       {/* Tasks */}
       <div className="mb-8">
-        <div className="mb-6">
-          <h3 className="aw-heading-lg mb-2">
-            <span className="hidden sm:inline">
-              Tasks ({pendingTodos.length} pending, {todos.filter(t => t.completed).length}{' '}
-              completed)
-            </span>
-            <span className="sm:hidden">
-              Tasks {pendingTodos.length} pending • {todos.filter(t => t.completed).length} done
-            </span>
-          </h3>
-        </div>
+        <AppleWalletCard className="mb-6 aw-fade-in">
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h3 className="aw-heading-lg" style={{ margin: 0 }}>
+              <span className="hidden sm:inline">
+                📋 Tasks ({pendingTodos.length} pending, {todos.filter(t => t.completed).length}{' '}
+                completed)
+              </span>
+              <span className="sm:hidden">
+                📋 Tasks {pendingTodos.length} • {todos.filter(t => t.completed).length} done
+              </span>
+            </h3>
+            <div className="aw-badge aw-badge-primary">
+              {Math.round(
+                (todos.filter(t => t.completed).length / Math.max(todos.length, 1)) * 100
+              )}
+              % Complete
+            </div>
+          </div>
+        </AppleWalletCard>
 
         {pendingTodos.length === 0 ? (
           <div className="text-center py-12">
@@ -590,10 +629,22 @@ const TaskManager = () => {
             >
               {/* Pinned Tasks Section */}
               {pinnedTodos.length > 0 && (
-                <AppleWalletCard className="mb-6 aw-slide-in" elevated>
-                  <h4 className="aw-heading-md mb-4 flex items-center">
-                    <span className="mr-3">📌</span>
-                    Pinned Tasks
+                <AppleWalletCard
+                  className="mb-6 aw-slide-in"
+                  elevated
+                  style={{ background: 'var(--aw-gradient-accent)', color: 'white' }}
+                >
+                  <h4
+                    className="aw-heading-md"
+                    style={{
+                      marginBottom: 'var(--aw-space-lg)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      color: 'white',
+                    }}
+                  >
+                    <span style={{ marginRight: 'var(--aw-space-md)' }}>📌</span>
+                    Pinned Tasks ({pinnedTodos.length})
                   </h4>
                   <TaskList
                     tasks={pinnedTodos}
@@ -608,7 +659,21 @@ const TaskManager = () => {
 
               {/* Unpinned Tasks Section */}
               {unpinnedTodos.length > 0 && (
-                <div className={pinnedTodos.length > 0 ? 'mt-6' : ''}>
+                <AppleWalletCard
+                  className={`aw-slide-in ${pinnedTodos.length > 0 ? 'mt-6' : ''}`}
+                  elevated
+                >
+                  <h4
+                    className="aw-heading-md"
+                    style={{
+                      marginBottom: 'var(--aw-space-lg)',
+                      display: 'flex',
+                      alignItems: 'center',
+                    }}
+                  >
+                    <span style={{ marginRight: 'var(--aw-space-md)' }}>📝</span>
+                    Active Tasks ({unpinnedTodos.length})
+                  </h4>
                   <TaskList
                     tasks={unpinnedTodos}
                     onToggleComplete={handleToggleComplete}
@@ -617,7 +682,7 @@ const TaskManager = () => {
                     onDelete={handleDelete}
                     onStartPomodoro={handleStartPomodoro}
                   />
-                </div>
+                </AppleWalletCard>
               )}
 
               {/* Drag Overlay */}
