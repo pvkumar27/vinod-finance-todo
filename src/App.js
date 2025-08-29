@@ -6,9 +6,7 @@ import MainApp from './components/MainApp';
 import NotificationScheduler from './utils/notificationScheduler';
 import './App.css';
 import './styles/globals.css';
-import './styles/finbot-theme.css';
-import './styles/design-system.css';
-import './styles/apple-wallet-theme.css';
+import './styles/modern-ui.css';
 
 function App() {
   const [session, setSession] = useState(null);
