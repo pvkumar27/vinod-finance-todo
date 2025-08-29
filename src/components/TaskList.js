@@ -107,7 +107,7 @@ const TaskList = ({ tasks, onToggleComplete, onDelete, completed = false }) => {
                     {task.task}
                   </div>
                   {task.due_date && (
-                    <div className="text-sm text-secondary">
+                    <div className="body-text text-secondary">
                       Due: {formatDateString(task.due_date)}
                     </div>
                   )}

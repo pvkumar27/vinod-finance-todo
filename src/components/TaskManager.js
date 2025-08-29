@@ -252,8 +252,10 @@ const TaskManager = () => {
               >
                 🎉
               </motion.div>
-              <div className="text-lg font-semibold text-primary mb-2">All caught up!</div>
-              <div className="text-secondary">No pending tasks. Time to add some new goals!</div>
+              <div className="section-header text-primary mb-2">All caught up!</div>
+              <div className="body-text text-secondary">
+                No pending tasks. Time to add some new goals!
+              </div>
             </motion.div>
           ) : (
             <TaskList
@@ -278,7 +280,7 @@ const TaskManager = () => {
                   borderTop: '1px solid var(--border)',
                 }}
               >
-                <h3 className="text-lg font-semibold text-primary mb-4">
+                <h3 className="section-header text-primary mb-4">
                   ✅ Completed Tasks ({completedTodos.length})
                 </h3>
                 <TaskList
