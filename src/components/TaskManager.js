@@ -6,6 +6,7 @@ import TaskList from './TaskList';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/Card';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
+import Toggle from './ui/Toggle';
 import useSoundEffects from '../hooks/useSoundEffects';
 import useAudioCues from '../hooks/useAudioCues';
 
@@ -221,15 +222,16 @@ const TaskManager = () => {
             <div className="flex items-center gap-4">
               <div className="text-sm text-secondary">{pendingTodos.length} pending</div>
               {completedTodos.length > 0 && (
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    buttonPress();
-                    setShowCompleted(!showCompleted);
-                  }}
-                >
-                  {showCompleted ? 'Hide' : 'Show'} Completed ({completedTodos.length})
-                </Button>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-secondary">Show Completed</span>
+                  <Toggle
+                    checked={showCompleted}
+                    onChange={() => {
+                      buttonPress();
+                      setShowCompleted(!showCompleted);
+                    }}
+                  />
+                </div>
               )}
             </div>
           </div>

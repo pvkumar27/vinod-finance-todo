@@ -2,6 +2,7 @@ import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { formatDateString, getTodayDateString } from '../utils/dateUtils';
 import { Button } from './ui/Button';
+import Checkbox from './ui/Checkbox';
 import useSoundEffects from '../hooks/useSoundEffects';
 
 const TaskList = ({ tasks, onToggleComplete, onDelete, completed = false }) => {
@@ -75,23 +76,13 @@ const TaskList = ({ tasks, onToggleComplete, onDelete, completed = false }) => {
               style={getTaskCardStyle(task)}
             >
               <div className="flex items-center gap-4">
-                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                  <input
-                    type="checkbox"
-                    checked={task.completed || false}
-                    onChange={() => {
-                      buttonPress();
-                      onToggleComplete(task.id, task.completed);
-                    }}
-                    style={{
-                      width: '20px',
-                      height: '20px',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      accentColor: 'var(--success)',
-                    }}
-                  />
-                </motion.div>
+                <Checkbox
+                  checked={task.completed || false}
+                  onChange={() => {
+                    buttonPress();
+                    onToggleComplete(task.id, task.completed);
+                  }}
+                />
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div

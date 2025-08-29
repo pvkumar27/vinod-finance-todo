@@ -9,6 +9,10 @@ const Card = React.forwardRef(({ className, children, ...props }, ref) => (
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.25 }}
+    whileHover={{
+      y: -2,
+      boxShadow: '0 10px 25px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+    }}
     {...props}
   >
     {children}
