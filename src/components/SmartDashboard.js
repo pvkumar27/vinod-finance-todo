@@ -120,9 +120,9 @@ const SmartDashboard = ({ onQueryGenerated }) => {
     <motion.div
       className="container"
       style={{ paddingTop: 'var(--space-6)', paddingBottom: 'var(--space-8)' }}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.3 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.25 }}
     >
       {/* Header */}
       <Card className="mb-6">
