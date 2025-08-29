@@ -147,11 +147,11 @@ body {
 
 /* Typography Hierarchy */
 .text-xs { font-size: 0.75rem; }
-.text-sm { font-size: 0.875rem; }
+.text-sm { font-size: 0.875rem; color: #6B7280; } /* Captions/dates */
 .text-base { font-size: 1rem; font-weight: 400; } /* Body text */
-.text-lg { font-size: 1.125rem; font-weight: 500; } /* Section headers */
-.text-xl { font-size: 1.25rem; font-weight: 700; } /* Headlines */
-.text-2xl { font-size: 1.5rem; }
+.text-lg { font-size: 1.125rem; font-weight: 500; } /* Section titles */
+.text-xl { font-size: 1.25rem; font-weight: 700; }
+.text-2xl { font-size: 1.5rem; font-weight: 700; color: var(--primary); } /* Headlines */
 .text-3xl { font-size: 1.875rem; }
 
 .font-regular { font-weight: 400; }
@@ -163,12 +163,11 @@ body {
 .text-secondary { color: var(--text-secondary); }
 .text-tertiary { color: var(--text-tertiary); }
 
-/* Headlines */
-.headline { font-size: 1.25rem; font-weight: 700; font-family: 'Inter', sans-serif; }
-/* Section Headers */
+/* Updated Typography Classes */
+.headline { font-size: 1.5rem; font-weight: 700; color: var(--primary); font-family: 'Inter', sans-serif; }
 .section-header { font-size: 1.125rem; font-weight: 500; font-family: 'Inter', sans-serif; }
-/* Body Text */
 .body-text { font-size: 1rem; font-weight: 400; font-family: 'Inter', sans-serif; }
+.caption { font-size: 0.875rem; color: #6B7280; font-family: 'Inter', sans-serif; }
 
 /* Layout */
 .container {
@@ -271,9 +270,10 @@ body {
   }
   
   /* Responsive text scaling */
-  .text-xl, .headline { font-size: 1.125rem; } /* Headlines smaller on mobile */
+  .text-2xl, .headline { font-size: 1.25rem; } /* Headlines smaller on mobile */
   .text-lg, .section-header { font-size: 1rem; } /* Section headers smaller */
   .text-base, .body-text { font-size: 0.875rem; } /* Body text smaller */
+  .text-sm, .caption { font-size: 0.75rem; } /* Captions smaller */
   
   /* Mobile grid adjustments */
   .grid {
