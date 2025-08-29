@@ -14,8 +14,13 @@ const BottomNavigation = ({ activeTab, setActiveTab }) => {
     >
       <div className="max-w-screen-sm mx-auto px-4">
         <div
-          className="flex justify-around items-center h-14 pt-1 bg-white rounded-2xl shadow-lg border border-gray-100"
-          style={{ background: 'var(--surface)' }}
+          className="flex justify-around items-center h-14 pt-1 rounded-2xl border border-white/20"
+          style={{
+            background: 'rgba(255, 255, 255, 0.7)',
+            backdropFilter: 'blur(12px)',
+            WebkitBackdropFilter: 'blur(12px)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.05)',
+          }}
         >
           {navItems.map(item => (
             <button

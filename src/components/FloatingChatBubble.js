@@ -16,15 +16,16 @@ const FloatingChatBubble = ({ onClick, isActive }) => {
         onClick={onClick}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
-        className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center transition-colors ${
-          isActive ? 'bg-gray-600' : 'bg-primary'
-        }`}
+        className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors border border-white/20`}
         whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         style={{
           background: isActive
-            ? 'var(--text-secondary)'
+            ? 'rgba(107, 114, 128, 0.8)'
             : 'linear-gradient(135deg, var(--primary), var(--secondary))',
+          backdropFilter: 'blur(12px)',
+          WebkitBackdropFilter: 'blur(12px)',
+          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.05)',
         }}
       >
         <AnimatePresence mode="wait">
@@ -58,10 +59,18 @@ const FloatingChatBubble = ({ onClick, isActive }) => {
             initial={{ opacity: 0, x: 10, scale: 0.8 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: 10, scale: 0.8 }}
-            className="absolute right-16 top-1/2 transform -translate-y-1/2 bg-gray-800 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap"
+            className="absolute right-16 top-1/2 transform -translate-y-1/2 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap border border-white/20"
+            style={{
+              background: 'rgba(31, 41, 55, 0.9)',
+              backdropFilter: 'blur(12px)',
+              WebkitBackdropFilter: 'blur(12px)',
+            }}
           >
             Ask FinBot
-            <div className="absolute right-0 top-1/2 transform translate-x-1 -translate-y-1/2 w-2 h-2 bg-gray-800 rotate-45"></div>
+            <div
+              className="absolute right-0 top-1/2 transform translate-x-1 -translate-y-1/2 w-2 h-2 rotate-45"
+              style={{ background: 'rgba(31, 41, 55, 0.9)' }}
+            ></div>
           </motion.div>
         )}
       </AnimatePresence>
