@@ -479,8 +479,8 @@ const MainApp = () => {
   return (
     <div
       className="min-h-screen flex flex-col"
-      style={{ background: 'var(--aw-background)' }}
       style={{
+        background: 'var(--aw-background)',
         paddingTop: 'env(safe-area-inset-top)',
         paddingBottom: 'env(safe-area-inset-bottom)',
       }}

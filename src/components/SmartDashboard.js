@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import AppleWalletCard from './ui/AppleWalletCard';
-import AppleWalletButton from './ui/AppleWalletButton';
 
 const SmartDashboard = ({ onQueryGenerated }) => {
   const [loading, setLoading] = useState(true);

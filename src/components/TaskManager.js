@@ -29,7 +29,7 @@ const TaskManager = () => {
   const [taskDate, setTaskDate] = useState(getTodayDateString());
   const [editingTodo, setEditingTodo] = useState(null);
 
-  const { taskComplete, buttonPress, success, error: errorSound } = useSoundEffects();
+  const { taskComplete, buttonPress, success } = useSoundEffects();
 
   const [showCompleted, setShowCompleted] = useState(false);
   const [activeId, setActiveId] = useState(null);
@@ -146,36 +146,6 @@ const TaskManager = () => {
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
       setTimeout(() => setMessage(''), 4000);
-    }
-  };
-
-  const playTaskCompleteSound = () => {
-    try {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-      // Success sound - ascending notes
-      const notes = [261, 329, 392, 523]; // C4, E4, G4, C5
-
-      notes.forEach((freq, index) => {
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-
-        oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
-        oscillator.type = 'sine';
-
-        const startTime = audioContext.currentTime + index * 0.1;
-        gainNode.gain.setValueAtTime(0, startTime);
-        gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
-        gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + 0.3);
-
-        oscillator.start(startTime);
-        oscillator.stop(startTime + 0.3);
-      });
-    } catch (error) {
-      console.log('Audio not supported:', error);
     }
   };
 

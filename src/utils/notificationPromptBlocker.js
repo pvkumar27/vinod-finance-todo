@@ -82,8 +82,10 @@ export const safeProcessQuery = async (query, processor) => {
   }
 };
 
-export default {
+const notificationPromptBlocker = {
   isNotificationPrompt,
   blockNotificationPrompt,
   safeProcessQuery,
 };
+
+export default notificationPromptBlocker;

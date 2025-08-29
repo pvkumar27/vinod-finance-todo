@@ -5,7 +5,7 @@ import AppleWalletButton from './ui/AppleWalletButton';
 import useSoundEffects from '../hooks/useSoundEffects';
 
 const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete, onStartPomodoro }) => {
-  const { taskComplete, buttonPress, success, cardFlip } = useSoundEffects();
+  const { taskComplete, buttonPress, success } = useSoundEffects();
   const isPinned = task.pinned;
   const formattedDate = task.due_date ? formatDateString(task.due_date) : null;
 
@@ -13,7 +13,6 @@ const TaskItem = ({ task, onToggleComplete, onTogglePin, onEdit, onDelete, onSta
   const todayStr = getTodayDateString();
   const isToday = task.due_date === todayStr;
   const isOverdue = task.due_date < todayStr;
-  const isFuture = task.due_date > todayStr;
 
   // Apple Wallet style states
   const getTaskStyle = () => {
