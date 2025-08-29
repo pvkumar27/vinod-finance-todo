@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import { api } from '../services/api';
-import AppleWalletCard from './ui/AppleWalletCard';
-import AppleWalletButton from './ui/AppleWalletButton';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/Card';
+import { Button } from './ui/Button';
 
 const SmartDashboard = ({ onQueryGenerated }) => {
   const [loading, setLoading] = useState(true);
@@ -9,7 +10,6 @@ const SmartDashboard = ({ onQueryGenerated }) => {
 
   useEffect(() => {
     loadData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadData = async () => {
@@ -25,8 +25,6 @@ const SmartDashboard = ({ onQueryGenerated }) => {
 
   const generateInsights = (cards, todos) => {
     const now = new Date();
-
-    // Critical issues that need immediate attention
     const criticalIssues = [];
 
     // Overdue tasks
@@ -59,33 +57,6 @@ const SmartDashboard = ({ onQueryGenerated }) => {
       });
     }
 
-    // Expiring promos (30 days)
-    const expiringPromos = [];
-    cards.forEach(card => {
-      if (Array.isArray(card.current_promos)) {
-        card.current_promos.forEach(promo => {
-          if (promo.promo_expiry_date) {
-            const daysUntil = Math.ceil(
-              (new Date(promo.promo_expiry_date) - now) / (1000 * 60 * 60 * 24)
-            );
-            if (daysUntil <= 30 && daysUntil > 0) {
-              expiringPromos.push({ card: card.card_name, promo, daysUntil });
-            }
-          }
-        });
-      }
-    });
-    if (expiringPromos.length > 0) {
-      criticalIssues.push({
-        type: 'expiring_promos',
-        title: `${expiringPromos.length} Promos Expiring Soon`,
-        description: 'Promotional rates ending within 30 days',
-        action: 'Check Promos',
-        severity: 'medium',
-      });
-    }
-
-    // Quick stats
     const stats = {
       totalTasks: todos.length,
       completedTasks: todos.filter(t => t.completed).length,
@@ -97,7 +68,7 @@ const SmartDashboard = ({ onQueryGenerated }) => {
       }).length,
     };
 
-    setInsights({ criticalIssues, stats, expiringPromos, overdueTasks, inactiveCards });
+    setInsights({ criticalIssues, stats, overdueTasks, inactiveCards });
   };
 
   const handleAction = actionType => {
@@ -108,9 +79,6 @@ const SmartDashboard = ({ onQueryGenerated }) => {
       case 'Review Cards':
         window.dispatchEvent(new CustomEvent('switchTab', { detail: { tab: 'cards' } }));
         break;
-      case 'Check Promos':
-        window.dispatchEvent(new CustomEvent('switchTab', { detail: { tab: 'cards' } }));
-        break;
       default:
         if (onQueryGenerated) onQueryGenerated(actionType);
     }
@@ -118,176 +86,211 @@ const SmartDashboard = ({ onQueryGenerated }) => {
 
   if (loading) {
     return (
-      <AppleWalletCard className="text-center py-12 aw-fade-in">
-        <div className="aw-loading mx-auto mb-4"></div>
-        <p className="aw-text-body">Loading insights...</p>
-      </AppleWalletCard>
+      <div className="container" style={{ paddingTop: 'var(--space-8)' }}>
+        <Card>
+          <div style={{ textAlign: 'center' }}>
+            <div className="loading" style={{ margin: '0 auto var(--space-4)' }}></div>
+            <div className="text-secondary">Loading insights...</div>
+          </div>
+        </Card>
+      </div>
     );
   }
 
   if (!insights) {
     return (
-      <AppleWalletCard className="text-center aw-fade-in">
-        <div className="text-4xl mb-4">📊</div>
-        <h3 className="aw-heading-md mb-2">No Data Available</h3>
-        <p className="aw-text-body">Add some tasks or credit cards to see insights.</p>
-      </AppleWalletCard>
+      <div className="container" style={{ paddingTop: 'var(--space-8)' }}>
+        <Card>
+          <div style={{ textAlign: 'center', padding: 'var(--space-8)' }}>
+            <div style={{ fontSize: '4rem', marginBottom: 'var(--space-4)' }}>📊</div>
+            <CardTitle className="mb-2">No Data Available</CardTitle>
+            <CardDescription>Add some tasks or credit cards to see insights.</CardDescription>
+          </div>
+        </Card>
+      </div>
     );
   }
 
+  const completionRate =
+    insights.stats.totalTasks > 0
+      ? Math.round((insights.stats.completedTasks / insights.stats.totalTasks) * 100)
+      : 0;
+
   return (
-    <div
-      style={{
-        padding: 'var(--aw-space-xl)',
-        background: 'var(--aw-background)',
-        minHeight: '100vh',
-      }}
+    <motion.div
+      className="container"
+      style={{ paddingTop: 'var(--space-6)', paddingBottom: 'var(--space-8)' }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
     >
       {/* Header */}
-      <AppleWalletCard className="mb-6 aw-fade-in">
-        <h2 className="aw-heading-xl" style={{ display: 'flex', alignItems: 'center', margin: 0 }}>
-          <span style={{ marginRight: 'var(--aw-space-md)' }}>📊</span>
-          Smart Insights
-        </h2>
-        <p className="aw-text-body" style={{ marginTop: 'var(--aw-space-sm)' }}>
-          AI-powered financial and productivity insights
-        </p>
-      </AppleWalletCard>
+      <Card className="mb-6">
+        <CardHeader>
+          <CardTitle>📊 Smart Insights</CardTitle>
+          <CardDescription>AI-powered financial and productivity insights</CardDescription>
+        </CardHeader>
+      </Card>
 
-      {/* Critical Issues - Only show if there are any */}
+      {/* Critical Issues */}
       {insights.criticalIssues.length > 0 && (
-        <AppleWalletCard
-          className="mb-6 aw-slide-in"
-          style={{
-            background: 'linear-gradient(135deg, var(--aw-error) 0%, #FF6B6B 100%)',
-            color: 'white',
-          }}
-        >
-          <h3
-            className="aw-heading-lg"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              marginBottom: 'var(--aw-space-lg)',
-              color: 'white',
-            }}
-          >
-            <span style={{ marginRight: 'var(--aw-space-sm)' }}>⚠️</span>Needs Attention
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--aw-space-md)' }}>
-            {insights.criticalIssues.map((issue, index) => (
-              <div
-                key={index}
-                style={{
-                  padding: 'var(--aw-space-lg)',
-                  borderRadius: 'var(--aw-radius-md)',
-                  background: 'rgba(255, 255, 255, 0.15)',
-                  backdropFilter: 'blur(10px)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                }}
-              >
-                <div
-                  style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'flex-start',
-                    gap: 'var(--aw-space-md)',
-                  }}
+        <Card className="mb-6 border-error" style={{ background: 'rgb(239 68 68 / 0.02)' }}>
+          <CardHeader>
+            <CardTitle className="text-error">⚠️ Needs Attention</CardTitle>
+            <CardDescription>Issues that require immediate action</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {insights.criticalIssues.map((issue, index) => (
+                <motion.div
+                  key={index}
+                  className="flex items-center justify-between p-4 rounded-lg border border-error"
+                  style={{ background: 'rgb(239 68 68 / 0.05)' }}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
                 >
-                  <div style={{ flex: 1 }}>
-                    <h4 className="aw-heading-md" style={{ color: 'white', margin: 0 }}>
-                      {issue.title}
-                    </h4>
-                    <p
-                      className="aw-text-body"
-                      style={{ color: 'rgba(255, 255, 255, 0.9)', marginTop: 'var(--aw-space-xs)' }}
-                    >
-                      {issue.description}
-                    </p>
+                  <div>
+                    <div className="font-semibold text-error">{issue.title}</div>
+                    <div className="text-sm text-secondary">{issue.description}</div>
                   </div>
-                  <AppleWalletButton
-                    variant="ghost"
+                  <Button
+                    variant="secondary"
                     onClick={() => handleAction(issue.action)}
-                    style={{
-                      background: 'rgba(255, 255, 255, 0.2)',
-                      color: 'white',
-                      border: '1px solid rgba(255, 255, 255, 0.3)',
-                    }}
+                    className="text-error border-error"
                   >
                     {issue.action}
-                  </AppleWalletButton>
-                </div>
-              </div>
-            ))}
-          </div>
-        </AppleWalletCard>
+                  </Button>
+                </motion.div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
-      {/* Quick Stats */}
-      <div className="finbot-card p-6">
-        <h3 className="finbot-heading-lg mb-4 flex items-center">
-          <span className="mr-2">📊</span>Overview
-        </h3>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <div className="text-2xl font-bold text-blue-600">{insights.stats.totalTasks}</div>
-            <div className="text-sm text-blue-700">Total Tasks</div>
-            <div className="text-xs text-blue-600">{insights.stats.completedTasks} completed</div>
-          </div>
-          <div className="text-center p-4 bg-green-50 rounded-lg">
-            <div className="text-2xl font-bold text-green-600">{insights.stats.totalCards}</div>
-            <div className="text-sm text-green-700">Credit Cards</div>
-            <div className="text-xs text-green-600">{insights.stats.activeCards} active</div>
-          </div>
-          <div className="text-center p-4 bg-purple-50 rounded-lg">
-            <div className="text-2xl font-bold text-purple-600">
-              {insights.expiringPromos.length}
-            </div>
-            <div className="text-sm text-purple-700">Expiring Promos</div>
-            <div className="text-xs text-purple-600">Next 30 days</div>
-          </div>
-          <div className="text-center p-4 bg-red-50 rounded-lg">
-            <div className="text-2xl font-bold text-red-600">{insights.overdueTasks.length}</div>
-            <div className="text-sm text-red-700">Overdue Tasks</div>
-            <div className="text-xs text-red-600">Need action</div>
-          </div>
-        </div>
+      {/* Stats Overview */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Card>
+            <CardContent className="text-center p-6">
+              <div className="text-3xl font-bold text-primary mb-2">
+                {insights.stats.totalTasks}
+              </div>
+              <div className="text-sm font-medium text-primary">Total Tasks</div>
+              <div className="text-xs text-secondary">
+                {insights.stats.completedTasks} completed
+              </div>
+              <div className="mt-3 h-2 rounded-full" style={{ background: 'var(--border-light)' }}>
+                <div
+                  className="h-full rounded-full transition-all duration-500"
+                  style={{
+                    width: `${completionRate}%`,
+                    background: 'var(--primary)',
+                  }}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Card>
+            <CardContent className="text-center p-6">
+              <div className="text-3xl font-bold text-secondary mb-2">
+                {insights.stats.totalCards}
+              </div>
+              <div className="text-sm font-medium text-secondary">Credit Cards</div>
+              <div className="text-xs text-secondary">{insights.stats.activeCards} active</div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <Card>
+            <CardContent className="text-center p-6">
+              <div className="text-3xl font-bold text-warning mb-2">
+                {insights.inactiveCards.length}
+              </div>
+              <div className="text-sm font-medium text-warning">Inactive Cards</div>
+              <div className="text-xs text-secondary">90+ days unused</div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+        >
+          <Card>
+            <CardContent className="text-center p-6">
+              <div className="text-3xl font-bold text-error mb-2">
+                {insights.overdueTasks.length}
+              </div>
+              <div className="text-sm font-medium text-error">Overdue Tasks</div>
+              <div className="text-xs text-secondary">Need attention</div>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
       {/* Quick Actions */}
-      <div className="finbot-card p-6">
-        <h3 className="finbot-heading-lg mb-4 flex items-center">
-          <span className="mr-2">⚡</span>Quick Actions
-        </h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <button
-            onClick={() => handleAction('View Tasks')}
-            className="finbot-button-secondary text-left p-4 h-auto"
-          >
-            <div className="font-medium">📝 Manage Tasks</div>
-            <div className="text-sm text-[#8B4513] mt-1">View and organize your to-dos</div>
-          </button>
-          <button
-            onClick={() => handleAction('Review Cards')}
-            className="finbot-button-secondary text-left p-4 h-auto"
-          >
-            <div className="font-medium">💳 Review Cards</div>
-            <div className="text-sm text-[#8B4513] mt-1">Check card activity and promos</div>
-          </button>
-        </div>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>⚡ Quick Actions</CardTitle>
+          <CardDescription>Jump to important sections</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 md:grid-cols-2">
+            <Button
+              variant="secondary"
+              onClick={() => handleAction('View Tasks')}
+              className="justify-start p-4 h-auto"
+            >
+              <div className="text-left">
+                <div className="font-medium">📝 Manage Tasks</div>
+                <div className="text-sm text-secondary">View and organize your to-dos</div>
+              </div>
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => handleAction('Review Cards')}
+              className="justify-start p-4 h-auto"
+            >
+              <div className="text-left">
+                <div className="font-medium">💳 Review Cards</div>
+                <div className="text-sm text-secondary">Check card activity and promos</div>
+              </div>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* All Good Message */}
       {insights.criticalIssues.length === 0 && (
-        <div className="finbot-card p-6 text-center">
-          <div className="text-4xl mb-4">✅</div>
-          <h3 className="finbot-heading-lg text-green-700 mb-2">Everything Looks Good!</h3>
-          <p className="text-[#8B4513]">
-            No critical issues found. Keep up the great work managing your finances and tasks.
-          </p>
-        </div>
+        <Card className="mt-6 border-success" style={{ background: 'rgb(34 197 94 / 0.02)' }}>
+          <CardContent className="text-center p-8">
+            <div style={{ fontSize: '4rem', marginBottom: 'var(--space-4)' }}>✅</div>
+            <CardTitle className="text-success mb-2">Everything Looks Good!</CardTitle>
+            <CardDescription>
+              No critical issues found. Keep up the great work managing your finances and tasks.
+            </CardDescription>
+          </CardContent>
+        </Card>
       )}
-    </div>
+    </motion.div>
   );
 };
 
