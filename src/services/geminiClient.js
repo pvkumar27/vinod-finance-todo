@@ -1,6 +1,7 @@
 import { api } from './api.js';
 import { geminiRouter } from './geminiRouter.js';
 import { features } from '../config/features.js';
+import { blockNotificationPrompt } from '../utils/notificationPromptBlocker.js';
 
 const GEMINI_API_KEY = process.env.REACT_APP_GEMINI_API_KEY;
 
@@ -76,6 +77,9 @@ export class GeminiClient {
   }
 
   async processQuery(query) {
+    // Block notification prompts from being processed
+    blockNotificationPrompt(query);
+
     this.addToRecentQueries(query);
 
     if (!GEMINI_API_KEY) {
@@ -714,6 +718,17 @@ Key Parameters:
   }
   async fallbackProcess(query) {
     const lowerQuery = query.toLowerCase();
+
+    // Block notification prompts from being processed
+    try {
+      blockNotificationPrompt(query);
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Invalid query: notification prompt detected',
+        processingMode: 'blocked-notification-prompt',
+      };
+    }
 
     const learned = this.learnedQueries[lowerQuery.trim()];
     if (learned) {

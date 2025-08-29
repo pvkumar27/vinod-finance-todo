@@ -13,6 +13,7 @@ import {
   handleUIActions,
   focusInput,
 } from '../utils/aiAssistantUtils';
+import { blockNotificationPrompt } from '../utils/notificationPromptBlocker';
 
 const AIAssistant = () => {
   const [messages, setMessages] = useState([
@@ -118,6 +119,14 @@ const AIAssistant = () => {
   }, [isExpanded, checkProactiveAlerts]);
 
   const processQuery = useCallback(async (query, addUserMessage = true) => {
+    // Block notification prompts from being processed as queries
+    try {
+      blockNotificationPrompt(query);
+    } catch (error) {
+      console.warn('Blocked notification prompt:', error.message);
+      return;
+    }
+
     if (addUserMessage) {
       setMessages(prev => [...prev, createMessage('user', query)]);
     }

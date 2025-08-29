@@ -1,5 +1,6 @@
 import { supabase } from '../supabaseClient';
 import { GeminiClient } from './geminiClient';
+import { blockNotificationPrompt } from '../utils/notificationPromptBlocker';
 
 import { api } from './api';
 
@@ -91,6 +92,17 @@ class MCPClient {
 
   // Natural language processing using Gemini with smart fallback
   async processNaturalLanguageQuery(query) {
+    // Block notification prompts at the MCP level
+    try {
+      blockNotificationPrompt(query);
+    } catch (error) {
+      return {
+        success: false,
+        message: 'Invalid query: notification prompt detected',
+        processingMode: 'blocked-notification-prompt',
+      };
+    }
+
     try {
       const result = await this.geminiClient.processQuery(query);
       result.processingMode = 'gemini';
