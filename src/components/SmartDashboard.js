@@ -136,55 +136,91 @@ const SmartDashboard = ({ onQueryGenerated }) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div
+      style={{
+        padding: 'var(--aw-space-xl)',
+        background: 'var(--aw-background)',
+        minHeight: '100vh',
+      }}
+    >
+      {/* Header */}
+      <AppleWalletCard className="mb-6 aw-fade-in">
+        <h2 className="aw-heading-xl" style={{ display: 'flex', alignItems: 'center', margin: 0 }}>
+          <span style={{ marginRight: 'var(--aw-space-md)' }}>📊</span>
+          Smart Insights
+        </h2>
+        <p className="aw-text-body" style={{ marginTop: 'var(--aw-space-sm)' }}>
+          AI-powered financial and productivity insights
+        </p>
+      </AppleWalletCard>
+
       {/* Critical Issues - Only show if there are any */}
       {insights.criticalIssues.length > 0 && (
-        <div className="finbot-card p-6">
-          <h3 className="finbot-heading-lg mb-4 flex items-center">
-            <span className="mr-2">⚠️</span>Needs Attention
+        <AppleWalletCard
+          className="mb-6 aw-slide-in"
+          style={{
+            background: 'linear-gradient(135deg, var(--aw-error) 0%, #FF6B6B 100%)',
+            color: 'white',
+          }}
+        >
+          <h3
+            className="aw-heading-lg"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              marginBottom: 'var(--aw-space-lg)',
+              color: 'white',
+            }}
+          >
+            <span style={{ marginRight: 'var(--aw-space-sm)' }}>⚠️</span>Needs Attention
           </h3>
-          <div className="space-y-3">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--aw-space-md)' }}>
             {insights.criticalIssues.map((issue, index) => (
               <div
                 key={index}
-                className={`p-4 rounded-lg border ${
-                  issue.severity === 'high'
-                    ? 'bg-red-50 border-red-200'
-                    : 'bg-yellow-50 border-yellow-200'
-                }`}
+                style={{
+                  padding: 'var(--aw-space-lg)',
+                  borderRadius: 'var(--aw-radius-md)',
+                  background: 'rgba(255, 255, 255, 0.15)',
+                  backdropFilter: 'blur(10px)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                }}
               >
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4
-                      className={`font-semibold ${
-                        issue.severity === 'high' ? 'text-red-800' : 'text-yellow-800'
-                      }`}
-                    >
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    gap: 'var(--aw-space-md)',
+                  }}
+                >
+                  <div style={{ flex: 1 }}>
+                    <h4 className="aw-heading-md" style={{ color: 'white', margin: 0 }}>
                       {issue.title}
                     </h4>
                     <p
-                      className={`text-sm mt-1 ${
-                        issue.severity === 'high' ? 'text-red-600' : 'text-yellow-600'
-                      }`}
+                      className="aw-text-body"
+                      style={{ color: 'rgba(255, 255, 255, 0.9)', marginTop: 'var(--aw-space-xs)' }}
                     >
                       {issue.description}
                     </p>
                   </div>
-                  <button
+                  <AppleWalletButton
+                    variant="ghost"
                     onClick={() => handleAction(issue.action)}
-                    className={`finbot-button-secondary text-sm ${
-                      issue.severity === 'high'
-                        ? 'border-red-300 text-red-700 hover:bg-red-100'
-                        : 'border-yellow-300 text-yellow-700 hover:bg-yellow-100'
-                    }`}
+                    style={{
+                      background: 'rgba(255, 255, 255, 0.2)',
+                      color: 'white',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                    }}
                   >
                     {issue.action}
-                  </button>
+                  </AppleWalletButton>
                 </div>
               </div>
             ))}
           </div>
-        </div>
+        </AppleWalletCard>
       )}
 
       {/* Quick Stats */}

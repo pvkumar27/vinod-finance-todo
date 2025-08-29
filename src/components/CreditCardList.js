@@ -3,10 +3,10 @@ import { supabase } from '../supabaseClient';
 import { api } from '../services/api';
 import CreditCardForm from './CreditCardForm';
 import ReminderForm from './ReminderForm';
-
 import CreditCardTable from './CreditCardTable';
-
 import CreditCardDetailModal from './CreditCardDetailModal';
+import AppleWalletCard from './ui/AppleWalletCard';
+import AppleWalletButton from './ui/AppleWalletButton';
 
 /* eslint-disable react/prop-types */
 const ReminderItem = ({ reminder, onDelete, formatDate }) => (
@@ -556,90 +556,96 @@ const CreditCardList = () => {
   }
 
   return (
-    <div className="space-y-6 p-4">
+    <div
+      style={{
+        padding: 'var(--aw-space-xl)',
+        background: 'var(--aw-background)',
+        minHeight: '100vh',
+      }}
+    >
       {/* Header */}
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-200">
-        <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
-          <div>
-            <h2
-              data-cy="credit-cards-heading"
-              className="text-2xl sm:text-3xl font-bold flex items-center text-gray-900"
-            >
-              <span className="mr-3 text-2xl">💳</span>
-              Credit Cards
-            </h2>
-            <p className="mt-2 text-sm text-gray-600">{sortedCards.length} cards in your wallet</p>
-          </div>
-          <div className="flex flex-wrap gap-3">
-            <button
-              data-cy="card-add-button"
-              onClick={handleAddCard}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 text-white font-semibold px-4 py-2 rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-0.5 transition-all duration-200 active:scale-95 flex items-center gap-2"
-            >
-              <span>💳</span>
-              Add Card
-            </button>
-            <button
-              onClick={fetchCards}
-              className="bg-white text-gray-800 font-semibold px-4 py-2 rounded-xl border border-gray-300 shadow-md hover:bg-gray-50 hover:shadow-lg transition-all duration-200 active:scale-95 flex items-center gap-2"
-            >
-              <span>🔄</span>
-              Refresh
-            </button>
+      <AppleWalletCard className="mb-6 aw-fade-in">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--aw-space-lg)' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: 'var(--aw-space-md)',
+            }}
+          >
+            <div>
+              <h2
+                data-cy="credit-cards-heading"
+                className="aw-heading-xl"
+                style={{ display: 'flex', alignItems: 'center', margin: 0 }}
+              >
+                <span style={{ marginRight: 'var(--aw-space-md)' }}>💳</span>
+                Credit Cards
+              </h2>
+              <p className="aw-text-body" style={{ marginTop: 'var(--aw-space-sm)' }}>
+                {sortedCards.length} cards in your wallet
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 'var(--aw-space-md)', flexWrap: 'wrap' }}>
+              <AppleWalletButton
+                variant="primary"
+                data-cy="card-add-button"
+                onClick={handleAddCard}
+              >
+                <span style={{ marginRight: 'var(--aw-space-sm)' }}>💳</span>
+                Add Card
+              </AppleWalletButton>
+              <AppleWalletButton variant="secondary" onClick={fetchCards}>
+                <span style={{ marginRight: 'var(--aw-space-sm)' }}>🔄</span>
+                Refresh
+              </AppleWalletButton>
+            </div>
           </div>
         </div>
-      </div>
+      </AppleWalletCard>
 
       {/* Message */}
       {message && (
-        <div
-          className={`p-4 rounded-xl text-sm border ${
-            message.includes('❌')
-              ? 'bg-red-500/20 border-red-500/50 text-red-400'
-              : 'bg-green-500/20 border-green-500/50 text-green-400'
+        <AppleWalletCard
+          className={`mb-6 aw-fade-in ${
+            message.includes('❌') ? 'aw-badge-error' : 'aw-badge-success'
           }`}
         >
-          {message}
-        </div>
+          <div className="aw-text-body" style={{ fontWeight: 'var(--aw-font-weight-medium)' }}>
+            {message}
+          </div>
+        </AppleWalletCard>
       )}
 
       {/* Tabs */}
-      <div className="bg-white rounded-2xl shadow-lg border border-gray-200 p-2 flex flex-wrap gap-1">
-        <button
-          onClick={() => setActiveTab('all')}
-          className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-xl transition-all duration-200 ${
-            activeTab === 'all'
-              ? 'bg-blue-100 text-blue-700 shadow-md'
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
-        >
-          <span className="hidden sm:inline">All Cards</span>
-          <span className="sm:hidden">All</span> ({cards.length})
-        </button>
-        <button
-          onClick={() => setActiveTab('promo')}
-          className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-xl transition-all duration-200 ${
-            activeTab === 'promo'
-              ? 'bg-orange-100 text-orange-700 shadow-md'
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
-        >
-          <span className="hidden sm:inline">⏳ Promo Expiring</span>
-          <span className="sm:hidden">⏳ Promo</span> (
-          {cards.filter(c => getPromoExpiryBadge(c.current_promos)).length})
-        </button>
-        <button
-          onClick={() => setActiveTab('inactive')}
-          className={`px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-xl transition-all duration-200 ${
-            activeTab === 'inactive'
-              ? 'bg-red-100 text-red-700 shadow-md'
-              : 'text-gray-600 hover:bg-gray-100'
-          }`}
-        >
-          ⚠️ Inactive (
-          {cards.filter(c => getInactivityBadge(c.days_inactive, c.last_used_date)).length})
-        </button>
-      </div>
+      <AppleWalletCard className="mb-6 aw-fade-in">
+        <div className="aw-tabs">
+          <button
+            onClick={() => setActiveTab('all')}
+            className={`aw-tab ${activeTab === 'all' ? 'active' : ''}`}
+          >
+            <span className="hidden sm:inline">All Cards</span>
+            <span className="sm:hidden">All</span> ({cards.length})
+          </button>
+          <button
+            onClick={() => setActiveTab('promo')}
+            className={`aw-tab ${activeTab === 'promo' ? 'active' : ''}`}
+          >
+            <span className="hidden sm:inline">⏳ Promo Expiring</span>
+            <span className="sm:hidden">⏳ Promo</span> (
+            {cards.filter(c => getPromoExpiryBadge(c.current_promos)).length})
+          </button>
+          <button
+            onClick={() => setActiveTab('inactive')}
+            className={`aw-tab ${activeTab === 'inactive' ? 'active' : ''}`}
+          >
+            ⚠️ Inactive (
+            {cards.filter(c => getInactivityBadge(c.days_inactive, c.last_used_date)).length})
+          </button>
+        </div>
+      </AppleWalletCard>
 
       {/* Search, Sort, and View Toggle */}
       <div className="flex flex-col gap-3 mb-4 lg:flex-row lg:items-center">

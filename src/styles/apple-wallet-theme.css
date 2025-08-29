@@ -449,21 +449,42 @@ body {
 /* Responsive Design */
 @media (max-width: 768px) {
   .aw-card {
-    padding: var(--aw-space-lg);
-    border-radius: var(--aw-radius-lg);
+    padding: var(--aw-space-md);
+    border-radius: var(--aw-radius-md);
+    margin-bottom: var(--aw-space-md);
   }
   
   .aw-button {
-    padding: var(--aw-space-lg) var(--aw-space-xl);
-    font-size: 16px;
+    padding: var(--aw-space-md) var(--aw-space-lg);
+    font-size: 14px;
+    min-height: 40px;
   }
   
   .aw-heading-xl {
-    font-size: 24px;
+    font-size: 20px;
   }
   
   .aw-heading-lg {
-    font-size: 20px;
+    font-size: 18px;
+  }
+  
+  .aw-heading-md {
+    font-size: 16px;
+  }
+  
+  .aw-input {
+    padding: var(--aw-space-md);
+    font-size: 16px; /* Prevent zoom on iOS */
+  }
+  
+  .aw-tabs {
+    flex-direction: column;
+    gap: var(--aw-space-xs);
+  }
+  
+  .aw-tab {
+    padding: var(--aw-space-sm) var(--aw-space-md);
+    font-size: 14px;
   }
 }
 
