@@ -11,7 +11,7 @@ const useSoundEffects = () => {
   }, [soundEnabled]);
 
   const playSound = useCallback(
-    (frequency, duration = 150, type = 'sine') => {
+    (frequency, duration = 200, volume = 0.1) => {
       if (!soundEnabled) return;
 
       try {
@@ -23,10 +23,10 @@ const useSoundEffects = () => {
         gainNode.connect(audioContext.destination);
 
         oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
-        oscillator.type = type;
+        oscillator.type = 'sine';
 
         gainNode.gain.setValueAtTime(0, audioContext.currentTime);
-        gainNode.gain.linearRampToValueAtTime(0.1, audioContext.currentTime + 0.01);
+        gainNode.gain.linearRampToValueAtTime(volume, audioContext.currentTime + 0.01);
         gainNode.gain.exponentialRampToValueAtTime(
           0.001,
           audioContext.currentTime + duration / 1000
@@ -35,52 +35,32 @@ const useSoundEffects = () => {
         oscillator.start(audioContext.currentTime);
         oscillator.stop(audioContext.currentTime + duration / 1000);
       } catch (error) {
-        console.log('Audio not supported:', error);
+        console.log('Audio not supported');
       }
     },
     [soundEnabled]
   );
 
-  const taskComplete = useCallback(() => {
-    // Soft success chime - C major chord
-    playSound(523.25, 100); // C5
-    setTimeout(() => playSound(659.25, 100), 50); // E5
-    setTimeout(() => playSound(783.99, 150), 100); // G5
-  }, [playSound]);
-
-  const buttonPress = useCallback(() => {
-    // Subtle tap sound
-    playSound(800, 50);
-  }, [playSound]);
-
   const success = useCallback(() => {
-    // Single pleasant tone
-    playSound(659.25, 200);
+    // Soft chime - pleasant pop
+    playSound(659.25, 150, 0.08);
+    setTimeout(() => playSound(783.99, 200, 0.06), 75);
   }, [playSound]);
 
   const error = useCallback(() => {
-    // Low warning tone
-    playSound(220, 300);
+    // Gentle low thump
+    playSound(220, 300, 0.1);
   }, [playSound]);
 
-  const pomodoroStart = useCallback(() => {
-    // Ascending chime
-    playSound(440, 100);
-    setTimeout(() => playSound(554.37, 100), 100);
-    setTimeout(() => playSound(659.25, 150), 200);
+  const taskComplete = useCallback(() => {
+    // Pleasant pop
+    playSound(523.25, 100, 0.08);
+    setTimeout(() => playSound(659.25, 150, 0.06), 50);
   }, [playSound]);
 
-  const pomodoroEnd = useCallback(() => {
-    // Descending completion chime
-    playSound(783.99, 150);
-    setTimeout(() => playSound(659.25, 150), 150);
-    setTimeout(() => playSound(523.25, 200), 300);
-  }, [playSound]);
-
-  const notification = useCallback(() => {
-    // Gentle notification sound
-    playSound(523.25, 100);
-    setTimeout(() => playSound(659.25, 150), 100);
+  const buttonPress = useCallback(() => {
+    // Subtle tap
+    playSound(800, 80, 0.05);
   }, [playSound]);
 
   const toggleSound = useCallback(() => {
@@ -90,13 +70,10 @@ const useSoundEffects = () => {
   return {
     soundEnabled,
     toggleSound,
-    taskComplete,
-    buttonPress,
     success,
     error,
-    pomodoroStart,
-    pomodoroEnd,
-    notification,
+    taskComplete,
+    buttonPress,
   };
 };
 
