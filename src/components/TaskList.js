@@ -91,13 +91,18 @@ const TaskList = ({ tasks, onToggleComplete, onDelete, completed = false }) => {
               style={getTaskCardStyle(task)}
             >
               <div className="flex items-center gap-4">
-                <Checkbox
-                  checked={task.completed || false}
-                  onChange={() => {
-                    buttonPress();
-                    onToggleComplete(task.id, task.completed);
-                  }}
-                />
+                <motion.div
+                  animate={task.completed ? { scale: [1, 1.2, 1] } : {}}
+                  transition={{ duration: 0.3 }}
+                >
+                  <Checkbox
+                    checked={task.completed || false}
+                    onChange={() => {
+                      buttonPress();
+                      onToggleComplete(task.id, task.completed);
+                    }}
+                  />
+                </motion.div>
 
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <motion.div

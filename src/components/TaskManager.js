@@ -70,6 +70,20 @@ const TaskManager = () => {
         taskComplete();
         taskCompleteAudio();
         setMessage('🎉 Task completed!');
+
+        // Check for progress milestones
+        const newCompletedCount = todos.filter(t => t.completed || t.id === id).length;
+        const totalTasks = todos.length;
+        const newRate = Math.round((newCompletedCount / totalTasks) * 100);
+        const oldRate = completionRate;
+
+        if (
+          (oldRate < 25 && newRate >= 25) ||
+          (oldRate < 50 && newRate >= 50) ||
+          (oldRate < 100 && newRate >= 100)
+        ) {
+          setTimeout(() => taskCompleteAudio(), 200);
+        }
       } else {
         success();
         setMessage('✅ Task updated!');
@@ -80,6 +94,7 @@ const TaskManager = () => {
     } catch (err) {
       setMessage(`❌ Error: ${err.message}`);
       errorSound();
+      errorAudio();
       setTimeout(() => setMessage(''), 4000);
     }
   };
@@ -191,9 +206,19 @@ const TaskManager = () => {
         {message && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: -10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              y: 0,
+              x: message.includes('❌') ? [0, -5, 5, -5, 5, 0] : 0,
+            }}
             exit={{ opacity: 0, scale: 0.95, y: -10 }}
-            transition={{ type: 'spring', duration: 0.25, bounce: 0.3 }}
+            transition={{
+              type: 'spring',
+              duration: 0.25,
+              bounce: 0.3,
+              x: { duration: 0.5 },
+            }}
           >
             <Card className={`mb-6 ${message.includes('❌') ? 'border-error' : 'border-success'}`}>
               <div

@@ -131,9 +131,19 @@ const CreditCardList = () => {
         {message && (
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: -10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
+            animate={{
+              opacity: 1,
+              scale: 1,
+              y: 0,
+              x: message.includes('❌') ? [0, -5, 5, -5, 5, 0] : 0,
+            }}
             exit={{ opacity: 0, scale: 0.95, y: -10 }}
-            transition={{ type: 'spring', duration: 0.25, bounce: 0.3 }}
+            transition={{
+              type: 'spring',
+              duration: 0.25,
+              bounce: 0.3,
+              x: { duration: 0.5 },
+            }}
           >
             <Card className={`mb-6 ${message.includes('❌') ? 'border-error' : 'border-success'}`}>
               <div
