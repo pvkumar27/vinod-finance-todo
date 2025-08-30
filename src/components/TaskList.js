@@ -6,7 +6,15 @@ import { Button } from './ui/Button';
 import Checkbox from './ui/Checkbox';
 import useSoundEffects from '../hooks/useSoundEffects';
 
-const TaskList = ({ tasks, onToggleComplete, onDelete, onStartPomodoro, completed = false }) => {
+const TaskList = ({
+  tasks,
+  onToggleComplete,
+  onDelete,
+  onStartPomodoro,
+  onEdit,
+  onTogglePin,
+  completed = false,
+}) => {
   const todayStr = getTodayDateString();
   const { buttonPress } = useSoundEffects();
 
@@ -36,23 +44,45 @@ const TaskList = ({ tasks, onToggleComplete, onDelete, onStartPomodoro, complete
   };
 
   const getTaskCardStyle = task => {
+    const status = getTaskStatus(task);
+    let bgColor = 'rgba(255, 255, 255, 0.9)';
+
+    // Age-based color coding
+    if (task.created_at) {
+      const daysSince = Math.floor(
+        (new Date() - new Date(task.created_at)) / (1000 * 60 * 60 * 24)
+      );
+      if (daysSince > 7) bgColor = 'rgba(254, 243, 199, 0.9)'; // amber tint for old tasks
+      if (daysSince > 30) bgColor = 'rgba(254, 226, 226, 0.9)'; // red tint for very old tasks
+    }
+
+    // Pinned tasks get blue tint
+    if (task.pinned) bgColor = 'rgba(219, 234, 254, 0.9)';
+
     return {
-      background: 'rgba(255, 255, 255, 0.9)',
+      background: bgColor,
       backdropFilter: 'blur(12px)',
       WebkitBackdropFilter: 'blur(12px)',
-      borderRadius: '12px',
-      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-      border: 'none',
-      padding: '16px',
+      borderRadius: '8px',
+      boxShadow: task.pinned ? '0 4px 6px -1px rgb(0 0 0 / 0.1)' : '0 1px 3px 0 rgb(0 0 0 / 0.1)',
+      border: task.pinned ? '2px solid #3B82F6' : 'none',
+      padding: '12px',
       position: 'relative',
       overflow: 'hidden',
     };
   };
 
+  // Sort tasks by pinned status, then by creation date (newest first)
+  const sortedTasks = [...tasks].sort((a, b) => {
+    if (a.pinned && !b.pinned) return -1;
+    if (!a.pinned && b.pinned) return 1;
+    return new Date(b.created_at || b.id) - new Date(a.created_at || a.id);
+  });
+
   return (
     <div className="flex flex-col gap-3">
       <AnimatePresence>
-        {tasks.map((task, index) => {
+        {sortedTasks.map((task, index) => {
           const status = getTaskStatus(task);
           return (
             <motion.div
@@ -74,6 +104,13 @@ const TaskList = ({ tasks, onToggleComplete, onDelete, onStartPomodoro, complete
               whileHover={{ scale: 1.02 }}
               style={getTaskCardStyle(task)}
             >
+              {/* Pin indicator */}
+              {task.pinned && (
+                <div className="absolute top-2 right-2 text-blue-500 text-sm" title="Pinned">
+                  📌
+                </div>
+              )}
+
               {/* Left edge gradient for overdue */}
               {status === 'overdue' && !task.completed && (
                 <div
@@ -117,8 +154,8 @@ const TaskList = ({ tasks, onToggleComplete, onDelete, onStartPomodoro, complete
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {getStatusBadge(status)}
+                  <div className="flex items-center gap-1">{getStatusBadge(status)}</div>
+                  <div className="flex items-center gap-1">
                     {!task.completed && onStartPomodoro && (
                       <Button
                         variant="ghost"
@@ -132,17 +169,43 @@ const TaskList = ({ tasks, onToggleComplete, onDelete, onStartPomodoro, complete
                         🍅
                       </Button>
                     )}
+                    {onTogglePin && (
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          buttonPress();
+                          onTogglePin(task.id, task.pinned);
+                        }}
+                        className="p-1 text-gray-400 hover:text-blue-500 text-xs"
+                        title={task.pinned ? 'Unpin' : 'Pin'}
+                      >
+                        {task.pinned ? '📌' : '📍'}
+                      </Button>
+                    )}
+                    {onEdit && (
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          buttonPress();
+                          onEdit(task);
+                        }}
+                        className="p-1 text-gray-400 hover:text-blue-500 text-xs"
+                        title="Edit"
+                      >
+                        ✏️
+                      </Button>
+                    )}
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        buttonPress();
+                        onDelete(task.id);
+                      }}
+                      className="p-1 text-gray-400 hover:text-red-500 text-xs"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
                   </div>
-                  <Button
-                    variant="ghost"
-                    onClick={() => {
-                      buttonPress();
-                      onDelete(task.id);
-                    }}
-                    className="p-2 text-gray-400 hover:text-red-500"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
                 </div>
               </div>
             </motion.div>

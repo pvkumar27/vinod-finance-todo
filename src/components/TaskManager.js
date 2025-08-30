@@ -20,6 +20,9 @@ const TaskManager = () => {
   const [taskDate, setTaskDate] = useState(getTodayDateString());
   const [showCompleted, setShowCompleted] = useState(false);
   const [selectedTaskForPomodoro, setSelectedTaskForPomodoro] = useState(null);
+  const [editingTask, setEditingTask] = useState(null);
+  const [editTaskText, setEditTaskText] = useState('');
+  const [editTaskDate, setEditTaskDate] = useState('');
 
   const { taskComplete, buttonPress, success, error: errorSound } = useSoundEffects();
   const { taskComplete: taskCompleteAudio, error: errorAudio } = useAudioCues();
@@ -107,6 +110,46 @@ const TaskManager = () => {
     try {
       await api.deleteTodo(id);
       setMessage('🗑️ Task deleted!');
+      success();
+      setTimeout(() => setMessage(''), 2000);
+      loadTodos();
+    } catch (err) {
+      setMessage(`❌ Error: ${err.message}`);
+      errorSound();
+      setTimeout(() => setMessage(''), 4000);
+    }
+  };
+
+  const handleEdit = task => {
+    setEditingTask(task);
+    setEditTaskText(task.task);
+    setEditTaskDate(task.due_date || '');
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editTaskText.trim()) return;
+
+    try {
+      await api.updateTodo(editingTask.id, {
+        task: editTaskText.trim(),
+        due_date: editTaskDate || null,
+      });
+      setMessage('✅ Task updated!');
+      success();
+      setTimeout(() => setMessage(''), 2000);
+      setEditingTask(null);
+      loadTodos();
+    } catch (err) {
+      setMessage(`❌ Error: ${err.message}`);
+      errorSound();
+      setTimeout(() => setMessage(''), 4000);
+    }
+  };
+
+  const handleTogglePin = async (id, currentPinned) => {
+    try {
+      await api.updateTodo(id, { pinned: !currentPinned });
+      setMessage(currentPinned ? '📍 Task unpinned!' : '📌 Task pinned!');
       success();
       setTimeout(() => setMessage(''), 2000);
       loadTodos();
@@ -319,6 +362,8 @@ const TaskManager = () => {
                 onToggleComplete={handleToggleComplete}
                 onDelete={handleDelete}
                 onStartPomodoro={setSelectedTaskForPomodoro}
+                onEdit={handleEdit}
+                onTogglePin={handleTogglePin}
               />
             )}
 
@@ -345,6 +390,8 @@ const TaskManager = () => {
                     onToggleComplete={handleToggleComplete}
                     onDelete={handleDelete}
                     onStartPomodoro={setSelectedTaskForPomodoro}
+                    onEdit={handleEdit}
+                    onTogglePin={handleTogglePin}
                     completed={true}
                   />
                 </motion.div>
@@ -368,6 +415,48 @@ const TaskManager = () => {
               onTaskComplete={handleToggleComplete}
               onClose={() => setSelectedTaskForPomodoro(null)}
             />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Edit Task Modal */}
+      <AnimatePresence>
+        {editingTask && (
+          <motion.div
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="bg-white rounded-2xl p-6 w-full max-w-md"
+              initial={{ scale: 0.9 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.9 }}
+            >
+              <h3 className="text-lg font-semibold mb-4">✏️ Edit Task</h3>
+              <div className="space-y-4">
+                <Input
+                  type="text"
+                  value={editTaskText}
+                  onChange={e => setEditTaskText(e.target.value)}
+                  placeholder="Task description"
+                  className="w-full"
+                />
+                <Input
+                  type="date"
+                  value={editTaskDate}
+                  onChange={e => setEditTaskDate(e.target.value)}
+                  className="w-full"
+                />
+                <div className="flex gap-3 justify-end">
+                  <Button variant="ghost" onClick={() => setEditingTask(null)}>
+                    Cancel
+                  </Button>
+                  <Button onClick={handleSaveEdit}>Save</Button>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
