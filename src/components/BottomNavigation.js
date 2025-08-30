@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 
 const BottomNavigation = ({ activeTab, setActiveTab }) => {
   const navItems = [
@@ -23,22 +24,28 @@ const BottomNavigation = ({ activeTab, setActiveTab }) => {
           }}
         >
           {navItems.map(item => (
-            <button
+            <motion.button
               key={item.id}
               onClick={() => setActiveTab(item.id)}
-              className={`aw-nav-item ${activeTab === item.id ? 'active' : ''}`}
+              className={`aw-nav-item ${activeTab === item.id ? 'active' : ''} relative flex flex-col items-center justify-center p-2 rounded-lg transition-all`}
               aria-label={`Navigate to ${item.label}`}
               data-cy={`nav-${item.id}-tab`}
+              animate={{
+                scale: activeTab === item.id ? 1.1 : 1,
+                y: activeTab === item.id ? -2 : 0,
+              }}
+              transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+              style={{
+                background: activeTab === item.id ? 'rgba(37, 99, 235, 0.1)' : 'transparent',
+                boxShadow:
+                  activeTab === item.id
+                    ? '0 0 20px rgba(37, 99, 235, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                    : 'none',
+              }}
             >
               <span className="text-lg">{item.icon}</span>
               <span className="text-xs font-medium">{item.label}</span>
-              {activeTab === item.id && (
-                <div
-                  className="w-1 h-1 rounded-full"
-                  style={{ background: 'var(--aw-primary)' }}
-                ></div>
-              )}
-            </button>
+            </motion.button>
           ))}
         </div>
       </div>
