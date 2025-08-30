@@ -284,13 +284,47 @@ const TaskManager = () => {
         <Card className="mb-6 bg-white rounded-2xl shadow-md">
           <form onSubmit={handleAddTodo}>
             <div className="flex flex-col sm:flex-row gap-3">
-              <Input
-                type="text"
-                placeholder="What needs to be done?"
-                value={newTask}
-                onChange={e => setNewTask(e.target.value)}
-                className="flex-1 text-sm md:text-base"
-              />
+              <div className="flex-1 relative">
+                <Input
+                  type="text"
+                  placeholder="What needs to be done?"
+                  value={newTask}
+                  onChange={e => setNewTask(e.target.value)}
+                  className="text-sm md:text-base pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => {
+                    if (
+                      !('webkitSpeechRecognition' in window) &&
+                      !('SpeechRecognition' in window)
+                    ) {
+                      setMessage('❌ Voice recognition not supported in this browser');
+                      setTimeout(() => setMessage(''), 3000);
+                      return;
+                    }
+                    const SpeechRecognition =
+                      window.SpeechRecognition || window.webkitSpeechRecognition;
+                    const recognition = new SpeechRecognition();
+                    recognition.continuous = false;
+                    recognition.interimResults = false;
+                    recognition.lang = 'en-US';
+                    recognition.onresult = event => {
+                      setNewTask(event.results[0][0].transcript);
+                    };
+                    recognition.onerror = () => {
+                      setMessage('❌ Voice recognition error');
+                      setTimeout(() => setMessage(''), 3000);
+                    };
+                    recognition.start();
+                  }}
+                  className="absolute right-2 top-1/2 transform -translate-y-1/2 w-8 h-8 p-0"
+                  title="Voice input"
+                >
+                  🎤
+                </Button>
+              </div>
               <Input
                 type="date"
                 value={taskDate}
