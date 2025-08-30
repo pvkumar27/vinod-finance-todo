@@ -18,8 +18,8 @@ const BottomNavigation = ({ activeTab, setActiveTab }) => {
           className="flex justify-around items-center h-14 pt-1 rounded-2xl border border-white/20"
           style={{
             background: 'rgba(255, 255, 255, 0.7)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
+            backdropFilter: 'blur(24px)',
+            WebkitBackdropFilter: 'blur(24px)',
             boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.05)',
           }}
         >
@@ -41,6 +41,7 @@ const BottomNavigation = ({ activeTab, setActiveTab }) => {
                   activeTab === item.id
                     ? '0 0 20px rgba(37, 99, 235, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
                     : 'none',
+                borderBottom: activeTab === item.id ? '2px solid #2563EB' : '2px solid transparent',
               }}
             >
               <span className="text-lg">{item.icon}</span>

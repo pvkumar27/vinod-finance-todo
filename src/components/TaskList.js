@@ -20,49 +20,37 @@ const TaskList = ({ tasks, onToggleComplete, onDelete, completed = false }) => {
 
   const getStatusBadge = status => {
     const badges = {
-      overdue: { text: 'Overdue', className: 'badge badge-error', icon: AlertCircle },
-      today: { text: 'Today', className: 'badge badge-warning' },
-      completed: { text: 'Done', className: 'badge badge-success' },
+      overdue: { text: 'Overdue', bg: 'bg-red-100', text: 'text-red-600' },
+      today: { text: 'Today', bg: 'bg-amber-100', text: 'text-amber-600' },
+      completed: { text: 'Done', bg: 'bg-green-100', text: 'text-green-600' },
     };
 
     const badge = badges[status];
     if (!badge) return null;
 
-    const Icon = badge.icon;
     return (
-      <span className={badge.className}>
-        {Icon && <Icon className="w-3 h-3 mr-1" />}
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
         {badge.text}
       </span>
     );
   };
 
   const getTaskCardStyle = task => {
-    const status = getTaskStatus(task);
-    let borderColor = 'var(--border-light)';
-    let backgroundColor = 'var(--surface)';
-
-    if (task.completed) {
-      backgroundColor = 'var(--surface-secondary)';
-    } else if (status === 'overdue') {
-      borderColor = 'var(--error)';
-      backgroundColor = 'rgb(239 68 68 / 0.02)';
-    } else if (status === 'today') {
-      borderColor = 'var(--warning)';
-      backgroundColor = 'rgb(245 158 11 / 0.02)';
-    }
-
     return {
-      padding: 'var(--space-4)',
-      borderRadius: 'var(--radius-lg)',
-      border: `1px solid ${borderColor}`,
-      background: backgroundColor,
-      transition: 'all var(--transition)',
+      background: 'rgba(255, 255, 255, 0.9)',
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
+      borderRadius: '12px',
+      boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+      border: 'none',
+      padding: '16px',
+      position: 'relative',
+      overflow: 'hidden',
     };
   };
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+    <div className="flex flex-col gap-3">
       <AnimatePresence>
         {tasks.map((task, index) => {
           const status = getTaskStatus(task);
@@ -70,26 +58,31 @@ const TaskList = ({ tasks, onToggleComplete, onDelete, completed = false }) => {
             <motion.div
               key={task.id}
               layout
-              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              initial={{ opacity: 0, scale: 0.8, y: 20 }}
               animate={{
-                opacity: task.completed ? 0.6 : 1,
+                opacity: task.completed ? 0.7 : 1,
+                scale: 1,
                 y: 0,
-                scale: status === 'overdue' && !task.completed ? [1, 1.02, 1] : 1,
               }}
-              exit={{ opacity: 0, y: -20, scale: 0.95 }}
+              exit={{ opacity: 0, scale: 0.8, x: -100 }}
               transition={{
-                duration: 0.2,
+                type: 'spring',
+                stiffness: 300,
+                damping: 25,
                 delay: index * 0.05,
-                layout: { duration: 0.3 },
-                scale:
-                  status === 'overdue' && !task.completed ? { repeat: Infinity, duration: 2 } : {},
               }}
-              whileHover={{
-                scale: 1.05,
-                boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-              }}
+              whileHover={{ scale: 1.02 }}
               style={getTaskCardStyle(task)}
             >
+              {/* Left edge gradient for overdue */}
+              {status === 'overdue' && !task.completed && (
+                <div
+                  className="absolute left-0 top-0 bottom-0 w-1"
+                  style={{
+                    background: 'linear-gradient(to bottom, #ef4444, #f87171)',
+                  }}
+                />
+              )}
               <div className="flex items-center gap-4">
                 <motion.div
                   animate={task.completed ? { scale: [1, 1.2, 1] } : {}}
@@ -111,24 +104,19 @@ const TaskList = ({ tasks, onToggleComplete, onDelete, completed = false }) => {
                       opacity: task.completed ? 0.7 : 1,
                     }}
                     transition={{ duration: 0.3 }}
-                    style={{
-                      fontSize: 'var(--text-base)',
-                      fontWeight: task.completed ? 'normal' : '500',
-                      color: task.completed ? 'var(--text-tertiary)' : 'var(--text-primary)',
-                      marginBottom: task.due_date ? 'var(--space-1)' : 0,
-                      wordBreak: 'break-word',
-                    }}
+                    className="text-base font-medium text-gray-900 mb-1"
+                    style={{ wordBreak: 'break-word' }}
                   >
                     {task.task}
                   </motion.div>
                   {task.due_date && (
-                    <div className="body-text text-secondary">
+                    <div className="text-xs text-gray-400 mb-2">
                       Due: {formatDateString(task.due_date)}
                     </div>
                   )}
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex items-center justify-between">
                   {getStatusBadge(status)}
                   <Button
                     variant="ghost"
@@ -136,11 +124,7 @@ const TaskList = ({ tasks, onToggleComplete, onDelete, completed = false }) => {
                       buttonPress();
                       onDelete(task.id);
                     }}
-                    style={{
-                      padding: 'var(--space-2)',
-                      minHeight: 'auto',
-                      color: 'var(--error)',
-                    }}
+                    className="p-2 text-gray-400 hover:text-red-500"
                   >
                     <Trash2 className="w-4 h-4" />
                   </Button>
