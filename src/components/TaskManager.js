@@ -139,26 +139,39 @@ const TaskManager = () => {
             </div>
             <div className="flex items-center gap-3">
               <div className="text-sm text-secondary">{completionRate}% Complete</div>
-              <div
-                className="rounded-full"
-                style={{
-                  width: '40px',
-                  height: '40px',
-                  background: `conic-gradient(var(--primary) ${completionRate * 3.6}deg, var(--border-light) 0deg)`,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                }}
-              >
+              <div className="relative" style={{ width: '40px', height: '40px' }}>
+                <svg className="w-full h-full transform -rotate-90">
+                  <defs>
+                    <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stopColor="#34C759" />
+                      <stop offset="100%" stopColor="#007AFF" />
+                    </linearGradient>
+                  </defs>
+                  <circle
+                    cx="20"
+                    cy="20"
+                    r="16"
+                    stroke="var(--border-light)"
+                    strokeWidth="3"
+                    fill="transparent"
+                  />
+                  <motion.circle
+                    cx="20"
+                    cy="20"
+                    r="16"
+                    stroke="url(#progressGradient)"
+                    strokeWidth="3"
+                    fill="transparent"
+                    strokeLinecap="round"
+                    strokeDasharray={`${2 * Math.PI * 16}`}
+                    initial={{ strokeDashoffset: 2 * Math.PI * 16 }}
+                    animate={{ strokeDashoffset: 2 * Math.PI * 16 * (1 - completionRate / 100) }}
+                    transition={{ duration: 0.8, ease: 'easeOut' }}
+                  />
+                </svg>
                 <div
-                  className="rounded-full"
+                  className="absolute inset-0 flex items-center justify-center"
                   style={{
-                    width: '32px',
-                    height: '32px',
-                    background: 'var(--surface)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
                     fontSize: '12px',
                     fontWeight: '600',
                     color: 'var(--primary)',

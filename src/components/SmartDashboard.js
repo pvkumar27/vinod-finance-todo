@@ -185,12 +185,14 @@ const SmartDashboard = ({ onQueryGenerated }) => {
                 {insights.stats.completedTasks} completed
               </div>
               <div className="mt-3 h-2 rounded-full" style={{ background: 'var(--border-light)' }}>
-                <div
-                  className="h-full rounded-full transition-all duration-500"
+                <motion.div
+                  className="h-full rounded-full"
                   style={{
-                    width: `${completionRate}%`,
-                    background: 'var(--primary)',
+                    background: 'linear-gradient(90deg, #34C759 0%, #007AFF 100%)',
                   }}
+                  initial={{ width: 0 }}
+                  animate={{ width: `${completionRate}%` }}
+                  transition={{ duration: 0.8, ease: 'easeOut' }}
                 />
               </div>
             </CardContent>
