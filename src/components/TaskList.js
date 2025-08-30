@@ -169,6 +169,7 @@ const TaskList = ({
                 <motion.div
                   animate={task.completed ? { scale: [1, 1.2, 1] } : {}}
                   transition={{ duration: 0.3 }}
+                  className="flex-shrink-0"
                 >
                   <Checkbox
                     checked={task.completed || false}
@@ -176,6 +177,7 @@ const TaskList = ({
                       buttonPress();
                       onToggleComplete(task.id, task.completed);
                     }}
+                    style={{ width: '16px', height: '16px' }}
                   />
                 </motion.div>
 

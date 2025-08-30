@@ -196,7 +196,7 @@ const TaskManager = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <CardTitle className="text-lg md:text-xl">📝 Tasks</CardTitle>
-                <CardDescription className="text-sm md:text-base">
+                <CardDescription className="text-sm md:text-base hidden sm:block">
                   Manage your daily tasks and boost productivity
                 </CardDescription>
               </div>
@@ -343,13 +343,13 @@ const TaskManager = () => {
         {/* Tasks */}
         <Card className="bg-white rounded-2xl shadow-md">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
               <CardTitle>Active Tasks</CardTitle>
               <div className="flex items-center gap-4">
                 <div className="text-sm text-secondary">{pendingTodos.length} pending</div>
                 {completedTodos.length > 0 && (
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-secondary">Show Completed</span>
+                    <span className="text-xs sm:text-sm text-secondary">Show Completed</span>
                     <Toggle
                       checked={showCompleted}
                       onChange={() => {
