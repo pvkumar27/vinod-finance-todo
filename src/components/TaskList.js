@@ -79,7 +79,7 @@ const TaskList = ({
       WebkitBackdropFilter: 'blur(12px)',
       borderRadius: '6px',
       boxShadow: task.pinned ? '0 2px 4px rgb(0 0 0 / 0.1)' : '0 1px 2px rgb(0 0 0 / 0.05)',
-      border: task.pinned ? '1px solid #3B82F6' : 'none',
+      border: task.pinned ? '1px solid #3B82F6' : '1px solid rgba(0, 0, 0, 0.1)',
       padding: '8px 12px',
       position: 'relative',
       overflow: 'hidden',
@@ -134,12 +134,24 @@ const TaskList = ({
                 </div>
               )}
 
-              {/* Left edge gradient for overdue */}
-              {status === 'overdue' && !task.completed && (
+              {/* Left edge gradient for all cards */}
+              {!task.completed && (
                 <div
                   className="absolute left-0 top-0 bottom-0 w-1"
                   style={{
-                    background: 'linear-gradient(to bottom, #ef4444, #f87171)',
+                    background: task.due_date
+                      ? (() => {
+                          const today = new Date();
+                          const dueDate = new Date(task.due_date);
+                          const daysDiff = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24));
+
+                          if (daysDiff < 0) return 'linear-gradient(to bottom, #ef4444, #f87171)'; // red
+                          if (daysDiff === 0) return 'linear-gradient(to bottom, #f59e0b, #fbbf24)'; // orange
+                          if (daysDiff <= 3) return 'linear-gradient(to bottom, #eab308, #facc15)'; // yellow
+                          if (daysDiff <= 7) return 'linear-gradient(to bottom, #22c55e, #4ade80)'; // light green
+                          return 'linear-gradient(to bottom, #16a34a, #22c55e)'; // green
+                        })()
+                      : 'linear-gradient(to bottom, #6b7280, #9ca3af)', // gray for no due date
                   }}
                 />
               )}
