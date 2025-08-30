@@ -90,7 +90,7 @@ const TaskList = ({
       borderRadius: '6px',
       boxShadow: task.pinned ? '0 2px 4px rgb(0 0 0 / 0.1)' : '0 1px 2px rgb(0 0 0 / 0.05)',
       border: task.pinned ? '1px solid #3B82F6' : '1px solid rgba(0, 0, 0, 0.1)',
-      padding: '10px 12px',
+      padding: '8px 10px',
       position: 'relative',
       overflow: 'hidden',
     };
@@ -113,7 +113,7 @@ const TaskList = ({
   });
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-2">
       <AnimatePresence>
         {sortedTasks.map((task, index) => {
           const status = getTaskStatus(task);
@@ -165,7 +165,7 @@ const TaskList = ({
                   }}
                 />
               )}
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 <motion.div
                   animate={task.completed ? { scale: [1, 1.2, 1] } : {}}
                   transition={{ duration: 0.3 }}
