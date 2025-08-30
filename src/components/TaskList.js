@@ -87,10 +87,10 @@ const TaskList = ({
       background: bgColor,
       backdropFilter: 'blur(12px)',
       WebkitBackdropFilter: 'blur(12px)',
-      borderRadius: '6px',
+      borderRadius: '4px',
       boxShadow: task.pinned ? '0 2px 4px rgb(0 0 0 / 0.1)' : '0 1px 2px rgb(0 0 0 / 0.05)',
       border: task.pinned ? '1px solid #3B82F6' : '1px solid rgba(0, 0, 0, 0.1)',
-      padding: '8px 10px',
+      padding: '6px 8px',
       position: 'relative',
       overflow: 'hidden',
     };
@@ -177,7 +177,7 @@ const TaskList = ({
                       buttonPress();
                       onToggleComplete(task.id, task.completed);
                     }}
-                    style={{ width: '16px', height: '16px' }}
+                    style={{ width: '14px', height: '14px' }}
                   />
                 </motion.div>
 
