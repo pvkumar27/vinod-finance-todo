@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Trash2, AlertCircle } from 'lucide-react';
 import { formatDateString, getTodayDateString } from '../utils/dateUtils';
 import { Button } from './ui/Button';
 import Checkbox from './ui/Checkbox';
@@ -19,13 +20,21 @@ const TaskList = ({ tasks, onToggleComplete, onDelete, completed = false }) => {
 
   const getStatusBadge = status => {
     const badges = {
-      overdue: { text: 'Overdue', className: 'badge badge-error' },
+      overdue: { text: 'Overdue', className: 'badge badge-error', icon: AlertCircle },
       today: { text: 'Today', className: 'badge badge-warning' },
       completed: { text: 'Done', className: 'badge badge-success' },
     };
 
     const badge = badges[status];
-    return badge ? <span className={badge.className}>{badge.text}</span> : null;
+    if (!badge) return null;
+
+    const Icon = badge.icon;
+    return (
+      <span className={badge.className}>
+        {Icon && <Icon className="w-3 h-3 mr-1" />}
+        {badge.text}
+      </span>
+    );
   };
 
   const getTaskCardStyle = task => {
@@ -126,10 +135,9 @@ const TaskList = ({ tasks, onToggleComplete, onDelete, completed = false }) => {
                       padding: 'var(--space-2)',
                       minHeight: 'auto',
                       color: 'var(--error)',
-                      fontSize: '16px',
                     }}
                   >
-                    🗑️
+                    <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { PlusCircle } from 'lucide-react';
 import { getTodayDateString } from '../utils/dateUtils';
 import { api } from '../services/api';
 import TaskList from './TaskList';
@@ -222,7 +223,10 @@ const TaskManager = () => {
               onChange={e => setTaskDate(e.target.value)}
               style={{ width: '150px' }}
             />
-            <Button type="submit">➕ Add Task</Button>
+            <Button type="submit">
+              <PlusCircle className="w-4 h-4 mr-2" />
+              Add Task
+            </Button>
           </div>
         </form>
       </Card>
