@@ -44,16 +44,30 @@ const TaskList = ({
   };
 
   const getTaskCardStyle = task => {
-    const status = getTaskStatus(task);
     let bgColor = 'rgba(255, 255, 255, 0.9)';
 
-    // Age-based color coding
-    if (task.created_at) {
-      const daysSince = Math.floor(
-        (new Date() - new Date(task.created_at)) / (1000 * 60 * 60 * 24)
-      );
-      if (daysSince > 7) bgColor = 'rgba(254, 243, 199, 0.9)'; // amber tint for old tasks
-      if (daysSince > 30) bgColor = 'rgba(254, 226, 226, 0.9)'; // red tint for very old tasks
+    // Due date based color coding (red = overdue/urgent, green = future)
+    if (task.due_date) {
+      const today = new Date();
+      const dueDate = new Date(task.due_date);
+      const daysDiff = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24));
+
+      if (daysDiff < 0) {
+        // Overdue - red
+        bgColor = 'rgba(254, 226, 226, 0.9)';
+      } else if (daysDiff === 0) {
+        // Due today - orange
+        bgColor = 'rgba(254, 243, 199, 0.9)';
+      } else if (daysDiff <= 3) {
+        // Due soon - yellow
+        bgColor = 'rgba(254, 249, 195, 0.9)';
+      } else if (daysDiff <= 7) {
+        // Due this week - light green
+        bgColor = 'rgba(240, 253, 244, 0.9)';
+      } else {
+        // Future - green
+        bgColor = 'rgba(220, 252, 231, 0.9)';
+      }
     }
 
     // Pinned tasks get blue tint
@@ -63,20 +77,29 @@ const TaskList = ({
       background: bgColor,
       backdropFilter: 'blur(12px)',
       WebkitBackdropFilter: 'blur(12px)',
-      borderRadius: '8px',
-      boxShadow: task.pinned ? '0 4px 6px -1px rgb(0 0 0 / 0.1)' : '0 1px 3px 0 rgb(0 0 0 / 0.1)',
-      border: task.pinned ? '2px solid #3B82F6' : 'none',
-      padding: '12px',
+      borderRadius: '6px',
+      boxShadow: task.pinned ? '0 2px 4px rgb(0 0 0 / 0.1)' : '0 1px 2px rgb(0 0 0 / 0.05)',
+      border: task.pinned ? '1px solid #3B82F6' : 'none',
+      padding: '8px 12px',
       position: 'relative',
       overflow: 'hidden',
     };
   };
 
-  // Sort tasks by pinned status, then by creation date (newest first)
+  // Sort tasks by pinned status, then by due date (oldest first)
   const sortedTasks = [...tasks].sort((a, b) => {
     if (a.pinned && !b.pinned) return -1;
     if (!a.pinned && b.pinned) return 1;
-    return new Date(b.created_at || b.id) - new Date(a.created_at || a.id);
+
+    // Sort by due date - oldest first (most urgent)
+    if (a.due_date && b.due_date) {
+      return new Date(a.due_date) - new Date(b.due_date);
+    }
+    if (a.due_date && !b.due_date) return -1;
+    if (!a.due_date && b.due_date) return 1;
+
+    // Fallback to creation date
+    return new Date(a.created_at || a.id) - new Date(b.created_at || b.id);
   });
 
   return (
@@ -120,7 +143,7 @@ const TaskList = ({
                   }}
                 />
               )}
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
                 <motion.div
                   animate={task.completed ? { scale: [1, 1.2, 1] } : {}}
                   transition={{ duration: 0.3 }}
@@ -141,13 +164,13 @@ const TaskList = ({
                       opacity: task.completed ? 0.7 : 1,
                     }}
                     transition={{ duration: 0.3 }}
-                    className="text-base font-medium text-gray-900 mb-1"
+                    className="text-sm font-medium text-gray-900 mb-1"
                     style={{ wordBreak: 'break-word' }}
                   >
                     {task.task}
                   </motion.div>
                   {task.due_date && (
-                    <div className="text-xs text-gray-400 mb-2">
+                    <div className="text-xs text-gray-400">
                       Due: {formatDateString(task.due_date)}
                     </div>
                   )}
@@ -163,7 +186,7 @@ const TaskList = ({
                           buttonPress();
                           onStartPomodoro(task);
                         }}
-                        className="p-1 text-gray-400 hover:text-red-500 text-xs"
+                        className="p-0.5 text-gray-400 hover:text-red-500 text-xs w-6 h-6"
                         title="Start Pomodoro"
                       >
                         🍅
@@ -176,7 +199,7 @@ const TaskList = ({
                           buttonPress();
                           onTogglePin(task.id, task.pinned);
                         }}
-                        className="p-1 text-gray-400 hover:text-blue-500 text-xs"
+                        className="p-0.5 text-gray-400 hover:text-blue-500 text-xs w-6 h-6"
                         title={task.pinned ? 'Unpin' : 'Pin'}
                       >
                         {task.pinned ? '📌' : '📍'}
@@ -189,7 +212,7 @@ const TaskList = ({
                           buttonPress();
                           onEdit(task);
                         }}
-                        className="p-1 text-gray-400 hover:text-blue-500 text-xs"
+                        className="p-0.5 text-gray-400 hover:text-blue-500 text-xs w-6 h-6"
                         title="Edit"
                       >
                         ✏️
@@ -201,7 +224,7 @@ const TaskList = ({
                         buttonPress();
                         onDelete(task.id);
                       }}
-                      className="p-1 text-gray-400 hover:text-red-500 text-xs"
+                      className="p-0.5 text-gray-400 hover:text-red-500 text-xs w-6 h-6"
                     >
                       <Trash2 className="w-3 h-3" />
                     </Button>
