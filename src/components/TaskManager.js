@@ -4,6 +4,7 @@ import { PlusCircle } from 'lucide-react';
 import { getTodayDateString } from '../utils/dateUtils';
 import { api } from '../services/api';
 import TaskList from './TaskList';
+import TaskPomodoroIntegration from './pomodoro/TaskPomodoroIntegration';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/Card';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
@@ -18,6 +19,7 @@ const TaskManager = () => {
   const [newTask, setNewTask] = useState('');
   const [taskDate, setTaskDate] = useState(getTodayDateString());
   const [showCompleted, setShowCompleted] = useState(false);
+  const [selectedTaskForPomodoro, setSelectedTaskForPomodoro] = useState(null);
 
   const { taskComplete, buttonPress, success, error: errorSound } = useSoundEffects();
   const { taskComplete: taskCompleteAudio, error: errorAudio } = useAudioCues();
@@ -316,6 +318,7 @@ const TaskManager = () => {
                 tasks={pendingTodos}
                 onToggleComplete={handleToggleComplete}
                 onDelete={handleDelete}
+                onStartPomodoro={setSelectedTaskForPomodoro}
               />
             )}
 
@@ -341,6 +344,7 @@ const TaskManager = () => {
                     tasks={completedTodos}
                     onToggleComplete={handleToggleComplete}
                     onDelete={handleDelete}
+                    onStartPomodoro={setSelectedTaskForPomodoro}
                     completed={true}
                   />
                 </motion.div>
@@ -349,6 +353,24 @@ const TaskManager = () => {
           </CardContent>
         </Card>
       </motion.div>
+
+      {/* Pomodoro Timer Modal */}
+      <AnimatePresence>
+        {selectedTaskForPomodoro && (
+          <motion.div
+            className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <TaskPomodoroIntegration
+              task={selectedTaskForPomodoro}
+              onTaskComplete={handleToggleComplete}
+              onClose={() => setSelectedTaskForPomodoro(null)}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

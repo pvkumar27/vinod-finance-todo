@@ -1,10 +1,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Plus } from 'lucide-react';
 import { supabase } from '../supabaseClient';
 import { api } from '../services/api';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from './ui/Card';
 import { Button } from './ui/Button';
 import { Input } from './ui/Input';
+import CreditCardForm from './CreditCardForm';
 import useSoundEffects from '../hooks/useSoundEffects';
 import useAudioCues from '../hooks/useAudioCues';
 
@@ -15,6 +17,8 @@ const CreditCardList = () => {
   const [activeTab, setActiveTab] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [message, setMessage] = useState('');
+  const [showForm, setShowForm] = useState(false);
+  const [editingCard, setEditingCard] = useState(null);
 
   const { success, error: errorSound, buttonPress } = useSoundEffects();
   const { error: errorAudio } = useAudioCues();
@@ -116,14 +120,29 @@ const CreditCardList = () => {
                   {filteredCards.length} cards in your wallet
                 </CardDescription>
               </div>
-              <Button
-                onClick={() => {
-                  buttonPress();
-                  fetchCards();
-                }}
-              >
-                🔄 Refresh
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  onClick={() => {
+                    buttonPress();
+                    setShowForm(true);
+                    setEditingCard(null);
+                  }}
+                  className="text-sm"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Card
+                </Button>
+                <Button
+                  variant="ghost"
+                  onClick={() => {
+                    buttonPress();
+                    fetchCards();
+                  }}
+                  className="text-sm"
+                >
+                  🔄
+                </Button>
+              </div>
             </div>
           </CardHeader>
         </Card>
@@ -276,7 +295,7 @@ const CreditCardList = () => {
                               </span>
                             </div>
 
-                            <div className="flex gap-2 flex-wrap">
+                            <div className="flex gap-2 flex-wrap mb-3">
                               {isInactive && (
                                 <span className="badge badge-warning">⚠️ Inactive</span>
                               )}
@@ -287,6 +306,18 @@ const CreditCardList = () => {
                                 <span className="badge badge-success">🏷️ New Promo</span>
                               )}
                             </div>
+
+                            <Button
+                              variant="ghost"
+                              onClick={() => {
+                                buttonPress();
+                                setEditingCard(card);
+                                setShowForm(true);
+                              }}
+                              className="w-full text-sm text-gray-600 hover:text-primary"
+                            >
+                              Edit Card
+                            </Button>
                           </div>
                         </CardContent>
                       </Card>
@@ -298,6 +329,23 @@ const CreditCardList = () => {
           )}
         </div>
       </motion.div>
+
+      {/* Credit Card Form Modal */}
+      <CreditCardForm
+        card={editingCard}
+        isOpen={showForm}
+        onSave={savedCard => {
+          setShowForm(false);
+          setEditingCard(null);
+          setMessage('✅ Card saved successfully!');
+          setTimeout(() => setMessage(''), 3000);
+          fetchCards();
+        }}
+        onCancel={() => {
+          setShowForm(false);
+          setEditingCard(null);
+        }}
+      />
     </div>
   );
 };

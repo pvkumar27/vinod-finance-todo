@@ -6,7 +6,7 @@ import { Button } from './ui/Button';
 import Checkbox from './ui/Checkbox';
 import useSoundEffects from '../hooks/useSoundEffects';
 
-const TaskList = ({ tasks, onToggleComplete, onDelete, completed = false }) => {
+const TaskList = ({ tasks, onToggleComplete, onDelete, onStartPomodoro, completed = false }) => {
   const todayStr = getTodayDateString();
   const { buttonPress } = useSoundEffects();
 
@@ -117,7 +117,22 @@ const TaskList = ({ tasks, onToggleComplete, onDelete, completed = false }) => {
                 </div>
 
                 <div className="flex items-center justify-between">
-                  {getStatusBadge(status)}
+                  <div className="flex items-center gap-2">
+                    {getStatusBadge(status)}
+                    {!task.completed && onStartPomodoro && (
+                      <Button
+                        variant="ghost"
+                        onClick={() => {
+                          buttonPress();
+                          onStartPomodoro(task);
+                        }}
+                        className="p-1 text-gray-400 hover:text-red-500 text-xs"
+                        title="Start Pomodoro"
+                      >
+                        🍅
+                      </Button>
+                    )}
+                  </div>
                   <Button
                     variant="ghost"
                     onClick={() => {
