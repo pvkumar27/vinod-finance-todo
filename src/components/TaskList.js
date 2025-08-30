@@ -90,7 +90,7 @@ const TaskList = ({
       borderRadius: '6px',
       boxShadow: task.pinned ? '0 2px 4px rgb(0 0 0 / 0.1)' : '0 1px 2px rgb(0 0 0 / 0.05)',
       border: task.pinned ? '1px solid #3B82F6' : '1px solid rgba(0, 0, 0, 0.1)',
-      padding: '6px 12px',
+      padding: '10px 12px',
       position: 'relative',
       overflow: 'hidden',
     };
@@ -186,11 +186,18 @@ const TaskList = ({
                       opacity: task.completed ? 0.7 : 1,
                     }}
                     transition={{ duration: 0.3 }}
-                    className="text-sm font-medium text-gray-900 truncate"
+                    className="text-sm font-medium text-gray-900"
+                    style={{
+                      display: '-webkit-box',
+                      WebkitLineClamp: 1,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden',
+                      wordBreak: 'break-word',
+                    }}
                   >
                     {task.task}
                     {task.due_date && (
-                      <span className="text-xs text-gray-400 ml-2">
+                      <span className="text-xs text-gray-400 ml-2 whitespace-nowrap">
                         Due: {formatDateString(task.due_date)}
                       </span>
                     )}
