@@ -16,10 +16,7 @@ const Button = React.forwardRef(
         ref={ref}
         className={cn(baseClasses, variantClasses[variant], className)}
         onClick={onClick}
-        whileHover={{
-          scale: 1.05,
-          boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
-        }}
+        whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
         transition={{ duration: 0.2 }}
         {...props}

@@ -107,14 +107,37 @@ body {
 }
 
 .btn-primary {
-  background: var(--primary);
+  background: linear-gradient(135deg, var(--primary), var(--secondary));
   color: white;
+  box-shadow: 0 0 0 0 rgba(37, 99, 235, 0);
+  transition: all var(--transition), box-shadow 0.3s ease;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #1D4ED8, #7C3AED);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-primary:active {
+  box-shadow: 0 0 20px rgba(37, 99, 235, 0.4);
+  transform: scale(0.98);
 }
 
 .btn-secondary {
   background: rgba(255, 255, 255, 0.6);
   color: var(--text-primary);
   border: 1px solid rgba(255, 255, 255, 0.3);
+  transition: all var(--transition), box-shadow 0.3s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(37, 99, 235, 0.2);
+}
+
+.btn-secondary:active {
+  box-shadow: 0 0 15px rgba(37, 99, 235, 0.2);
 }
 
 .btn-ghost {
@@ -124,6 +147,11 @@ body {
 
 .btn-ghost:hover {
   background: rgba(255, 255, 255, 0.4);
+  color: var(--primary);
+}
+
+.btn-ghost:active {
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.15);
 }
 
 /* Input Component */
