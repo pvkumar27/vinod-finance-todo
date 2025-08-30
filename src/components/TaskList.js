@@ -26,9 +26,19 @@ const TaskList = ({
     return 'normal';
   };
 
-  const getStatusBadge = status => {
+  const getStatusBadge = (status, task) => {
+    if (status === 'overdue' && task.due_date) {
+      const today = new Date();
+      const dueDate = new Date(task.due_date);
+      const daysOverdue = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
+      return (
+        <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-600">
+          {daysOverdue}d overdue
+        </span>
+      );
+    }
+
     const badges = {
-      overdue: { text: 'Overdue', bg: 'bg-red-100', textColor: 'text-red-600' },
       today: { text: 'Today', bg: 'bg-amber-100', textColor: 'text-amber-600' },
       completed: { text: 'Done', bg: 'bg-green-100', textColor: 'text-green-600' },
     };
@@ -189,7 +199,7 @@ const TaskList = ({
                 </div>
 
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1">{getStatusBadge(status)}</div>
+                  <div className="flex items-center gap-1">{getStatusBadge(status, task)}</div>
                   <div className="flex items-center gap-1">
                     {!task.completed && onStartPomodoro && (
                       <Button
