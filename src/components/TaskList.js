@@ -90,7 +90,7 @@ const TaskList = ({
       borderRadius: '6px',
       boxShadow: task.pinned ? '0 2px 4px rgb(0 0 0 / 0.1)' : '0 1px 2px rgb(0 0 0 / 0.05)',
       border: task.pinned ? '1px solid #3B82F6' : '1px solid rgba(0, 0, 0, 0.1)',
-      padding: '8px 12px',
+      padding: '6px 12px',
       position: 'relative',
       overflow: 'hidden',
     };
@@ -165,7 +165,7 @@ const TaskList = ({
                   }}
                 />
               )}
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2">
                 <motion.div
                   animate={task.completed ? { scale: [1, 1.2, 1] } : {}}
                   transition={{ duration: 0.3 }}
@@ -179,28 +179,27 @@ const TaskList = ({
                   />
                 </motion.div>
 
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div className="flex-1 min-w-0">
                   <motion.div
                     animate={{
                       textDecoration: task.completed ? 'line-through' : 'none',
                       opacity: task.completed ? 0.7 : 1,
                     }}
                     transition={{ duration: 0.3 }}
-                    className="text-sm font-medium text-gray-900 mb-1"
-                    style={{ wordBreak: 'break-word' }}
+                    className="text-sm font-medium text-gray-900 truncate"
                   >
                     {task.task}
+                    {task.due_date && (
+                      <span className="text-xs text-gray-400 ml-2">
+                        Due: {formatDateString(task.due_date)}
+                      </span>
+                    )}
                   </motion.div>
-                  {task.due_date && (
-                    <div className="text-xs text-gray-400">
-                      Due: {formatDateString(task.due_date)}
-                    </div>
-                  )}
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1">{getStatusBadge(status, task)}</div>
-                  <div className="flex items-center gap-1">
+                <div className="flex items-center gap-1">
+                  {getStatusBadge(status, task)}
+                  <div className="flex items-center gap-0.5">
                     {!task.completed && onStartPomodoro && (
                       <Button
                         variant="ghost"
