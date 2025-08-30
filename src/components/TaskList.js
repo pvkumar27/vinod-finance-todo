@@ -87,10 +87,10 @@ const TaskList = ({
       background: bgColor,
       backdropFilter: 'blur(12px)',
       WebkitBackdropFilter: 'blur(12px)',
-      borderRadius: '4px',
+      borderRadius: '8px',
       boxShadow: task.pinned ? '0 2px 4px rgb(0 0 0 / 0.1)' : '0 1px 2px rgb(0 0 0 / 0.05)',
       border: task.pinned ? '1px solid #3B82F6' : '1px solid rgba(0, 0, 0, 0.1)',
-      padding: '6px 8px',
+      padding: '12px',
       position: 'relative',
       overflow: 'hidden',
     };
@@ -113,7 +113,7 @@ const TaskList = ({
   });
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3">
       <AnimatePresence>
         {sortedTasks.map((task, index) => {
           const status = getTaskStatus(task);
@@ -165,11 +165,10 @@ const TaskList = ({
                   }}
                 />
               )}
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-3">
                 <motion.div
                   animate={task.completed ? { scale: [1, 1.2, 1] } : {}}
                   transition={{ duration: 0.3 }}
-                  className="flex-shrink-0"
                 >
                   <Checkbox
                     checked={task.completed || false}
@@ -177,7 +176,6 @@ const TaskList = ({
                       buttonPress();
                       onToggleComplete(task.id, task.completed);
                     }}
-                    style={{ width: '14px', height: '14px' }}
                   />
                 </motion.div>
 
@@ -188,70 +186,69 @@ const TaskList = ({
                       opacity: task.completed ? 0.7 : 1,
                     }}
                     transition={{ duration: 0.3 }}
-                    className="text-sm font-medium text-gray-900 truncate"
+                    className="text-sm font-medium text-gray-900 mb-1"
+                    style={{ wordBreak: 'break-word' }}
                   >
-                    <span className="mr-2">{task.task}</span>
-                    {task.due_date && (
-                      <span className="text-xs text-gray-400 whitespace-nowrap">
-                        Due: {formatDateString(task.due_date)}
-                      </span>
-                    )}
+                    {task.task}
                   </motion.div>
+                  {task.due_date && (
+                    <div className="text-xs text-gray-400">
+                      Due: {formatDateString(task.due_date)}
+                    </div>
+                  )}
                 </div>
 
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-2">
                   {getStatusBadge(status, task)}
-                  <div className="flex items-center gap-0.5">
-                    {!task.completed && onStartPomodoro && (
-                      <Button
-                        variant="ghost"
-                        onClick={() => {
-                          buttonPress();
-                          onStartPomodoro(task);
-                        }}
-                        className="p-0.5 text-gray-400 hover:text-red-500 text-xs w-6 h-6"
-                        title="Start Pomodoro"
-                      >
-                        🍅
-                      </Button>
-                    )}
-                    {onTogglePin && (
-                      <Button
-                        variant="ghost"
-                        onClick={() => {
-                          buttonPress();
-                          onTogglePin(task.id, task.pinned);
-                        }}
-                        className="p-0.5 text-gray-400 hover:text-blue-500 text-xs w-6 h-6"
-                        title={task.pinned ? 'Unpin' : 'Pin'}
-                      >
-                        {task.pinned ? '📌' : '📍'}
-                      </Button>
-                    )}
-                    {onEdit && (
-                      <Button
-                        variant="ghost"
-                        onClick={() => {
-                          buttonPress();
-                          onEdit(task);
-                        }}
-                        className="p-0.5 text-gray-400 hover:text-blue-500 text-xs w-6 h-6"
-                        title="Edit"
-                      >
-                        ✏️
-                      </Button>
-                    )}
+                  {!task.completed && onStartPomodoro && (
                     <Button
                       variant="ghost"
                       onClick={() => {
                         buttonPress();
-                        onDelete(task.id);
+                        onStartPomodoro(task);
                       }}
-                      className="p-0.5 text-gray-400 hover:text-red-500 text-xs w-6 h-6"
+                      className="p-1 text-gray-400 hover:text-red-500 text-xs"
+                      title="Start Pomodoro"
                     >
-                      <Trash2 className="w-3 h-3" />
+                      🍅
                     </Button>
-                  </div>
+                  )}
+                  {onTogglePin && (
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        buttonPress();
+                        onTogglePin(task.id, task.pinned);
+                      }}
+                      className="p-1 text-gray-400 hover:text-blue-500 text-xs"
+                      title={task.pinned ? 'Unpin' : 'Pin'}
+                    >
+                      {task.pinned ? '📌' : '📍'}
+                    </Button>
+                  )}
+                  {onEdit && (
+                    <Button
+                      variant="ghost"
+                      onClick={() => {
+                        buttonPress();
+                        onEdit(task);
+                      }}
+                      className="p-1 text-gray-400 hover:text-blue-500 text-xs"
+                      title="Edit"
+                    >
+                      ✏️
+                    </Button>
+                  )}
+                  <Button
+                    variant="ghost"
+                    onClick={() => {
+                      buttonPress();
+                      onDelete(task.id);
+                    }}
+                    className="p-1 text-gray-400 hover:text-red-500 text-xs"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
                 </div>
               </div>
             </motion.div>
