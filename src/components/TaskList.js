@@ -188,18 +188,11 @@ const TaskList = ({
                       opacity: task.completed ? 0.7 : 1,
                     }}
                     transition={{ duration: 0.3 }}
-                    className="text-sm font-medium text-gray-900"
-                    style={{
-                      display: '-webkit-box',
-                      WebkitLineClamp: 1,
-                      WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden',
-                      wordBreak: 'break-word',
-                    }}
+                    className="text-sm font-medium text-gray-900 truncate"
                   >
-                    {task.task}
+                    <span className="mr-2">{task.task}</span>
                     {task.due_date && (
-                      <span className="text-xs text-gray-400 ml-2 whitespace-nowrap">
+                      <span className="text-xs text-gray-400 whitespace-nowrap">
                         Due: {formatDateString(task.due_date)}
                       </span>
                     )}
