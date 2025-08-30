@@ -62,16 +62,22 @@ const TaskList = ({ tasks, onToggleComplete, onDelete, completed = false }) => {
               key={task.id}
               layout
               initial={{ opacity: 0, y: 20, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, x: -100, scale: 0.95 }}
+              animate={{
+                opacity: task.completed ? 0.6 : 1,
+                y: 0,
+                scale: status === 'overdue' && !task.completed ? [1, 1.02, 1] : 1,
+              }}
+              exit={{ opacity: 0, y: -20, scale: 0.95 }}
               transition={{
                 duration: 0.2,
                 delay: index * 0.05,
                 layout: { duration: 0.3 },
+                scale:
+                  status === 'overdue' && !task.completed ? { repeat: Infinity, duration: 2 } : {},
               }}
               whileHover={{
-                scale: 1.01,
-                boxShadow: 'var(--shadow-md)',
+                scale: 1.05,
+                boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
               }}
               style={getTaskCardStyle(task)}
             >
@@ -85,18 +91,22 @@ const TaskList = ({ tasks, onToggleComplete, onDelete, completed = false }) => {
                 />
 
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div
+                  <motion.div
+                    animate={{
+                      textDecoration: task.completed ? 'line-through' : 'none',
+                      opacity: task.completed ? 0.7 : 1,
+                    }}
+                    transition={{ duration: 0.3 }}
                     style={{
                       fontSize: 'var(--text-base)',
                       fontWeight: task.completed ? 'normal' : '500',
                       color: task.completed ? 'var(--text-tertiary)' : 'var(--text-primary)',
-                      textDecoration: task.completed ? 'line-through' : 'none',
                       marginBottom: task.due_date ? 'var(--space-1)' : 0,
                       wordBreak: 'break-word',
                     }}
                   >
                     {task.task}
-                  </div>
+                  </motion.div>
                   {task.due_date && (
                     <div className="body-text text-secondary">
                       Due: {formatDateString(task.due_date)}
