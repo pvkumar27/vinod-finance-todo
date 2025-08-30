@@ -20,16 +20,16 @@ const TaskList = ({ tasks, onToggleComplete, onDelete, onStartPomodoro, complete
 
   const getStatusBadge = status => {
     const badges = {
-      overdue: { text: 'Overdue', bg: 'bg-red-100', text: 'text-red-600' },
-      today: { text: 'Today', bg: 'bg-amber-100', text: 'text-amber-600' },
-      completed: { text: 'Done', bg: 'bg-green-100', text: 'text-green-600' },
+      overdue: { text: 'Overdue', bg: 'bg-red-100', textColor: 'text-red-600' },
+      today: { text: 'Today', bg: 'bg-amber-100', textColor: 'text-amber-600' },
+      completed: { text: 'Done', bg: 'bg-green-100', textColor: 'text-green-600' },
     };
 
     const badge = badges[status];
     if (!badge) return null;
 
     return (
-      <span className={`px-2 py-1 rounded-full text-xs font-medium ${badge.bg} ${badge.text}`}>
+      <span className={`px-2 py-1 rounded-full text-xs font-medium ${badge.bg} ${badge.textColor}`}>
         {badge.text}
       </span>
     );
