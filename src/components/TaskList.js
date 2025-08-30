@@ -33,7 +33,7 @@ const TaskList = ({
       const daysOverdue = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
       return (
         <span className="px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-600">
-          {daysOverdue}d overdue
+          {daysOverdue} {daysOverdue === 1 ? 'day' : 'days'} overdue
         </span>
       );
     }
