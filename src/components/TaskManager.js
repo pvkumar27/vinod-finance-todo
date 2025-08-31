@@ -191,7 +191,15 @@ const TaskManager = () => {
         transition={{ duration: 0.25 }}
       >
         {/* Header */}
-        <Card className="mb-6 bg-white rounded-2xl shadow-md">
+        <Card
+          className="mb-6 rounded-2xl shadow-md"
+          style={{
+            background: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+          }}
+        >
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
@@ -283,7 +291,15 @@ const TaskManager = () => {
         </AnimatePresence>
 
         {/* Add Task Form */}
-        <Card className="mb-6 bg-white rounded-2xl shadow-md">
+        <Card
+          className="mb-6 rounded-2xl shadow-md"
+          style={{
+            background: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+          }}
+        >
           <form onSubmit={handleAddTodo}>
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="flex-1 relative">
@@ -343,7 +359,15 @@ const TaskManager = () => {
         </Card>
 
         {/* Tasks */}
-        <Card className="bg-white rounded-2xl shadow-md">
+        <Card
+          className="rounded-2xl shadow-md"
+          style={{
+            background: 'rgba(255, 255, 255, 0.9)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+          }}
+        >
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <CardTitle>Active Tasks</CardTitle>

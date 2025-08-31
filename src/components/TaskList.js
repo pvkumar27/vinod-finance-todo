@@ -73,6 +73,12 @@ const TaskList = ({ tasks, onToggleComplete, onTogglePin, onEdit, onDelete, onSt
               exit={{ opacity: 0, x: -100 }}
               transition={{ delay: index * 0.05 }}
               className={`group flex items-center py-1 px-1 sm:p-2 mb-1 rounded-lg transition-all duration-200 min-h-[2.25rem] w-full shadow-sm hover:shadow ${bgColor} ${borderColor}`}
+              style={{
+                background: bgColor.includes('bg-') ? undefined : 'rgba(255, 255, 255, 0.8)',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+              }}
             >
               <div className="mr-1 sm:mr-3">
                 <input
