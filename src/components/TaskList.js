@@ -74,12 +74,55 @@ const TaskList = ({ tasks, onToggleComplete, onTogglePin, onEdit, onDelete, onSt
               transition={{ delay: index * 0.05 }}
               className={`group flex items-center py-1 px-1 sm:p-2 mb-1 rounded-lg transition-all duration-200 min-h-[2.25rem] w-full shadow-sm hover:shadow ${bgColor} ${borderColor}`}
               style={{
-                background: bgColor.includes('bg-') ? undefined : 'rgba(255, 255, 255, 0.8)',
+                background: (() => {
+                  if (task.due_date) {
+                    const today = new Date();
+                    const dueDate = new Date(task.due_date);
+                    const daysDiff = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24));
+                    if (daysDiff < 0) return 'rgba(254, 226, 226, 0.8)';
+                    if (daysDiff === 0) return 'rgba(254, 243, 199, 0.8)';
+                    if (daysDiff <= 3) return 'rgba(254, 249, 195, 0.8)';
+                    if (daysDiff <= 7) return 'rgba(240, 253, 244, 0.8)';
+                    return 'rgba(220, 252, 231, 0.8)';
+                  }
+                  return task.pinned ? 'rgba(219, 234, 254, 0.8)' : 'rgba(255, 255, 255, 0.8)';
+                })(),
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
+                border: task.pinned ? '1px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.3)',
+                boxShadow: task.pinned
+                  ? '0 4px 6px rgba(0, 0, 0, 0.1)'
+                  : '0 2px 4px rgba(0, 0, 0, 0.05)',
               }}
             >
+              {/* Left edge gradient */}
+              {!task.completed && (
+                <div
+                  className="absolute left-0 top-0 bottom-0 w-1"
+                  style={{
+                    background: task.due_date
+                      ? (() => {
+                          const today = new Date();
+                          const dueDate = new Date(task.due_date);
+                          const daysDiff = Math.floor((dueDate - today) / (1000 * 60 * 60 * 24));
+                          if (daysDiff < 0) return 'linear-gradient(to bottom, #ef4444, #f87171)';
+                          if (daysDiff === 0) return 'linear-gradient(to bottom, #f59e0b, #fbbf24)';
+                          if (daysDiff <= 3) return 'linear-gradient(to bottom, #eab308, #facc15)';
+                          if (daysDiff <= 7) return 'linear-gradient(to bottom, #22c55e, #4ade80)';
+                          return 'linear-gradient(to bottom, #16a34a, #22c55e)';
+                        })()
+                      : 'linear-gradient(to bottom, #6b7280, #9ca3af)',
+                  }}
+                />
+              )}
+
+              {/* Pin indicator */}
+              {task.pinned && (
+                <div className="absolute top-2 right-2 text-blue-500 text-sm" title="Pinned">
+                  📌
+                </div>
+              )}
+
               <div className="mr-1 sm:mr-3">
                 <input
                   type="checkbox"
