@@ -38,8 +38,8 @@ const TaskList = ({ tasks, onToggleComplete, onTogglePin, onEdit, onDelete, onSt
 
           let bgColor, borderColor;
           if (isPinned) {
-            bgColor = 'bg-yellow-50';
-            borderColor = 'border-l-2 border-yellow-400';
+            bgColor = 'bg-purple-100';
+            borderColor = 'border-l-4 border-purple-500';
           } else if (isToday) {
             bgColor = 'bg-green-50';
             borderColor = 'border-l-4 border-green-500';
@@ -75,6 +75,7 @@ const TaskList = ({ tasks, onToggleComplete, onTogglePin, onEdit, onDelete, onSt
               className={`group flex items-center py-1 px-1 sm:p-2 mb-1 rounded-lg transition-all duration-200 min-h-[2.25rem] w-full shadow-sm hover:shadow ${bgColor} ${borderColor}`}
               style={{
                 background: (() => {
+                  if (task.pinned) return 'rgba(147, 51, 234, 0.3)';
                   if (task.due_date) {
                     const today = new Date();
                     const dueDate = new Date(task.due_date);
@@ -85,11 +86,11 @@ const TaskList = ({ tasks, onToggleComplete, onTogglePin, onEdit, onDelete, onSt
                     if (daysDiff <= 7) return 'rgba(240, 253, 244, 0.8)';
                     return 'rgba(220, 252, 231, 0.8)';
                   }
-                  return task.pinned ? 'rgba(219, 234, 254, 0.8)' : 'rgba(255, 255, 255, 0.8)';
+                  return 'rgba(255, 255, 255, 0.8)';
                 })(),
                 backdropFilter: 'blur(12px)',
                 WebkitBackdropFilter: 'blur(12px)',
-                border: task.pinned ? '1px solid #3B82F6' : '1px solid rgba(255, 255, 255, 0.3)',
+                border: task.pinned ? '2px solid #9333EA' : '1px solid rgba(255, 255, 255, 0.3)',
                 boxShadow: task.pinned
                   ? '0 4px 6px rgba(0, 0, 0, 0.1)'
                   : '0 2px 4px rgba(0, 0, 0, 0.05)',
@@ -118,7 +119,7 @@ const TaskList = ({ tasks, onToggleComplete, onTogglePin, onEdit, onDelete, onSt
 
               {/* Pin indicator */}
               {task.pinned && (
-                <div className="absolute top-2 right-2 text-blue-500 text-sm" title="Pinned">
+                <div className="absolute top-2 right-2 text-purple-600 text-sm" title="Pinned">
                   📌
                 </div>
               )}
