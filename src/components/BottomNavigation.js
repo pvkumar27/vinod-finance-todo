@@ -39,7 +39,7 @@ const BottomNavigation = ({ activeTab, setActiveTab }) => {
                 background: activeTab === item.id ? 'rgba(37, 99, 235, 0.1)' : 'transparent',
                 boxShadow:
                   activeTab === item.id
-                    ? '0 0 20px rgba(37, 99, 235, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
+                    ? '0 0 8px rgba(37, 99, 235, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2)'
                     : 'none',
                 borderBottom: activeTab === item.id ? '2px solid #2563EB' : '2px solid transparent',
               }}

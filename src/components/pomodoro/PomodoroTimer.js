@@ -197,10 +197,10 @@ const PomodoroTimer = ({ selectedTask, onComplete, onCancel }) => {
   const progress = ((currentMode.duration - timeLeft) / currentMode.duration) * 100;
 
   return (
-    <div className="finbot-card p-6 text-center">
+    <div className="bg-white rounded-2xl p-6 text-center shadow-2xl border max-w-md w-full">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <h3 className="finbot-heading-lg flex items-center">
+        <h3 className="text-lg font-semibold flex items-center">
           <span className="mr-2">{currentMode.emoji}</span>
           {currentMode.label}
         </h3>
@@ -268,7 +268,7 @@ const PomodoroTimer = ({ selectedTask, onComplete, onCancel }) => {
             }
             setIsRunning(!isRunning);
           }}
-          className={`finbot-button-primary px-4 py-3 ${currentMode.color}`}
+          className={`px-4 py-3 rounded-lg text-white font-medium transition-colors ${currentMode.color} hover:opacity-90`}
         >
           {isRunning ? '⏸️ Pause' : '▶️ Start'}
         </button>
@@ -285,7 +285,7 @@ const PomodoroTimer = ({ selectedTask, onComplete, onCancel }) => {
                 onCancel(); // Close the timer
               }
             }}
-            className="finbot-button-primary px-4 py-3 bg-green-500 hover:bg-green-600"
+            className="px-4 py-3 rounded-lg text-white font-medium bg-green-500 hover:bg-green-600 transition-colors"
             disabled={timeLeft === currentMode.duration}
           >
             ✅ Done Early
@@ -295,7 +295,7 @@ const PomodoroTimer = ({ selectedTask, onComplete, onCancel }) => {
         {(mode === 'shortBreak' || mode === 'longBreak') && (
           <button
             onClick={() => switchMode('work')}
-            className="finbot-button-primary px-4 py-3 bg-orange-500 hover:bg-orange-600"
+            className="px-4 py-3 rounded-lg text-white font-medium bg-orange-500 hover:bg-orange-600 transition-colors"
           >
             ⏭️ Skip Break
           </button>
@@ -306,7 +306,7 @@ const PomodoroTimer = ({ selectedTask, onComplete, onCancel }) => {
             setTimeLeft(currentMode.duration);
             setIsRunning(false);
           }}
-          className="finbot-button-secondary px-4 py-3"
+          className="px-4 py-3 rounded-lg border border-gray-300 text-gray-700 font-medium hover:bg-gray-50 transition-colors"
         >
           🔄 Reset
         </button>

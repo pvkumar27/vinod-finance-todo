@@ -183,7 +183,7 @@ const TaskManager = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-50 to-orange-100">
       <motion.div
         className="p-4 max-w-7xl mx-auto"
         initial={{ opacity: 0, y: 20 }}
@@ -345,13 +345,15 @@ const TaskManager = () => {
         {/* Tasks */}
         <Card className="bg-white rounded-2xl shadow-md">
           <CardHeader>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <CardTitle>Active Tasks</CardTitle>
-              <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
                 <div className="text-sm text-secondary">{pendingTodos.length} pending</div>
                 {completedTodos.length > 0 && (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs sm:text-sm text-secondary">Show Completed</span>
+                    <span className="text-xs sm:text-sm text-secondary whitespace-nowrap">
+                      Show Completed
+                    </span>
                     <Toggle
                       checked={showCompleted}
                       onChange={() => {

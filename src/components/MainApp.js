@@ -430,29 +430,23 @@ const MainApp = () => {
       <AnimatePresence>
         {isChatOpen && (
           <motion.div
-            className="fixed inset-0 z-40 flex flex-col"
-            style={{ background: 'var(--color-background)' }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            className="fixed bottom-20 right-4 z-40 w-80 h-96 bg-white rounded-2xl shadow-2xl border flex flex-col"
+            initial={{ opacity: 0, scale: 0.8, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.8, y: 20 }}
             transition={{ duration: 0.25 }}
           >
-            <TopBar />
             <ChatHeader isCollapsed={false} onToggleCollapse={() => setIsChatOpen(false)} />
-            <div className="flex-1 p-4 overflow-hidden pb-36">
-              <div className="card h-full">
-                <div className="p-4 h-full flex flex-col">
-                  <ChatContainer
-                    messages={messages}
-                    isLoading={isLoading}
-                    messagesEndRef={messagesEndRef}
-                    onRoast={handleRoast}
-                    onHype={handleHype}
-                  />
-                </div>
-              </div>
+            <div className="flex-1 p-4 overflow-hidden">
+              <ChatContainer
+                messages={messages}
+                isLoading={isLoading}
+                messagesEndRef={messagesEndRef}
+                onRoast={handleRoast}
+                onHype={handleHype}
+              />
             </div>
-            <div className="fixed bottom-16 left-0 right-0 z-50">
+            <div className="border-t">
               <BottomPanel
                 inputValue={inputValue}
                 setInputValue={setInputValue}
