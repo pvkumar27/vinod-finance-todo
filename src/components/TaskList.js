@@ -87,11 +87,11 @@ const TaskList = ({ tasks, onToggleComplete, onTogglePin, onEdit, onDelete, onSt
               </div>
 
               <div className="flex-1 min-w-0 flex flex-col sm:flex-row sm:items-center pl-1 pr-0.5">
-                <span className="max-w-full text-sm font-medium text-left text-gray-900 truncate">
+                <span className="max-w-full text-sm font-medium text-left text-gray-900 truncate sm:flex-1">
                   {task.task}
                 </span>
                 {formattedDate && (
-                  <span className="text-[10px] sm:text-xs text-gray-500 sm:ml-2 whitespace-nowrap mt-0.5 sm:mt-0 flex items-center text-left">
+                  <span className="text-[10px] sm:text-xs text-gray-500 sm:ml-2 whitespace-nowrap mt-0.5 sm:mt-0 flex items-center text-left sm:flex-shrink-0">
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-400 mr-0.5 inline-block sm:hidden"></span>
                     Due: {formattedDate}
                     {isOverdue && (

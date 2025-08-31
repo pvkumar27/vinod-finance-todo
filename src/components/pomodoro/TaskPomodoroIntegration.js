@@ -73,13 +73,13 @@ const TaskPomodoroIntegration = ({ task, onTaskComplete, onClose }) => {
   }
 
   return (
-    <div className="finbot-card p-4">
+    <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="finbot-heading-md flex items-center">
+        <h3 className="text-lg font-semibold flex items-center">
           <span className="mr-2">🍅</span>
           Pomodoro Focus
         </h3>
-        <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-xl">
           ✕
         </button>
       </div>
@@ -109,7 +109,7 @@ const TaskPomodoroIntegration = ({ task, onTaskComplete, onClose }) => {
       {/* Start Button */}
       <button
         onClick={handleStartPomodoro}
-        className="finbot-button-primary w-full bg-red-500 hover:bg-red-600 flex items-center justify-center"
+        className="w-full bg-red-500 hover:bg-red-600 text-white py-3 px-4 rounded-lg flex items-center justify-center font-medium transition-colors"
       >
         <span className="mr-2">🍅</span>
         Start 25-min Focus Session

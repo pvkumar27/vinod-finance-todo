@@ -183,7 +183,7 @@ const TaskManager = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-slate-100">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <motion.div
         className="p-4 max-w-7xl mx-auto"
         initial={{ opacity: 0, y: 20 }}
@@ -249,17 +249,19 @@ const TaskManager = () => {
         </Card>
 
         {/* Message */}
+        {/* Fixed Message */}
         <AnimatePresence>
           {message && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: -10 }}
+              className="fixed top-4 left-4 right-4 z-50"
+              initial={{ opacity: 0, scale: 0.95, y: -20 }}
               animate={{
                 opacity: 1,
                 scale: 1,
                 y: 0,
                 x: message.includes('❌') ? [0, -5, 5, -5, 5, 0] : 0,
               }}
-              exit={{ opacity: 0, scale: 0.95, y: -10 }}
+              exit={{ opacity: 0, scale: 0.95, y: -20 }}
               transition={{
                 type: 'spring',
                 duration: 0.25,
@@ -268,7 +270,7 @@ const TaskManager = () => {
               }}
             >
               <Card
-                className={`mb-6 ${message.includes('❌') ? 'border-error' : 'border-success'}`}
+                className={`${message.includes('❌') ? 'border-error bg-red-50' : 'border-success bg-green-50'} shadow-lg`}
               >
                 <div
                   className={`font-medium ${message.includes('❌') ? 'text-error' : 'text-success'}`}
@@ -463,10 +465,10 @@ const TaskManager = () => {
             exit={{ opacity: 0 }}
           >
             <motion.div
-              className="bg-white rounded-2xl p-6 w-full max-w-md"
-              initial={{ scale: 0.9 }}
-              animate={{ scale: 1 }}
-              exit={{ scale: 0.9 }}
+              className="bg-white rounded-2xl p-6 w-full max-w-md shadow-2xl border"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
             >
               <h3 className="text-lg font-semibold mb-4">✏️ Edit Task</h3>
               <div className="space-y-4">
