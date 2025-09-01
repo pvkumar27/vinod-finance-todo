@@ -2,14 +2,14 @@
   "@netlify/functions": {
     "current": "2.8.2",
     "wanted": "2.8.2",
-    "latest": "4.2.2",
+    "latest": "4.2.5",
     "dependent": "vinod-finance-todo",
     "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/@netlify/functions"
   },
   "@supabase/supabase-js": {
-    "current": "2.55.0",
-    "wanted": "2.56.0",
-    "latest": "2.56.0",
+    "current": "2.56.0",
+    "wanted": "2.56.1",
+    "latest": "2.56.1",
     "dependent": "vinod-finance-todo",
     "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/@supabase/supabase-js"
   },
@@ -65,7 +65,7 @@
   "nodemailer": {
     "current": "6.10.1",
     "wanted": "6.10.1",
-    "latest": "7.0.5",
+    "latest": "7.0.6",
     "dependent": "vinod-finance-todo",
     "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/nodemailer"
   },
