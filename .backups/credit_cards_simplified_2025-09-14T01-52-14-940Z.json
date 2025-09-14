@@ -1,0 +1,202 @@
+[
+  {
+    "id": "de421259-5876-4d55-8a13-0a2c16bc3434",
+    "user_id": "55a76048-3516-41e0-a72a-04f29ef3f518",
+    "card_name": null,
+    "days_inactive": null,
+    "last_used_date": null,
+    "new_promo_available": false,
+    "interest_after_promo": null,
+    "current_promos": [
+      {
+        "promo_apr": "0.00",
+        "promo_amount": "",
+        "promo_expiry_date": ""
+      }
+    ],
+    "created_at": "2025-08-29T20:12:17.11836+00:00",
+    "updated_at": "2025-08-29T20:12:17.11836+00:00",
+    "bank_name": "Chase",
+    "last_four_digits": "1234",
+    "card_type": "",
+    "promo_used": false,
+    "notes": "",
+    "card_holder": "Vinod",
+    "promo_end_date": null
+  },
+  {
+    "id": "d980982e-7246-43a0-9bbf-8d7d2ee5f7b0",
+    "user_id": "55a76048-3516-41e0-a72a-04f29ef3f518",
+    "card_name": null,
+    "days_inactive": null,
+    "last_used_date": null,
+    "new_promo_available": false,
+    "interest_after_promo": null,
+    "current_promos": [
+      {
+        "promo_apr": "0.00",
+        "promo_amount": "",
+        "promo_expiry_date": ""
+      }
+    ],
+    "created_at": "2025-08-29T20:12:29.974586+00:00",
+    "updated_at": "2025-08-29T20:12:29.974586+00:00",
+    "bank_name": "Chase",
+    "last_four_digits": "1234",
+    "card_type": "",
+    "promo_used": false,
+    "notes": "",
+    "card_holder": "Vinod",
+    "promo_end_date": null
+  },
+  {
+    "id": "e53e07ae-e408-4c8a-a1aa-9872f933a898",
+    "user_id": "370621bf-3d54-4c3f-ae21-97a30062b0f9",
+    "card_name": "Bank of America 6159",
+    "days_inactive": null,
+    "last_used_date": null,
+    "new_promo_available": false,
+    "interest_after_promo": null,
+    "current_promos": [
+      {
+        "promo_apr": "0.00",
+        "promo_amount": "",
+        "promo_expiry_date": ""
+      }
+    ],
+    "created_at": "2025-08-07T03:26:10.088838+00:00",
+    "updated_at": "2025-08-07T03:26:10.088838+00:00",
+    "bank_name": "Bank of America",
+    "last_four_digits": "6159",
+    "card_type": "",
+    "promo_used": false,
+    "notes": "",
+    "card_holder": "Vinod",
+    "promo_end_date": null
+  },
+  {
+    "id": "c5b841d9-0563-4228-bf1a-2855b221eafb",
+    "user_id": "370621bf-3d54-4c3f-ae21-97a30062b0f9",
+    "card_name": "Bank of America 5668",
+    "days_inactive": null,
+    "last_used_date": null,
+    "new_promo_available": false,
+    "interest_after_promo": null,
+    "current_promos": [
+      {
+        "promo_apr": "0.00",
+        "promo_amount": "",
+        "promo_expiry_date": ""
+      }
+    ],
+    "created_at": "2025-08-07T03:27:10.22867+00:00",
+    "updated_at": "2025-08-07T03:27:10.22867+00:00",
+    "bank_name": "Bank of America",
+    "last_four_digits": "5668",
+    "card_type": "",
+    "promo_used": false,
+    "notes": "",
+    "card_holder": "Vinod",
+    "promo_end_date": null
+  },
+  {
+    "id": "9977acba-c47c-422f-887e-d7219bff6554",
+    "user_id": "370621bf-3d54-4c3f-ae21-97a30062b0f9",
+    "card_name": "Bank of America 5484",
+    "days_inactive": null,
+    "last_used_date": null,
+    "new_promo_available": false,
+    "interest_after_promo": null,
+    "current_promos": [
+      {
+        "promo_apr": "0.00",
+        "promo_amount": "",
+        "promo_expiry_date": ""
+      }
+    ],
+    "created_at": "2025-08-07T03:27:36.745941+00:00",
+    "updated_at": "2025-08-07T03:27:36.745941+00:00",
+    "bank_name": "Bank of America",
+    "last_four_digits": "5484",
+    "card_type": "",
+    "promo_used": false,
+    "notes": "",
+    "card_holder": "Vinod",
+    "promo_end_date": null
+  },
+  {
+    "id": "d3ab8848-4734-4e7e-b54f-8b3b48b30a1f",
+    "user_id": "370621bf-3d54-4c3f-ae21-97a30062b0f9",
+    "card_name": "Bank of America 0771",
+    "days_inactive": null,
+    "last_used_date": null,
+    "new_promo_available": false,
+    "interest_after_promo": null,
+    "current_promos": [
+      {
+        "promo_apr": "0.00",
+        "promo_amount": "",
+        "promo_expiry_date": ""
+      }
+    ],
+    "created_at": "2025-08-07T03:34:59.268279+00:00",
+    "updated_at": "2025-08-07T03:34:59.268279+00:00",
+    "bank_name": "Bank of America",
+    "last_four_digits": "0771",
+    "card_type": "",
+    "promo_used": false,
+    "notes": "",
+    "card_holder": "Vinod",
+    "promo_end_date": null
+  },
+  {
+    "id": "22a9768c-36e7-4d05-9600-f545b4e3fd52",
+    "user_id": "55a76048-3516-41e0-a72a-04f29ef3f518",
+    "card_name": null,
+    "days_inactive": 9,
+    "last_used_date": "2025-08-01",
+    "new_promo_available": false,
+    "interest_after_promo": null,
+    "current_promos": [
+      {
+        "promo_apr": "0.00",
+        "promo_amount": "",
+        "promo_expiry_date": ""
+      }
+    ],
+    "created_at": "2025-08-09T14:02:26.531616+00:00",
+    "updated_at": "2025-08-09T14:02:26.531616+00:00",
+    "bank_name": "Bank of America",
+    "last_four_digits": "1818",
+    "card_type": "free",
+    "promo_used": false,
+    "notes": "",
+    "card_holder": "Vinod",
+    "promo_end_date": null
+  },
+  {
+    "id": "fd2d9017-6c23-4b3c-a120-ff8753213274",
+    "user_id": "370621bf-3d54-4c3f-ae21-97a30062b0f9",
+    "card_name": "Bank of America 1837",
+    "days_inactive": null,
+    "last_used_date": null,
+    "new_promo_available": false,
+    "interest_after_promo": null,
+    "current_promos": [
+      {
+        "promo_apr": "0.00",
+        "promo_amount": "25109.60",
+        "promo_expiry_date": "0026-01-26"
+      }
+    ],
+    "created_at": "2025-08-07T03:30:32.357065+00:00",
+    "updated_at": "2025-08-07T03:30:32.357065+00:00",
+    "bank_name": "Bank of America",
+    "last_four_digits": "1837",
+    "card_type": "",
+    "promo_used": true,
+    "notes": "APR after 18.24%",
+    "card_holder": "Vinod",
+    "promo_end_date": null
+  }
+]
