@@ -2,14 +2,14 @@
   "@netlify/functions": {
     "current": "2.8.2",
     "wanted": "2.8.2",
-    "latest": "4.2.2",
+    "latest": "4.2.5",
     "dependent": "vinod-finance-todo",
     "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/@netlify/functions"
   },
   "@supabase/supabase-js": {
-    "current": "2.55.0",
-    "wanted": "2.56.0",
-    "latest": "2.56.0",
+    "current": "2.56.0",
+    "wanted": "2.57.4",
+    "latest": "2.57.4",
     "dependent": "vinod-finance-todo",
     "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/@supabase/supabase-js"
   },
@@ -37,14 +37,14 @@
   "cypress": {
     "current": "14.5.4",
     "wanted": "14.5.4",
-    "latest": "15.0.0",
+    "latest": "15.2.0",
     "dependent": "vinod-finance-todo",
     "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/cypress"
   },
   "dotenv": {
     "current": "16.6.1",
     "wanted": "16.6.1",
-    "latest": "17.2.1",
+    "latest": "17.2.2",
     "dependent": "vinod-finance-todo",
     "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/dotenv"
   },
@@ -62,10 +62,17 @@
     "dependent": "vinod-finance-todo",
     "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/husky"
   },
+  "lint-staged": {
+    "current": "16.1.5",
+    "wanted": "16.1.6",
+    "latest": "16.1.6",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/lint-staged"
+  },
   "nodemailer": {
     "current": "6.10.1",
     "wanted": "6.10.1",
-    "latest": "7.0.5",
+    "latest": "7.0.6",
     "dependent": "vinod-finance-todo",
     "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/nodemailer"
   },
@@ -83,10 +90,17 @@
     "dependent": "vinod-finance-todo",
     "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/react-dom"
   },
+  "recharts": {
+    "current": "3.1.2",
+    "wanted": "3.2.0",
+    "latest": "3.2.0",
+    "dependent": "vinod-finance-todo",
+    "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/recharts"
+  },
   "tailwindcss": {
     "current": "3.4.17",
     "wanted": "3.4.17",
-    "latest": "4.1.12",
+    "latest": "4.1.13",
     "dependent": "vinod-finance-todo",
     "location": "/home/runner/work/vinod-finance-todo/vinod-finance-todo/node_modules/tailwindcss"
   },
